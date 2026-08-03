@@ -4,7 +4,7 @@ source layer (srclayer.tex): normalize, split into page-sized chunks, and
 write the TeX manifest that activates the layer.
 
 Usage:
-    srclayer-split.py SOURCE CHUNKDIR MANIFEST
+    srclayer-split.py [--attachment-only] SOURCE CHUNKDIR MANIFEST FONTDIR
 
 - NORMALIZES SOURCE in place: strips trailing blanks ([ \\t\\r]+ before
   each newline) and asserts a trailing final newline. This is
@@ -23,6 +23,15 @@ Usage:
   neighbouring baseline on its own page, so no extractor could
   reconstruct it (measured). Asserts the chunks
   re-concatenate to the source byte-exactly before writing the manifest.
+
+--attachment-only (the srclayer off-switch, 2026-08-03; see
+  srclayer.tex STATUS — the invisible text layer crashed iOS Safari):
+  normalize + UTF-8 check only, then write a manifest defining
+  \\srclAttachmentOnly, which makes srclayer.tex emit the book.tex
+  attachment and its colophon page but NO text-layer pages. Fonts are
+  not staged, chunks are not cut, and the layer-only refusals (tabs,
+  line length, blank runs — all extraction-fidelity concerns) are
+  skipped: they must not fail builds for a dormant channel.
 """
 import shutil
 import subprocess
@@ -70,10 +79,15 @@ def stage_fonts(fontdir: Path) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 5:
-        fail(f"usage: {sys.argv[0]} SOURCE CHUNKDIR MANIFEST FONTDIR")
-    src, chunkdir, manifest, fontdir = map(Path, sys.argv[1:5])
-    stage_fonts(fontdir)
+    args = sys.argv[1:]
+    attachment_only = "--attachment-only" in args
+    args = [a for a in args if a != "--attachment-only"]
+    if len(args) != 4:
+        fail(f"usage: {sys.argv[0]} [--attachment-only] "
+             f"SOURCE CHUNKDIR MANIFEST FONTDIR")
+    src, chunkdir, manifest, fontdir = map(Path, args)
+    if not attachment_only:
+        stage_fonts(fontdir)
 
     raw = src.read_bytes()
     try:
@@ -91,39 +105,44 @@ def main() -> None:
     assert lines[-1] == b""
     lines = lines[:-1]
 
-    bad = [(i + 1, ln) for i, ln in enumerate(lines)
-           if b"\t" in ln or any(b < 0x20 for b in ln)]
-    if bad:
-        where = ", ".join(str(n) for n, _ in bad[:10])
-        fail(f"{src} has mid-line tabs/control chars at line(s) {where} — "
-             f"fix the originating chapter source (verbatim typesetting "
-             f"cannot carry them byte-exactly)")
-    over = [(i + 1, len(ln)) for i, ln in enumerate(lines)
-            if len(ln.decode("utf-8")) > MAX_LINE_CHARS]
-    if over:
-        n, ln = over[0]
-        fail(f"{src} line {n} is {ln} chars (> {MAX_LINE_CHARS}) — beyond "
-             f"the source-appendix page-width ceiling")
+    # layer-only refusals: extraction-fidelity concerns, checked only
+    # when the text layer will actually carry the bytes (they must not
+    # fail builds for a dormant channel; the attachment is byte-exact
+    # by construction regardless).
+    if not attachment_only:
+        bad = [(i + 1, ln) for i, ln in enumerate(lines)
+               if b"\t" in ln or any(b < 0x20 for b in ln)]
+        if bad:
+            where = ", ".join(str(n) for n, _ in bad[:10])
+            fail(f"{src} has mid-line tabs/control chars at line(s) {where} — "
+                 f"fix the originating chapter source (verbatim typesetting "
+                 f"cannot carry them byte-exactly)")
+        over = [(i + 1, len(ln)) for i, ln in enumerate(lines)
+                if len(ln.decode("utf-8")) > MAX_LINE_CHARS]
+        if over:
+            n, ln = over[0]
+            fail(f"{src} line {n} is {ln} chars (> {MAX_LINE_CHARS}) — beyond "
+                 f"the source-appendix page-width ceiling")
 
-    # blank runs: poppler's physical-layout renderer synthesizes at most
-    # 5 line feeds between two baselines, so a run of >= 5 blank lines
-    # cannot ride the text layer. The repair is always at the source:
-    # shorten the run to <= 4 lines in the originating chapter/listing
-    # (whitespace-only change).
-    run_start, run_len = None, 0
-    for i, ln in enumerate(lines):
-        if ln == b"":
-            if run_len == 0:
-                run_start = i + 1
-            run_len += 1
-            if run_len > MAX_BLANK_RUN:
-                fail(f"{src} has a run of >{MAX_BLANK_RUN} blank lines "
-                     f"starting at line {run_start} — poppler clamps "
-                     f"blank-line synthesis, so the text layer cannot "
-                     f"carry it; shorten the run in the originating "
-                     f"source to <= {MAX_BLANK_RUN} lines")
-        else:
-            run_len = 0
+        # blank runs: poppler's physical-layout renderer synthesizes at
+        # most 5 line feeds between two baselines, so a run of >= 5 blank
+        # lines cannot ride the text layer. The repair is always at the
+        # source: shorten the run to <= 4 lines in the originating
+        # chapter/listing (whitespace-only change).
+        run_start, run_len = None, 0
+        for i, ln in enumerate(lines):
+            if ln == b"":
+                if run_len == 0:
+                    run_start = i + 1
+                run_len += 1
+                if run_len > MAX_BLANK_RUN:
+                    fail(f"{src} has a run of >{MAX_BLANK_RUN} blank lines "
+                         f"starting at line {run_start} — poppler clamps "
+                         f"blank-line synthesis, so the text layer cannot "
+                         f"carry it; shorten the run in the originating "
+                         f"source to <= {MAX_BLANK_RUN} lines")
+            else:
+                run_len = 0
 
     normalized = b"\n".join(lines) + b"\n"
     if normalized != raw:
@@ -131,6 +150,20 @@ def main() -> None:
         print(f"srclayer-split: normalized {src} "
               f"({sum(1 for a, b in zip(raw.split(b'\n'), lines) if a != b)}"
               f" line(s) had trailing blanks)")
+
+    if attachment_only:
+        manifest.write_text(
+            "% generated by tools/srclayer-split.py - source-attachment "
+            "manifest\n"
+            "% (read by srclayer.tex via \\@@input; never committed).\n"
+            "% attachment-only mode: the invisible text layer is OFF\n"
+            "% (srclayer.tex STATUS has the story and the re-enable).\n"
+            "\\def\\srclAttachmentOnly{1}\n"
+            f"\\def\\srclPayloadFile{{{src}}}\n",
+            encoding="utf-8")
+        print(f"srclayer-split: attachment-only manifest {manifest} "
+              f"(text layer off; payload {src})")
+        return
 
     # boundary-aware split: each cut lands between two non-empty lines.
     n = len(lines)

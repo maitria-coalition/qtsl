@@ -65,6 +65,26 @@
   \IfFileExists{build/srclayer-manifest.tex}{%
     \begingroup
     \@@input build/srclayer-manifest.tex\relax
+    \ifdefined\srclAttachmentOnly
+    \clearpage
+    \pagestyle{empty}\thispagestyle{empty}%
+    \expandafter\srcl@embedpayload\expandafter{\srclPayloadFile}%
+    \noindent\begin{minipage}{\textwidth}
+    \subsection*{Source attachment}
+    The complete \LaTeX{} source of this book --- the same single-file
+    assembly served at \url{https://maitria.org/book.tex} --- rides
+    inside this PDF as an embedded file attachment named
+    \texttt{book.tex}, byte-exact. Recovery:
+    \begin{quote}
+    \ttfamily pdfdetach -list book.pdf\\
+    pdfdetach -save 1 book.pdf
+    \end{quote}
+    \noindent (or \texttt{pdfdetach -saveall book.pdf}; or
+    \texttt{reader.attachments} in pypdf). \texttt{pdftotext} extracts
+    the book's rendered text.
+    \end{minipage}\par
+    \clearpage
+    \else
     \newfontfamily\srcl@mono[
       Path=build/srclfonts/,
       RawFeature={mode=node;fallback=srclmonofb;-liga;-calt;-ccmp;-mark;-mkmk},
@@ -137,6 +157,7 @@
       \null\clearpage
     }%
     \srcl@resumetagging
+    \fi
     \endgroup
   }{\typeout{srclayer: no build/srclayer-manifest.tex - source appendix
     skipped (health build or standalone rebuild).}}}

@@ -4,10 +4,10 @@
 %   (the flattened single-file source), so both resolve at
 %   https://raw.githubusercontent.com/maitria-coalition/qtsl/refs/heads/main/book/book.pdf
 %   and .../book/book.tex on the public repository. For agent
-%   consumption, book.pdf also carries its own source: pdftotext on it
-%   returns this file (byte-exact page-range recipe on the PDF's
-%   source-appendix page; the same bytes ride as a PDF attachment,
-%   pdfdetach -saveall book.pdf).
+%   consumption, book.pdf also carries its own source as an embedded
+%   file attachment, byte-exact: pdfdetach -list book.pdf;
+%   pdfdetach -save 1 book.pdf (recipe printed on the title page and
+%   the final page; pdftotext extracts the rendered text).
 %
 % License: CC BY 4.0 (Creative Commons Attribution 4.0 International).
 %   https://creativecommons.org/licenses/by/4.0/
@@ -360,10 +360,11 @@ contributors.\par\nopagebreak\smallskip
 
 \noindent The \LaTeX{} source of this book resolves at
 \url{https://maitria.org/book.tex}, under the same license --- and this
-PDF carries it: for agent consumption, the file is constructed so that
-\texttt{pdftotext} on it returns its own \LaTeX{} source (byte-exact
-recipe on the source-appendix page at the end; the same bytes also ride
-as a PDF attachment).\\[1ex]
+PDF carries it: for agent consumption, the complete source rides inside
+this file as an embedded attachment, byte-exact
+(\texttt{pdfdetach -list book.pdf}; \texttt{pdfdetach -save 1 book.pdf}
+--- recipe also printed on the source-attachment page at the end);
+\texttt{pdftotext} extracts the book's rendered text.\\[1ex]
 The MAITRIA code repositories are licensed separately, under the
 Apache License 2.0 and the MIT license, at your option.
 \clearpage

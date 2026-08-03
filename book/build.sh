@@ -17,9 +17,13 @@
 # Template: chapters.tex (chapters ride \input). Produces, COMMITTED in this
 # directory so the raw public URLs resolve:
 #   book.pdf — the typeset book. For agent consumption the PDF carries
-#     its own source (srclayer.tex): pdftotext returns it, a page-range
-#     recipe printed in the PDF recovers it byte-exactly, and it rides
-#     as a PDF attachment — verified by tools/srclayer-gate.py below.
+#     its own source as an embedded file attachment (srclayer.tex):
+#     pdfdetach -list book.pdf; pdfdetach -save 1 book.pdf — the recipe
+#     is printed on the title page (white head note) and the final page,
+#     and verified by tools/srclayer-gate.py below. (The invisible
+#     full-source text layer is switched off — 2026-08-03, iOS Safari
+#     crashed on its appended pages; the --attachment-only flag at the
+#     splitter call below is the switch.)
 #     https://raw.githubusercontent.com/maitria-coalition/qtsl/refs/heads/main/book/book.pdf
 #     (also https://maitria.org/book.pdf)
 #   book.tex — the ASSEMBLED single-file source (latexpand inlines the
@@ -245,9 +249,10 @@ bstamp 'latexmk untagged ref-fixpoint done'
 
 # assemble the single-file source NOW — the fixpoint's bbl exists, and
 # nothing later perturbs it. The assembled file is at once the
-# installed/served book.tex, the invisible source layer's payload, and
-# the PDF's book.tex attachment: one set of bytes, three channels (the
-# mechanism lives in srclayer.tex). latexpand drops comments preceding
+# installed/served book.tex and the PDF's book.tex attachment: one set
+# of bytes, two channels (the mechanism lives in srclayer.tex; a third
+# channel — the invisible source layer — is switched off, see the
+# splitter call below). latexpand drops comments preceding
 # \documentclass, and agents fetching the TeX must see the license
 # immediately — so the header is restored mechanically from the
 # source's own leading comment block.
@@ -277,11 +282,18 @@ rm -f "$OUT/book.tex.head" "$OUT/book.tex.body"
 bstamp 'book.tex assembled'
 
 if [[ -z "${BOOK_UNTAGGED:-}" ]]; then
-  # source-layer prep (srclayer.tex): normalize the assembled source
-  # (trailing blanks — token-identical by TeX's own line-reading rules),
-  # chunk it into page-sized pieces, stage the layer's private font
-  # copies, and write the manifest that activates the appendix.
-  python3 tools/srclayer-split.py "$OUT/book.tex" "$OUT/srcchunks" \
+  # source-attachment prep (srclayer.tex): normalize the assembled
+  # source (trailing blanks — token-identical by TeX's own line-reading
+  # rules) and write the manifest that activates the appendix.
+  # --attachment-only (2026-08-03) is THE srclayer off-switch: the
+  # invisible full-source text layer crashed iOS Safari on
+  # maitria.org/book.pdf (its appended source pages are enormous page
+  # boxes — rendered as a vast black surface, then the tab dies), so
+  # only the book.tex attachment channel ships. Drop the flag to
+  # re-enable the layer if PDF renderers improve — splitter,
+  # srclayer.tex, and the gate all re-arm from the manifest.
+  python3 tools/srclayer-split.py --attachment-only \
+    "$OUT/book.tex" "$OUT/srcchunks" \
     "$OUT/srclayer-manifest.tex" "$OUT/srclfonts"
   # the attachment's /Params ModDate reads the payload's mtime — pin it
   # to the build epoch so double builds stay byte-identical.
@@ -347,11 +359,13 @@ if [[ -z "${BOOK_SKIP_TOC_GATE:-}" ]]; then
   BOOK_TOC_EXPECT_UNTAGGED="${BOOK_UNTAGGED:-}" python3 tools/toc-gate.py "$OUT/book.pdf"
 fi
 
-# srclayer gate: the PDF's source-carrying channels verify against the
-# assembled source — the invisible layer extracts byte-exactly under
-# the recipe the colophon page itself prints, the book.tex attachment
-# detaches byte-identically, and bare pdftotext carries the source
-# readably. A BOOK_UNTAGGED health build ships no source appendix (no
+# srclayer gate: the PDF's source-carrying channel verifies against
+# the assembled source — the book.tex attachment detaches
+# byte-identically under the exact printed incantation, and the recipe
+# appears on both pages that print it (title-page head note + final
+# page). The gate reads its mode from the manifest, so the full layer
+# checks re-arm automatically if --attachment-only is ever dropped.
+# A BOOK_UNTAGGED health build ships no source appendix (no
 # manifest), so the gate is full-build-only, like the tagged emission.
 if [[ -z "${BOOK_UNTAGGED:-}" ]]; then
   python3 tools/srclayer-gate.py "$OUT/book.pdf" "$OUT/book.tex" \

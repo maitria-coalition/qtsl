@@ -2,13 +2,13 @@
 
 Source of `https://maitria.org/book.pdf` and its sibling artefact
 `https://maitria.org/book.tex` (the flattened single-file LaTeX source).
-For agent consumption, the PDF has been constructed such that `pdftotext`
-on it returns the original LaTeX source: bare `pdftotext book.pdf -`
-yields the body text followed by the complete source, a byte-exact
-page-range recipe is printed on the PDF's own source-appendix page, and
-the same bytes ride as a PDF attachment (`pdfdetach -saveall book.pdf`).
-The `book.tex` URL continues to resolve; the PDF simply no longer needs
-a sidecar to be read whole.
+For agent consumption, the PDF carries its complete LaTeX source as an
+embedded file attachment, byte-exact: `pdfdetach -list book.pdf` shows
+it as attachment 1, and `pdfdetach -save 1 book.pdf` recovers it (the
+recipe is printed on the PDF's final page, and — white-on-white — on
+the title page, for agents that read only the head). `pdftotext
+book.pdf -` extracts the book's rendered text. The `book.tex` URL
+continues to resolve; the PDF simply carries its own copy.
 
 The book is the manual for the MAITRIA bundle — **Geolog** (the modelling
 substrate), **QTSL** (the Quantitative Temporal Specification Logic), and
@@ -85,14 +85,17 @@ statement the build keeps current is the preview notice in
   never hand-edit.
 - `srclayer.tex`, `tools/srclayer-split.py`, `tools/srclayer-gate.py` —
   the source-carrying mechanism: `book.pdf` carries the assembled
-  `book.tex` as an invisible fixed-pitch text layer on appended pages
-  (extraction recipes printed on the PDF's source-appendix page) and as
-  a PDF attachment. The splitter normalizes and chunks the payload and
-  stages the layer's private fonts; the gate verifies, on every full
-  build, that the printed recipe reproduces `book.tex` byte-exactly,
-  that the attachment detaches byte-identically, and that bare
-  `pdftotext` carries the source. `srclayer.tex`'s header comment is
-  the design story.
+  `book.tex` as an embedded file attachment (`pdfdetach -save 1`;
+  recipes printed on the PDF's final page and, white-on-white, on the
+  title page). The splitter normalizes the payload and writes the
+  activating manifest; the gate verifies, on every full build, that
+  the attachment detaches byte-identically under the exact printed
+  incantation and that both printed recipes are present. The mechanism
+  also holds a second, currently dormant channel — an invisible
+  fixed-pitch text layer on appended pages that let bare `pdftotext`
+  return the source — switched off 2026-08-03 after it crashed iOS
+  Safari's PDF renderer (`--attachment-only` in `build.sh` is the
+  switch; `srclayer.tex`'s header comment is the design story).
 - `build.sh` — the one verb, with two more behind it:
   - `./build.sh` builds. Transcripts regenerate first (cached, see
     above); intermediate state lives in `build/` (gitignored);

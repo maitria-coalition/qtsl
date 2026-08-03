@@ -3,7 +3,23 @@
 
 Usage: srclayer-gate.py BOOK_PDF BOOK_TEX MANIFEST
 
-Verifies, against the assembled single-file source (BOOK_TEX):
+The MODE comes from the manifest (the same file that configured
+srclayer.tex, so gate and artefact cannot disagree):
+
+ATTACHMENT-ONLY MODE (\\srclAttachmentOnly in the manifest — the
+current mode; the invisible text layer is off since it crashed iOS
+Safari's renderer, see srclayer.tex STATUS):
+
+A. ATTACHMENT, byte-identical: `pdfdetach -list` names book.tex as
+   attachment 1 and `pdfdetach -save 1` — the exact incantation the
+   book prints — recovers BOOK_TEX byte-exactly.
+B. COLOPHON HONESTY: the final page prints that same pdfdetach recipe.
+C. HEAD NOTE: page 1 (the title page's white-on-white note for agents
+   that read only the PDF's head) prints the recipe too.
+
+FULL-LAYER MODE (no \\srclAttachmentOnly; re-arms automatically when
+build.sh drops --attachment-only), verified against the assembled
+single-file source (BOOK_TEX):
 
 1. INVISIBLE LAYER, byte-exact: the recipe printed on the colophon page
    — pdftotext -layout -fixed 3.125 -f <first source page>, form feeds
@@ -39,6 +55,55 @@ def fail(msg: str) -> None:
     sys.exit(1)
 
 
+def page_text(pdf: Path, page: int) -> str:
+    """One page's extracted text, whitespace-collapsed (a printed recipe
+    may wrap; needles are matched against the flattened form)."""
+    out = subprocess.run(
+        ["pdftotext", "-f", str(page), "-l", str(page), str(pdf), "-"],
+        capture_output=True, text=True, check=True).stdout
+    return " ".join(out.split())
+
+
+def verify_attachment_only(pdf: Path, expected: bytes, pages: int) -> None:
+    """Attachment-only mode: the layer is off; the attachment and both
+    printed recipes (colophon + title-page head note) are the contract."""
+    # A. the attachment, under the exact printed incantation.
+    listing = subprocess.run(["pdfdetach", "-list", str(pdf)],
+                             capture_output=True, text=True,
+                             check=True).stdout
+    if not re.search(r"^\s*1:\s*book\.tex\s*$", listing, re.M):
+        fail(f"pdfdetach -list does not name book.tex as attachment 1:\n"
+             f"{listing.strip()}")
+    with tempfile.TemporaryDirectory() as td:
+        subprocess.run(["pdfdetach", "-save", "1", str(pdf.resolve())],
+                       cwd=td, capture_output=True, check=True)
+        detached = Path(td) / "book.tex"
+        if not detached.exists():
+            fail("pdfdetach -save 1 produced no book.tex")
+        if detached.read_bytes() != expected:
+            fail("attachment book.tex differs from the assembled source")
+
+    # B. colophon honesty: the final page prints the recipe.
+    colophon = page_text(pdf, pages)
+    for needle in ("pdfdetach -list", "pdfdetach -save 1", "book.tex"):
+        if needle not in colophon:
+            fail(f"final page (the source-attachment colophon) does not "
+                 f"state {needle!r} - its printed recipe drifted")
+
+    # C. the head note: page 1 prints the recipe for agents that read
+    #    only the start of the PDF (white-on-white on the title page).
+    head = page_text(pdf, 1)
+    for needle in ("pdfdetach -list", "pdfdetach -save 1"):
+        if needle not in head:
+            fail(f"page 1 lacks the head note's {needle!r} - the title "
+                 f"page's agent-facing recipe is missing or drifted")
+
+    print(f"srclayer gate: ok - ATTACHMENT-ONLY mode (text layer off): "
+          f"attachment 1 byte-identical under 'pdfdetach -save 1', "
+          f"colophon (page {pages}) + title-page head note both print "
+          f"the recipe")
+
+
 def main() -> None:
     if len(sys.argv) != 4:
         fail(f"usage: {sys.argv[0]} BOOK_PDF BOOK_TEX MANIFEST")
@@ -53,16 +118,21 @@ def main() -> None:
                   f"install poppler-utils to verify the source layer)")
             return
 
-    m = re.search(r"\\def\\srclChunkCount\{(\d+)\}",
-                  manifest.read_text(encoding="utf-8"))
-    if not m:
-        fail(f"{manifest} carries no \\srclChunkCount")
-    chunks = int(m.group(1))
+    manifest_text = manifest.read_text(encoding="utf-8")
     expected = tex.read_bytes()
 
     info = subprocess.run(["pdfinfo", str(pdf)],
                           capture_output=True, text=True, check=True)
     pages = int(re.search(r"^Pages:\s+(\d+)", info.stdout, re.M).group(1))
+
+    if re.search(r"\\def\\srclAttachmentOnly\{1\}", manifest_text):
+        verify_attachment_only(pdf, expected, pages)
+        return
+
+    m = re.search(r"\\def\\srclChunkCount\{(\d+)\}", manifest_text)
+    if not m:
+        fail(f"{manifest} carries no \\srclChunkCount")
+    chunks = int(m.group(1))
     first = pages - chunks + 1
 
     # 1. the invisible layer, byte-exact under the printed recipe.

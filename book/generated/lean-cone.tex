@@ -6415,6 +6415,76 @@ theorem combValid (st : SmallGainStep H) :
 theorem toSyzygy_components (st : SmallGainStep H) :
     st.toSyzygy.components = st.components
 \end{leansrc}
+\par\medskip\noindent{\small \texttt{PPLC.}\texttt{\bfseries smallGainN\_is\_syzygy}}\hfill{\footnotesize \path{lean/qtsl/Qtsl/Composition.lean}, line 582}\par\nopagebreak
+\begin{leansrc}
+theorem smallGainN_is_syzygy (kk : ℕ) (LV A Sg : Fin kk → Poly)
+    (lam : Fin kk → ℚ) (B : Fin kk → Fin kk → ℚ) (th : ℚ)
+    (hcol : ∀ j, ((List.finRange kk).map (fun i => B i j)).sum = lam j) :
+    (((List.finRange kk).map
+        (fun i => (lam i, Poly.sub (Poly.add (LV i) (A i)) (Sg i)))
+      ++ (List.finRange kk).map
+        (fun i => ((1 : ℚ), smallGainNMemPoly kk A Sg lam B th i))).foldr
+      (fun pr acc => Poly.add (Poly.scale pr.1 pr.2) acc) [])
+    = Poly.add
+        ((List.finRange kk).foldr
+          (fun i acc => Poly.add (Poly.scale (lam i) (LV i)) acc) [])
+        (Poly.scale th
+          ((List.finRange kk).foldr
+            (fun i acc => Poly.add (Poly.scale (lam i) (A i)) acc) []))
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{PPLC.SmallGainNStep.}\texttt{\bfseries toSyzygy}}\hfill{\footnotesize \path{lean/qtsl/Qtsl/Composition.lean}, line 796}\par\nopagebreak
+\begin{leansrc}
+def toSyzygy (st : SmallGainNStep H kk) : SyzygyStep H where …
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{PPLC.}\texttt{\bfseries sound\_smallGainN}}\hfill{\footnotesize \path{lean/qtsl/Qtsl/Composition.lean}, line 825}\par\nopagebreak
+\begin{leansrc}
+theorem sound_smallGainN {H : Hypernet} {kk : ℕ} (st : SmallGainNStep H kk)
+    (hdiss : ∀ i, (st.diss i).semanticallyValid H)
+    (hmem : ∀ i, (st.mem i).semanticallyValid H) :
+    st.seq.semanticallyValid H
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{PPLC.}\texttt{\bfseries smallGainN\_colSum\_mutant\_refuted}}\hfill{\footnotesize \path{lean/qtsl/Qtsl/Composition.lean}, line 857}\par\nopagebreak
+\begin{leansrc}
+theorem smallGainN_colSum_mutant_refuted :
+    ¬ (∀ (kk : ℕ) (LV A Sg : Fin kk → Poly) (lam : Fin kk → ℚ)
+        (B : Fin kk → Fin kk → ℚ) (th : ℚ),
+        (((List.finRange kk).map
+            (fun i => (lam i, Poly.sub (Poly.add (LV i) (A i)) (Sg i)))
+          ++ (List.finRange kk).map
+            (fun i => ((1 : ℚ), smallGainNMemPoly kk A Sg lam B th i))).foldr
+          (fun pr acc => Poly.add (Poly.scale pr.1 pr.2) acc) [])
+        = Poly.add
+            ((List.finRange kk).foldr
+              (fun i acc => Poly.add (Poly.scale (lam i) (LV i)) acc) [])
+            (Poly.scale th
+              ((List.finRange kk).foldr
+                (fun i acc => Poly.add (Poly.scale (lam i) (A i)) acc) [])))
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{Qtsl.QtslCompose.Discrete.}\texttt{\bfseries smallGainN\_drift}}\hfill{\footnotesize \path{lean/qtsl-aux/QtslAux/QtslCompose/AGComposeDiscrete.lean}, line 372}\par\nopagebreak
+\begin{leansrc}
+theorem smallGainN_drift (hlam : ∀ i, 0 ≤ lam i)
+    (hcol : ∀ j, ∑ i, B i j = lam j)
+    (hint : ∀ i, ∀ y, y ∉ A → Integrable (V i) (K y))
+    (hd : ∀ i, ∀ y, y ∉ A →
+        ∫ z, V i z ∂K y ≤ V i y - alpha i y + sigma i y)
+    (hm : ∀ i, ∀ y, y ∉ A →
+        lam i * sigma i y ≤ (1 - theta) * ∑ j, B i j * alpha j y) :
+    ∀ y, y ∉ A → ∫ z, (∑ i, lam i * V i z) ∂K y
+      ≤ (∑ i, lam i * V i y) - theta * ∑ j, lam j * alpha j y
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{Qtsl.QtslCompose.Discrete.}\texttt{\bfseries smallGain\_drift\_of\_N}}\hfill{\footnotesize \path{lean/qtsl-aux/QtslAux/QtslCompose/AGComposeDiscrete.lean}, line 416}\par\nopagebreak
+\begin{leansrc}
+theorem smallGain_drift_of_N {V₁ V₂ alpha₁ alpha₂ sigma₁ sigma₂ : S → ℝ}
+    {lam theta : ℝ} (hlam : 0 ≤ lam)
+    (hint₁ : ∀ y, y ∉ A → Integrable V₁ (K y))
+    (hint₂ : ∀ y, y ∉ A → Integrable V₂ (K y))
+    (hd₁ : ∀ y, y ∉ A → ∫ z, V₁ z ∂K y ≤ V₁ y - alpha₁ y + sigma₁ y)
+    (hd₂ : ∀ y, y ∉ A → ∫ z, V₂ z ∂K y ≤ V₂ y - alpha₂ y + sigma₂ y)
+    (hm₁ : ∀ y, y ∉ A → lam * sigma₂ y ≤ (1 - theta) * alpha₁ y)
+    (hm₂ : ∀ y, y ∉ A → sigma₁ y ≤ lam * ((1 - theta) * alpha₂ y)) :
+    ∀ y, y ∉ A → ∫ z, (V₁ z + lam * V₂ z) ∂K y
+      ≤ (V₁ y + lam * V₂ y) - theta * (alpha₁ y + lam * alpha₂ y)
+\end{leansrc}
 \par\medskip\noindent{\small \texttt{PPLC.}\texttt{\bfseries citeFacet}}\hfill{\footnotesize \path{lean/qtsl/Qtsl/ProductLattice.lean}, line 675}\par\nopagebreak
 \begin{leansrc}
 def citeFacet (s : Sequent) (rider : Formula) : Sequent
