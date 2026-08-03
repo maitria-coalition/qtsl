@@ -44,7 +44,7 @@ import qtsl.{farkasPairValid, saCellOneHotForm, saCellOutWitnessForm,
 // schema: the theory surface's declarations live in
 // ../BernsteinLogic.geolog and ../Qtsl.geolog.
 //
-// RETIREMENT CLAUSE, AMENDED at the cwa re-point (2026-08-03):
+// RETIREMENT CLAUSE, AMENDED at the cwa re-point:
 // the original clause here ("retires when the bridge learns
 // functions, ground dtypes, and extends") was written for a
 // PROJECTION, and this file is not one — it is the executable
@@ -361,7 +361,7 @@ theory CellFlavorChase {
 
   // Presenter codomain: the sign-READING demand — each presenter
   // contributes exactly one weak sign, so its output must be a
-  // sign-readable exact scalar: dtype Q (the ratified rank-1 [1],Q
+  // sign-readable exact scalar: dtype Q (the rank-1 [1],Q
   // codomain, Lean codOk; rank-1 and extent-1 are counting plane).
   // mode report (type equations over producer rows never chase —
   // unification would corrupt type rows other wires reference,

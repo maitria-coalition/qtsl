@@ -2185,6 +2185,19 @@ theorem generator_dilate (c : ℚ≥0) (hc : 1 ≤ c) (T : ThinningForm V) :
 theorem generator_absorbDiagonal (T : ThinningForm V) :
     T.absorbDiagonal.generator = T.generator
 \end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Stochastic.ThinningForm.JumpTerm.}\texttt{\bfseries elaborate\_superpose}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Stochastic/JumpAlgebra.lean}, line 534}\par\nopagebreak
+\begin{leansrc}
+theorem elaborate_superpose (J₁ J₂ : JumpTerm V) :
+    (superpose J₁ J₂).elaborate
+      = (J₁.elaborate).superpose (J₂.elaborate)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Stochastic.ThinningForm.JumpTerm.}\texttt{\bfseries generator\_elaborate\_interleave}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Stochastic/JumpAlgebra.lean}, line 561}\par\nopagebreak
+\begin{leansrc}
+theorem generator_elaborate_interleave (J₁ : JumpTerm V₁)
+    (J₂ : JumpTerm V₂) :
+    (interleave J₁ J₂).elaborate.generator
+      = ((J₁.elaborate).interleave (J₂.elaborate)).generator
+\end{leansrc}
 \par\medskip\noindent{\small \texttt{SuFunctor.Stochastic.}\texttt{\bfseries generator\_eq\_stepMix}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Stochastic/JumpDiffusionThinning.lean}, line 187}\par\nopagebreak
 \begin{leansrc}
 theorem generator_eq_stepMix (P : JdProfile n m) (V : State n → ℝ)
@@ -2197,7 +2210,7 @@ theorem generator_eq_stepMix (P : JdProfile n m) (V : State n → ℝ)
         + (P.legs.map fun lm =>
             lm.1 z * stepMixGenerator (deficitToCemetery lm.2) V z).sum
 \end{leansrc}
-\par\medskip\noindent Modules cited: \texttt{SuFunctor.Stochastic}.
+\par\medskip\noindent Modules cited: \texttt{SuFunctor.Stochastic}, \texttt{SuFunctor.Stochastic.JumpAlgebra}.
 
 \section{Systems: Mathematical Models}
 Citations from Chapter~\ref{ch:qtsl-mathematical-models}.
@@ -3952,6 +3965,30 @@ theorem share_feasible {w : Wire} {τ : TensorType} (hty : ty w = some τ)
     (AdmRegion ty (AlignedLoose.unit {w})
       [PrimApp.const τ c w]).Nonempty
 \end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Spacetime.}\texttt{\bfseries hybridTime\_square\_subset}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/HybridTime.lean}, line 489}\par\nopagebreak
+\begin{leansrc}
+theorem hybridTime_square_subset
+    (D : SpecDnf (Joint (W → ClockedEl Clk (SiteRec κ X)))) :
+    ((D.withWall (sampleWireWall κ X ports i i' φ)).withWall
+        (possWall (perTickRowsSet κ X ports i i' φ Pc))).modelClass ⊆
+      ((D.withWall (sampleWireWall κ X ports i i' φ)).withWall
+        (possWall (coarseRowsSet κ X ports i Pc))).modelClass
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Spacetime.}\texttt{\bfseries tickSeam\_hybridTime\_square\_eq}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/HybridTime.lean}, line 552}\par\nopagebreak
+\begin{leansrc}
+theorem tickSeam_hybridTime_square_eq {X : Type u}
+    (Pc : SpacetimeRec (tickClkOf.{u} ⟨false⟩) X → Prop)
+    (D : SpecDnf (Joint (ULift.{u} Bool →
+      ClockedEl (ULift.{u} Bool) (SiteRec tickClkOf X)))) :
+    ((D.withWall (sampleWireWall tickClkOf X tickPorts ⟨false⟩ ⟨true⟩
+          tickSeamHom)).withWall
+        (possWall (perTickRowsSet tickClkOf X tickPorts ⟨false⟩ ⟨true⟩
+          tickSeamHom Pc))).modelClass =
+      ((D.withWall (sampleWireWall tickClkOf X tickPorts ⟨false⟩ ⟨true⟩
+          tickSeamHom)).withWall
+        (possWall (coarseRowsSet tickClkOf X tickPorts ⟨false⟩
+          Pc))).modelClass
+\end{leansrc}
 \par\medskip\noindent{\small \texttt{SuFunctor.Plain.}\texttt{\bfseries funnelComp\_breaks\_unit\_coherence}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Plain/Battery.lean}, line 177}\par\nopagebreak
 \begin{leansrc}
 theorem funnelComp_breaks_unit_coherence (M : Pat A B) :
@@ -3967,6 +4004,18 @@ theorem unitClass_transparent (M : Pat A B) (𝒰 : Cpl M) :
         (PseudoDoubleCategoryStruct.lLeftUnitor (C := WireSpan El) M)) ''
         Set.image2 boxplus ({unitPen A} : Cpl (Pat.id A)) 𝒰 = 𝒰
 \end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries funnel\_coupledSat\_of\_parts}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/Funnel.lean}, line 195}\par\nopagebreak
+\begin{leansrc}
+theorem funnel_coupledSat_of_parts (F : FunnelData K) {σ₁ σ₂ : K → ℝ≥0∞}
+    (h₁ : σ₁ ∈ F.transit.modelClass) (h₂ : σ₂ ∈ F.hold.modelClass)
+    (hcon : ∀ w ∈ F.composite.marks, Dip (σ₁ + σ₂) w) :
+    σ₁ + σ₂ ∈ F.composite.modelClass
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FunnelParts.}\texttt{\bfseries assemble\_isSome\_iff}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/Funnel.lean}, line 138}\par\nopagebreak
+\begin{leansrc}
+theorem assemble_isSome_iff {p : FunnelParts K} :
+    p.assemble.isSome ↔ p.transitTarget = p.holdInvariant ∧ 0 < p.budget
+\end{leansrc}
 \par\medskip\noindent{\small \texttt{SuFunctor.}\texttt{\bfseries vorobev\_record\_glue}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/MarginalGlue.lean}, line 274}\par\nopagebreak
 \begin{leansrc}
 theorem vorobev_record_glue (v : Bool × Bool × Bool) :
@@ -3974,8 +4023,8 @@ theorem vorobev_record_glue (v : Bool × Bool × Bool) :
         0 < pairIndep.wt (proj13 v)) ↔
       v = (false, false, false) ∨ v = (true, true, true)
 \end{leansrc}
-\par\medskip\noindent Modules cited: \texttt{SuFunctor.HypernetComposition}, \texttt{SuFunctor.Adequacy.StochasticPetriSupervise}.
-\par\medskip\noindent Also cited in this chapter, listed under an earlier one: \texttt{Qtsl.ScmTwin}, \texttt{SuFunctor.Adequacy.MarginalGlue}, \texttt{SuFunctor.HypernetInclusion}, \texttt{SuFunctor.Plain.Battery}, \texttt{SuFunctor.SingleSiteSemanticUniverse}, \texttt{credalCompile\_vorobevGlue}, \texttt{glue\_admissible\_iff}, \texttt{theta\_comp}, \texttt{vorobev\_no\_joint}.
+\par\medskip\noindent Modules cited: \texttt{SuFunctor.HypernetComposition}, \texttt{SuFunctor.Adequacy.HybridTime}, \texttt{SuFunctor.Adequacy.Funnel}, \texttt{SuFunctor.Adequacy.StochasticPetriSupervise}.
+\par\medskip\noindent Also cited in this chapter, listed under an earlier one: \texttt{Qtsl.ScmTwin}, \texttt{SuFunctor.Adequacy.MarginalGlue}, \texttt{SuFunctor.HypernetInclusion}, \texttt{SuFunctor.Plain.Battery}, \texttt{SuFunctor.SingleSiteSemanticUniverse}, \texttt{coupledSat\_comp\_add\_of\_dips}, \texttt{credalCompile\_vorobevGlue}, \texttt{glue\_admissible\_iff}, \texttt{theta\_comp}, \texttt{vorobev\_no\_joint}.
 
 \section{Specification Language}
 Citations from Chapter~\ref{ch:qtsl-specification-language}.

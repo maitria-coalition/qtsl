@@ -40,7 +40,7 @@
 # not a mutation, and a report->chase promotion is refused by the
 # engine's linter on sight.
 #
-# THEORY-PATH ERA (the cwa re-point, 2026-08-03): the fixture and mutant
+# THEORY-PATH ERA (the cwa re-point): the fixture and mutant
 # batteries chase the THEORY FILES directly — the chase verb rides
 # the transpose carriage (functions as out-field relations keeping
 # their names; unary functions take the synthesized `arg` field;
@@ -651,7 +651,7 @@ grep -qF 'violated' "$TMP/cgsum.out" && \
 verdict contract-fence-sum-admitted $ok
 
 # mutant mctg1: DELETING the fence's max refusal must kill the denial
-# (measured 2026-07-30: a refuse->report flip is chase-invisible —
+# (measured: a refuse->report flip is chase-invisible —
 # both judge, the m3 lesson — so this mutant deletes the row).
 sed -f mutants/mctg1-fence-max-deleted.sed cwa/ContractGuardChase.geolog > "$TMP/cgmut.geolog"
 "$GEOLOG" chase --evaluator-free "$TMP/cgmut.geolog" --instance ContractMaxCell > "$TMP/cgmut.out" 2>&1

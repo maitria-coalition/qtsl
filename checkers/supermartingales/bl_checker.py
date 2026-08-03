@@ -534,8 +534,8 @@ def check_proof(node: Proof, wire_names: set, fails: Failures, where="root"):
         # the region argument is a wire; over a 1-dim region the polynomial
         # is univariate in that wire (the v0 form); over an n>1-dim region
         # the region wire is rank-1 and every occurrence in the polynomial
-        # must be TIdx-indexed with index < n (Term.idx, ruling G1
-        # 2026-07-16 — 'scalar component i of a rank-1 term').
+        # must be TIdx-indexed with index < n (Term.idx: scalar
+        # component i of a rank-1 term).
         if not isinstance(node.termX, TVar):
             fails.add("berncone.termX", where, "region argument must be a wire")
             return

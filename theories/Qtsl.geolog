@@ -1625,7 +1625,7 @@ theory Qtsl extends BernsteinLogic {
   // The demonic dwell floor is strictly positive: a zero floor
   // would let the scheduler chatter, and the positive floor IS the
   // wing's Zeno-incapability (the whole-seat counting bound in the
-  // former header). Strict by ratified design — never nonstrict.
+  // former header). Strict by design — never nonstrict.
   report ax/wf/tr_dwellmin_pos : forall t : Transition, q : Q,
       e : EnnRat, k : TrClock.
     t Transition/clock = k, k = {dwellMin: e} tkDemonic,
@@ -1715,7 +1715,7 @@ theory Qtsl extends BernsteinLogic {
   // At most one gate per row is admission conformance (C-TR kin);
   // gate-inside-window — the gate's sign-fiber lies within
   // [floor, ceil] and is nonempty on it — is a side-condition,
-  // evaluator-deferred loudly per the house idiom:
+  // evaluator-deferred loudly (qtsl_init_member kin):
   qtsl_dwell_gate : {tr: Transition} -> Prop;   // side-condition
 
   report ax/wf/dwell_gate : forall t : Transition, g : HypernetRef.
@@ -1860,8 +1860,8 @@ theory Qtsl extends BernsteinLogic {
   //
   // The from-init affine count envelope over a transition roster —
   // the (rho, sigma) token-bucket pair of the event-rate design
-  // (adopted 2026-07-19: the affine from-init primitive; limsup
-  // refused as primitive). SRateLE denotes the region
+  // (the affine from-init primitive; limsup refused as
+  // primitive). SRateLE denotes the region
   //   { x : forall t >= 0,
   //         upper-prevision E_x[N^trs_t] <= rho*t + sigma }
   // and SRateGE its throughput mirror
@@ -6919,8 +6919,8 @@ theory Qtsl extends BernsteinLogic {
   // split readings).
   asel_warrant : {mark: QRegionSat, wit: ASelWitness} -> Prop;
 
-  // Side-conditions (evaluator-deferred, loudly, per the house
-  // idiom -- qtsl_init_member kin):
+  // Side-conditions (evaluator-deferred, loudly --
+  // qtsl_init_member kin):
   qtsl_asel_reach   : {wit: ASelWitness} -> Prop;
       // the cited warrant's subject is the witness's system and
       // its region is the witness's cover target
@@ -7027,12 +7027,12 @@ theory Qtsl extends BernsteinLogic {
   //
   // An aggregate wire is a CONTRACTION ROW over the plate index:
   // index map binding the plate, output set the residual axes,
-  // semiring named by the kind cell. The house tensor-contraction
-  // definition's gamma side condition governs (every un-hit index
+  // semiring named by the kind cell. The contraction row's gamma
+  // side condition governs (every un-hit index
   // is an output — no phantom-axis scaling); sum wires are (Q,+,x)
   // contraction, max wires tropical. The scale-parametric cell
-  // (davidad 2026-07-28 10:37: softale — "strictly monotone in
-  // every argument, interpolating between sum and max") enters as
+  // ("softale": strictly monotone in
+  // every argument, interpolating between sum and max) enters as
   // an optional conjugation datum on the SAME row shape: phi(x)=x^p
   // (integer p: phi-composed features stay polynomial — exact-Q
   // today) or phi(x)=e^{beta x} (enclosure-gated: the certified
@@ -7272,8 +7272,8 @@ theory Qtsl extends BernsteinLogic {
     r HFootprintRow/polarity = hrpGap, r HFootprintRow/gap = g
     |- {l: 0, r: g} q_lt;
 
-  // Side-conditions (evaluator-deferred, loudly, per the house
-  // idiom — qtsl_init_member kin):
+  // Side-conditions (evaluator-deferred, loudly —
+  // qtsl_init_member kin):
   qtsl_hplate_footprint : {row: HFootprintRow} -> Prop;
       // SUBJECT AGREEMENT FIRST (the checker binds c = the row's
       // cert, s = c's System, t = the row's transition, and
@@ -7437,8 +7437,8 @@ theory Qtsl extends BernsteinLogic {
   qpaf_upper : {node: QPAlwaysFromFold, cert: HCert} -> Prop;
   qpaf_lower : {node: QPAlwaysFromFold, cert: HCert} -> Prop;
 
-  // The walk (side-condition; semantics = the judgment-tie design
-  // memo, normative, ten steps: conclusion resolution, spec shape,
+  // The walk (side-condition; the judgment-tie semantics,
+  // normative, ten steps: conclusion resolution, spec shape,
   // atom decomposition, cert citations, subject agreement, fold
   // scale, poly correspondence against the count-wire enumeration
   // (mech_bag_wire), init membership from mech_bag_marking,
@@ -7890,11 +7890,11 @@ theory Qtsl extends BernsteinLogic {
   // The primitive-box semiring cell: contract_{beta, S} (event 5)
   // ==========================================================
   //
-  // The core contraction box names its (+)-side (davidad-asked,
-  // 2026-07-30): the HPlate aggregate-wire stratum already names
+  // The core contraction box names its (+)-side: the HPlate
+  // aggregate-wire stratum already names
   // its semiring via the kind cell — this lifts the SAME datum to
   // the primitive box, generalizing the Q-fixed sum-of-products to
-  // the house tensor-contraction definition's semiring-generic
+  // the contraction row's semiring-generic
   // form, and making the hypernet figures' Sigma/Pi boundary
   // annotations formal box-label content. One vocabulary for one
   // concept: the kind cell is HAggKind (sum/max/min/conjugated),
@@ -8055,8 +8055,8 @@ theory Qtsl extends BernsteinLogic {
     |- {app: a} qtsl_contract_param;
 
   // The cell's semantic obligation: the box's contraction row reads
-  // in the named (+)-scale (the gamma side condition of the house
-  // contraction definition governs unchanged — every un-hit index
+  // in the named (+)-scale (the contraction row's gamma side
+  // condition governs unchanged — every un-hit index
   // an output, no phantom-axis scaling; sum cells are (Q,+,x)
   // contraction, max/min tropical, conjugated cells phi-composed).
   // For an ADMITTED conjugated-power cell, "phi-composed" is
@@ -8831,7 +8831,7 @@ theory Qtsl extends BernsteinLogic {
   // TrMeter seam, slack allowed (rho*d >= 1, sigma >= 1), whose
   // LAW is mechanized (Meter.lean rate_envelope: pathwise
   // N <= T/d + 1 <= rho*T + sigma, run-quantified). Different
-  // evidence families on one lane — the house sibling pattern
+  // evidence families on one lane — the standing sibling pattern
   // (the fold-route weakening note at the clock node is the same
   // shape). Rosters compose via the disjoint-roster sum free law;
   // this rule is that packaging's first consumer.

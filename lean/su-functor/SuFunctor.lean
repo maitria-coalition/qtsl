@@ -151,6 +151,8 @@ import SuFunctor.Adequacy.CheckerAcceptance
 import SuFunctor.Adequacy.RecordSpace
 import SuFunctor.Adequacy.DtmcGenerator
 import SuFunctor.Adequacy.DtmcAbsorb
+import SuFunctor.Adequacy.DtmcAliveTail
+import SuFunctor.Adequacy.DtmcContraction
 import SuFunctor.Adequacy.DtmcTemplate
 import SuFunctor.Adequacy.SpecBehavioral
 import SuFunctor.Adequacy.SpecPathLens
@@ -844,6 +846,26 @@ Module map:
   composed claim shape the certificate species checks; and the
   transfer-contraction induction whose `c = 1` case subsumes the
   generator form's supermartingale consumption.
+* `SuFunctor.Adequacy.DtmcAliveTail` — the alive-mass tail of a
+  regional transfer contraction: with a closed complement (no stored
+  row re-enters the region) and a unit floor on the certificate
+  component, the bare mass remaining on the region decays
+  geometrically — the stored-row form of a hitting-time tail bound;
+  both added hypotheses carried with kernel-checked countermodels as
+  standing mutant teeth.
+* `SuFunctor.Adequacy.DtmcContraction` — weighted transfer contraction
+  for the discrete row grain: the forward evolution generalized from
+  stochastic kernels to arbitrary nonnegative weight matrices
+  (score-carrying and sub-probability row sets as instances of one
+  induction), the contraction core with its score face and its
+  subsumption instance re-deriving the stochastic core (chaining
+  through the `c = 1` face to the incumbent generator-form
+  consumption, so certificates admitted under the incumbent stay
+  valid under the strengthening), the regional packaging (contraction
+  on a region plus no-re-entry, via the region-supported observable),
+  exit domination, and the geometric and arithmetico-geometric tail
+  assemblies bounding total and time-weighted exit weight past any
+  horizon.
 * `SuFunctor.Adequacy.DtmcTemplate` — geometric templates collapse to
   one inequality: under `V(n) = M·γⁿ` with integer offsets, the
   per-state contraction inequalities of an offset-invariant row

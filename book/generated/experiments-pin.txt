@@ -1,4 +1,4 @@
 # qtsl-experiments provenance for the committed book artefacts.
 # chapter-tree is git's content hash of chapter/ (survives history rewrites).
 chapter-tree=3a78f0ce44727d6aa477074c81ceaac92402ed7f
-commit=1e0d1b1 2026-08-03
+commit=f53c9ca 2026-08-03

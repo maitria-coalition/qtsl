@@ -2363,7 +2363,7 @@ theory BernsteinLogic extends Judgments {
   // judgment-kind conclusion --- they are root-only certificate
   // species, reached from the certificate revision's partial
   // rootFam/rootEnc funs.
-  // Correspondence note (answered by inspection): the Qtsl certificate
+  // Kinship note (settled by inspection): the Qtsl certificate
   // stratum's QBlockLattice is this object's Qtsl-side KIN, not its
   // realization --- its axes are Qtsl state-space grids with no
   // hypernet coupling, while this lattice's axes each carry a

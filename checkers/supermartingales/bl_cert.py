@@ -101,9 +101,8 @@ class TNeg(Term):
 
 @dataclass(frozen=True)
 class TIdx(Term):
-    """Scalar component i of a rank-1 term (the G1 ruling,
-    2026-07-16: Term.idx ratified — the degenerate case of the einsum
-    contraction primitive; wire pool tag 0x07; geolog TIdx).  The producer
+    """Scalar component i of a rank-1 term (the degenerate case of the
+    einsum contraction primitive; wire pool tag 0x07; geolog TIdx).  The producer
     only ever indexes wires directly: t is TVar in all emitted certificates,
     matching the Lean bridge's asCoordPoly? remap surface."""
     t: Term
@@ -115,9 +114,9 @@ class TIdx(Term):
 
 @dataclass(frozen=True)
 class TEinsum(Term):
-    """terms-v1 (BINARY.md §6.1 tag 0x08; memo §8 ruling): term-level
-    tensor-product-and-contraction per the G1 rider's design constraint
-    (the Tensors design sketch (David "davidad" Dalrymple), quoted in the upstream correspondence spec, ruling G1).
+    """terms-v1 (BINARY.md §6.1 tag 0x08): term-level
+    tensor-product-and-contraction per the Tensors design sketch
+    (David "davidad" Dalrymple).
     `extents[m]` is index m's extent; each input pairs a term with its
     axis->index binding tuple; `out_bindings` is the ordered, distinct
     output-axis tuple. Exact-only. Reference-checker scope: symbolic /
@@ -941,8 +940,8 @@ class POrECtx(Proof):
     rule, realized exactly as drafted here;
     warrant = sound_orECtx (kernel-checked soundness, certified
     surface). Plain OrE = the path=() instance. Wire: tag 6 carries the
-    path; disjuncts recomputed from the pre (upstream correspondence
-    spec, ratification ruling 9-prime)."""
+    path; disjuncts are recomputed from the pre — derivable data never
+    rides the wire."""
     concludes: Judgment
     path: tuple
     left: Proof
@@ -965,7 +964,7 @@ class PCut(Proof):
 
 @dataclass(frozen=True)
 class PEqRefl(Proof):
-    """EqRefl (core per item-10 ruling, 2026-07-16; wire tag 23):
+    """EqRefl (core; wire tag 23):
     post = (term = term); pre arbitrary (the Norm convention)."""
     concludes: Judgment
     term: Term
@@ -973,7 +972,7 @@ class PEqRefl(Proof):
 
 @dataclass(frozen=True)
 class PEqSym(Proof):
-    """EqSym (core per item-10 ruling; wire tag 24): premise post = (t = u);
+    """EqSym (core; wire tag 24): premise post = (t = u);
     post = (u = t); pre preserved.  Replaces the toy's retired R2 `flipped`
     flag for all NEW emission (relu1d's flipped usage is grandfathered
     python-side; it has no wire image)."""
@@ -1155,8 +1154,8 @@ class PConstExact(Proof):
     evaluation (Lean `Formula.evalClosed = some true`; the python checker
     evaluates both sides in sympy and requires no free symbols).  Pre
     arbitrary (the Norm convention).  Subsumes the PRatFact corner
-    (e1 = const c, e2 = const 0; design ruling, 2026-07-18: "enact the
-    generalization PConstExact, which subsumes PRatFact") and with it
+    (e1 = const c, e2 = const 0; PConstExact is the deliberate
+    generalization subsuming PRatFact) and with it
     retires the box-pair constant trick (mu*(x0-hi0) + mu*(lo0-x0)
     = mu*(lo0-hi0)) at producer sites that need a literal constant entry
     in a combination; until the v1 window, emission-bound builds still

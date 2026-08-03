@@ -92,22 +92,32 @@
 # chids remain resolvable forever.
 # prior revs: qc=6419ae4be3de7b250d6e5be472cf8a55d875e21a9509ee1f66e3d00792a8ec53 dc=6d8a418fe5c019e087e1b8625b41a47f6fd90ceaa45c3d54c7de62ea3fd5edd7
 # revs: qc=9952506dd2491e880a6107471a1ca92f66a4a33a64a8cc250833d00402e3b0e6 dc=bc30a5f3b22da487f77080d5aa4186084376552b7ce070ccf44d4c5226c5aa96
+#
+# Embedded containers (all events) re-extracted from register-scrubbed
+# sources — comment-only edits, each vintage re-sealed on an engine
+# equivalent to its mint's (verified: unscrubbed sources reproduce the
+# published containers byte-identically; scrubbed sources reproduce
+# every revision chid and C1 hash). Seal companions are raw-text-bound
+# and move with comment edits — revisions and C1 hashes are the
+# byte-stable pin surface; the companion rows below are the current
+# extracts'. Prior companions remain resolvable in the append-only
+# store forever.
 
 closure qc sources BernsteinLogic.geolog,Qtsl.geolog
 closure qc shape theories=10 axioms=732 revision_ops=39283
 closure qc revision 9952506dd2491e880a6107471a1ca92f66a4a33a64a8cc250833d00402e3b0e6
 closure qc c1_revision_hash 7fd58f26febcf237ad08bea6f2be6a6b0f6faffa7de9b69a537f9bd4770746de
-closure qc seal_companion 7122ba5e2798a5897db17d084697096b060b5d6642ad0127bd6d452c3205a453
+closure qc seal_companion 9ea2bea4ac084ac752e1226ec4fe75176f80796296e3a4b05a3feac7469dc0a3
 
 closure dc sources BernsteinLogic.geolog,Qtsl.geolog,Dtmc.geolog
 closure dc shape theories=11 axioms=741 revision_ops=39788
 closure dc revision bc30a5f3b22da487f77080d5aa4186084376552b7ce070ccf44d4c5226c5aa96
 closure dc c1_revision_hash 010594201cd5a49f144d4280c8928ef07c3ab84baefc60d167005b81b9a837f6
-closure dc seal_companion 938f3b4994840a30380b856938b2c11d6eeca9f3534a8aabe05842ca0642ce2e
+closure dc seal_companion 5f6160abe1457e98cda6f26643a1e5e7ec07d8d35935198d028b6fbc7abd7556
 
 golden genesis 6d9691e1d2ee858cd5004d82dd6d6e78d2b02252631c251ad992f805ac169d94
 golden ground_comparisons e91ba7cd511a3db3e9f7bb36eedc3a7318d564d57ff018965f114e2d9dae2509
 
-source_sha256 BernsteinLogic.geolog 935a654be005973b20673214e50f436bd64a16841b977f40bc1292bede5d0385
-source_sha256 Qtsl.geolog 309931c6662c73fd45769593caacec5988359012ce01aa7ab7bbc2d8460f5fa5
+source_sha256 BernsteinLogic.geolog 6967bb151f5812dfaf98bed985f0e91025e0d3a4a7264b5555f52db2797095c9
+source_sha256 Qtsl.geolog ffc24239c5edf7c345fe86739eeff6b26b1b6b26a50df73cd262de17875d8e29
 source_sha256 Dtmc.geolog aa9ebd3f5e87a0143f696620210127c43c92efc277ce75cb4b703bbc64a25fec
