@@ -1,0 +1,28 @@
+OK
+container version=1 prereqs=3 commits=1
+prereq flag=1 chid=0x18881c891e9df3a9eec1afd0bf2e47a439ff23edbbf65b65071b8c805f82bc12 roster=0
+prereq flag=1 chid=0x3691087b9835ec906abe1aeda16b4122ddff7fbb0971468c26668ad3f9a62e69 roster=1
+prereq flag=1 chid=0xd77ce0d167948ded93057826c4aec283fe713f7eed5151223863cb7a95a51a6f roster=2
+commit 0: bodyhash=0x9e57f2daf88771ea8fca69829a35c9c2853e0ad4a564fb48b7182752dd289685 bodyblake=0x9e57f2daf88771ea8fca69829a35c9c2853e0ad4a564fb48b7182752dd289685 deps=[18881c891e9df3a9eec1afd0bf2e47a439ff23edbbf65b65071b8c805f82bc12,3691087b9835ec906abe1aeda16b4122ddff7fbb0971468c26668ad3f9a62e69,d77ce0d167948ded93057826c4aec283fe713f7eed5151223863cb7a95a51a6f] parents=0 ts=0 msg=none ops=22 zones=[]
+op 0: elta sort=E(0,19)
+op 1: elta sort=E(0,19)
+op 2: elta sort=E(0,19)
+op 3: elta sort=E(0,19)
+op 4: elta sort=E(0,19)
+op 5: elta sort=E(0,20)
+op 6: elta sort=E(0,21)
+op 7: elta sort=E(0,22)
+op 8: elta sort=E(2,0)
+op 9: funa fun=E(0,170) args=[L(0),L(1)] value=L(2)
+op 10: funa fun=E(0,170) args=[L(0),L(3)] value=L(4)
+op 11: funa fun=E(0,172) args=[] value=L(0)
+op 12: funa fun=E(0,173) args=[] value=L(3)
+op 13: funa fun=E(0,174) args=[L(5)] value=L(2)
+op 14: funa fun=E(0,175) args=[L(5)] value=L(4)
+op 15: funa fun=E(0,178) args=[L(6)] value=L(5)
+op 16: funa fun=E(0,183) args=[L(7)] value=L(6)
+op 17: funa fun=E(2,2) args=[L(8)] value=L(6)
+op 18: funa fun=E(2,6) args=[L(8)] value=lit(2,0x00)
+op 19: funa fun=E(2,7) args=[L(8)] value=lit(2,0x00)
+op 20: funa fun=E(2,8) args=[L(8)] value=lit(2,0x00)
+op 21: funa fun=E(2,20) args=[] value=L(1)

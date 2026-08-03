@@ -1,0 +1,44 @@
+# bindings.toml.d/PSDCertDD.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'PSDCertDD'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "checkDD"
+sha256 = "7b5f2f382a3e8ff3beea42938a73cac1b27b2ee16523522c17c1d16dcdf2890a"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "congEntry"
+sha256 = "4f47b3aa172c713ac5898720b1eb15eb553ed8f91dedf0af5088d23ff5624795"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "checkDD_posDef"
+sha256 = "67d50d7d88fbfa4ba4c304ce36583a9d60a7e26557f9bc7f75c6bf2b8446d664"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "checkDD_quadForm_nonneg"
+sha256 = "bfa9147a058fff34935b4e1c57c128844ce3da8407aaf435eb155d5b61cff70b"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "posDef_of_dd_witness"
+sha256 = "cde5f25aed8b2493740a11942cda54a7780de6916d049d4a6153310d188b0bf1"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "posDef_of_dominant"
+sha256 = "926bd36afb0e3ad183582ba2084ed04932d6a0b00cbd40c89eff93403c0b4e48"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_psdCertDD"
+sha256 = "e64998d6771cbe4456cc56e76c6311f5efc362c7495196488459e1673b617f1f"
+
+[[correspondence]]
+entry = "PSDCertDD"
+steele_sha256 = "3db49aab0c5578f82f758292a9555ae1610666e4ad4cfe21582954981738e008"
+statements_sha256 = "a139744f22032d9f957ccb74afe1861c93015af5cdbd42d45d4f990c6c0c74b4"
+prose_sha256 = "1c55dc1b097d095f002afaa0d20f0d002ba5f82d2dde0a010053c08ddf77c861"
+

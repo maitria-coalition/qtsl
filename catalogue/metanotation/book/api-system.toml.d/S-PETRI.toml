@@ -1,0 +1,24 @@
+# api-system.toml.d/S-PETRI.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-PETRI"
+entity = "model type"
+
+[api.ts]
+handle = "system.petri"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_petri"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "marker:ts_petri"
+note = '''The TS corpus exercises this factory through its refusal geometry (the corpus's discipline that failure geometry is routing advice); the quoted construction is that witness, and the happy-path byte authority is the Rust corpus opposite.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Petri::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_petri"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "marker:petri_happy"

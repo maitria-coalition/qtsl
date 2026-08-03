@@ -1,0 +1,24 @@
+# bindings.toml.d/Norm.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Norm'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Term.idxFree"
+sha256 = "8f853f9d93e53f5f3739d6582c333073b55b95dc72ecf4be3a46f15da3306055"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "polynomialCanonicalEq"
+sha256 = "98d2e7bf9ce3e01d6a57936ca664233157820aa65159f929b7aabacb08800c01"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_norm"
+sha256 = "19e92240c9356459a72af1341352eeea8aa52dd828fe83cd50312c644796d606"
+
+[[correspondence]]
+entry = "Norm"
+steele_sha256 = "a7f7e64df007d2de101664919fedbd29ba6721551e363f50c29237b7b9d66c28"
+statements_sha256 = "0378d6fb892ebc19b23a59f4f935756b63f6b7b9389c12370ad7e45c00e7c108"
+prose_sha256 = "c6aa1d2596c0d92974240f5791fb73e0ac7964e36625af22ee97ebe618898478"
+

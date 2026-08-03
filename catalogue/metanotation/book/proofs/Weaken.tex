@@ -1,0 +1,75 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as in the \rulename{Ax}
+section: valuations, admissibility, entrywise atom satisfaction,
+semantic validity; counterexamples read over the one-wire hypernet.}
+
+\textbf{Claim (\texttt{sound\_weaken}).}\enspace The payload supplies a
+premise sequent $\Phi \vdash \Psi$ with its sub-derivation, the added
+conjunct $\chi$ (\texttt{extra}), and two tree identities: the
+conclusion's premise is $\Phi \wedge \chi$ (\texttt{preEq}) and its
+conclusion is $\Psi$ (\texttt{postEq}). If $\Phi \vdash \Psi$ is
+semantically valid, so is $\Phi \wedge \chi \vdash \Psi$.
+
+\begin{bthm}[soundness of \rulename{Weaken}]\label{thm:weaken-sound}
+Under \texttt{preEq} and \texttt{postEq}, semantic validity of the
+premise sequent implies semantic validity of the conclusion sequent,
+over every hypernet.
+\end{bthm}
+\begin{proof}
+Let $\sigma$ be admissible with $\sigma \models \Phi \wedge \chi$.
+
+\emph{Step 1 (project).} The $\wedge$-clause of satisfaction is
+meta-conjunction, so $\sigma \models \Phi$ and $\sigma \models \chi$;
+keep the left component and discard the right --- this rule's whole
+activity is licensed forgetting.
+
+\emph{Step 2 (apply the premise).} Premise validity at $\sigma$ gives
+$\sigma \models \Psi$, which \texttt{postEq} pins as the conclusion's
+post.
+\end{proof}
+
+\begin{bremark}[\texttt{preEq} forces extension, not replacement]
+\label{rem:weaken-preeq}
+The identity $\mathrm{seq.pre} = \Phi \wedge \chi$ makes the conclusion's
+premise contain the sub-derivation's premise \emph{verbatim} as the left
+conjunct of one new $\wedge$-node, with the named $\chi$ on the right.
+Drop it and ``weakening'' could \emph{replace} the assumptions instead of
+extending them: from $w \leq 0 \vdash w \leq 0$ (an \rulename{Ax}
+instance) conclude $\top \vdash w \leq 0$ --- false at $\sigma(w) = 1$.
+This context-swap family is the standard counterexample to every dropped
+\texttt{preEq} in the structural sections; we cite it from here on
+rather than restating it.
+\end{bremark}
+
+\begin{bremark}[positional discipline]
+$\chi$ arrives as the right child of a single new $\wedge$-node:
+$\Phi \wedge \chi$, never $\chi \wedge \Phi$, and never merged into
+$\Phi$'s own tree. Any further placement is $\wedge$E/$\wedge$I work.
+Naming $\chi$ in the payload keeps the checker's comparison pure
+structure --- one tree identity, no matching or search.
+\end{bremark}
+
+\begin{bremark}[$\chi$ is unconstrained, harmlessly]
+Like \rulename{Ax}, the rule carries no typing side conditions on what
+it touches: $\chi$ may be unsatisfiable ($\bot$), ill-typed, or mention
+untyped wires. At worst the conclusion's premise becomes harder or
+impossible to satisfy --- vacuous validity, never unsoundness.
+Weakening only discards information; rules that must \emph{evaluate}
+are where typing fields live.
+\end{bremark}
+
+\begin{bremark}[monotonicity, locally and wholesale]
+In the lattice reading (the $\vee$E section), meet is a lower bound:
+the interpretation of $\Phi \wedge \chi$ lies below that of $\Phi$,
+which lies below that of $\Psi$. \rulename{Weaken}
+is the one-step premise-monotonicity of the consequence relation; the
+composition rule's conjunct-wise premise-containment check
+(\rulename{Syzygy}'s \texttt{preContains}) is the same monotonicity used
+wholesale.
+\end{bremark}
+
+\begin{anchors}
+Steps 1--2 & \texttt{sound\_weaken}; payload \texttt{PWeakenData} (fields \texttt{extra}, \texttt{preEq}, \texttt{postEq}); wired as \texttt{RuleData.weaken}\\
+$\wedge$-clause of satisfaction & \texttt{Formula.holds} (case \texttt{and})\\
+lattice reading & \texttt{M3.weaken\_kit}\\
+\end{anchors}

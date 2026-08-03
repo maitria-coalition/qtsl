@@ -1,0 +1,10 @@
+      1 theories; 11 axioms (0 moves; aux helpers: none)
+[2/5] geometric linter: CLEAN
+[3/5] two-run construction stability: byte-identical (2040 bytes of listing body)
+[4/5] idempotence (normalize ∘ normalize = normalize): GREEN
+[5/5] instance conformance: 5 blocks validated (ContractMaxCell, ContractMinCell, ContractExpCell, ContractPowCell, ContractSumCell)
+modes: 5 chase · 3 report (0 by the unmarked default) · 3 refuse
+
+move census (0 moves):
+termination (C-WA advisory): weakly acyclic (chase terminates on every seed, polynomially; special-rank 0; 0 positions, 0 edges, 0 chased axioms)
+CHECK: GREEN

@@ -1,0 +1,112 @@
+# B5 fan fragment (see CellInInterior.toml header note for flagged calls).
+
+[[rule]]
+id = "PSDCertDD"
+source = "../BL-rules.toml"
+row = "PSDCERT/DD"
+proof = "book/proofs/PSDCertDD.tex"
+commentary = '''
+\rulename{PSDCERT/DD} is the rounding-tolerant tier of the
+positive-definiteness certificate family (the family discipline ---
+untrusted witness, quadratic-form conclusion through
+\rulename{Syzygy}\textquotesingle s conclusion-form selector,
+strictness dropped at the formula boundary, premise-freedom --- is
+stated once in the \rulename{PSDCERT/T} section). Here the checked
+premises are: $A$ symmetric; $Z$ upper-triangular with positive
+diagonal; and the congruence $B := Z^{\mathsf T} A Z$, recomputed
+exactly by the checker, strictly row-diagonally dominant (positive
+diagonal implied, since the off-row absolute sum is nonnegative). A
+symmetric strictly dominant matrix is positive definite --- the
+Gershgorin-circle reading; the kernel proof is a self-contained
+arithmetic-geometric-mean regrouping of the quadratic form --- and
+positivity transports back through the invertible $Z$.
+
+This is the tier a real producer feeds: $Z := \lceil 2^s R^{-1}
+\rfloor$ rounded from an off-stage float Cholesky $A \approx
+R^{\mathsf T} R$ works directly, with the required scale $s$ tracking
+the matrix\textquotesingle s conditioning rather than any accuracy
+target --- witness entries stay at $\sim s$ bits regardless of
+dimension, where the exact /T witness inherits minor-scale bit growth.
+What a too-coarse witness costs is only completeness margin: the check
+fails closed and the producer retries finer, with soundness never in
+play. The price relative to /T is the $O(n^3)$ congruence product ---
+on bounded-width integers, embarrassingly parallel, still
+division-free.
+
+What breaks without each hypothesis: without symmetry of $A$ the
+regrouping step (which folds the dominance envelope using
+$B_{ij} = B_{ji}$) fails and row dominance alone bounds nothing about
+the form; without strictness the rule would accept singular matrices
+(a path-graph Laplacian is weakly dominant with the constants in its
+kernel); without exact recomputation of $B$ a wire-supplied congruence
+could be dominant while unrelated to $A$; the $Z$ checks are, as in
+/T, the cheapest syntactic invertibility certificate. The conclusion
+identity and evaluability fields carry the same discipline as /T. The
+proof section walks these in order.
+'''
+correspondence = '''
+Verbatim the \rulename{PSDCERT/T} dictionary --- premise-free silence,
+the same \texttt{ts}/\texttt{conclusion} binders, the same
+\texttt{conclCheck} and \texttt{syzygyConclusionForm} rows, the same
+undisplayed evaluability pack (\texttt{hshape}, \texttt{hfin},
+\texttt{hwpos}) --- except the witness row: the displayed congruence
+$B := Z^{\mathsf{T}} A Z$ strictly row-diagonally dominant $\mapsto$
+\texttt{hwit} $:$ \texttt{PsdCert.checkDD a A Z = true}, entering
+through \texttt{checkDD\_posDef} and consumed as its rational-points
+corollary \texttt{checkDD\_quadForm\_nonneg}. The shared assembly is
+one certified lemma, \texttt{sound\_psdCertOf}, visible above ---
+the dictionary\textquotesingle s claim that the trio differs only in
+the witness is itself a fact of the statements, not editorial.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "sound_psdCertDD",
+]
+
+[[rule.lean]]
+module = "Qtsl.PsdCert"
+src = "../../lean/qtsl/Qtsl/PsdCert.lean"
+decls = [
+  "posDef_of_dominant",
+  "posDef_of_dd_witness",
+  "checkDD_posDef",
+  "checkDD_quadForm_nonneg",
+]
+intro = '''
+\textbf{The dominance core.}\enspace \texttt{posDef\_of\_dominant} is
+the self-contained finite-sum argument (no spectral machinery):
+off-diagonal mass retreats into its arithmetic-geometric-mean envelope
+and symmetry folds the envelope onto the diagonal, leaving
+$\sum_i (B_{ii} - \sum_{j\neq i} |B_{ij}|)\,x_i^2 > 0$.
+\texttt{posDef\_of\_dd\_witness} composes it with the congruence
+transport displayed in the \rulename{PSDCERT/T} section;
+\texttt{checkDD\_posDef} bridges the executable check, and the
+rational-points corollary feeds the rule lemma.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "congEntry",
+  "checkDD",
+]
+intro = '''
+\textbf{The executable check --- what /DD adds.}\enspace Only the
+exact congruence entries and the dominance inspection are new; the
+shared helpers (\texttt{finQSum}, \texttt{qabs},
+\texttt{upperTriPosDiagB}, the conclusion check) are displayed in the
+\rulename{PSDCERT/T} section.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+Same status as \rulename{PSDCERT/T}: the certificate family postdates
+the HOL4 catalogue port and the script contains no counterpart of the
+witness or conclusion checks (verified against the script this
+writing); the port belongs to the next catalogue-slice port.
+'''

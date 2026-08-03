@@ -1,0 +1,23 @@
+# api-system.toml.d/S-GSHS.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-GSHS"
+entity = "model type"
+
+[api.ts]
+handle = "system.gshs"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_gshs"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "fn-body:buildGshs"
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Gshs::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_gshs"]
+snippet_file = "crates/mtk-catalogue/tests/common/mod.rs"
+snippet = "fn-body:gshs"

@@ -1,0 +1,270 @@
+# bindings.toml — machine-maintained by `qtsl-book bind` (see book/DESIGN.md).
+# Module + HOL-script rows only; per-entry statement rows live in
+# bindings.toml.d/<entry>.toml. Hashes only; hand-prose lives in
+# book.toml + book.toml.d/. Regenerate, never hand-edit.
+
+[[module]]
+module = "Qtsl.Admissible"
+package = "main"
+olean_sha256 = "7a0441f9465f4b13427ec50c056a253af80f807a8c60c7b9ec36581f00b29741"
+olean_provenance = "bound from receipt bcf3a2495141650a, 2026-07-21T16:38:10Z"
+source_git_blob = "cf7c03a3603190dfef13695612001699aa828a8c"
+
+[[module]]
+module = "Qtsl.Catalogue"
+package = "main"
+olean_sha256 = "9c5ba3b3c24e922e3190f7e91e96bfb9c9eff58a80a054a183a215aeb8a4091c"
+olean_provenance = "bound from receipt 82e74e9afb8c4f1d, 2026-07-21T16:38:14Z"
+source_git_blob = "08ff44808949bc70fb75b672d0acab33521105c0"
+
+[[module]]
+module = "Qtsl.Composition"
+package = "main"
+olean_sha256 = "aa9eb9e8a9d0723a959113177a769c864cf752b8e605389c88ae35c6a09c6f59"
+olean_provenance = "bound from receipt f4769815b77e3efd, 2026-07-21T16:38:17Z"
+source_git_blob = "b5c3a6d67d69c8a6e7e60801cc54f1e838190c34"
+
+[[module]]
+module = "Qtsl.Core.Catalogue"
+package = "main"
+olean_sha256 = "588adec520a41b81316554c01c9239f6c6107b1c64307e89ac2b49cc9e0abb11"
+olean_provenance = "bound from receipt 18d0db3a6173ed7c, 2026-07-21T16:38:20Z"
+source_git_blob = "22f4e1ffe0a5371c215300124e8c34e6760401a6"
+
+[[module]]
+module = "Qtsl.Discharge"
+package = "main"
+olean_sha256 = "b04397faccc8a9b341121c82f70e41a1018a23291e8e97aeda37cea0754ffd78"
+olean_provenance = "bound from receipt d714b6624a4e0479, 2026-07-21T16:38:24Z"
+source_git_blob = "3334ac315454cdd760fbe2a5f97b5de0b95f8c96"
+
+[[module]]
+module = "Qtsl.LatticeInv"
+package = "main"
+olean_sha256 = "13443026b5d37946a2e27bbd3f88985fd7447c27db7612d888e9708ba5677eb1"
+olean_provenance = "bound from receipt bdc8fe137c39aa6f, 2026-07-21T16:38:27Z"
+source_git_blob = "e7f24ce620963ec8bc48b05076969f5f68d1d8d1"
+
+[[module]]
+module = "Qtsl.Product"
+package = "main"
+olean_sha256 = "a28155d25c5832bb88462517c25653601eba86303b2ee07bf9f508a31cd15608"
+olean_provenance = "bound from receipt 5d869be8c3b5a607, 2026-07-21T16:38:30Z"
+source_git_blob = "50877769099ccd540db8952b3504678f3e5f7d43"
+
+[[module]]
+module = "Qtsl.ProductLattice"
+package = "main"
+olean_sha256 = "b83fed7716b66b6e1c2b4a44b7a63c53bb9a55718d3b66649db03d5d0b0e747b"
+olean_provenance = "bound from receipt a674100e6f422916, 2026-07-21T16:38:33Z"
+source_git_blob = "4ebf4e6919d351ea20a20d6233c9314c14315814"
+
+[[module]]
+module = "Qtsl.PsdCert"
+package = "main"
+olean_sha256 = "73bbe6ae597044a6075ac8de6da3c5a90cda3d20c7556b26e950d03e896222ea"
+olean_provenance = "bound from receipt 2765550ba435903e, 2026-07-21T16:38:37Z"
+source_git_blob = "71c72ac1b998aeb47115efad9118f078497b2fe6"
+
+[[module]]
+module = "Qtsl.QtslSoundness"
+package = "main"
+olean_sha256 = "0474db7a90c7d930e8bb6dc75c16b2ccd1fe0187062c828ea12dfa586c6d11fe"
+olean_provenance = "bound from receipt d6da13c9a0b3de27, 2026-07-21T16:38:40Z"
+source_git_blob = "99147ddcc6e5b961a3d1e48becc70d13556954d9"
+
+[[module]]
+module = "Qtsl.ReluExpansion"
+package = "main"
+olean_sha256 = "8110f1452e0a6a2df9791d7d9a316ba46bc367866d610e74011318ac01da65ba"
+olean_provenance = "bound from receipt 3758addf966b6d58, 2026-07-21T16:38:43Z"
+source_git_blob = "82a8c8eb3ba8eabbe844fdaa0baf21d832d65c5d"
+
+[[module]]
+module = "Qtsl.ReluSplit"
+package = "main"
+olean_sha256 = "3c1db4c3dcd0af9e7d15f55eef2e1f60203940af32d97efaa08872448285062b"
+olean_provenance = "bound from receipt b05362824b42a61f, 2026-07-21T16:38:47Z"
+source_git_blob = "36dea4e2a9b5a4e5ad49a487b3bcea9b90e7a1d1"
+
+[[module]]
+module = "Qtsl.Soundness"
+package = "main"
+olean_sha256 = "0013e54c07a73eb6151a67e45ffeaafbf8d4b74701d977ad1aa792bf3d1dc6bd"
+olean_provenance = "bound from receipt fb71c48ec2d96dfb, 2026-07-21T16:38:50Z"
+source_git_blob = "052a441d6e0792941a7df1a1d867325a71be46af"
+
+[[module]]
+module = "QtslAux.AGCompose.GshsParallel"
+package = "qtsl-aux"
+olean_sha256 = "aef505d67ec5556b388894385272b05e8e11cca050ecc48eba793413a59d77f1"
+olean_provenance = "bound from receipt e6ae6b1dd8f6c73f, 2026-07-21T17:22:55Z"
+source_git_blob = "2622cc07d63028f01c266d172caa447188c513c3"
+
+[[module]]
+module = "QtslAux.AGCompose.GshsSeries"
+package = "qtsl-aux"
+olean_sha256 = "0eb2c9508ce10524db2495b5d5eb5669164f151e08975906162c17ebcf47e2a5"
+olean_provenance = "bound from receipt 50fee5d6d9978cec, 2026-07-21T17:22:57Z"
+source_git_blob = "58ca8262cf7a995ebf0dba68a02620e5f3d45d63"
+
+[[module]]
+module = "QtslAux.Acceptance"
+package = "qtsl-aux"
+olean_sha256 = "4d0a40d48beeccd4a37fbfd9afa63a9ebcf00985d1892feee9293edf48ef0f96"
+olean_provenance = "bound from receipt 72977268f369848b, 2026-07-21T17:22:58Z"
+source_git_blob = "50d586c5c12f1fc2ce2108f4fd5b618120bb962c"
+
+[[module]]
+module = "QtslAux.Battery"
+package = "qtsl-aux"
+olean_sha256 = "5cd74847e9b54dc49846658322ff613a3577cfda3b2030609dbd97df84739bf3"
+olean_provenance = "bound from receipt 40447dfc3761c545, 2026-07-21T17:23:00Z"
+source_git_blob = "f1d989cfaaf187cf27a01be2a302e941bb60ac15"
+
+[[module]]
+module = "QtslAux.Excursions"
+package = "qtsl-aux"
+olean_sha256 = "c63e44e64c053e29040f2c4ff9495d2cf1e344408d773933ebfb339e01ff824c"
+olean_provenance = "bound from receipt 9d95ca94e652ea77, 2026-07-21T17:23:02Z"
+source_git_blob = "5c8e78f204718de431cd131cb4a84d1795c532d7"
+
+[[module]]
+module = "QtslAux.GshsFeedbackSum"
+package = "qtsl-aux"
+olean_sha256 = "9077532affbd3f9d5adea45ddc2c661dbd4a4b65feb15b2f0c4f20ece8abdc9b"
+olean_provenance = "bound from receipt 78abdb4c3c04ab7f, 2026-07-21T17:23:04Z"
+source_git_blob = "17cb5dbb58f668a4ac2ef48709d8910f0f2f32bc"
+
+[[module]]
+module = "QtslAux.LayerD.Skeleton"
+package = "qtsl-aux"
+olean_sha256 = "59f987fe9bf31d94f1f74ccde4ee8058694f36e08236734b965a776ea83ab126"
+olean_provenance = "bound from receipt acfe6144ebd67d0a, 2026-07-21T17:23:05Z"
+source_git_blob = "90e62c4d35e2b63a5e610ba03cb051a0f682854a"
+
+[[module]]
+module = "QtslAux.MaxFormPDMP"
+package = "qtsl-aux"
+olean_sha256 = "49994e9ddb463ebaa5220dbbc286593dc1673d32a3f055efa2fbcf9021281fec"
+olean_provenance = "bound from receipt f6b533f8ee525f86, 2026-07-21T17:23:07Z"
+source_git_blob = "bcd7854a45d217e130949ae804f91eaf4c6b2fb9"
+
+[[module]]
+module = "QtslAux.NNFDuality"
+package = "qtsl-aux"
+olean_sha256 = "9eeb909e6684f042d8f0320de7c22f3b22a2446286b3b4b746a1eb82e5eaf0e1"
+olean_provenance = "bound from receipt 74afc6be2e505412, 2026-07-21T17:23:09Z"
+source_git_blob = "974aefb5b6f1d7719184dfca387e9d29e7d9da6d"
+
+[[module]]
+module = "QtslAux.QDistTransport"
+package = "qtsl-aux"
+olean_sha256 = "dcbd2e7463163e8acf7b84e8bf656a516e3105b287eb8875a05d329a413237ff"
+olean_provenance = "bound from receipt 374ec58874e71b92, 2026-07-21T17:23:11Z"
+source_git_blob = "96d152506ec66e33e16adc80c82e38ab63968f15"
+
+[[module]]
+module = "QtslAux.QFixBall"
+package = "qtsl-aux"
+olean_sha256 = "8f5589c3072aea1738d67775f53befbb1a3f5cc0052fcb7b8392c251b4ac5498"
+olean_provenance = "bound from receipt 837f2e560a144246, 2026-07-21T17:23:13Z"
+source_git_blob = "ed6c37f8f067437567c6cf54446c2aadcdf1a432"
+
+[[module]]
+module = "QtslAux.QRelChain"
+package = "qtsl-aux"
+olean_sha256 = "d5829895a5ff4ef58df32d6371db014f57351f8181c4ea93a9e2bc698b870f28"
+olean_provenance = "bound from receipt c09fd83e23a86128, 2026-07-21T17:23:14Z"
+source_git_blob = "c371e1ad40c87f39227b833d5c4cd63cb02e58ec"
+
+[[module]]
+module = "QtslAux.QStreett"
+package = "qtsl-aux"
+olean_sha256 = "93d86932e989bf0784bea04baf4ab4ff109b63db60058da4134240801d75f828"
+olean_provenance = "bound from receipt 67a96c141e70be13, 2026-07-21T17:23:16Z"
+source_git_blob = "580643bea9219ef8acb16be2d7d61a4c6a18911f"
+
+[[module]]
+module = "QtslAux.QtslAliases"
+package = "qtsl-aux"
+olean_sha256 = "92c741d77548b17196a1c58ec73fae86cb9c0140f2442197c8264b612c673259"
+olean_provenance = "bound from receipt 687946fab7ec0fd9, 2026-07-21T17:23:18Z"
+source_git_blob = "86470461277a11cfb1c5aab03905534b497af3e7"
+
+[[module]]
+module = "QtslAux.QtslBattery"
+package = "qtsl-aux"
+olean_sha256 = "103164ac6f0ee8107daa7adeb574f4c8b82ff9beb9e9318a0f7ee4556e15d704"
+olean_provenance = "bound from receipt fc75681845a1363c, 2026-07-21T17:23:20Z"
+source_git_blob = "481c6428a79c7a2833256ba723e7f9efc1faccb3"
+
+[[module]]
+module = "QtslAux.QtslCompose.AGCompose"
+package = "qtsl-aux"
+olean_sha256 = "1fe915b97fc1f94deb2b74234293ca11a188bb9c95d616481d6dbb84c803d2f0"
+olean_provenance = "bound from receipt 6687094d9559b256, 2026-07-21T17:23:21Z"
+source_git_blob = "ffecf93a0dfdbfd5adcff8fb9d563260fdabeeab"
+
+[[module]]
+module = "QtslAux.QtslCompose.AggReduce"
+package = "qtsl-aux"
+olean_sha256 = "c5c82f21a5a86f77e2987ae60f2b697b043d1463d35b2d1d30aa1d4abd8fe9f5"
+olean_provenance = "bound from receipt 9bd921b83644ff8c, 2026-07-21T17:23:23Z"
+source_git_blob = "6b1e72763814bd1b8a65de4e2871aed2d874d647"
+
+[[module]]
+module = "QtslAux.QtslCompose.Flatten"
+package = "qtsl-aux"
+olean_sha256 = "109e313e3b58a2c3a25efbded7b4acc946a3f7db2c74878a14fe2b0aa6763723"
+olean_provenance = "bound from receipt 9aae420b75c2e405, 2026-07-21T17:23:25Z"
+source_git_blob = "85a0d482e0ec93c5f6e3f8f5d2f06a64a5fa94c1"
+
+[[module]]
+module = "QtslAux.QtslCompose.Presentation"
+package = "qtsl-aux"
+olean_sha256 = "026b6593b12fc8580f3956f759c60cf4269eebcdc71c37733ed48de3cabcb14c"
+olean_provenance = "bound from receipt 16d56f85e885fe99, 2026-07-21T17:23:27Z"
+source_git_blob = "99e284fe313e1657296bd6c582bce8eea697e7e7"
+
+[[module]]
+module = "QtslAux.QtslCompose.SimTransport"
+package = "qtsl-aux"
+olean_sha256 = "19a6dc2da9395608348f6f07b81ed9fff420f77fe5e4d1eebb85b1193e507eb4"
+olean_provenance = "bound from receipt 1c9ec82351ef199c, 2026-07-21T17:23:29Z"
+source_git_blob = "a24ef803bf116ea49d0861b24b677d4cd2055776"
+
+[[module]]
+module = "QtslAux.QtslCompose.WireCertDischarge"
+package = "qtsl-aux"
+olean_sha256 = "4e2ed4eb2f6faa9be654bb8f36cbc0c7a526843b30e5be7fa1701dff6f4fa851"
+olean_provenance = "bound from receipt d03de0ab81342f0d, 2026-07-21T17:23:30Z"
+source_git_blob = "124fdb696d66e7dc1c041c34d1568a3fd4192068"
+
+[[module]]
+module = "QtslAux.Structural"
+package = "qtsl-aux"
+olean_sha256 = "4806c1489102949a7c8a86586a1ab4103f6ea6a8f2155a8c85d963cf1ca0188a"
+olean_provenance = "bound from receipt 7f5bc730b1b1031c, 2026-07-21T17:23:32Z"
+source_git_blob = "ef5e0237eaedc6fc3e2bec587512fc459c3ef49d"
+
+[[hol_file]]
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+git_blob = "b32b4ddc50b9f523fc4ac44d34e4d10628075a9a"
+
+[[hol_file]]
+script = "../../hol/checker/qtsl_fam_andeScript.sml"
+git_blob = "8b5757e07eab7e9d97dd4bd85775837d9ae79983"
+
+[[hol_file]]
+script = "../../hol/checker/qtsl_fam_axScript.sml"
+git_blob = "f03556f5cf67c73812e8a8f4074e51a1579baa52"
+
+[[hol_file]]
+script = "../../hol/checker/qtsl_fam_oreScript.sml"
+git_blob = "147cdb02fe196db0b30ec6e53343fb990fedb2df"
+
+[[hol_file]]
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+git_blob = "11c448c510db5caf3a819cc438ac8e762436a276"
+

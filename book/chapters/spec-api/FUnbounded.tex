@@ -1,0 +1,29 @@
+\apilang{TypeScript}{spec.derived.eventuallyProducerHorizon}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+eventuallyProducerHorizon(horizon: QLike, arg: StatePred): PathPred
+\end{tssrc}
+\apiprov{definition --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+/** The `producerT` spelling of unbounded reach: `F phi` compiled as
+ * `F_{<=horizon} phi` at a producer-chosen horizon — a sound
+ * under-approximation, flagged as such in the row. */
+eventuallyProducerHorizon(horizon: QLike, arg: StatePred): PathPred {
+  return deadline(horizon, arg, { producerT: true });
+},
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::eventually\_producer\_horizon}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn eventually_producer_horizon(horizon: WitRat, arg: StatePred) -> Result<PathPred, Refusal>
+\end{rustsrc}
+\apiprov{definition --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+/// The `producerT` spelling of unbounded reach: `F phi` compiled as
+/// `F_{<=horizon} phi` at a producer-chosen horizon — a sound
+/// under-approximation, *flagged as such* in the row (Wing F keeps
+/// unbounded quantitative reach out of the primitive grammar; S7.3).
+pub fn eventually_producer_horizon(horizon: WitRat, arg: StatePred) -> Result<PathPred, Refusal> {
+    PathPred::deadline(horizon, arg, true)
+}
+\end{rustsrc}

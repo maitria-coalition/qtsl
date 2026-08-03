@@ -1,0 +1,13 @@
+INCLUDES = $(CAKEMLDIR)/misc $(CAKEMLDIR)/basis $(CAKEMLDIR)/compiler $(CAKEMLDIR)/cv_translator ..
+
+all: $(DEFAULT_TARGETS)
+.PHONY: all
+
+ifdef POLY
+HOLHEAP = $(CAKEMLDIR)/cv_translator/cake_compile_heap
+endif
+
+qtsl_toy_arm8.S: *qtslToyCompileARM8Script.sml
+qtsl_cert_arm8.S: *qtslCertCompileARM8Script.sml
+qtsl_cert_perf_arm8.S: *qtslCertPerfCompileARM8Script.sml
+qtsl_cert_rel_arm8.S: *qtslCertRelCompileARM8Script.sml

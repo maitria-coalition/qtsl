@@ -1,0 +1,127 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as in the \rulename{Ax}
+section; counterexamples read over the one-wire hypernet. This section
+also carries the fork note on the rule's \emph{reach}: the plain form
+quoted here, its mechanized limitation, and the context-carrying
+generalization of which it is the boundary case.}
+
+\textbf{Claim (\texttt{sound\_orE}).}\enspace The payload supplies two
+branch sequents $\Phi_1 \vdash \Psi$ and $\Phi_2 \vdash \Psi$ with their
+sub-derivations and three tree identities: the branches share one
+conclusion (\texttt{postMatch}), the conclusion's premise is the
+disjunction $\Phi_1 \vee \Phi_2$ of the branch premises (\texttt{preEq}),
+and the conclusion's post is the left branch's post (\texttt{postEq}).
+If both branch sequents are semantically valid, so is
+$\Phi_1 \vee \Phi_2 \vdash \Psi$.
+
+\begin{bthm}[soundness of $\vee$E, plain form]\label{thm:ore-sound}
+Under the three payload identities, semantic validity of both branch
+sequents implies semantic validity of the conclusion, over every
+hypernet.
+\end{bthm}
+\begin{proof}
+Let $\sigma$ be admissible with $\sigma$ satisfying the conclusion's
+premise, which \texttt{preEq} pins as the tree $\Phi_1 \vee \Phi_2$.
+
+\emph{Step 1 (case split).} The $\vee$-clause of satisfaction is
+meta-disjunction: $\sigma \models \Phi_1$ or $\sigma \models \Phi_2$.
+
+\emph{Step 2 (either branch delivers).} In the first case, left branch
+validity gives $\sigma \models \Psi$ directly (\texttt{postEq}). In the
+second, right branch validity gives satisfaction of the right branch's
+conclusion, which \texttt{postMatch} identifies --- as a tree --- with
+the left's, hence with the conclusion's post.
+\end{proof}
+
+\begin{bremark}[\texttt{postMatch} is essential]\label{rem:ore-post}
+The branches must agree on what they conclude \emph{before} the split is
+trusted. Drop \texttt{postMatch} and take the left branch
+$w \leq 0 \vdash w \leq 0$ and the right branch $\top \vdash \top$ (both
+\rulename{Ax} instances): the degenerate rule, reading its conclusion
+from the left branch, concludes $(w \leq 0) \vee \top \vdash w \leq 0$
+--- false at $\sigma(w) = 1$, where the premise holds through the right
+disjunct. \texttt{preEq}'s removal admits the context-swap family (the
+\rulename{Weaken} section); \texttt{postEq}'s removal frees the
+conclusion outright. In the lattice reading the rule is the bounding
+half of join's universal property --- $x \leq z$ and $y \leq z$ iff
+$x \sqcup y \leq z$ --- whose introducing half is $\vee$I.
+\end{bremark}
+
+\begin{bremark}[the reach problem, and why it is a theorem]
+\label{rem:ore-reach}
+\texttt{preEq} demands that the eliminated disjunction \emph{be} the
+whole premise. But in this calculus the disjunctions worth eliminating
+almost never are: a sequent's premise in practice has the shape
+$\Gamma \wedge \mathsf{SP}$ --- a context conjoined with the synthesized
+case facts of the hypernet's primitives (a cell indicator's finite case
+list, a rectifier's sign split) --- so the disjunction arrives as a
+\emph{conjunct} of the premise, one or more $\wedge$-nodes deep. The
+plain rule cannot reach it, and the core cannot restructure its way
+there, because distributing $\wedge$ over $\vee$ is underivable. That is
+a theorem, not a design suspicion. Interpret formulas over a hypernet
+with no typed wires into $M_3$, the five-element diamond --- three
+pairwise-incomparable atoms between $\bot$ and $\top$, the canonical
+modular non-distributive lattice \cite{birkhoff1967} --- sending
+$\wedge$ to meet, $\vee$ to join, and three designated disequality atoms
+to the three lattice atoms. Every rule of the catalogue preserves
+interpretation-order across the turnstile
+(\texttt{ProofObject.m3sound}): the structural rules are precisely the
+lattice axioms of order, meet, and join --- the sections
+\rulename{Ax} through $\vee$E in this book, one kit lemma each --- and
+no rule of the calculus consumes distributivity. Now take the
+distribution instance
+$P \wedge (Q \vee R) \;\vdash\; (P \wedge Q) \vee (P \wedge R)$:
+its premise interprets to $a \sqcap (b \sqcup c) = a \sqcap \top = a$,
+its conclusion to $(a \sqcap b) \sqcup (a \sqcap c) = \bot \sqcup \bot
+= \bot$, and $a \not\leq \bot$ --- so no derivation concludes it
+(\texttt{cx\_not\_derivable}), even though both branch premises
+$P \wedge Q \vdash \cdot$ and $P \wedge R \vdash \cdot$ are two-step
+core derivations (an \rulename{Ax} node and a $\vee$I node each).
+\end{bremark}
+
+\begin{bremark}[the context-carrying form, and the fork discipline]
+\label{rem:ore-fork}
+The repair is not restructuring but a stronger elimination. The
+context-carrying rule's payload adds a \emph{conjunct path} $\pi$ into
+the premise's $\wedge$-tree, with read and replace obligations: the
+conjunct at $\pi$ is a disjunction $\Phi_1 \vee \Phi_2$, each branch
+premise is the conclusion's premise with that conjunct replaced by the
+respective disjunct, and both branches conclude the common conclusion
+(\texttt{OrECtxStep}). Three mechanized facts locate it precisely.
+\emph{Sound}: whenever both branch premises are semantically valid, so
+is the conclusion, over every hypernet (\texttt{sound\_orECtx} --- one
+path-read lemma to extract the disjunction, the case split of
+Theorem~\ref{thm:ore-sound}, one path-replace lemma to transport each
+branch's strengthened premise). \emph{Proper}: no elaboration of the
+context-carrying rule into the core exists
+(\texttt{orECtx\_not\_elaborable}) --- the countermodel instance of
+Remark~\ref{rem:ore-reach} has derivable branches and an underivable
+conclusion, so the extension proves something true that the core cannot
+reach. \emph{Conservative at the boundary}: at $\pi = \mathrm{here}$
+the rule elaborates into the plain constructor
+(\texttt{OrECtxStep.elabHere}) --- the form proven sound above is
+exactly the identity-path case. The cost side of the fork is small and
+bounded: the certificate carries the path, the checker two small path
+functions (read-at, replace-at), and the soundness proof one lemma
+about conjunct-path replacement. The alternative --- adding
+$\wedge$-restructuring rules to the core --- cannot substitute:
+restructuring rules are themselves sound for every lattice
+interpretation, so adding any number of them leaves the countermodel
+intact; closing the gap requires a rule whose soundness genuinely uses
+distributivity, which is the context-carrying elimination itself. The
+accompanying development accordingly treats the context-carrying form
+as the intended elimination rule; the constructor quoted in this
+section's Lean cell is the plain form, destined to become its boundary
+alias.
+\end{bremark}
+
+\begin{anchors}
+Steps 1--2 & \texttt{sound\_orE}; payload \texttt{POrEData} (fields \texttt{postMatch}, \texttt{preEq}, \texttt{postEq}); wired as \texttt{RuleData.orE}\\
+$\vee$-clause of satisfaction & \texttt{Formula.holds} (case \texttt{or})\\
+lattice reading & \texttt{M3.orE\_kit}\\
+Remark \ref{rem:ore-reach}: order-preservation metatheorem & \texttt{ProofObject.m3sound} (Qtsl/Admissible.lean)\\
+Remark \ref{rem:ore-reach}: underivable distribution instance & \texttt{cxStep}, \texttt{cx\_not\_derivable}\\
+Remark \ref{rem:ore-fork}: extension payload + soundness & \texttt{OrECtxStep}, \texttt{sound\_orECtx}\\
+Remark \ref{rem:ore-fork}: properness & \texttt{orECtx\_not\_elaborable}\\
+Remark \ref{rem:ore-fork}: boundary elaboration & \texttt{OrECtxStep.elabHere}\\
+\end{anchors}

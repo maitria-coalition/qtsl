@@ -1,0 +1,144 @@
+\RequirePackage{pdfrender}
+\RequirePackage{fancyvrb}
+
+\makeatletter
+
+\directlua{
+  luaotfload.add_fallback("srclmonofb",{
+    "[build/srclfonts/srcl-FreeMono.otf]:mode=node;-liga;-calt;-ccmp;-kern;-mark;-mkmk;",
+    "[build/srclfonts/srcl-DejaVuSans.ttf]:mode=node;-liga;-calt;-ccmp;-kern;-mark;-mkmk;",
+    "[build/srclfonts/srcl-FreeSerif.ttf]:mode=node;-liga;-calt;-ccmp;-kern;-mark;-mkmk;",
+    "[build/srclfonts/srcl-STIX-Regular.otf]:mode=node;-liga;-calt;-ccmp;-kern;-mark;-mkmk;",
+    "[build/srclfonts/srcl-Asana-Math.otf]:mode=node;-liga;-calt;-ccmp;-kern;-mark;-mkmk;",
+  })
+  luatexbase.add_to_callback("luaotfload.patch_font", function(tfmdata, spec)
+    if type(tfmdata.name) == "string"
+       and string.find(tfmdata.name, "srclfonts", 1, true) then
+      local cell = math.floor((tfmdata.size or 0) * 0.625 + 0.5)
+      for _, chr in pairs(tfmdata.characters or {}) do
+        chr.width = cell
+      end
+    end
+  end, "srclayer.grid")
+}
+
+\protected\def\srcl@literal#1{\pdfextension literal{#1}}
+
+\def\srcl@suspendtagging{%
+  \ifdefined\tagpdfparaOff\tagpdfparaOff\fi
+  \ifdefined\SuspendTagging\SuspendTagging{srclayer}%
+  \else\ifdefined\tagstop\tagstop\fi\fi}
+\def\srcl@resumetagging{%
+  \ifdefined\ResumeTagging\ResumeTagging{srclayer}%
+  \else\ifdefined\tagstart\tagstart\fi\fi}
+
+\ExplSyntaxOn
+\cs_new:Npn \srcl@shippedsofar { \int_use:N \g_shipout_readonly_int }
+\cs_new_protected:Npn \srcl@embedpayload #1
+  {
+    \cs_if_exist:NTF \pdffile_embed_file:nnn
+      {
+        \group_begin:
+        \pdfdict_put:nnn { l_pdffile/Filespec }{ Desc }
+          { (Complete~assembled~LaTeX~source~of~this~book~---~the~same~
+             file~served~at~https://maitria.org/book.tex) }
+        \pdffile_embed_file:nnn {#1} { book.tex } { srcl/payload }
+        \pdfmanagement_add:nne { Catalog/Names/EmbeddedFiles }
+          { book.tex } { \pdf_object_ref:n { srcl/payload } }
+        \group_end:
+      }
+      { \iow_term:n {srclayer:~attachment~skipped~(untagged~pass,~no~pdfmanagement)} }
+  }
+\ExplSyntaxOff
+
+\newsavebox{\srcl@box}
+\newlength{\srcl@pageht}
+\newlength{\srcl@pagewd}
+\def\srcl@vbsize{\fontsize{5.01875pt}{5.520625pt}}
+\def\srcl@fontsetup{%
+  \setlength{\parskip}{0pt}\setlength{\parindent}{0pt}%
+  \lineskiplimit=-\maxdimen \lineskip=0pt
+  \def\FV@Space{\char32\relax}%
+  \relax}
+
+\AtEndDocument{%
+  \IfFileExists{build/srclayer-manifest.tex}{%
+    \begingroup
+    \@@input build/srclayer-manifest.tex\relax
+    \newfontfamily\srcl@mono[
+      Path=build/srclfonts/,
+      RawFeature={mode=node;fallback=srclmonofb;-liga;-calt;-ccmp;-mark;-mkmk},
+      Kerning=Off, Scale=1,
+      BoldFont=srcl-DejaVuSansMono.ttf,
+      ItalicFont=srcl-DejaVuSansMono.ttf]{srcl-DejaVuSansMono.ttf}%
+    \begingroup\srcl@mono\selectfont\xdef\srcl@family{\f@family}\endgroup
+    \clearpage
+    \pagestyle{empty}\thispagestyle{empty}%
+    \expandafter\srcl@embedpayload\expandafter{\srclPayloadFile}%
+    \newcount\srcl@first \srcl@first=\numexpr\srcl@shippedsofar+2\relax
+    \newcount\srcl@last  \srcl@last=\numexpr\srcl@first+\srclChunkCount-1\relax
+    \noindent\begin{minipage}{\textwidth}
+    \subsection*{Source appendix}
+    The \srclChunkCount{} pages that follow --- physical pages
+    \the\srcl@first{} through \the\srcl@last{} of this file --- carry the
+    complete \LaTeX{} source of this book (the same single-file assembly
+    served at \url{https://maitria.org/book.tex}) as an invisible text
+    layer: this PDF is constructed so that text extraction returns its
+    own source. The layer never displays and never prints; the pages are
+    deliberately blank to the eye.
+
+    \medskip
+    \noindent Byte-exact recovery (the build verifies this equality on
+    every run):
+    \begin{quote}
+    \ttfamily pdftotext -layout -fixed 3.125 -f \the\srcl@first{}
+    book.pdf - | tr -d '\textbackslash f' > book.tex
+    \end{quote}
+    \noindent Bare \texttt{pdftotext book.pdf -} also returns the source,
+    readably, after the body text (the source begins at
+    \texttt{\textbackslash documentclass}). The same file rides as a PDF
+    attachment, byte-exact by construction:
+    \begin{quote}
+    \ttfamily pdfdetach -saveall book.pdf
+    \end{quote}
+    \noindent (or \texttt{reader.attachments} in pypdf).
+    \end{minipage}\par
+    \clearpage
+    \ifdefined\microtypesetup
+      \microtypesetup{protrusion=false,expansion=false}%
+    \fi
+    \srcl@suspendtagging
+    \setlength{\srcl@pagewd}{\dimexpr\srclMaxLineChars\p@*16/5+140pt\relax}%
+    \ifdim\srcl@pagewd<\paperwidth\setlength{\srcl@pagewd}{\paperwidth}\fi
+    \ifdim\srcl@pagewd>16300pt
+      \PackageError{srclayer}{source line too long for one page
+        (needs \the\srcl@pagewd)}{Shorten the offending source line, or
+        rework the layer.}%
+    \fi
+    \pagewidth=\srcl@pagewd
+    \@for\srcl@f:=\srclChunkFiles\do{%
+      \begin{lrbox}{\srcl@box}%
+        \begin{minipage}[t]{\dimexpr\srcl@pagewd-40pt\relax}%
+        \pdfrender{TextRenderingMode=Invisible}%
+        \srcl@fontsetup
+        \VerbatimInput[fontfamily=\srcl@family,fontsize=\srcl@vbsize]{\srcl@f}%
+        \end{minipage}%
+      \end{lrbox}%
+      \setlength{\srcl@pageht}{\dimexpr\ht\srcl@box+\dp\srcl@box+40pt\relax}%
+      \ifdim\srcl@pageht<\paperheight\setlength{\srcl@pageht}{\paperheight}\fi
+      \ifdim\srcl@pageht>16300pt
+        \PackageError{srclayer}{source chunk taller than the PDF page
+          ceiling (\the\srcl@pageht)}{Lower the chunk size in build.sh's
+          splitter.}%
+      \fi
+      \pageheight=\srcl@pageht
+      \AddToHookNext{shipout/background}{%
+        \put(0,-40){\srcl@literal{/Artifact BMC}\usebox{\srcl@box}\srcl@literal{EMC}}}%
+      \null\clearpage
+    }%
+    \srcl@resumetagging
+    \endgroup
+  }{\typeout{srclayer: no build/srclayer-manifest.tex - source appendix
+    skipped (health build or standalone rebuild).}}}
+
+\makeatother

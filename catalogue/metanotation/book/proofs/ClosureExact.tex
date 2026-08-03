@@ -1,0 +1,105 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template, here
+in the degenerate-target form: the target is a verified set identity,
+not a catalogue node. This section also carries the closure
+discipline\textquotesingle s shared preamble; the
+\rulename{ClosureDiscipline-OUTWARD} and
+\rulename{ClosureDiscipline-INWARD-EPS} sections build on it by
+reference.}
+
+\begin{brecipe}[the closure discipline --- shared preamble for the trio]
+\label{rec:cd-preamble}
+The kernel\textquotesingle s rows quantify over closed cells; its
+certificates consume closed atoms; its exact arithmetic decides
+non-strict comparisons. Strict literals therefore never reach a row:
+every strict atom is resolved, before rows are emitted, by one of
+three moves keyed to the literal\textquotesingle s position.
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\textbf{literal} & \textbf{move} & \textbf{cost}\\
+\midrule
+complement of a strict atom & \rulename{ClosureDiscipline-EXACT}: replace by the closed form & none (set identity)\\
+complement of a closed atom & \rulename{ClosureDiscipline-OUTWARD}: swap orientation, over-approximate & the cut $\{p = c\}$\\
+strict atom, positive position & \rulename{ClosureDiscipline-INWARD-EPS}: round inward by $\varepsilon > 0$ & the band $(c - \varepsilon, c)$\\
+\end{tabular}
+\end{center}
+The polarity logic: at a \emph{positive} position --- the atom
+contributes to what the certified region must lie inside ---
+under-approximation is sound, so shrinking the atom (the inward move)
+is the safe direction. At a \emph{negative} position --- the atom
+arrives complemented --- the consuming side wants the complement
+over-approximated, so growing it by the boundary cut (the outward
+move) is the safe direction. The exact move is direction-free: an
+identity is sound everywhere. Soundness-only is the
+discipline\textquotesingle s contract: no move claims to preserve
+provability, and a specification tight at a critical threshold fails
+honestly --- the certificate is refused --- rather than being
+silently widened.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{ClosureDiscipline-EXACT} instance]
+\label{rec:ce-instance}
+\[
+\mathrm{cmpl}\{p < c\} \;\rightsquigarrow\; \{c \le p\}
+\qquad\qquad
+\mathrm{cmpl}\{c < p\} \;\rightsquigarrow\; \{p \le c\}
+\]
+Payload transport: observable $p$ and threshold $c$ verbatim;
+orientation swapped; strictness dropped; the complement consumed. One
+literal $\to$ one closed atom, and the respelling is \emph{exact}:
+Proposition~\ref{prop:ce-identity} is an equality, not a containment,
+so the rewrite is sound at every position, positive or negative ---
+the only member of the trio with that property.
+\end{brecipe}
+
+\begin{bprop}[the exactness identity]\label{prop:ce-identity}
+$\mathrm{cmpl}\{x \mid p(x) < c\} = \{x \mid c \le p(x)\}$, and
+symmetrically
+$\mathrm{cmpl}\{x \mid c < p(x)\} = \{x \mid p(x) \le c\}$.
+\end{bprop}
+\begin{proof}
+Pointwise, $\neg\bigl(p(x) < c\bigr) \iff c \le p(x)$ --- totality of
+the order on $\R$, nothing more.
+\texttt{closureExactLt\_sound} and \texttt{closureExactGt\_sound} are
+this equivalence under one set-extensionality step; there is no
+analytic content anywhere in the move.
+\end{proof}
+
+\begin{bprop}[the closedness that names the move]\label{prop:ce-closed}
+For continuous $p$, the atoms $\{c \le p\}$ and $\{p \le c\}$ are
+closed sets.
+\end{bprop}
+\begin{proof}
+Each is the preimage under $p$ of a closed ray
+(\texttt{closureExact\_isClosed\_ge}, \texttt{\_le}). The
+calculus\textquotesingle s observables are polynomials, hence
+continuous; the lemmas ask continuity only, so any continuous
+extension of the observable grammar inherits the move unchanged.
+\end{proof}
+
+\begin{bremark}[both orientations, deliberately]
+The identity is stated twice because both strict forms occur in the
+atom grammar, and a one-sided statement of a complement lemma is a
+standing trap --- an earlier one-sided draft of the
+discipline\textquotesingle s complement analysis was caught in
+adversarial review at exactly that omission. Stating both
+orientations costs two lines and removes the trap.
+\end{bremark}
+
+\begin{bremark}[soundness corollary, and what the siblings inherit]
+Substituting equals for equals needs no direction analysis, so the
+soundness corollary is immediate: any judgement consuming
+$\mathrm{cmpl}\{p < c\}$ may consume $\{c \le p\}$ with identical
+denotation, and no margin is spent. The sibling moves are
+containments, not identities, and their soundness is
+position-dependent --- which is exactly why the discipline routes
+each literal to the move whose direction its position wants
+(Recipe~\ref{rec:cd-preamble}).
+\end{bremark}
+
+\begin{anchors}
+Proposition \ref{prop:ce-identity} & \texttt{closureExactLt\_sound}, \texttt{closureExactGt\_sound}\\
+Proposition \ref{prop:ce-closed} & \texttt{closureExact\_isClosed\_ge}, \texttt{closureExact\_isClosed\_le}\\
+strict-atom reading & the \texttt{hbridge} hypothesis of the identity lemmas\\
+the sibling moves & the \rulename{ClosureDiscipline-OUTWARD} and \rulename{ClosureDiscipline-INWARD-EPS} sections\\
+\end{anchors}

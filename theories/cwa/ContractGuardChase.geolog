@@ -1,0 +1,161 @@
+// Engine-decided judgements (oracle = the qtsl certification plugin
+// at the engine's ground seam). Everything declared and not imported
+// below is ordinary (the default).
+import qtsl.{qtsl_contract_cell, qtsl_contract_param};
+
+// ContractGuardChase.geolog — the H-CONTRACT admission guard,
+// transported into the carried (chased) fragment WITH its refuse
+// rows: the executable form of the fragment-projection countermodel
+// (the event-5 data-plane round's F-2; the event-5.1 transport
+// lift's named acceptance test).
+//
+// DELIBERATE, LOCAL EXCEPTION to the standing convention that
+// refuse rows are absent from projections: this file's entire
+// purpose is to FENCE the admission refusals — the battery chases
+// its instances and greps the violated-denial judgements by name
+// (the max instance IS the F-2 countermodel's cell, banked). The
+// main erased projection (QtslChase.geolog) keeps the standing
+// convention untouched; nothing here enters any minted closure —
+// this file is battery apparatus, like the mutants.
+//
+// HAL-PAIR MIRROR DUTY: the refuse rows below are the per-kind
+// relational spelling of the real guard
+// (ax/qtsl/contract_semiring_transport_only in Qtsl.geolog, premise
+// `not k = hagSum, not k = hagConjPow`) — a relations-only theory
+// cannot spell not-equalities against constants, so the guard's
+// complement is enumerated per constructible refused kind (max,
+// min, exp). The future-kind closure clause is NOT expressible
+// here; it is census-fenced on the real row (mutant mct3). A
+// premise change on the real guard edits this file in the same
+// motion.
+
+theory ContractGuardChase {
+  PrimApp : Set;
+  HAggKind : Set;
+
+  // ---- constructor functions, as functional relations (the
+  // QtslChase spelling verbatim)
+
+  hagSumR     : {out: HAggKind} -> Prop;
+  hagMaxR     : {out: HAggKind} -> Prop;
+  hagMinR     : {out: HAggKind} -> Prop;
+  hagConjPowR : {out: HAggKind} -> Prop;
+  hagConjExpR : {out: HAggKind} -> Prop;
+
+  // ---- the cell and its demand relations (param: Q erased, as at
+  // QtslChase)
+
+  contract_semiring : {app: PrimApp, kind: HAggKind} -> Prop;
+
+  qtsl_contract_param : {app: PrimApp} -> Prop;
+  qtsl_contract_cell  : {app: PrimApp} -> Prop;
+
+  // ---- functionality (what the constants carried implicitly)
+
+  chase ax/fn/hagsum : forall k1 : HAggKind, k2 : HAggKind.
+    {out: k1} hagSumR, {out: k2} hagSumR
+    |- k1 = k2;
+
+  chase ax/fn/hagmax : forall k1 : HAggKind, k2 : HAggKind.
+    {out: k1} hagMaxR, {out: k2} hagMaxR
+    |- k1 = k2;
+
+  chase ax/fn/hagmin : forall k1 : HAggKind, k2 : HAggKind.
+    {out: k1} hagMinR, {out: k2} hagMinR
+    |- k1 = k2;
+
+  chase ax/fn/hagconjpow : forall k1 : HAggKind, k2 : HAggKind.
+    {out: k1} hagConjPowR, {out: k2} hagConjPowR
+    |- k1 = k2;
+
+  chase ax/fn/hagconjexp : forall k1 : HAggKind, k2 : HAggKind.
+    {out: k1} hagConjExpR, {out: k2} hagConjExpR
+    |- k1 = k2;
+
+  // ---- the semiring cell's demands (QtslChase spelling verbatim)
+
+  report ax/wf/contract_param_pow : forall a : PrimApp, k : HAggKind.
+    {app: a, kind: k} contract_semiring, {out: k} hagConjPowR
+    |- {app: a} qtsl_contract_param;
+
+  report ax/wf/contract_param_exp : forall a : PrimApp, k : HAggKind.
+    {app: a, kind: k} contract_semiring, {out: k} hagConjExpR
+    |- {app: a} qtsl_contract_param;
+
+  report ax/wf/contract_cell : forall a : PrimApp, k : HAggKind.
+    {app: a, kind: k} contract_semiring
+    |- {app: a} qtsl_contract_cell;
+
+  // ---- THE GUARD, refusal-mode, per refused kind (the mirror of
+  // ax/qtsl/contract_semiring_transport_only)
+
+  refuse ax/fence/contract_max_refused : forall a : PrimApp,
+      k : HAggKind.
+    {app: a, kind: k} contract_semiring, {out: k} hagMaxR
+    |- false;
+
+  refuse ax/fence/contract_min_refused : forall a : PrimApp,
+      k : HAggKind.
+    {app: a, kind: k} contract_semiring, {out: k} hagMinR
+    |- false;
+
+  refuse ax/fence/contract_exp_refused : forall a : PrimApp,
+      k : HAggKind.
+    {app: a, kind: k} contract_semiring, {out: k} hagConjExpR
+    |- false;
+}
+
+// The F-2 countermodel's ADMISSION HALF — the executable max-cell
+// refusal representative: a max-tagged cell must hit the mirror
+// refusal (the battery greps
+// `denial violated: ax/fence/contract_max_refused`). The NUMERIC
+// halves of the countermodel — the (1,2)x(1,1) box's sum reading 3
+// vs max reading 2 and their disagreement — are Lean-checked
+// (contract_cell_countermodel_max in the T-TRANSFER module); this
+// relations-only instance deliberately carries no arithmetic.
+instance ContractMaxCell : ContractGuardChase {
+  fma : PrimApp;
+  fmk : HAggKind;
+
+  [out: fmk] hagMaxR;
+  [app: fma, kind: fmk] contract_semiring;
+}
+
+instance ContractMinCell : ContractGuardChase {
+  fna : PrimApp;
+  fnk : HAggKind;
+
+  [out: fnk] hagMinR;
+  [app: fna, kind: fnk] contract_semiring;
+}
+
+// exp refuses at this revision (enclosure tier — no rational
+// phi-image); its param demand still derives, exactly as the real
+// theory's pre-staged spelling keeps it.
+instance ContractExpCell : ContractGuardChase {
+  fea : PrimApp;
+  fek : HAggKind;
+
+  [out: fek] hagConjExpR;
+  [app: fea, kind: fek] contract_semiring;
+}
+
+// The admitted kinds. pow — the transport lift's content: chased
+// alone it must SATURATE (no denial) with both demands derived.
+instance ContractPowCell : ContractGuardChase {
+  fpa : PrimApp;
+  fpk : HAggKind;
+
+  [out: fpk] hagConjPowR;
+  [app: fpa, kind: fpk] contract_semiring;
+}
+
+// sum — the default made formal: cell demand only; the param demand
+// must NOT smear onto it (the absence half).
+instance ContractSumCell : ContractGuardChase {
+  fsa : PrimApp;
+  fsk : HAggKind;
+
+  [out: fsk] hagSumR;
+  [app: fsa, kind: fsk] contract_semiring;
+}

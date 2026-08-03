@@ -1,0 +1,24 @@
+# bindings.toml.d/ClosureInwardEps.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ClosureInwardEps'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureInwardEpsGt_sound"
+sha256 = "f8fd8f4b3674b10802afe2865191890e433afd41685eea90e2e0e4649bc38746"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureInwardEpsLt_sound"
+sha256 = "6ba516c649cd3ac4562e55b666c9885ba65975ec7fa3de8aced22fe98fe51959"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureInwardEps_isClosed"
+sha256 = "bdf95b7905dc41b0385dee014e83d7a331f6ecf990314862cc1dd96983c7bc11"
+
+[[correspondence]]
+entry = "ClosureInwardEps"
+steele_sha256 = "0f77625ec595302020337b5768416e56c87ad465fa0617ff0bede01f5f210a84"
+statements_sha256 = "5bccf2094af9bdebc1d48b62d6fa57df4be27ff14eddd200c58fabd2dc26b6c3"
+prose_sha256 = "edd21424e600f777589aa0065cff7452c9fe73e62d244d70864ed0da9d80d9cb"
+

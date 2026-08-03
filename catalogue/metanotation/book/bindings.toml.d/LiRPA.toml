@@ -1,0 +1,69 @@
+# bindings.toml.d/LiRPA.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'LiRPA'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PrimApp.isReluAt"
+sha256 = "9a5732ae051c8f902621d4afcdc95c52fcae657483a9d7050ce9b70fc9e6aa03"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "affineWireTerm"
+sha256 = "cc8ef028653c3136b4a8768f120b09a244230b3e6278037953ceb22cf5c63e80"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "lirpaConclusionForm"
+sha256 = "115b4a3d1e100b27430a0f8ac8f015a01e9fc06e3424c48583c8c4c73685b379"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "reluLinked"
+sha256 = "fd5efd75bc3264a9c5ed4399de9d6f55d4e12b95bd625ec49b70fc9d5733c127"
+
+[[statement]]
+module = "Qtsl.ReluExpansion"
+decl = "reluExpH"
+sha256 = "9b36397c6c301d465f11468987afa6094982870ec5cb612ea8aef0026c9fece9"
+
+[[statement]]
+module = "Qtsl.ReluExpansion"
+decl = "relu_projection"
+sha256 = "e4e13d7b2f94ee15003d090f70d4f37ea82e3054432d471620ffcf95f779c47c"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "lirpa_lower_neg"
+sha256 = "c3d5f8cde0c616f6701ca4972037beb28db550d05f8dad6133a3466e7678ae79"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "lirpa_lower_pos"
+sha256 = "a6129352f8bc08be6ecea9f22577191b3fa4869cade717e31aae11a078afbd89"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "lirpa_upper_neg"
+sha256 = "842c8c35f84c8e390bed5de2653b9dd4934f1a95c8e996f20850398075885ff4"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "lirpa_upper_pos"
+sha256 = "b05f312f645c3a65a69261019d3cc9be700f9608148c2205a8fdf2eb4dfdf922"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "reluLinked_facts"
+sha256 = "aded74db3439ce8f3627278806230a8cd4b866dbe527a2a560a6566a3f45205a"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_lirpa"
+sha256 = "ccb04e2737a44d7c8bbae0887d098c8d395bd1164e6ad6ec881df58b82fc5669"
+
+[[correspondence]]
+entry = "LiRPA"
+steele_sha256 = "bebb1c982a4e066d94dd4b2fee04b723b439ecee08d82bc52c790422cf03f572"
+statements_sha256 = "c6a34d6d4c8166e5c5033a88bf4b9dadeade0f6eee752c3333e65ac00cb2e619"
+prose_sha256 = "dcf34921221d8ac9de26ab09e956ea6be7883bac5f4ff8de5b6d8810f805b389"
+

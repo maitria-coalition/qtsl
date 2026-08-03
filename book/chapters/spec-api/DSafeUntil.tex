@@ -1,0 +1,35 @@
+\apilang{TypeScript}{spec.derived.safetyUntilDeadline}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+safetyUntilDeadline(t: QLike, safe: StatePred, target: StatePred): PathPred
+\end{tssrc}
+\apiprov{definition --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+/** Safety until deadline — `safe U_{<=t} target`, directly. */
+safetyUntilDeadline(t: QLike, safe: StatePred, target: StatePred): PathPred {
+  return until(t, safe, target);
+},
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::safety\_until\_deadline}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn safety_until_deadline(
+    t: WitRat,
+    safe: StatePred,
+    target: StatePred,
+) -> Result<PathPred, Refusal>
+\end{rustsrc}
+\apiprov{definition --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+/// Wing C: safety until deadline — `safe U_{<=t} target`, directly
+/// (or as the probability cap around it, which is a composition of
+/// [`ForallSpec::prob_ge`] with this). Witness: the worked example;
+/// until-battery fixtures.
+pub fn safety_until_deadline(
+    t: WitRat,
+    safe: StatePred,
+    target: StatePred,
+) -> Result<PathPred, Refusal> {
+    PathPred::until(t, safe, target)
+}
+\end{rustsrc}

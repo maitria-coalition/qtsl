@@ -1,0 +1,129 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template: the
+1$\to$1 unpack, the filled-in target application, the payload-transport
+table, the exactness identity, and the soundness corollary through the
+target\textquotesingle s lemma. This row is the membership leaf itself,
+catalogued as a rule of its own because every initialized certificate
+ends with one; in the staged certificate schema it is a \emph{field} of
+the \texttt{QSat} claim record (the \texttt{eval} slot --- the
+record-level home of the dissolved bridge rule\textquotesingle s
+membership premise), not a node sort. The judgement-level story is the
+record\textquotesingle s demand set --- this section owns the leaf.
+Mechanization state: the target\textquotesingle s lemma is
+kernel-verified; the exactness identities are mechanized and bound in
+the entry, and the payload-level elaborator slot is marked below.}
+
+\begin{brecipe}[the template instance]\label{rec:re-template}
+One leaf $\to$ one node: membership of the initial point $x_0$ in the
+certificate\textquotesingle s \emph{root atom} --- the region atom
+concluded at the root of the certificate (naming note: ``root'' refers
+to the certificate\textquotesingle s root claim, not to roots of
+polynomials) --- by exact rational evaluation. For a \emph{sublevel}
+atom $\{x : V(x) \le \mathrm{thr}\}$ the unpack image is a single
+\rulename{PConstExact} application
+(Recipe~\ref{rec:re-filled}). For a \emph{box} atom the leaf is not a
+rule application at all: per-coordinate interval containment is
+recomputed directly by the checker\textquotesingle s side-condition
+registry (conformance recomputation) --- the alias reading covers the
+sublevel branch, and the box branch is stated so the respelling never
+overclaims. Nothing else is derived: the rule is a compact spelling of
+one ground-fact row.
+\end{brecipe}
+
+\begin{brecipe}[the filled-in application]\label{rec:re-filled}
+Sublevel atom $R = \{x : V(x) \le \mathrm{thr}\}$ with $V$ a polynomial
+over $\Q$, threshold $\mathrm{thr} \in \Q$, and initial point
+$x_0$ with rational coordinates:
+\begin{mathpar}
+\inferrule*[Right=\rulename{PConstExact}]{
+  \mathrm{evalClosed}\bigl(V(x_0) \le \mathrm{thr}\bigr) = \mathsf{true}
+}{
+  \Phi \vdash V(x_0) \le \mathrm{thr}
+}
+\end{mathpar}
+with arbitrary premise $\Phi$, as the target licenses (the rule is
+premise-free). $V(x_0)$ denotes the closed term obtained by
+substituting every coordinate of $x_0$ into $V$ --- closed by
+construction, so the target\textquotesingle s verified evaluator
+decides the comparison in exact $\Q$, and a $\mathsf{true}$ verdict
+certifies closedness as a byproduct (the target section unpacks why).
+\end{brecipe}
+
+\begin{brecipe}[payload transport --- field for field]\label{rec:re-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{\rulename{RootEval} data} & \textbf{\rulename{PConstExact} payload}\\
+\midrule
+$x_0$ \textnormal{(rational coordinates)} & substituted into the closed left-hand term\\
+sublevel atom $(V, \mathrm{thr})$ & the comparison\textquotesingle s two sides\\
+comparator & $\le$ (inside the admissible set)\\
+box atom \textnormal{(per-axis bounds)} & \emph{not} transported --- registry recompute (Recipe~\ref{rec:re-template})\\
+\end{tabular}
+\end{center}
+\end{brecipe}
+
+\begin{bprop}[the exactness identity]\label{prop:re-exact}
+\[
+x_0 \in \{x : V(x) \le \mathrm{thr}\}
+\quad\Longleftrightarrow\quad
+\mathrm{evalClosed}\bigl(V(x_0) \le \mathrm{thr}\bigr) = \mathsf{true}.
+\]
+\end{bprop}
+\begin{proof}
+Two lines, which is the point. Substituting a rational point into a
+rational polynomial is exact arithmetic --- no rounding enters at any
+step --- so the evaluator computes the value $V(x_0)$ itself, not an
+approximation to it; and the decidable comparison of two exact
+rationals is the membership predicate verbatim. This is the degenerate
+--- and best --- case of the exactness identity an alias owes: not an
+algebraic rearrangement but a literal identity of values. It is also
+the whole rule: with approximate evaluation, a point lying
+$\varepsilon$ outside the region could certify membership, and the
+bridge rule\textquotesingle s instantiation (its section,
+the extension page) would conclude satisfaction from a false premise.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:re-sound}
+If the leaf checks, $x_0$ belongs to the root atom.
+\end{bprop}
+\begin{proof}
+\texttt{Formula.holds\_of\_evalClosed\_true} (the target\textquotesingle s
+kernel-verified evaluator theorem, quoted in the \rulename{PConstExact}
+section): a closed comparison whose exact evaluation returns
+$\mathsf{true}$ holds at every valuation. By
+Proposition~\ref{prop:re-exact} that is membership. There is no other
+content --- the alias genre working as intended. (For the box branch
+the recomputed per-coordinate containment plays the same role, warranted
+by the recompute\textquotesingle s definition rather than a rule lemma.)
+\end{proof}
+
+\absentbox{payload-level elaborator pending schema staging}{The
+\emph{semantic} content of the respelling is now mechanized and bound
+in the entry: \texttt{rootEval\_eval\_cast} is
+Proposition~\ref{prop:re-exact}\textquotesingle s literal identity of
+values, and \texttt{rootEval\_sublevel\_iff} /
+\texttt{rootEval\_box\_iff} are the two atom shapes as equivalences.
+What remains unmechanized is the payload-level elaborator --- taking
+$(x_0, \text{atom})$ to the one \rulename{PConstExact} payload of
+Recipe~\ref{rec:re-transport} (sublevel branch), factoring through
+\texttt{Formula.holds\_of\_evalClosed\_true} --- which awaits the
+extension certificate schema\textquotesingle s staging, per the batch
+template.}
+
+\begin{bremark}[the inherited comparator confinement]
+\rulename{PConstExact} excludes one comparator ($\neq$) from its
+admissible set, for reasons of a second soundness invariant unpacked in
+that rule\textquotesingle s section. The membership leaf uses $\le$
+only --- comfortably inside --- but any port or mechanization of this
+rule must \emph{preserve} the exclusion rather than re-derive the
+comparator set from the semantic lemma alone; the flag travels with
+the alias.
+\end{bremark}
+
+\begin{anchors}
+target lemma (Prop.~\ref{prop:re-sound}) & \texttt{Formula.holds\_of\_evalClosed\_true}; \texttt{sound\_pConstExact} (quoted in the \rulename{PConstExact} section)\\
+closedness implied at the leaf & \texttt{Formula.evalClosed} ($\mathsf{none}$ on any wire; same section)\\
+exactness identities & \texttt{rootEval\_eval\_cast}, \texttt{rootEval\_sublevel\_iff}, \texttt{rootEval\_box\_iff} (bound in the entry); payload-level elaborator pending schema staging (the amber box)\\
+box-atom branch & checker-side registry recompute, by design --- no rule anchor\\
+consumption site & the \texttt{QSat} claim record\textquotesingle s \texttt{eval} field (the record\textquotesingle s closing-demand set)\\
+\end{anchors}

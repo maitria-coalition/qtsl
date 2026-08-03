@@ -1,0 +1,82 @@
+[[rule]]
+id = "AndI"
+source = "../BL-rules.toml"
+row = '$\wedge$I'
+proof = "book/proofs/AndI.tex"
+commentary = '''
+$\wedge$I pairs two conclusions proven from the \emph{same} assumptions:
+from $\Phi \vdash \Psi_1$ and $\Phi \vdash \Psi_2$, conclude
+$\Phi \vdash \Psi_1 \wedge \Psi_2$. A producer uses it to assemble
+composite claims from separately established facts --- two one-sided
+bounds into a two-sided one, the conjuncts a later
+node\textquotesingle s premise-form expects --- and, with $\wedge$E, to
+rebuild conjunction trees in the shape a structural comparison demands
+(the core never reassociates a conjunction on its own).
+
+The checker recomputes three tree identities: the two
+sub-derivations\textquotesingle{} premises are the same tree, the
+conclusion inherits that premise, and the conclusion\textquotesingle s
+post is one new $\wedge$-node with the left sub-derivation\textquotesingle s
+conclusion on the left. Order is data: $\Psi_1 \wedge \Psi_2$ and
+$\Psi_2 \wedge \Psi_1$ are different conclusions, obtained by swapping
+which sub-derivation rides which payload slot.
+
+The context-sharing identity is the essential one. Drop it and the
+rule pairs facts earned under different assumptions, keeping only one
+set: from the valid $\top \vdash \top$ and $w \leq 0 \vdash w \leq 0$
+it would conclude $\top \vdash \top \wedge (w \leq 0)$, false wherever
+$w$ is positive. The proof section also records the structural
+observation the $\vee$E section turns into a theorem: $\wedge$I and
+$\wedge$E are the two directions of the universal property of meet, so
+the conjunction fragment adds nothing beyond the lattice structure of
+entailment.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premises as at
+\rulename{Weaken}.
+\begin{itemize}
+\item the two premise judgements $\mapsto$ \texttt{ihl}/\texttt{ihr}
+  over the binders \texttt{leftPremise}/\texttt{rightPremise}.
+\item the display writes one context $\Phi$ twice; the statement binds
+  two sequents and demands \texttt{hpreMatch} $:$
+  \texttt{leftPremise.pre = rightPremise.pre} --- sharing by equation
+  rather than by a common binder, the pattern of every two-premise
+  rule on this page.
+\item $\Phi \mapsto$ \texttt{leftPremise.pre} (hence, through the
+  match, \texttt{rightPremise.pre}); $\Psi_1 \mapsto$
+  \texttt{leftPremise.post}; $\Psi_2 \mapsto$
+  \texttt{rightPremise.post}.
+\item conclusion $\Phi \vdash \Psi_1 \wedge \Psi_2$ $\mapsto$ the goal
+  under \texttt{hpre} $:$ \texttt{seq.pre = leftPremise.pre} and
+  \texttt{hpost} $:$ \texttt{seq.post = .and leftPremise.post
+  rightPremise.post} --- left sub-derivation on the left, as
+  displayed.
+\end{itemize}
+No width difference in either direction; every hypothesis is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_andI"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["PAndIData"]
+intro = '''
+Payload, read as in the \rulename{Ax} section: sub-derivations plus
+structural equalities, nothing else.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_andi_def",
+  "Theorem famEq_andi",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

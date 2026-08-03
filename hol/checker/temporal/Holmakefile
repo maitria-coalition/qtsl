@@ -1,0 +1,4 @@
+# Temporal rewrite rules over omega-words. Depends only on the HOL4
+# distribution (arithmeticTheory + relationTheory).
+all: ltl_rewriteTheory.uo
+.PHONY: all

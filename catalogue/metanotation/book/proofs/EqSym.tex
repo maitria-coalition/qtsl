@@ -1,0 +1,77 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as fixed in the
+\rulename{EqElim} section.}
+
+\textbf{Claim} (\texttt{sound\_eqSym}).\enspace The payload supplies
+terms $t, u$; the premise concludes the atom $t = u$ over premise formula
+$\Phi$, shared with the conclusion sequent; the conclusion is the atom
+$u = t$. If the premise is semantically valid, so is
+$\Phi \vdash u = t$.
+
+\begin{blemma}[the elementwise relation of a symmetric relation is
+symmetric]\label{lem:eqsym-rel2}
+Let $r$ be a symmetric binary relation on $\Q$, and suppose tensors $A$,
+$B$ stand in the elementwise-under-broadcast lift of $r$. Then $B$, $A$
+stand in it too.
+\end{blemma}
+\begin{proof}
+The lift has three live branches, and each is separately symmetric ---
+this per-branch analysis is the entire content, so we spell it out.
+\emph{Equal shapes}: the relation reads the zipped entry lists; the
+swapped claim reads the zip in the other order, and each swapped pair is
+closed by symmetry of $r$. \emph{Rank-0 $A$ against positive-rank $B$}:
+the hypothesis says $r(A_{\mathrm{scalar}}, y)$ for every entry $y$ of
+$B$; the swapped claim is judged in the \emph{other} scalar-broadcast
+branch (rank-0 on the right), which demands $r(y, A_{\mathrm{scalar}})$
+for every $y$ --- symmetry of $r$, pointwise. \emph{Rank-0 $B$}: mirror
+image. Two unequal positive-rank shapes never stand in the lift, so
+there is nothing to prove there. (\texttt{QTensor.rel2\_symm}.)
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{EqSym}]\label{thm:eqsym-sound}
+If $\Phi \vdash t = u$ is semantically valid, so is $\Phi \vdash u = t$.
+\end{bthm}
+\begin{proof}
+Fix an admissible $\sigma \models \Phi$. The premise yields evaluations
+$A$ of $t$ and $B$ of $u$ in the elementwise equality lift. Present the
+same two evaluations in the opposite roles: $u$ evaluates to $B$, $t$ to
+$A$, and Lemma~\ref{lem:eqsym-rel2} (with $r$ the symmetric relation
+$=$) closes the atom $u = t$.
+\end{proof}
+
+\begin{bremark}[the negative space: what this rule does \emph{not} need]
+\label{rem:eqsym-neg}
+The rule has no droppable side condition --- every payload field is
+structural (the three form equations) --- so the honest remarks here
+concern the two fields conspicuously absent. No typing pack
+(\rulename{EqRefl}'s \texttt{tyDef}/\texttt{fin}): the premise's holding
+atom already \emph{witnesses} both evaluations, and symmetry only re-uses
+the premise's own evidence; nothing must be manufactured. No common-shape
+condition (\rulename{EqElim}'s \texttt{tyEq}): Lemma~\ref{lem:eqsym-rel2}
+is shape-agnostic --- a broadcast equality flips to the mirror broadcast
+equality, same content, no interchangeability claim ever made. The
+contrast triangulates \rulename{EqElim}'s repair: the typing condition
+there guards \emph{transport into a different formula}, which is exactly
+what \rulename{EqSym} never does.
+\end{bremark}
+
+\begin{bremark}[why a primitive, when a two-node unpack exists on paper]
+\label{rem:eqsym-adm}
+From $\Phi \vdash t = u$ one can derive $\Phi \vdash u = t$ through
+\rulename{EqRefl} + \rulename{EqElim}: body $\Psi := (a = t)$, rewrite
+the left occurrence of $t$ in $t = t$ to $u$. But the derivation demands
+\rulename{EqRefl}'s typing pack on $t$ \emph{and} \rulename{EqElim}'s
+common-shape condition on $(t, u)$ --- side data the premise atom does
+not syntactically carry, and which a producer cannot always reconstruct
+at the flip site. The primitive constructor instead consumes the
+premise's semantic evidence directly (the proof above), making the flip
+unconditional. In the catalogue's three-tier taxonomy that obstruction is
+what sorts \rulename{EqSym} core rather than admissible: the unpack is
+not payload-computable from the node it would replace.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:eqsym-rel2} & \texttt{QTensor.rel2\_symm}\\
+Theorem \ref{thm:eqsym-sound} & \texttt{sound\_eqSym}; wired as core \texttt{RuleData.eqSym} into \texttt{ProofObject.sound}\\
+form equations & payload fields \texttt{preEq}, \texttt{premisePost}, \texttt{postEq} (\texttt{PEqSymData})\\
+\end{anchors}

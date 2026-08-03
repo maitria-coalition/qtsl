@@ -1,0 +1,25 @@
+\apilang{TypeScript}{spec.deadline}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function deadline(
+  t: QLike,
+  arg: StatePred,
+  opts?: { producerT?: boolean },
+): PathPred
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const goal = s.polyGe(1n, s.unwrap(s.polyVar(0, 2)));
+const cap = s.probGe(Q.of(3, 4), s.deadline(20n, goal));
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::PathPred::deadline}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn deadline(t: WitRat, arg: StatePred, producer_t: bool) -> Result<PathPred, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let goal = StatePred::poly_ge(q(1, 1), Poly::var(0, 2).unwrap());
+let cap =
+    ForallSpec::prob_ge(q(3, 4), PathPred::deadline(q(20, 1), goal, false).unwrap()).unwrap();
+\end{rustsrc}

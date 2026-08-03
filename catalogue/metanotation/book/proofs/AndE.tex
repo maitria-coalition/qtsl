@@ -1,0 +1,70 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as in the \rulename{Ax}
+section; counterexamples read over the one-wire hypernet.}
+
+\textbf{Claim (\texttt{sound\_andE\_left} /
+\texttt{sound\_andE\_right}).}\enspace The rule is realized as two
+constructors, one per projection; the payload of either supplies a
+premise sequent with its sub-derivation, the \emph{discarded} conjunct
+(\texttt{other}), and two tree identities: shared context
+(\texttt{preEq}) and, for the left constructor, that the premise's
+conclusion is $\mathrm{post} \wedge \mathrm{other}$ --- for the right,
+$\mathrm{other} \wedge \mathrm{post}$ (\texttt{postEq}). If the premise
+sequent $\Phi \vdash \Psi_1 \wedge \Psi_2$ is semantically valid, so is
+$\Phi \vdash \Psi_i$.
+
+\begin{bthm}[soundness of $\wedge$E]\label{thm:ande-sound}
+Under the payload identities of either constructor, semantic validity of
+the premise sequent implies semantic validity of the conclusion, over
+every hypernet.
+\end{bthm}
+\begin{proof}
+Left constructor; the right is its mirror image.
+
+\emph{Step 1 (apply the premise).} Let $\sigma$ be admissible with
+$\sigma \models \Phi$; by \texttt{preEq} and premise validity,
+$\sigma$ satisfies the premise's conclusion.
+
+\emph{Step 2 (read it as a pair and project).} \texttt{postEq} says that
+conclusion \emph{is} the tree
+$\mathrm{seq.post} \wedge \mathrm{other}$; the $\wedge$-clause of
+satisfaction is meta-conjunction, so $\sigma$ satisfies both conjuncts.
+Keep the left one: $\sigma \models \mathrm{seq.post}$.
+\end{proof}
+
+\begin{bremark}[the discarded conjunct is named, so nothing is searched]
+\label{rem:ande-other}
+Carrying \texttt{other} in the payload turns the side condition into one
+structural identity: the checker never hunts through the premise's
+conclusion for an occurrence of the target --- it compares two named
+trees. Orientation is checked by the same identity: a left-constructor
+certificate claiming the \emph{right} conjunct fails \texttt{postEq}
+unless the two conjuncts happen to be the same tree, in which case the
+distinction is empty anyway.
+\end{bremark}
+
+\begin{bremark}[the index is a constructor, not a flag]
+The paper's $i \in \{1, 2\}$ is realized as the choice between two
+constructors rather than an integer field --- there is no unchecked
+side flag to corrupt, and each constructor's soundness lemma is its own
+two-line proof. Dropping \texttt{postEq} in either frees the conclusion
+outright; dropping \texttt{preEq} admits the context-swap family (the
+\rulename{Weaken} section).
+\end{bremark}
+
+\begin{bremark}[one-way information loss, two-way fragment]
+Projection discards its \texttt{other} irrecoverably --- the conclusion
+carries no trace of it (compare \rulename{Cut}, whose conclusion hides
+the cut formula; here the forgetting is the visible point of the rule).
+Together with $\wedge$I the fragment is lossless: see the meet-adjunction
+remark in the $\wedge$I section. In the lattice reading these are
+\texttt{M3.andE\_l\_kit}/\texttt{M3.andE\_r\_kit}, the upper direction
+of meet's universal property.
+\end{bremark}
+
+\begin{anchors}
+Steps 1--2 (left) & \texttt{sound\_andE\_left}; payload \texttt{PAndEData.left} (fields \texttt{other}, \texttt{preEq}, \texttt{postEq})\\
+mirror (right) & \texttt{sound\_andE\_right}; payload \texttt{PAndEData.right}\\
+dispatch & wired as \texttt{RuleData.andE} into \texttt{ProofObject.sound}\\
+lattice reading & \texttt{M3.andE\_l\_kit}, \texttt{M3.andE\_r\_kit}\\
+\end{anchors}

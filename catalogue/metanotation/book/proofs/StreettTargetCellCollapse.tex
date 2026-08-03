@@ -1,0 +1,76 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template; the
+batch's shared template, including the honesty clause about unstaged
+payloads, is Recipe 1 of the \rulename{StreettDegenerate} section.}
+
+\begin{brecipe}[the filled-in application --- one row to one row]
+\label{rec:tcc-filled}
+Inside a \rulename{QStreettBundle} kit, fix a pair $i$ and a guard
+transition with reset map $g$ and guard slab $\mathrm{slab}$, and let $T$
+be a region on which the convention $W_i \equiv 0$ holds (the target
+cells). Under the recomputed containment $g(\mathrm{slab}) \subseteq T$,
+the rewrite is
+\[
+\bigl\{\vdash W_i \circ g \le W_i \ \text{on } \mathrm{slab}\bigr\}
+\quad\rightsquigarrow\quad
+\bigl\{\vdash W_i \ge 0 \ \text{on } \mathrm{slab}\bigr\}
+\]
+--- the ranking-guard row on the left is discharged by citing the
+nonnegativity row on the right, which the bundle kit demands anyway. No
+new row is emitted; the collapse is a citation.
+\end{brecipe}
+
+\begin{brecipe}[payload transport, catalogued-field level]\label{rec:tcc-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{collapse node} & \textbf{bundle kit row}\\
+\midrule
+guard row $(W_i, g, \mathrm{slab})$ & the kit's nonneg row for $W_i$ on $\mathrm{slab}$, cited\\
+containment $g(\mathrm{slab}) \subseteq T$ & recomputed side-condition (never producer-supplied)\\
+zero convention $W_i \equiv 0$ on $T$ & the kit's target-cell convention, verbatim\\
+\end{tabular}
+\end{center}
+Unpack-function slot: no verified payload function in this edition (batch template); the
+semantic witness exists --- \texttt{ranking\_guard\_collapse} (auxiliary
+module, not hash-bound in this edition).
+\end{brecipe}
+
+\begin{bprop}[the exactness identity --- one line]\label{prop:tcc-exact}
+For every $y \in \mathrm{slab}$: if $g(y) \in T$ and $W_i \equiv 0$ on
+$T$ and $0 \le W_i(y)$, then $W_i(g(y)) = 0 \le W_i(y)$.
+\end{bprop}
+\begin{proof}
+Substitution --- the displayed chain is the proof. The guard row's left
+side is identically zero on the slab, so the guard row and the nonneg
+row assert the same inequality there.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:tcc-sound}
+Any bundle kit admitting the nonneg row on the slab admits the
+ranking-guard row on the slab; hence every conclusion drawn through
+\rulename{QStreettBundle} from the collapsed kit is drawn from the full
+kit, with the bundle's own soundness theorem as warrant.
+\end{bprop}
+\begin{proof}
+Proposition~\ref{prop:tcc-exact} produces the guard row pointwise from
+the nonneg row under the side-condition; the bundle theorem consumes rows
+pointwise. There is no other content. (Machine-checked as
+\texttt{ranking\_guard\_collapse}; not hash-bound in this edition.)
+\end{proof}
+
+\begin{bremark}[why the side-condition is not decoration]
+Drop the containment and the collapse is unsound: a reset landing at a
+state with $W_i(g(y)) > W_i(y)$ (outside the zero region) breaks the
+ranking argument exactly where the bundle's telescoping lemma consumes
+the guard row --- the certificate could be pumped back up at each guard
+crossing, and the summability of un-responded requests
+(\rulename{QStreettBundle} section) fails. The containment is
+checker-recomputed for precisely this reason; its weight is the tier
+flag recorded in the commentary.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:tcc-filled} target & the \rulename{QStreettBundle} section's kit (H4 rows)\\
+Proposition \ref{prop:tcc-exact} & \texttt{ranking\_guard\_collapse} (\texttt{QtslAux.QStreett}; machine-checked, not hash-bound in this edition)\\
+side-condition & the zero-on-target containment, recomputed (the bundle's G5-convention check)\\
+\end{anchors}

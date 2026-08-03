@@ -1,0 +1,47 @@
+// session.ts — work an obligation workspace by hand: you are the strategy.
+import { Workspace, polyKind } from "@maitria/mtk-session";
+
+// The claim: x(1-x) - 1/4 <= 0 on [0, 1] — true, with equality at x = 1/2.
+const ws = new Workspace([polyKind]);
+const root = ws.pose({
+  kind: "poly.nonpositive",
+  poly: [
+    { exps: [2], coeff: "-1" },
+    { exps: [1], coeff: "1" },
+    { exps: [0], coeff: "-1/4" },
+  ],
+  box: [["0", "1"]],
+});
+console.log(`${root.id}: ${ws.describe(root.id)}`);
+console.log("menu:", ws.moves(root.id).map((m) => `${m.name}/${m.cost}`).join(" "));
+
+// Cheapest first: one exact Bernstein enclosure of p over the whole box.
+const r1 = ws.apply(root.id, "range");
+console.log("range:", r1.attempt.outcome, JSON.stringify(r1.attempt.evidence));
+console.log("  note:", r1.attempt.note);
+
+// The enclosure straddles zero because p touches it at 1/2. Split there.
+const r2 = ws.apply(root.id, "split", { axis: 0, at: "1/2" });
+console.log("split:", r2.attempt.outcome, "->", r2.spawned.map((c) => c.id).join(", "));
+
+// The parent is now out of our hands — the workspace says so:
+try {
+  ws.apply(root.id, "range");
+} catch (e) {
+  console.log("refused:", (e as Error).message);
+}
+
+// Work the leaves; each half certifies by one enclosure.
+for (const child of r2.spawned) {
+  const r = ws.apply(child.id, "range");
+  console.log(`${child.id} range:`, r.attempt.outcome, JSON.stringify(r.attempt.witness));
+}
+
+// Nobody set the parent's status; the second discharge propagated it.
+const done = ws.get(root.id);
+console.log(`${root.id}: ${done.status} (via ${done.via})`, JSON.stringify(done.witness));
+
+// The workspace is a fold of its event log: replay rebuilds it exactly.
+const replica = Workspace.replay(ws.events, [polyKind]);
+const same = JSON.stringify(replica.snapshot()) === JSON.stringify(ws.snapshot());
+console.log("replayed", replica.events.length, "events; state identical:", same);

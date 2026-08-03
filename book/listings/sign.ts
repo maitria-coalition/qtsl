@@ -1,0 +1,32 @@
+// sign.ts — certify the sign of a polynomial on cells of a triangle.
+import { Q, poly } from "@maitria/mtk";
+
+// p(x, y) = x^2 + x*y - y + 1/3
+const p: poly.Term[] = [
+  { exps: [2, 0], coeff: 1 },
+  { exps: [1, 1], coeff: 1 },
+  { exps: [0, 1], coeff: -1 },
+  { exps: [0, 0], coeff: Q.of(1, 3) },
+];
+
+// the unit triangle, split at the midpoint of its hypotenuse
+const mid = [Q.of(1, 2), Q.of(1, 2)];
+const t = poly.simplexBern({
+  poly: p,
+  cells: [
+    [[0, 0], [1, 0], mid],
+    [[0, 0], mid, [0, 1]],
+  ],
+  degree: 4, // elevate past deg(p): tighter enclosures
+  device: "cpu", // pin the host rung: same integers on any box
+});
+
+console.log(`ran on ${t.device}; ladder served F/M/host = ${t.served}`);
+for (let b = 0; b < t.cells; b++) {
+  const [lo, hi] = t.enclosure(b);
+  const verdict =
+    lo.sign() > 0 ? "p > 0 CERTIFIED"
+    : hi.sign() < 0 ? "p < 0 CERTIFIED"
+    : "sign open (subdivide)";
+  console.log(`cell ${b}: p in [${lo}, ${hi}] — ${verdict}`);
+}

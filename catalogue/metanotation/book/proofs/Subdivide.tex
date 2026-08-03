@@ -1,0 +1,144 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe; the general admissible template is stated in the \rulename{Norm}
+section and instantiated here. \rulename{Subdivide} is the genuinely
+one-node-to-many member of this batch: its rewrite is a case analysis
+over the branch sub-proofs, and the checked cover condition is what
+makes the case analysis exhaustive.}
+
+\begin{brecipe}[the \rulename{Subdivide} instance]\label{rec:sd-instance}
+The node carries a region premise and one sub-proof per branch:
+\[
+\inferrule*[Right=\rulename{Subdivide}]{
+  \mathcal{T}_0 \rhd \bigl(\Phi \vdash x \in \mathcal{R}(\Delta, S)\bigr) \\\\
+  \mathcal{T}_k \rhd \bigl(\Phi \wedge (x \in \mathcal{R}(\Delta_k, S_k))
+    \vdash \Psi\bigr) \quad (k = 1, \dots, N) \\\\
+  \mathcal{R}(\Delta, S) \subseteq \textstyle\bigcup_k
+    \mathcal{R}(\Delta_k, S_k) \ \text{\upshape(checked: the interval
+    chain)}
+}{\Phi \vdash \Psi}
+\qquad\rightsquigarrow\qquad
+\text{\upshape select the covering branch; consult its subtree.}
+\]
+Conceptually the rewrite is an $N$-way case analysis: at any valuation
+satisfying $\Phi$, the premise puts the evaluated point in the parent
+region, the cover places it in some branch region $k$, and
+$\mathcal{T}_k$'s strengthened premise then holds --- so $\mathcal{T}_k$
+delivers $\Psi$. The shipped warrant packages this selection argument as
+one verified lemma rather than as catalogue surgery (the catalogued
+stratum records the corresponding derivation sketch through
+\rulename{Farkas}-discharged infeasibility cuts and
+$\vee$-elimination); the checked side condition is
+Proposition~\ref{prop:sd-chain}, the exhaustiveness of the case
+analysis.
+\end{brecipe}
+
+\begin{bprop}[the greedy chain covers]\label{prop:sd-chain}
+Let $\mathrm{ivs}$ be a finite list of closed intervals and
+$\mathrm{lo} < \mathrm{hi}$ rationals. Define one greedy pass
+$r \mapsto \mathrm{extend}(r)$: fold over the list, replacing $r$ by an
+interval's right endpoint whenever that interval's left endpoint is
+$\leq r$ and its right endpoint is $> r$. If after
+$|\mathrm{ivs}|$ passes from $\mathrm{lo}$ the reach is
+$\geq \mathrm{hi}$, then
+$[\mathrm{lo}, \mathrm{hi}] \subseteq \bigcup \mathrm{ivs}$.
+\end{bprop}
+\begin{proof}
+Maintain the invariant: the reach $r$ satisfies $\mathrm{lo} \leq r$,
+and either $r \leq \mathrm{lo}$ or every point of
+$[\mathrm{lo}, r]$ lies in some interval of the \emph{full} list. It
+holds initially ($r = \mathrm{lo}$, the first disjunct). One pass
+preserves it: when the fold takes an interval $[a, b]$ with
+$a \leq r < b$, any point $y \in [\mathrm{lo}, b]$ is either
+$\leq r$ --- covered by the invariant, or by $[a, b]$ itself in the
+$r \leq \mathrm{lo}$ base case since then $a \leq \mathrm{lo} \leq y$
+--- or lies in $(r, b] \subseteq [a, b]$; and when the fold declines an
+interval the state is unchanged. As many passes as there are intervals
+reach the fixpoint: a productive pass strictly increases $r$ onto a
+\emph{new} interval's right endpoint, of which there are at most
+$|\mathrm{ivs}|$, and an unproductive pass is already the fixpoint. If
+the final reach is $\geq \mathrm{hi} > \mathrm{lo}$, the invariant's
+second disjunct is in force and covers all of
+$[\mathrm{lo}, \mathrm{hi}]$.
+\end{proof}
+
+\begin{bprop}[semantic warrant]\label{prop:subdiv-sound}
+Suppose the region premise and every branch premise-sequent are
+semantically valid, the branch premises have the checked shape
+($(\mathrm{branch}\ k)$'s premise is
+$\Phi \wedge (x \in \mathcal{R}(\Delta_k, S_k))$ and its conclusion is
+$\Psi$), and the cover check accepts. Then $\Phi \vdash \Psi$ is
+semantically valid.
+\end{bprop}
+\begin{proof}
+Fix an admissible $\sigma \models \Phi$. The region premise puts the
+evaluated point $q$ of $x$ in $\mathcal{R}(\Delta, S)$; the accepted
+cover check says the parent reads as a closed interval
+$[\mathrm{lo}, \mathrm{hi}]$ (dimension 1, two-vertex support,
+$S = \emptyset$), so $q$'s coordinate lies in
+$[\mathrm{lo}, \mathrm{hi}]$ --- eliminating the parent's barycentric
+weights to endpoint bounds. By Proposition~\ref{prop:sd-chain} some
+branch interval contains the coordinate; the checked tie identifies
+that interval with branch $k$'s region, and re-introducing barycentric
+weights from the two endpoint bounds puts the \emph{same} evaluated
+point in $\mathcal{R}(\Delta_k, S_k)$ --- this is where nothing about
+the region term is needed beyond its one evaluation, used twice.
+Hence $\sigma$ satisfies branch $k$'s premise
+$\Phi \wedge (x \in \mathcal{R}(\Delta_k, S_k))$; its validity delivers
+its conclusion, which is $\Psi$ by the checked branch-conclusion
+shape.
+\end{proof}
+
+\begin{bremark}[what breaks without the cover check]
+\label{rem:sd-gap}
+Everything: the rule without the cover is ``prove $\Psi$ wherever
+convenient.'' The canonical mutant is the gap family
+$\{[1, \tfrac{4}{3}],\ [\tfrac{3}{2}, 2]\}$ over the parent
+$[1, 2]$ --- each branch sub-proof can be perfectly honest, and the goal
+simply fails on $(\tfrac{4}{3}, \tfrac{3}{2})$, where no branch
+constrains it. The greedy reach from $1$ arrives at $\tfrac{4}{3}$ and
+stops: no remaining interval's left endpoint is $\leq \tfrac{4}{3}$,
+so the check refuses. The checker's replayed battery keeps this mutant,
+together with a point-supported branch (a degenerate interval that
+cannot read), an extension-ray parent, and untied branch simplices, as
+standing negative controls.
+\end{bremark}
+
+\begin{bremark}[the fragment boundary, and why refusal is the right
+default]\label{rem:sd-fragment}
+The checkable fragment is deliberate: 1-dimensional closed intervals,
+chained. Extension-ray parents or branches, higher-dimensional regions,
+and richer supports are refused --- not because the rule is false there,
+but because no verified covering argument exists there yet, and the
+fail-toward-refusal posture makes the unproven territory
+unrepresentable. This costs no expressive power for box domains:
+$n$-dimensional grids arise by nesting per-coordinate splits across
+several applications, each within the fragment. The cover-certificate
+wire slot is likewise part of the posture: recomputing the cover from
+the branch regions means a forged certificate cannot influence the
+verdict, and a future interpretation that reads per-gap infeasibility
+certificates out of the slot can only make the checker stricter.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The rule is the reassembly half of branch-and-bound over Bernstein
+enclosures: subdivision sharpens coefficient bounds quadratically and
+drives them to the range in the limit \cite{garloff1986}, with the
+subdivision algorithms themselves classical
+\cite{decasteljau1959,laneriesenfeld1980}. In that literature the
+splitting is a completeness device --- \emph{some} refinement certifies
+any strict global fact; here only the soundness direction enters the
+kernel: whatever refinement the producer chose, the chain check makes
+its case analysis exhaustive. None of the producer-side effectivity
+data (piece counts, degrees, tolerances) is consulted.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:sd-instance} warrant & \texttt{sound\_subdivide}\\
+interval reading of the parent and branches & \texttt{ExtensionSet.interval1D?}; elim/intro pair \texttt{interval1D\_elim}, \texttt{interval1D\_intro}\\
+Proposition \ref{prop:sd-chain} & \texttt{coverExtendPass}, \texttt{coverReach}, \texttt{coverChainCheck}; invariant \texttt{ChainInv}, \texttt{chainInv\_extendPass}, \texttt{chainInv\_reach}; covering fact \texttt{coverChain\_covers}\\
+the assembled check (ties included) & \texttt{coverCheck}, \texttt{coverInfeasibilityValid}\\
+branch premise/conclusion shape & payload fields \texttt{branchPre}, \texttt{branchPost} (\texttt{PSubdivideData})\\
+same-point re-entry (Prop.\ \ref{prop:subdiv-sound}) & the region read used by both parent elimination and branch introduction in \texttt{sound\_subdivide}'s body\\
+wire placement & \texttt{RuleTag.subdivide}; the unconsulted certificate slot \texttt{coverCertificate}\\
+\end{anchors}

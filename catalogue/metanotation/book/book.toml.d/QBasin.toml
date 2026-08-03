@@ -1,0 +1,106 @@
+# QBasin — graduated from dashboard-only coverage to a full literate
+# section (batch B9). The [[rule.lean]] block below preserves the former
+# [[coverage.lean]] block verbatim (module/src/decls unchanged). No
+# conditional flag: the cited theorems are proved outright with no
+# interface facts — the one unconditional Q-row.
+[[rule]]
+id = "QBasin"
+source = "../QTSL-rules.toml"
+row = "QBasin"
+proof = "book/proofs/QBasin.tex"
+commentary = '''
+\rulename{QBasin} is the campaign rule: safety atoms by citation. From
+one invariance-scope judgement and one disjointness fact per avoid
+region, it concludes the safety-shaped region judgement
+$\mathsf{P}_{\ge 1}[\mathsf{G}\,\neg\beta]$ on the
+scope\textquotesingle s init region --- the deterministic reading, with
+no probabilistic machinery: for the deterministic model class the
+certified claim is universal avoidance, and no supermartingale
+certificate is synthesized or needed. The economics are the point: the
+invariance judgement is proved once (typically by \rulename{QBlockInv}
+or \rulename{QLatticeInv}, whose facet rows already live in the family
+object), and each additional avoid region costs exactly its own
+disjointness rows --- zero new rows after the first containment, even
+jointly (the batch theorem).
+
+What the checker recomputes: the conclusion tie (the cited
+judgement\textquotesingle s region and init fields equal the
+rule\textquotesingle s own), plus the per-box disjointness sign rows,
+or the grid bookkeeping when the avoid region is cell-aligned. What
+would break without each hypothesis: without invariance, a trajectory
+exits the scope and reaches the avoid set (the proof
+section\textquotesingle s drift counterexample); without the
+containment, failure at time zero; without disjointness, failure at
+time zero inside the scope.
+
+The premise is deliberately the invariance judgement and NOT the global
+Morse judgement: recurrence structure alone implies no enclosure of the
+init region --- an orbit may transit the avoid set en route to its
+Morse set. Basin-minted and battery-minted safety atoms are
+type-identical conclusions, so downstream citations consume either
+producer indifferently; keying on provenance is forbidden by design.
+
+This is the one Morse-family rule whose mechanization is
+unconditional: the cited theorems are proved outright, with no
+interface hypotheses.
+'''
+note = '''
+The $\mathsf{P}_{\ge 1}$ costume matters for composition: the
+conclusion lands in the same judgement form the probabilistic batteries
+mint, so tower citations, boolean combination at the root, and the
+assume--guarantee spine consume deterministic and stochastic safety
+atoms through one interface.
+'''
+correspondence = '''
+Both statements are read against the abstract model class: the
+display\textquotesingle s model $\mathcal{M}$ is any forward semiflow
+$\varphi$ (\texttt{Semiflow X}) on a bare state type; the v1 model
+class realizes it, and nothing in either statement consumes the
+realization.
+\begin{itemize}
+\item $S$, $X_0$ (the scope\textquotesingle s region and init region)
+  $\mapsto$ the binders \texttt{S X0 : Set X}; the avoid
+  predicate\textquotesingle s extent $[\![\beta_j]\!]$ $\mapsto$
+  \texttt{B : Set X} in \texttt{qBasin\_sound}, and the indexed family
+  \texttt{B : J $\to$ Set X} in \texttt{qBasin\_batch} (the
+  display\textquotesingle s $j$-indexed premise row, taken jointly).
+\item premise $\mathrm{inv} : \mathsf{QInvScope}(S, X_0)$ $\mapsto$
+  \texttt{hscope} $: \varphi.\texttt{InvScopeSat}\ S\ X_0$ ---
+  definitionally the conjunction of forward invariance of $S$ and
+  $X_0 \subseteq S$, the judgement\textquotesingle s two clauses.
+\item each \texttt{avoid\_disjoint} row $\vdash S \cap [\![\beta_j]\!]
+  = \emptyset$ $\mapsto$ \texttt{hAvoid} $: S \cap B = \emptyset$
+  (batch: $\forall j,\ S \cap B\,j = \emptyset$).
+\item conclusion $\mathcal{M} \vDash_{X_0}
+  \mathsf{P}_{\ge 1}[\mathsf{G}\,\neg\beta_j]$ $\mapsto$ the goal
+  $\varphi.\texttt{SafetySat}\ X_0\ B$: every trajectory from $X_0$
+  avoids $B$ at every forward time --- the deterministic
+  $\mathsf{P}_{\ge 1}$ reading of the displayed judgement.
+  \texttt{qBasin\_batch} concludes
+  $\varphi.\texttt{SafetySat}\ X_0\ (\bigcup_j B\,j)$, which yields the
+  displayed per-$j$ family of conclusions by monotonicity.
+\end{itemize}
+Width note: the display\textquotesingle s E1 annotation (the premise is
+the invariance judgement, \emph{not} the Morse judgement) is enforced by
+type rather than by hypothesis --- \texttt{qBasin\_sound} consumes an
+\texttt{InvScopeSat} fact and nothing of Morse shape fits that premise
+slot. No hypothesis of either statement is unused, and neither
+statement is wider than the displayed rule.
+'''
+
+[[rule.lean]]
+module = "Qtsl.QtslSoundness"
+src = "../../lean/qtsl/Qtsl/QtslSoundness.lean"
+decls = ["qBasin_sound", "qBasin_batch"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent: the HOL4 development\textquotesingle s object is the
+base-kernel checker cone, and the satisfaction-judgement stratum this
+rule concludes in has no HOL twin --- no judgement-stratum definition
+exists in the ported scripts (verified against the
+port\textquotesingle s definition inventory). The disjointness rows
+this rule consumes ARE covered by the ported checker; the three-line
+judgement-stratum soundness lemma is Lean-only today.
+'''

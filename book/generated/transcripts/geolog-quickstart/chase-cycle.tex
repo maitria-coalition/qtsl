@@ -1,0 +1,16 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ geolog chase routes-cycle.geolog
+sorts:
+  Node — 4 elements (4 seeded)
+relations:
+  Edge — 4 rows (4 seeded, 0 derived)
+    ⋮
+  Path — 12 rows (0 seeded, 12 derived)
+    ⋮
+judgements (3):
+  denial violated: ax/no/loop at [a: hub]
+  denial violated: ax/no/loop at [a: east]
+  denial violated: ax/no/loop at [a: port]
+$ echo $?
+1
+\end{Verbatim}

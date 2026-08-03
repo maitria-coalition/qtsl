@@ -1,0 +1,130 @@
+
+\sourcenote{Genre: core rule (tier 1). The rule's semantic content is
+honestly small --- the behavioural pullback is two lines --- and the
+section says so rather than inflating it; the substance of any
+application is the sequent-level discharge of the compatibility
+squares, plus the finite-kernel instance where the transport is proven
+against actual chain machinery. The gaps beyond those two strata are
+marked loudly.}
+
+\textbf{Setting and claim.}\enspace A simulation witness
+$\sigma : S \to S'$ is a per-mode polynomial map whose
+\emph{compatibility squares} --- commutation of $\sigma$ with the two
+systems' dynamics declarations, mode by mode --- are checked as
+inherited sequent leaves. The rule: from
+$\mathsf{QSatI}(S', \mathit{spec}')$ and the witness, conclude
+$\mathsf{QSatI}(S, \sigma^{*}\mathit{spec}')$ --- certify the
+abstraction once, reuse under refinement \cite{lynchvaandrager1995,
+capuccimyers2026}.
+
+\begin{bthm}[behavioral pullback]\label{thm:qst-pullback}
+Let $\mathrm{Beh}$, $\mathrm{Beh}'$ be the compiled behaviour classes
+of $S$, $S'$, and suppose $\sigma$ maps behaviours to behaviours
+($\sigma[\mathrm{Beh}] \subseteq \mathrm{Beh}'$ --- the semantic
+content of the compatibility squares). If every behaviour of $S'$
+satisfies $\mathit{spec}'$, then every behaviour of $S$ satisfies
+$\sigma^{-1}[\mathit{spec}']$.
+\end{bthm}
+\begin{proof}
+$\omega \in \mathrm{Beh}$ gives
+$\sigma(\omega) \in \mathrm{Beh}' \subseteq \mathit{spec}'$, i.e.\
+$\omega \in \sigma^{-1}[\mathit{spec}']$
+(\texttt{pullback}). Two lines is the honest size: the rule's
+\emph{semantic} content is inclusion-chasing, and everything
+substantive in an application is establishing
+$\sigma[\mathrm{Beh}] \subseteq \mathrm{Beh}'$ from the checked
+squares --- per-mode polynomial identities, discharged by the base
+calculus. The hypothesis is not droppable to
+``$\sigma$ is any map'': without the squares the image of a concrete
+behaviour need not be an abstract behaviour, and the pullback claims
+anything at all.
+\end{proof}
+
+\textbf{The finite-kernel instance.}\enspace At the finite Markov
+tier the witness has teeth the behavioural form leaves abstract: a
+\emph{functional simulation} is per-state marginal identity ---
+pushing the concrete kernel row at $s$ along $\sigma$ yields the
+abstract kernel row at $\sigma(s)$ (a pushforward-kernel witness) ---
+and the transport theorems are proven against the chain machinery.
+
+\begin{blemma}[observable pullback]\label{lem:qst-expect}
+For any law $\mu$ on the concrete states and observable $g$ on the
+abstract states,
+$\sum_b (\sigma_{*}\mu)(b) \, g(b) = \sum_s \mu(s) \, g(\sigma(s))$;
+and along a pushforward-kernel witness, the time-$n$ expectation of a
+pulled-back observable on the concrete chain \emph{equals} the
+abstract chain's expectation of $g$ at time $n$ (started from the
+pushed initial law). Hence any certified expectation bound proven
+against the abstract chain holds for the concrete chain at the
+pulled-back observable.
+\end{blemma}
+\begin{proof}
+The first identity is summation over fibres of $\sigma$
+(\texttt{expect\_push}). The second composes it with the
+marginal-process lemma --- the per-state marginal identities
+propagate, by induction on time, to equality of pushed laws at every
+time --- giving \texttt{sim\_expect}; the bound transports by
+rewriting (\texttt{sim\_expect\_bound}). Note the direction: the
+producer proves one bound on the small chain and every refinement
+inherits it; nothing is re-proven per refinement beyond the witness
+identities themselves.
+\end{proof}
+
+\begin{blemma}[region pullback]\label{lem:qst-region}
+Along a pushforward-kernel witness with entrywise-nonnegative kernel
+and initial law: if the abstract law at time $n$ puts no mass outside
+$R'$, the concrete law at time $n$ puts no mass outside
+$\sigma^{-1}[R']$.
+\end{blemma}
+\begin{proof}
+For $s$ with $\sigma(s) \notin R'$: the concrete mass at $s$ is at
+most the pushed mass at $\sigma(s)$ (one nonnegative term of a
+fibre sum), which equals the abstract mass at $\sigma(s)$ (the
+marginal-process lemma), which is zero; nonnegativity closes the
+squeeze (\texttt{sim\_region}). The nonnegativity hypotheses are
+essential, not hygiene: with signed ``mass'' the fibre sum could
+cancel --- a negative sibling hiding positive mass at $s$ outside the
+preimage region --- and the single-term bound fails. Nonnegativity is
+what makes ``no mass outside $R'$'' transfer pointwise through a
+many-to-one map.
+\end{proof}
+
+\begin{bremark}[refinement is one-sided; a simulation is not a
+coupling]\label{rem:qst-onesided}
+The witness machinery genuinely shared with the relational
+(two-chain) tier is exactly the pushforward-kernel identity and the
+marginal-process lemma --- a functional simulation \emph{is} such a
+witness. Nothing else transfers: the relational tier's certificates
+are joint-kernel data over a product space with absorption and drift
+hypotheses, and none of that is simulation transport. A functional
+simulation induces a degenerate coupling, but the theorems above
+never route through it --- they are pushforward plus summation
+identities, full stop. Conflating the two would import hypotheses
+(coupling emptiness, absorption) that this rule neither needs nor
+checks.
+\end{bremark}
+
+\begin{bremark}[the gaps, loud]\label{rem:qst-gaps}
+The conditional mark scopes the warrant to the two strata proven
+above: behavioural, and finite-kernel. Not yet mechanized: the general
+measurable-kernel tier (the finite arguments are summation
+identities; their measure-kernel analogues are standard but unwritten
+here), and the categorical strengthening under which the composition
+rule could cite the lens-composition theorem of
+\cite{capuccimyers2026} as a lemma \emph{template} --- the direct
+composition proofs never pull back along strict weakenings, so
+nothing in this book depends on that strengthening; it is named so
+that its absence is a recorded choice, not an oversight. No
+end-to-end certificate exercises the rule in this edition. Related
+reading, not dependency: an exchangeability quotient is a simulation
+map, so aggregate-space reduction can be \emph{read} as an instance
+of this rule; it stands on its own proof and cites nothing here.
+\end{bremark}
+
+\begin{anchors}
+Theorem \ref{thm:qst-pullback} & \texttt{pullback}\\
+Lemma \ref{lem:qst-expect} & \texttt{expect\_push}, \texttt{sim\_expect}, \texttt{sim\_expect\_bound}; marginal-process lemma \texttt{push\_law} (chain substrate module)\\
+Lemma \ref{lem:qst-region} & \texttt{sim\_region}; law nonnegativity \texttt{law\_nonneg} (chain substrate module)\\
+witness form & \texttt{PushKernel} (chain substrate module) --- the per-state marginal identity\\
+compatibility squares (cited, not re-proved) & inherited sequent leaves, per mode (main package)\\
+\end{anchors}

@@ -1,0 +1,180 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof at
+Putnam-exam-solution detail. Every hypothesis of the rule is used below and
+remarked on; the formal-anchor table maps each step to the Lean declaration
+that carries it.}
+
+\textbf{Setting and claim.}\enspace Fix a hypernet $H$. A \emph{valuation}
+$\sigma$ assigns each wire a rational tensor of its declared shape; a
+sequent $\Phi \vdash \Psi$ is \emph{semantically valid} when every
+admissible $\sigma$ satisfying $\Phi$ satisfies $\Psi$. Atoms
+$e \leq 0$ over tensor-shaped terms hold per-entry: every entry of the
+evaluated tensor is $\leq 0$. The rule's data (the \texttt{SyzygyStep}
+payload quoted above) supplies component sequents
+$\Phi_i \vdash e_i \leq 0$ for $i = 1,\dots,n$, a combination certificate
+with weights $\lambda_i \in \Q_{\geq 0}$ on the components and free
+weights $\nu_k \in \Q$ on equality sub-conjuncts $g_k = 0$ of $\Phi$, a
+conclusion term $c$, and a checked \emph{syntactic} identity
+\begin{equation}
+c \;\equiv\; \sum_{i} \lambda_i\, e_i \;+\; \sum_{k} \nu_k\, g_k
+\qquad\text{(equality of exact canonical polynomials over } \Q\text{).}
+\tag{$\ast$}
+\end{equation}
+The claim (\texttt{sound\_syzygy}): if every component sequent is
+semantically valid, the composite sequent $\Phi \vdash \Psi$ is
+semantically valid, where $\Psi$ is any reading of $c \leq 0$ admitted by
+\texttt{syzygyConclusionForm} (Lemma~\ref{lem:syz-transport}).
+
+\begin{blemma}[nonnegative combination]\label{lem:syz-comb}
+In an ordered field, if $a_i \leq 0$ and $\lambda_i \geq 0$ for
+$i = 1,\dots,n$, and $b_k = 0$ for $k = 1,\dots,m$ with $\nu_k$ arbitrary,
+then $\sum_i \lambda_i a_i + \sum_k \nu_k b_k \leq 0$.
+\end{blemma}
+\begin{proof}
+Each $\lambda_i a_i \leq 0$: multiplication by a nonnegative element
+preserves $\leq$ (applied to $a_i \leq 0$), so
+$\lambda_i a_i \leq \lambda_i \cdot 0 = 0$. Each $\nu_k b_k = \nu_k \cdot 0
+= 0$ \emph{regardless of the sign of $\nu_k$} --- this sign-blindness on
+equality atoms is precisely the freedom classical Farkas variants grant
+multipliers of equality constraints \cite[\S7.3]{schrijver1986}. A finite
+sum of nonpositive elements is nonpositive, by induction on $n + m$.
+\end{proof}
+
+\begin{blemma}[the certified identity evaluates]\label{lem:syz-eval}
+Let $(\ast)$ hold as an identity of canonical polynomials, and let
+$\sigma$ be a valuation at which $c$ and every $e_i$, $g_k$ evaluate
+(per-entry, through the clamped per-entry valuation for tensor shapes).
+Then the rational identity
+$c(\sigma) = \sum_i \lambda_i\, e_i(\sigma) + \sum_k \nu_k\, g_k(\sigma)$
+holds at every entry.
+\end{blemma}
+\begin{proof}
+Evaluation at a fixed (per-entry) valuation is a ring homomorphism
+$\Q[\text{wires}] \to \Q$; a syntactic identity of canonical forms is an
+identity of polynomials, and ring homomorphisms preserve polynomial
+identities. Two remarks make this step deserve its own lemma. First,
+$(\ast)$ is checked by \emph{exact canonical-form equality} over $\Q$
+(\texttt{syzygyCombinationValid}, replayed through \texttt{toPoly}), not by
+evaluation at test points --- so no completeness, degree bound, or
+interpolation argument is needed anywhere in this proof; soundness is pure
+arithmetic. Second, the checker admits three certified routes to the same
+fact (the legacy idx-free branch, the W idx-form branch, and the mixed
+tagged-union branch of the 2026-07-19 checker widening,
+\texttt{syzygyCheck = Core $\vee$ W $\vee$ M}); all three certify exactly
+the identity this lemma consumes.
+\end{proof}
+
+\begin{blemma}[reading transport]\label{lem:syz-transport}
+Suppose $\sigma$ satisfies the zero-normal atom $c \leq 0$. Then $\sigma$
+satisfies every formula $F$ admitted by
+$\mathrm{syzygyConclusionForm}(c, F)$, namely:
+\emph{(Z$\leq$)} $F = (c \leq 0)$ itself;
+\emph{(G)} $F = (e \geq 0)$ where $c = -e$;
+\emph{(L$\leq$)} $F = (l \leq r)$ where $c = l - r$.
+\end{blemma}
+\begin{proof}
+(Z$\leq$) is the identity transport. (G): per entry,
+$-e(\sigma) \leq 0 \iff e(\sigma) \geq 0$ (negate and flip, an ordered-field
+axiom). (L$\leq$): per entry, $l(\sigma) - r(\sigma) \leq 0 \iff l(\sigma)
+\leq r(\sigma)$ (add $r(\sigma)$ to both sides). This is the ge-bridge ring
+lemma \texttt{holds\_of\_syzygyConclusionForm} (the both-polarity
+conclusion-form design): the readings are one exact $\Q$ identity
+re-presented under a sign flip, so the polarity bridge lives \emph{once},
+here, and every $\leq 0$-shaped rule (\rulename{Syzygy} itself,
+\rulename{PBound}'s compact spelling, the PSDCERT family) inherits all
+readings with no separate justification.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{Syzygy} = Lemma B, dialect D]
+\label{thm:syz-sound}
+Under the payload's checked hypotheses, if every component sequent
+$\Phi_i \vdash e_i \leq 0$ is semantically valid, then so is
+$\Phi \vdash \Psi$.
+\end{bthm}
+\begin{proof}
+Fix an admissible valuation $\sigma$ with $\sigma \models \Phi$; we must
+show $\sigma \models \Psi$.
+
+\emph{Step 1 (components hold at $\sigma$).} For each $i$, the payload
+checks $\Phi \supseteq \Phi_i$ conjunct-wise (\texttt{premiseContains});
+hence $\sigma \models \Phi_i$, and by the assumed semantic validity of the
+$i$-th component, $\sigma \models e_i \leq 0$: every entry of
+$e_i(\sigma)$ is $\leq 0$.
+
+\emph{Step 2 (wiring identities hold at $\sigma$).} Each $g_k = 0$ is an
+equality sub-conjunct of $\Phi$, so $\sigma \models g_k = 0$ directly:
+$g_k(\sigma) = 0$ at every entry.
+
+\emph{Step 3 (the conclusion evaluates).} The B13 shape fields
+(\texttt{conclShape}, \texttt{conclFin}) guarantee $c$ has a determinate
+finite Bernstein shape over $H$, and the B14 positivity fields
+(Remark~\ref{rem:syz-b14}) guarantee every wire in sight has positive total
+size; together these give a total per-entry evaluation of $c$ at $\sigma$
+--- the two-case shape analysis (\,singleton vs.\ indexed\,) in
+\texttt{sound\_syzygy}'s body.
+
+\emph{Step 4 (combine).} At each entry, Lemma~\ref{lem:syz-eval} turns the
+certified identity $(\ast)$ into the rational identity
+$c(\sigma) = \sum_i \lambda_i e_i(\sigma) + \sum_k \nu_k g_k(\sigma)$; the
+per-entry source discharge is the case split of Steps 1--2 (a
+component-sourced entry's atom holds by component validity, a
+wiring-sourced entry's atom holds as a premise sub-conjunct ---
+\texttt{atomLeZeroPolys\_sound\_entryC} delivers per-entry nonpositivity in
+both cases), and Lemma~\ref{lem:syz-comb} closes the fold:
+$c(\sigma) \leq 0$ at every entry.
+
+\emph{Step 5 (read off).} Lemma~\ref{lem:syz-transport} transports the
+zero-normal bound $c \leq 0$ to whichever reading
+$\mathrm{syzygyConclusionForm}(c, \Psi)$ the payload declared
+(\texttt{postForm}). Hence $\sigma \models \Psi$.
+\end{proof}
+
+\begin{bremark}[why the B14 hypotheses are not decoration]
+\label{rem:syz-b14}
+\texttt{wiresPos} and its honest extension \texttt{compPostWiresPos}
+require every wire appearing in $\Phi$'s free wires, the conclusion, and
+each component conclusion to have positive total size. Drop
+\texttt{compPostWiresPos} and the rule is \emph{unsound}: a component
+conclusion over a zero-size wire holds \emph{vacuously} (its evaluated
+tensor has no entries, so ``every entry $\leq 0$'' is empty), yet its
+polynomial enters the combination $(\ast)$ with full algebraic weight ---
+a vacuously-held component can then push the composite conclusion to
+something false. The counterexample is kernel-checkable and recorded at
+the field's introduction (Composition.lean header, quoted in the
+\texttt{SyzygyStep} doc above). This is the classic mismatch between
+empty-product semantics and nonempty algebra, caught by making the
+degenerate case unrepresentable rather than discouraged.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The rule is the \emph{sound} (easy) direction of an affine Farkas-type
+combination, lifted twice: atoms come from sub-\emph{proofs} rather than
+sub-conjuncts, and atoms may have arbitrary polynomial degree. The linear
+ancestor is Farkas' lemma \cite{farkas1902}; the textbook treatment of
+multiplier sign conventions ($\lambda \geq 0$ on inequalities, free on
+equalities) is \cite[\S7]{schrijver1986}. With polynomial atoms the
+combination sits in the Krivine--Handelman family of positivity
+certificates \cite{krivine1964,handelman1988} --- of which, again, only
+the trivial direction is claimed or needed: no Positivstellensatz
+completeness enters the kernel. The wiring reading --- components as
+open subsystems, $g_k = 0$ as power-preserving interconnection, the
+composite as dissipation of $\sum_i \lambda_i V_i$ --- is Tellegen's
+theorem \cite{tellegen1952} in certificate form, i.e.\ compositional
+dissipativity in the sense of Willems \cite{willems1972} and
+Moylan--Hill \cite{moylanhill1978}; the port-Hamiltonian formulation is
+surveyed in \cite{vanderschaftjeltsema2014}. Within the accompanying
+development the rule is known as Lemma~B (dialect~D); a quantitative
+effectivity result for tree-structured interconnections --- sparse
+Handelman certificates with running-intersection support --- is developed
+in a companion note in the repository.
+\end{bremark}
+
+\begin{anchors}
+Step 1: conjunct-wise premise containment & \texttt{premiseContains} (payload field \texttt{preContains})\\
+Steps 1--2, per-entry atom discharge & \texttt{atomLeZeroPolys\_sound\_entryC}; source tags \textsc{from-component}/\textsc{from-wiring}\\
+Step 3: conclusion evaluates & \texttt{conclShape}, \texttt{conclFin} (B13); \texttt{wiresPos}, \texttt{compPostWiresPos} (B14); \texttt{wire\_discipline\_of\_bshape\_fin}, \texttt{Term.evalQ\_total\_singleton}\\
+Step 4: certified identity, all three checker branches & \texttt{syzygyCombinationValid}, \texttt{syzygyCheck} = \texttt{syzygyCheckCore} $\vee$ \texttt{syzygyCheckW} $\vee$ \texttt{syzygyCheckM}\\
+Lemma \ref{lem:syz-comb} fold & the nonnegative fold in \texttt{sound\_syzygy}'s body\\
+Lemma \ref{lem:syz-transport} & \texttt{holds\_of\_syzygyConclusionForm}\\
+Theorem \ref{thm:syz-sound} & \texttt{sound\_syzygy}; wired as core \texttt{RuleData.syzygy} into \texttt{ProofObject.sound}\\
+\end{anchors}

@@ -1,0 +1,169 @@
+
+\newgeometry{hmargin=1cm,vmargin=1.2cm}
+\begin{landscape}
+\setlength{\parskip}{0pt}%
+\vspace*{\fill}
+\centering
+\begin{tikzpicture}[x=1cm, y=0.97cm,
+  place/.style={circle, draw=black!80, line width=0.7pt,
+    minimum size=8.5mm, inner sep=0pt},
+  trans/.style={rectangle, draw=black!80, line width=0.7pt, fill=white,
+    minimum width=9.5mm, minimum height=4.5mm, inner sep=1.5pt,
+    font=\footnotesize},
+  every label/.style={font=\footnotesize, label distance=1.5pt},
+  arc/.style={line width=0.55pt, draw=black!80,
+    arrows={Bar[width=2.1mm]}-{Stealth[length=2.4mm]}},
+  carc/.style={arc, draw=czero},
+  rarc/.style={line width=0.55pt, draw=black!80,
+    arrows={Stealth[length=2.4mm]}-{Stealth[length=2.4mm]}}]
+
+\node[place, label=above:{$q_0$}] (q0) at (0,0) {};
+\node[trans] (rel) at (1.7,0) {$\mathrm{release}$};
+\foreach \i in {1,...,6}
+  \node[place, label=above:{$q_\i$}] (q\i) at ({3.4*\i},0) {};
+
+\foreach \i/\T/\c/\a in {1/225/wkA/0, 2/30/wkB/0, 3/55/wkC/0,
+                      4/50/wkD/0, 5/255/wkE/0, 6/10/wkF/45}{
+  \node[place, draw=\c, line width=0.9pt,
+        label={[font=\footnotesize]\a:{$p_\i$}}]
+        (p\i) at ({3.4*\i+1.0},-4.2) {};
+  \node[font=\scriptsize, align=left, anchor=north west, xshift=-1ex]
+        at ({3.4*\i+1.5},-4.32)
+        {colour:\\[-1.5pt] $\textcolor{\c}{\T} \to \textcolor{czero}{0}$};
+}
+
+\foreach \i in {1,...,6}
+  \node[trans] (s\i) at ({3.4*\i+0.5},-2.1) {$\mathrm{start}_\i$};
+\foreach \i in {1,...,5}
+  \node[trans] (f\i) at ({3.4*\i+2.3},-2.1) {$\mathrm{finish}_\i$};
+\foreach \i in {1,...,6}
+  \node[trans] (t\i) at ({3.4*\i+1.0},-6.3) {$\mathrm{tick}_\i$};
+\node[trans] (ship) at (23.3,-4.2) {$\mathrm{ship}$};
+
+\node[place, label=below:{$m_{\mathrm{diff}}$}] (mdiff) at (9.5,-9.3) {};
+\node[place, label=below:{$m_{\mathrm{impl}}$}] (mimpl) at (12.5,-9.3) {};
+\node[place, label=below:{$m_{\mathrm{lith}}$}] (mlith) at (15.5,-9.3) {};
+
+\fill[black] (q0.center) circle (0.065);
+\foreach \a in {0,60,120,180,240,300}
+  \fill[black] ([shift={(\a:0.235)}]q0.center) circle (0.065);
+\fill[black] ([xshift=-1.2mm]mdiff.center) circle (0.065);
+\fill[black] ([xshift= 1.2mm]mdiff.center) circle (0.065);
+\fill[black] ([xshift=-1.2mm]mimpl.center) circle (0.065);
+\fill[black] ([xshift= 1.2mm]mimpl.center) circle (0.065);
+\fill[black] (mlith.center) circle (0.065);
+
+\draw[arc] (q0) -- (rel);
+\draw[arc] (rel) -- (q1);
+\foreach \i in {1,...,6} \draw[arc] (q\i) -- (s\i);
+\foreach \i/\j in {1/2, 2/3, 3/4, 4/5, 5/6} \draw[arc] (f\i) -- (q\j);
+
+\foreach \i/\c in {1/wkA, 2/wkB, 3/wkC, 4/wkD, 5/wkE, 6/wkF}{
+  \draw[arc, draw=\c] (s\i) -- (p\i);
+  \draw[arc, draw=\c] (t\i) to[bend right=30] (p\i);
+}
+\foreach \i in {1,...,6} \draw[carc] (p\i) to[bend right=30] (t\i);
+\foreach \i in {1,...,5} \draw[carc] (p\i) -- (f\i);
+\draw[carc] (p6) -- (ship);
+
+\draw[arc, rounded corners=6pt] (mdiff.115) |- (3.65,-7.35)
+      -- ([xshift=-2.5mm]s1.south);
+\draw[arc, rounded corners=6pt] (mdiff.65)  |- (17.25,-7.35)
+      -- ([xshift=-2.5mm]s5.south);
+\draw[arc, rounded corners=6pt] (mimpl.115) |- (7.05,-7.55)
+      -- ([xshift=-2.5mm]s2.south);
+\draw[arc, rounded corners=6pt] (mimpl.65)  |- (13.85,-7.55)
+      -- ([xshift=-2.5mm]s4.south);
+\draw[arc, rounded corners=6pt] (mlith.115) |- (10.45,-7.75)
+      -- ([xshift=-2.5mm]s3.south);
+\draw[arc, rounded corners=6pt] (mlith.65)  |- (20.65,-7.75)
+      -- ([xshift=-2.5mm]s6.south);
+\draw[arc, rounded corners=6pt] ([xshift=2.5mm]f1.south)
+      -- (5.95,-7.95)  -- (9.43,-7.95)  -- (mdiff.100);
+\draw[arc, rounded corners=6pt] ([xshift=2.5mm]f5.south)
+      -- (19.55,-7.95) -- (9.57,-7.95)  -- (mdiff.80);
+\draw[arc, rounded corners=6pt] ([xshift=2.5mm]f2.south)
+      -- (9.35,-8.15)  -- (12.43,-8.15) -- (mimpl.100);
+\draw[arc, rounded corners=6pt] ([xshift=2.5mm]f4.south)
+      -- (16.15,-8.15) -- (12.57,-8.15) -- (mimpl.80);
+\draw[arc, rounded corners=6pt] ([xshift=2.5mm]f3.south)
+      -- (12.75,-8.35) -- (15.43,-8.35) -- (mlith.100);
+\draw[arc, rounded corners=6pt] (ship.south) |- (15.57,-8.35)
+      -- (mlith.80);
+
+\begin{pgfonlayer}{holebg}
+  \draw[dashed, line width=0.7pt, draw=black!75]
+        (-0.4,-11.6) rectangle (24.4,-10.35);
+  \node[font=\footnotesize\itshape] at (12.0,-11.15)
+        {Dispatcher policy};
+\end{pgfonlayer}
+\node[place, fill=white,
+      label={[font=\footnotesize]160:{$g_1$}}] (g1) at (3.0,-10.35) {};
+\node[place, fill=white,
+      label={[font=\footnotesize]200:{$c_1$}}] (c1) at (5.45,-10.35) {};
+\node[place, fill=white,
+      label={[font=\footnotesize]200:{$g_5$}}] (g5) at (16.7,-10.35) {};
+\node[rectangle, draw=black!80, line width=0.7pt, fill=white,
+      minimum size=3.5mm, inner sep=0pt,
+      label={[font=\footnotesize]200:{$p_5$ pool}}] (tp5) at (19.3,-10.35) {};
+\node[place, fill=white,
+      label={[font=\footnotesize]340:{$c_5$}}] (c5) at (20.25,-10.35) {};
+\node[rectangle, draw=black!80, line width=0.7pt, fill=white,
+      minimum size=3.5mm, inner sep=0pt,
+      label={[font=\footnotesize]200:{$q_5$ pool}}] (tq5) at (24.05,-10.35) {};
+\draw[rarc, draw=wkA, rounded corners=6pt] (g1) |- (s1.west);
+\draw[arc,  draw=wkA] ([xshift=-2.5mm]f1.south) -- (c1.north);
+\draw[rarc, draw=wkE, rounded corners=6pt] (g5) |- (s5.west);
+\draw[rarc, rounded corners=6pt] (p5.80) |- (19.9,-3.45)
+      -- (19.9,-9.7) -- (19.3,-9.7) -- (tp5.north);
+\draw[arc,  draw=wkE, rounded corners=6pt] (f5.east) -| (c5.north);
+\draw[rarc, rounded corners=6pt] (q5.east) -- (17.7,0) -- (17.7,-1.2)
+      -- (24.05,-1.2) -- (tq5.north);
+\end{tikzpicture}%
+\par\medskip
+\begin{minipage}{0.94\linewidth}
+\platecaption{The Mini-Fab exhibit of this section, in Petri
+notation: circles are places, rectangles Petri transitions; every arc
+runs place-to-transition or transition-to-place, bar at its source,
+head at its target --- $16$ places, $19$ transitions, $49$ arcs, the
+census of the classification tables of
+section~\ref{sec:minifab-sdcpn}. The initial marking is drawn: $N = 7$
+lots pending in $q_0$ (the hexagonal cluster; $N$ appears nowhere else
+in the model), and $(2, 2, 1)$ idle machines. Colour coding: each
+in-process place $p_k$ declares its colour type, tagged
+\emph{colour:} $T_k \to 0$ with $T_k$ the step's work quantum; arcs
+\emph{producing} into $p_k$ (its start; its tick's return, paying one
+unit of $w$ per firing) wear that type's hue, and every arc
+\emph{consuming} from an in-process place wears the shared grey of
+the terminal colour $0$ --- the value each countdown drains to, and
+the guard at which finishes and shipment fire; the tag numerals wear
+the same coding. Machine take and give-back ride
+the rectilinear arcs to the pool places at the bottom --- the
+two-steps-per-machine-group wiring ($1{,}5$ diffusion; $2{,}4$
+implantation; $3{,}6$ lithography) is the re-entrancy. The dashed box
+at the foot is the open system's supervisor hole --- the one seat the
+plant leaves open, labelled by the policy that fills it --- drawn at
+the boundary the synthesized dispatch policy of
+section~\ref{sec:minifab-optimum} exercises, one grammar with
+Figure~\ref{fig:minifab-pistar}, which draws that filler seated: two
+gate places $g_1$, $g_5$, whose read-and-return enabling arcs (a head
+at both ends) gate the two diffusion starts --- the seat's act wires;
+two firing counters $c_1$, $c_5$, one token per
+$\mathrm{finish}_1$/$\mathrm{finish}_5$ firing; and two pooled
+read-and-return taps on $q_5$ and $p_5$ --- four observables; with the
+gates, the strict subset of the full-dispatch interface
+(section~\ref{sec:minifab-fulldispatch}) that $\pi^{\ast}$ needs.
+Boundary wires wear the gated step's hue; the boundary is drawn
+unfilled --- gate tokens are exactly what a filler mints. The seat's \emph{first}
+filler (section~\ref{sec:minifab-synthesis}) sealed this same seat at
+a narrower interface --- one weight-$N$ cumulative-arrival tap on
+$q_6$, a gate on $\mathrm{start}_6$, and the armed plate's one-shot
+key, its conservation pair $k + g = 1$ the certified Boolean gate
+discipline. The hole apparatus is the comb's, beyond the plant census
+above.}{fig:minifab-sdcpn-petri}
+\end{minipage}
+\par
+\vspace*{\fill}
+\thispagestyle{empty}
+\end{landscape}
+\restoregeometry

@@ -1,0 +1,171 @@
+
+\sourcenote{Genre: edge discipline (glue) --- the extension
+page\textquotesingle s fourth category, deliberately outside the three
+tiers. This entry is not a rule: it has no conclusion judgement, so
+``semantic soundness of the conclusion'' does not type-check against
+it, and it has nothing to unpack, so neither rewriting genre applies
+--- it \emph{is} the unpacking mechanism. What it owes the book
+instead is the warrant every other section of the extension page
+silently leans on: each rule\textquotesingle s soundness lemma is
+proved \emph{relative} to base soundness, and this discipline is how
+those conditional lemmas compose into an unconditional verdict about a
+whole certificate. The presentation apes the recipe form: the general
+induction template, then the discipline\textquotesingle s obligations
+as the instance that makes the template apply.}
+
+\begin{brecipe}[what the discipline licenses]\label{rec:tc-license}
+A concluded child judgement
+$\mathcal{M} \vDash_{R} \varphi_{\mathrm{child}}$ (the region-level
+satisfaction kind: every point of $R$ satisfies
+$\varphi_{\mathrm{child}}$, with $R$ under-approximating the
+formula\textquotesingle s denotation) makes $R$ \emph{citable} as a
+region atom in any parent row\textquotesingle s scope or target. The
+working example: a nested probability operator
+$\mathsf{P}_{\ge p}[\psi]$ inside a state formula compiles its child
+first and cites the child\textquotesingle s concluded region as the
+sublevel atom $\{V_{\mathrm{child}} \le 1 - p\}$. The license is an
+\emph{edge} between rows of one certificate, never a node: the
+citation itself concludes nothing.
+\end{brecipe}
+
+\begin{brecipe}[the induction template]\label{rec:tc-template}
+Let a certificate be a finite set of admitted rows: base-calculus
+proof rows (leaves, concluding sequents on the $\vdash$ side) and
+extension rows (concluding satisfaction judgements on the $\vDash$
+side), each extension row\textquotesingle s premise fields referencing
+other rows. Suppose:
+\begin{enumerate}
+\item \emph{base soundness} --- every admitted base row\textquotesingle s
+  sequent is true in kernel semantics;
+\item \emph{per-rule conditional soundness} --- for every extension
+  rule sort $R$ a lemma $\mathrm{sound}_R$: if the referenced child
+  judgements\textquotesingle{} denotations hold, the base leaves are
+  true, and the side conditions recompute true, then the concluded
+  judgement\textquotesingle s denotation holds;
+\item \emph{acyclicity} --- the certificate\textquotesingle s citation
+  graph is acyclic.
+\end{enumerate}
+Then every admitted row\textquotesingle s judgement denotation holds:
+induct over the citation order, which clause 3 makes well-founded; at
+each row the induction hypothesis supplies exactly what clause
+2\textquotesingle s lemma consumes, and clause 1 grounds the leaves.
+The conditional lemmas are the per-rule sections of this book; the
+induction is this section.
+\end{brecipe}
+
+\begin{brecipe}[the instance --- the discipline\textquotesingle s three
+obligations]\label{rec:tc-instance}
+The discipline is staged as \emph{typing and conformance}, not as a
+node sort, in three obligations, each of which is one premise of
+Recipe~\ref{rec:tc-template} made checkable:
+\begin{itemize}
+\item \textbf{E1 (edge typing).} Every premise field of an extension
+  row is typed as a satisfaction-judgement kind or as an inherited
+  base-proof leaf, exclusively --- never as a raw rule row of either
+  theory. This makes the induction\textquotesingle s case analysis
+  exhaustive: every edge lands on something clause 1 or the induction
+  hypothesis covers; no edge can cite an object that has no soundness
+  account.
+\item \textbf{E2 (data/edge separation).} Certificate-\emph{data}
+  references --- a certificate family reused across rows, a lattice
+  object --- are not derivation edges. The induction metric counts
+  derivation edges only, so shared data can neither smuggle a cycle
+  past the acyclicity pass nor impose ordering the derivation
+  structure does not have.
+\item \textbf{E3 (admittedness + acyclicity).} A loader pass over the
+  certificate\textquotesingle s own row graph checks that every
+  referenced row is admitted and that the citation graph is acyclic
+  --- clause 3 verbatim. This is \emph{conformance}, deliberately not
+  an axiom of the theory: an existence-of-concluding-proof axiom would
+  let the theory\textquotesingle s own saturation fabricate proof
+  rows, and well-foundedness is an induction principle, which the
+  logical framework deliberately lacks. A cyclic certificate would
+  satisfy every local check while proving nothing: two rows each
+  citing the other\textquotesingle s conclusion discharge all per-row
+  obligations and warrant neither.
+\end{itemize}
+\end{brecipe}
+
+\begin{bprop}[consumption-site soundness]\label{prop:tc-consume}
+Let the child conclude $\mathcal{M} \vDash_R \varphi$ with
+$R \subseteq [\![\varphi]\!]$. Then at every consumption site the
+citation is used in the sound direction:
+\begin{enumerate}
+\item[(a)] a \emph{positive} citation passes $R$ exactly, and any
+  monotone claim over $R$ (``the state reaches / remains in $R$'')
+  entails the same claim for $[\![\varphi]\!]$;
+\item[(b)] a \emph{complement} citation swaps orientation:
+  $\mathrm{cmpl}(R) \supseteq \mathrm{cmpl}([\![\varphi]\!])$, so a
+  premise row proved on --- or a probability bound proved for reaching
+  --- $\mathrm{cmpl}(R)$ covers the true violation set.
+\end{enumerate}
+\end{bprop}
+\begin{proof}
+(a) is monotonicity of the consuming operator in
+$R \subseteq [\![\varphi]\!]$; (b) is the same inclusion complemented.
+The discipline contributes exactly this inclusion and its swap;
+\emph{which} operators are monotone in which positions is each
+consuming rule\textquotesingle s own lemma\textquotesingle s business,
+stated and proved in that rule\textquotesingle s section.
+Under-approximation on the positive side and over-approximation on the
+complement side are both conservative: a certificate can lose
+completeness at a citation, never soundness.
+\end{proof}
+
+\begin{bremark}[why this is not a rule, and what the mechanization is]
+The three tiers each predicate on a conclusion: core is the concluded
+judgement\textquotesingle s semantic soundness; admissible and alias
+are verified unpackings of a concluded node. A discipline with no
+conclusion satisfies none of the three definitions --- it is the
+induction step the tiers\textquotesingle{} lemmas plug into, which is
+why it renders under its own category head rather than wearing a tier
+that does not type-check. Its one \emph{checkable} obligation (E3)
+ships as certificate-loader conformance code. The warrant itself is
+now mechanized at exactly the certificate-object level this
+section\textquotesingle s recipes state it
+(\texttt{QtslAux/Acceptance.lean}, the acceptance
+module\textquotesingle s first brick), anchor by anchor:
+Recipe~\ref{rec:tc-template} is \texttt{towerCitation\_sound} ---
+well-founded induction over admitted rows, consuming the per-rule
+lemmas as its step hypothesis --- in finite-acyclic (headline) and
+well-founded forms, with root corollary
+\texttt{towerCitation\_root}; the E1 typing of
+Recipe~\ref{rec:tc-instance} is the row type itself, so the
+exhaustiveness of the induction\textquotesingle s case analysis is
+type-checked (two consumptions exist: kernel truth of a base leaf,
+denotation of a concluded judgement --- no third case to cite); E2 is
+the edge metric \texttt{Row.cited} (premise slots only); E3\textquotesingle s
+sufficiency is the bridge \texttt{acyclic\_wellFounded} --- on a
+finite certificate the checkable acyclicity pass yields exactly the
+well-foundedness the induction needs, which is why conformance
+suffices where the logical framework deliberately lacks an induction
+axiom; and Proposition~\ref{prop:tc-consume} is the transport pair
+\texttt{citePos\_sound} / \texttt{citeCmpl\_subset} /
+\texttt{citeCmpl\_sound}. The induction theorem proper
+(\texttt{towerCitation\_sound\_of\_wf}) depends on no axioms at all;
+the bridge and transport lemmas close under the standard three.
+\end{bremark}
+
+\begin{bremark}[what remains conditional, named]
+The dashboard marks this discipline\textquotesingle s mechanization
+conditional, on named residues rather than a vague gap.
+\textbf{R1} --- the per-rule lemmas enter the induction as a
+hypothesis: that is the discipline\textquotesingle s literal content
+(it composes conditional lemmas; it does not prove them), but the
+type-level identification of that hypothesis\textquotesingle s
+instances with this book\textquotesingle s bound per-rule statement
+family awaits the deep embedding and the per-rule schema wrappers;
+until then the identification is editorial, rule by rule.
+\textbf{R2} --- E2 is discharged by \emph{representation}: the
+abstract row type carries derivation edges only, and the faithfulness
+of the concrete certificate format\textquotesingle s erasure onto it
+(no derivation edge lost, no data reference kept) is loader/decode
+conformance, outside the module. \textbf{R3} --- admittedness
+(E3\textquotesingle s first half) is absorbed by the totality of the
+abstract certificate\textquotesingle s indexing: every reference IS an
+admitted row, by type; the loader\textquotesingle s admittedness check
+is what establishes that totality. (Clause~1, base soundness, is the
+base calculus\textquotesingle s own soundness frontier and enters as
+the named hypothesis it always was --- a premise of the template, not
+a residue of the mechanization.)
+\end{bremark}

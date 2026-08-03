@@ -1,0 +1,125 @@
+# StreettCmplRequest (T9b): admissible — complement-typed requests consumed
+# through region weakening on the Streett bundle.
+
+[[rule]]
+id = "StreettCmplRequest"
+source = "../QTSL-rules.toml"
+row = "StreettCmplRequest (T9b)"
+proof = "book/proofs/StreettCmplRequest.tex"
+conditional = true
+conditional_label = "DTMC"
+commentary = '''
+\rulename{StreettCmplRequest} lets a Streett pair carry its request as a
+\emph{complement}: the pair $(\mathrm{cmpl}\,\rho_i, \varphi_i)$ asks
+that if states \emph{outside} $[\![\rho_i]\!]$ recur forever, responses
+recur forever. The satisfaction judgement\textquotesingle s workhorse
+orientation certifies regions that \emph{under}-approximate a
+formula\textquotesingle s denotation --- one orientation, deliberately:
+the complement of an under-approximation is an
+\emph{over}-approximation, so a complement-typed request arrives with
+the opposite orientation for free. The rule (the source catalogue labels
+it T9b) is \emph{admissible}, not alias: its unpacking is one
+\rulename{QStreettBundle} node \emph{plus} region-weakening premises ---
+the certified request regions over-approximate the complement
+denotations, the certified response regions under-approximate the
+response denotations --- and the direction check that makes this the
+sound weakening is genuine content, not transport. Requests sit on the
+hypothesis side of each pair implication and responses on the conclusion
+side, so over-approximating requests and under-approximating responses
+each \emph{weaken the claimed event}: any path satisfying the certified
+pair satisfies the semantic pair. What the checker recomputes: nothing
+new --- the weakening premises are ordinary region-containment rows, and
+the complement itself is consumed at the region-atom level (the atom
+dualities of the \rulename{NNFDuality} section), never as a formula
+node.
+
+Scope, stated plainly (this entry is marked \emph{conditional}): the
+bound statements below are the discrete-profile witnesses --- the
+event-level direction lemma \texttt{streett\_event\_mono} (two
+monotonicity steps, exactly the two lines the recipe below typesets) and
+the assembled bundle-through-formula-tie
+\texttt{sound\_QStreettBundle\_tie} (requests over-approximated,
+responses under-approximated, concluded over the semantic satisfaction
+predicates), both in module \texttt{QtslAux.QStreett}, plus
+the atom-level complement step \texttt{denot\_elimNeg} in
+\texttt{QtslAux.NNFDuality}. Two named residues keep the
+flag: the witnesses cover the rule at the \emph{discrete-kernel
+profile} (the residue shared with the bundle and the battery family),
+and the continuous-time face of the complement lemma (the
+fine-topology content of Lemma Q(ii) at the
+general-stochastic-hybrid profile) remains prose in the design
+record.
+'''
+note = '''
+Why one orientation of the workhorse judgement suffices, in one line: an
+under-approximating region calculus is closed under the connectives the
+rules consume, and where a complement appears, the swap to
+over-approximation is exactly what the hypothesis side of an implication
+wants --- demanding a second, over-approximating judgement kind would
+duplicate every rule for zero content.
+'''
+correspondence = '''
+Three bound statements, three display constituents. The
+orientation-swap kernel --- the display\textquotesingle s
+``exactly the sound direction, for free'' --- $\mapsto$
+\texttt{streett\_event\_mono}: \texttt{Rq ⊆ Rqhat} (requests
+over-approximated) and \texttt{Ghat ⊆ G} (responses
+under-approximated) transport the per-pair Streett implication
+pathwise; two \texttt{Frequently.mono}s, the priced two lines,
+axiom-light and \emph{deterministic} --- no measure appears.
+\begin{itemize}
+\item the assembled rule $\mapsto$
+  \texttt{sound\_QStreettBundle\_tie}: the full bundle kit (the
+  battery-pattern binder block, as on the degenerate-request page)
+  plus the two tie hypotheses, and the polarity pair is carried
+  exactly --- \texttt{hreq : ∀ i y, reqSat i y → y ∈ Rq i} (the
+  certified region \emph{over}-approximates the semantic request
+  truth set: for $\mathrm{cmpl}$-typed requests this is
+  Q(ii)\textquotesingle s $[\![\mathrm{cmpl}\,\varphi]\!] \supseteq
+  [\![\varphi]\!]^{\mathsf{c}}$) and \texttt{hresp : ∀ i, ∀ y ∈ G i,
+  respSat i y} (responses \emph{under}-approximated). The conclusion
+  event quantifies over the semantic predicates
+  \texttt{reqSat}/\texttt{respSat}, of which \emph{no measurability
+  is asked} (the measurable objects are the certified regions ---
+  the QSafetyBattery \texttt{sat} pattern), and both tie hypotheses
+  are safe-direction widenings in the T13 polarity sense.
+\item the atom step of Lemma Q(ii) $\mapsto$ \texttt{denot\_elimNeg}
+  (the NNF module): where each dual atom denotes the complement,
+  consuming a $\mathrm{cmpl}$-typed request through swapped atoms
+  preserves the region --- the lawfulness clause the display cites
+  from T22\textquotesingle s boundary.
+\end{itemize}
+Width note: the conditional mark\textquotesingle s two residues,
+exactly as the roster carries them --- the discrete-kernel profile
+(as all bundle kin), and the GSHS-side fine-topology content of
+Lemma Q(ii) (nearly-Borel, $E^r \subseteq E$), which remains design-note
+prose with no bound counterpart. \texttt{streett\_event\_mono} is
+itself profile-free (pure path logic); the profile enters only with
+the assembled tie.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QStreett"
+src = "../../lean/qtsl-aux/QtslAux/QStreett.lean"
+decls = ["streett_event_mono", "sound_QStreettBundle_tie"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.NNFDuality"
+src = "../../lean/qtsl-aux/QtslAux/NNFDuality.lean"
+decls = ["denot_elimNeg"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent, precisely located: the rule\textquotesingle s realization rides
+the typed request field of the Streett bundle sort, which is itself not
+yet staged in the certificate schema --- there is no wire object for a
+HOL checker to consume, and the HOL4 development
+(\texttt{qtsl\_catalogue}, the base-calculus checker cone) carries
+nothing at the satisfaction stratum. A HOL statement becomes meaningful
+only after the bundle sort is staged and ported; the weakening rows
+themselves are ordinary containment sequents the base checker already
+covers. Checked against the HOL sources this edition.
+'''

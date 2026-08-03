@@ -1,0 +1,24 @@
+# bindings.toml.d/EqSym.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'EqSym'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PEqSymData"
+sha256 = "eda09422af88d5d637c7a63d971e66f1574a5f70b6e21d062cc6e693a1bc7de1"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "QTensor.rel2_symm"
+sha256 = "708d3906d46adc97a83176d6b167286629b8a7cb90dcccd017997cee96c538d2"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_eqSym"
+sha256 = "5c399211083dcce86d8fde3785da41259094bfd00a667fe2ee9c4f10c010ae2d"
+
+[[correspondence]]
+entry = "EqSym"
+steele_sha256 = "3867ab2a6b6bba8f8b6037228d53b8b568ccfa3d739ff25dc668a44bd1ddbb12"
+statements_sha256 = "5afe05f776c212f1e91dcb6c05aff0c77571b52063c33e045d54e26373262dff"
+prose_sha256 = "67d62a860c4f63cf68758227ce945a2fdad1ca062c2e4273ed48e21278067892"
+

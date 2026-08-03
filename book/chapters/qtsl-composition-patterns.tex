@@ -1,0 +1,968 @@
+\chapter{Systems: Composition Patterns}
+\label{ch:qtsl-composition-patterns}
+
+\noindent\draftmark\medskip
+
+This chapter is the second wing of the System Catalogue --- the first,
+chapter~\ref{ch:qtsl-mathematical-models}, inventories what a single mechanism
+can be; this one inventories how Systems combine. A specification is
+only as compositional as the model underneath it, so the System layer
+ships composition as a small, closed inventory of \emph{patterns}:
+each is a syntactic row family with a typing rule, a semantics, and
+an explicit account of which certificates transport across the
+composite boundary and which are
+\emph{refused}. The refusals carry real content: per-component stability
+certificates must not compose to composite stability, because that
+inference is false (re-entrant lines destabilize below capacity under
+plausible dispatch policies --- Kumar--Seidman and
+kin~\cite{kumar1990dynamic}), and the
+pattern inventory encodes the refusal structurally rather than leaving
+it to the modeller's vigilance.
+
+A pattern, throughout, is a \emph{usage of the wiring stratum plus its
+transport rules} --- the row-level counterpart of composition by
+wiring diagram in operadic treatments of dynamical
+systems~\cite{libkind21}. The composition data are ordinary rows --- the
+manifest's own composite-stratum descriptors, or one of four dedicated
+pattern row families --- and the transport rules that move
+certificates across a composite boundary are rules of the Rule
+Catalogue, not machinery of this chapter. Each entry below states the
+pattern in prose (composition data, transport, witness status), then
+closes with the same two blocks as every System Catalogue entry. The
+\emph{Computer Science Metanotation} block gives the entry's \emph{term
+former}: an inference rule whose premises are the formation data the
+pattern builders consume and refuse on, with their sorts, and whose
+conclusion is a primitive judgment at the sort $\mathsf{System}$ ---
+or at the pattern's own sort, where the mechanized constructor
+forms a pattern row citing its subjects rather than a System; the
+four dedicated row families do exactly that, and their rules say so.
+The \emph{API} block carries producer surfaces extracted from the
+toolkit sources at every regeneration. Two reading conventions,
+stated once. First, the wiring-stratum rules display a \emph{single}
+pattern row in the composite's row slot: a composite carries any
+number of rows across the families, with each row's premises checked
+independently, and the head form elides the ambient rows. Second, as
+in the first wing, optional formation data (marked $?$) are consumed
+without appearing in the head form. The first four entries --- the
+three wiring modes and nesting --- are the composition machinery that
+the model-type chapter's fourth grading leg, compositional closure,
+checks frames against; the remaining formal entries are instruments
+with landed witnesses. Two entries near the end withhold their formal
+blocks, by the same refusal that governs the first wing's frontier
+entries: event ports, whose primitive's producer surface has already
+landed, and state sharing, reserved outright. Between them sits
+supervision, whose semantic tier is mechanized ahead of its producer
+surface --- its gating uses an arc kind the inventory already
+carries. The chapter closes with an entry that records a closure
+property rather than a pattern.
+
+The composition tier underneath this inventory is mechanized,
+sorry-free, in the toolkit's Lean tree (\texttt{lean/su-functor/}).
+The semantic universe's decoration functor carries its compositor with
+every coherence obligation proved --- transport functoriality,
+compositor naturality, associativity, and both unit laws, on the nose
+modulo the base's definitional transports (module
+\texttt{SuFunctor.SingleSiteSemanticUniverse}) --- and the possibilistic
+inclusion of hypernets composes through it exactly, with no determinism
+hypothesis (\texttt{SuFunctor.HypernetInclusion}). On the
+content-addressed wire stratum the calculus is strict, and failure is
+part of the account (module \texttt{SuFunctor.HypernetComposition}): composition of
+aligned interfaces is associative and unital on the nose
+(\texttt{AlignedLoose.seq\_assoc} --- hierarchy pays no coherence tax,
+which is the semantic face of the nesting entry's freeness);
+components with equal semantic interfaces are interchangeable in any
+composite (\texttt{austereDnf\_subst} --- the congruence property every
+entry below presupposes when it speaks of transport across a
+boundary); an infeasible component makes its composite infeasible
+(\texttt{admRegion\_append\_empty\_left}, iterating along the strict
+associativity above), while the converse fails by a mechanized witness
+(\texttt{share\_contradiction}); and renaming a composite is the
+composite of the renamings (\texttt{theta\_rename\_seq}), so a
+certificate transported across a renamed boundary composes to the
+transported composite. What follows is therefore inventory over a
+proved foundation, and each entry's transport story stands on that
+tier rather than re-arguing it.
+
+\section{Parameter Setting}
+\label{sec:cp-set}
+
+One system's output fixes another's parameter: an input wire bound to
+a parameter appearing in the consumer's field polynomials. This is the
+``set'' mode of the wiring stratum --- directed by construction, so
+the row demands its \textsf{from} endpoint resolve to a declared
+output and its \textsf{to} endpoint to a declared input wherever the
+component's interface is declared. Transport is the assume--guarantee
+square~\cite{capucci26}: the wiring is certified for spec-to-spec entailment with
+slack, the leaves are ordinary sequents, and the slack arithmetic is
+checker-recomputed. \textbf{Witnessed} --- this is the mode behind the
+inventory's one cross-frame composition witness (the ODE plant wired
+to a discrete controller of
+section~\ref{sec:mt-ode}, every mutant of the composite refusing),
+and behind the inventory's deliberate asymmetry: one mode witnessed,
+the rest below graded only as far as their evidence reaches.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-SET}]{
+  S_1, \ldots, S_k : \mathsf{System} \\
+  \mathsf{from},\, \mathsf{to} : \mathsf{PortRef} \text{ into the
+  roster},\ \mathsf{from} \neq \mathsf{to} \\
+  \mathrm{dir}(\mathsf{from}) = \mathsf{output} \\
+  \mathrm{dir}(\mathsf{to}) = \mathsf{input}
+}{
+  \mathsf{Composite}\big(S_1, \ldots, S_k;\,
+  \langle \mathsf{set},\, \mathsf{from},\, \mathsf{to} \rangle\big) :
+  \mathsf{System}
+}
+\end{mathpar}
+$\mathsf{PortRef} = \langle \mathsf{component},\, \mathsf{wire}
+\rangle$ addresses the roster by index. The direction premises
+resolve against declared \emph{mechanism} interfaces; an endpoint
+whose component declares none (a composite; a mechanism without an
+interface binding) passes to the checker's replay.}
+\input{chapters/api-system/S-SET}
+
+\section{Variable Sharing}
+\label{sec:cp-share}
+
+Two systems read identified wires: the ``share'' mode identifies its
+two endpoints as one variable, with direction consumed by the
+causality check rather than declared in the row (stochastic wires
+remain directed-only at this preview). Transport: the same
+assume--guarantee square; the admissible-tier anchor is the small-gain
+arithmetic witness --- the certified composite in which cross-supplies
+cancel identically. \textbf{Status}: machinery staged at the rule
+level; no heterogeneous share witness has landed yet. The mode's
+\emph{semantics}, by contrast, is already theorem-grade: admissibility
+of an identified composite is the conjunction of the parts'
+admissibilities, mechanized with no determinism hypothesis at the
+catalogue stratum (\texttt{glue\_admissible\_iff}) and the
+semantic-universe stratum (\texttt{admRegion\_append},
+\texttt{theta\_comp}); and identification is exactly where feasibility
+fails to compose --- the minimal mechanized witness is a pair of
+individually feasible constant sources demanding different values of
+one shared variable (\texttt{share\_feasible},
+\texttt{share\_contradiction}, module
+\texttt{SuFunctor.HypernetComposition}), while infeasibility, once
+present, propagates outward through further wiring
+(\texttt{admRegion\_append\_empty\_left}).
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-SHARE}]{
+  S_1, \ldots, S_k : \mathsf{System} \\
+  \mathsf{from},\, \mathsf{to} : \mathsf{PortRef} \text{ into the
+  roster, declared where an interface exists} \\
+  \mathsf{from} \neq \mathsf{to}
+}{
+  \mathsf{Composite}\big(S_1, \ldots, S_k;\,
+  \langle \mathsf{share},\, \mathsf{from},\, \mathsf{to} \rangle\big) :
+  \mathsf{System}
+}
+\end{mathpar}
+The row identifies rather than assigns, which is why, unlike
+\rulename{S-SET}, no direction premise appears: either side may be an
+input or an output, and the two wires denote one variable of the
+composite.}
+\input{chapters/api-system/S-SHARE}
+
+\section{Mode Switching}
+\label{sec:cp-switch}
+
+A supervisory edge hands the active role between components. Switch
+edges live at the composite stratum in three species: guarded (guard
+content at the composite level), rate (stochastic hand-off at a
+state-dependent intensity --- the species that makes switched
+diffusions composable), and forced (domain-exit at the composite
+stratum). Transport: the switch-composition rule, staged at the rule
+level with per-profile soundness lemmas in the inventory.
+\textbf{Status}: rule staged, witnesses pending; the static frames
+(the graphical-model rows of chapter~\ref{ch:qtsl-mathematical-models}) carry
+\emph{inapplicability} arguments instead --- a frame with no
+internal time axis has nothing for a supervisory switch to sequence
+--- and that escape is earned per-frame by an argument from the
+frame's own semantics (section~\ref{sec:mt-pgm} states it), never by
+a bare declaration.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-SWITCH}]{
+  S_1, \ldots, S_k : \mathsf{System} \\
+  i, j < k,\ i \neq j \\
+  \sigma : \mathsf{species}
+}{
+  \mathsf{Composite}\big(S_1, \ldots, S_k;\,
+  \langle i \to j,\, \sigma \rangle\big) : \mathsf{System}
+}
+\end{mathpar}
+\[
+\sigma \;::=\;
+\mathsf{guarded}\big(\overrightarrow{\mathsf{constraint}}\big)
+\;\mid\; \mathsf{rate}(\mathsf{poly})
+\;\mid\; \mathsf{forced}
+\]
+$i \to j$ names roster indices --- the component handing off and the
+component receiving --- and the $i \neq j$ premise is the no-self-switch
+refusal. The rate polynomial is exact-rational, like every field
+polynomial in the catalogue.}
+\input{chapters/api-system/S-SWITCH}
+
+\section{Nesting}
+\label{sec:cp-nest}
+
+Hierarchical composition is free in the theory: a component of a
+composite is any System --- a mechanism or a built composite --- so
+composition terms nest by construction, and no dedicated descriptor
+exists to get out of sync with the term structure. The flatten rule
+guarantees the discipline's point: composites add structure and
+scalability, never expressiveness. Wire-level containment resolves
+against declared \emph{mechanism} interfaces, and a composite
+component's wires pass to the checker's replay (composites declare no
+export map at this preview). \textbf{Status}: structural (the
+construction cannot fail to nest), but unwitnessed as a certified
+heterogeneous artefact; hierarchical control is the named first
+candidate.
+
+\syscatmetapat{%
+No former of its own --- deliberately. Nesting is the recursion
+already present in the core grammar: \rulename{Composite}'s premises
+(section~\ref{sec:mt-core}) quantify over $\mathsf{System}$, which a
+built composite inhabits exactly as a mechanism does, so
+$\mathsf{Composite}(\ldots, \mathsf{Composite}(\ldots), \ldots)$ is
+well-formed by the rules already stated --- cited here, not restated.
+A dedicated nesting rule would exist only to drift from the term
+grammar it duplicates.}
+\input{chapters/api-system/S-NEST}
+
+\section{The Hybrid-Time Pattern}
+\label{sec:cp-hybtime}
+
+The pattern that discharges multi-clock composition in practice: put
+the discrete component's tick on a timer mechanism, prove the
+component's rows schedule-generically --- per-tick, in its own counter
+--- and carry the schedule class (period bounds, jitter bracket) in
+the \emph{assumption slot} of the composition square. One value
+function, one cover, both time semantics --- with the price of jitter
+certified, not assumed. \textbf{Witnessed}: the lander free-flight
+pair of section~\ref{sec:mt-tick} (the same funnel under exact tick
+and jitter bracket from one table and one cover, jitter costing a
+certified factor $2.66$ in ticks-to-funnel, with two exact infeasibility
+theorems marking where full dispersion is impossible), checked on an
+independent lane; the pattern text is the staging-independent recipe.
+The square behind the recipe is machine-checked, sorry-free, in the
+toolkit's Lean tree (module \texttt{SuFunctor.Adequacy.HybridTime}):
+compiling the rows onto the coarse clock, versus reading the per-tick
+semantics back through the declared clock morphism, the walled
+composite sits on the weak side in general
+(\texttt{hybridTime\_square\_subset}); the two readings agree whenever
+the transport relation is a function graph --- the pattern's own tick
+seam is one (\texttt{tickSeam\_hybridTime\_square\_eq}) --- and at a
+jittered-coarse seam the inclusion is strict, which is why the
+assumption slot, and nothing else, carries the price of jitter.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-HYBTIME}]{
+  S_1, \ldots, S_k : \mathsf{System} \\
+  i < k \\
+  \tau : \mathsf{TickDecl}
+}{
+  \mathsf{Composite}\big(S_1, \ldots, S_k;\,
+  \langle i,\, \tau \rangle\big) : \mathsf{System}
+}
+\end{mathpar}
+At most one assumption per component --- a duplicate is refused with
+both declarations serialized. $\mathsf{TickDecl}$ is
+section~\ref{sec:mt-tick}'s grammar, here in the assumption slot of
+the composition square rather than on the mechanism.}
+\input{chapters/api-system/S-HYBTIME}
+
+\section{The Funnel Pattern}
+\label{sec:cp-funnel}
+
+Transit plus absorbing tail: an outer transit certificate (reach the
+gate within a budget, worst-case) composed with an inner invariance
+certificate (the gate region is forward-invariant and its holds are
+certified), citing the inner region as the outer target through the
+tower discipline. This is the certified shape of approximate dynamic
+programming with a terminal set --- the outer table a
+value-supersolution on a cell graph, the inner tail the polynomial
+telescope. \textbf{Witnessed twice}: the pendulum swing-up row
+(a $24{,}467$-cell supersolution, capture within $139$ steps, return
+$\ge -619.99$, composed with the upright-hold invariance as absorbing
+tail) and the lander attitude funnel. The sort stated in the
+block below is forced, not chosen: a funnel that collapsed its parts
+into a one-slot composite could not be a lawful compositor, because
+collapsing composition breaks the unit law --- a machine-checked
+refusal (\texttt{funnelComp\_breaks\_unit\_coherence}, beside its
+no-tax counterpart \texttt{unitClass\_transparent}, module
+\texttt{SuFunctor.Plain.Battery}) --- so the pattern composes
+certificates about a System rather than forming one. The pattern's
+positive semantics is machine-checked in the same tree, sorry-free
+(module \texttt{SuFunctor.Adequacy.Funnel}): a funnel's composite
+satisfies the coupled transit-then-hold reading as a pure
+instantiation of the tower's composition theorem for budget sums with
+certified dips (\texttt{funnel\_coupledSat\_of\_parts}, instantiating
+\texttt{coupledSat\_comp\_add\_of\_dips} with no new induction), and
+the tower-citation edge enters as an equation: assembly succeeds
+precisely when transit and hold cite one gate
+(\texttt{assemble\_isSome\_iff}), so a funnel whose parts disagree on
+the gate is unrepresentable rather than refused at replay.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-FUNNEL}]{
+  \mathsf{sys} : \mathsf{SysRef} \\
+  \mathsf{transit},\, \mathsf{hold} : \mathsf{SpecRef} \\
+  \mathsf{gate} : \mathsf{RegionAtom} \text{ carrying a certified
+  family} \\
+  \mathsf{budget} \in \mathbb{Q}_{>0}
+}{
+  \mathrm{Funnel}(\mathsf{sys};\, \mathsf{transit};\, \mathsf{hold};\,
+  \mathsf{gate};\, \mathsf{budget}) : \mathsf{FunnelDecl}
+}
+\end{mathpar}
+The sort is forced: not a System former --- the pattern composes two
+certificates about one subject System, cited by reference, and its
+row is the composition data the tower-citation edge consumes
+at replay. The gate premise excludes the bare box: the tower
+discipline cites \emph{certified families} (sublevel or affine), and
+a box region carries none to place the citation on. The budget
+premise is the sign gate --- a funnel with no transit budget asserts
+nothing about reaching the gate.}
+\input{chapters/api-system/S-FUNNEL}
+
+\section{The Twin-World Pattern}
+\label{sec:cp-twin}
+
+Two intervened copies of one model run against a single draw of the
+exogenous sources --- the counterfactual composition. The pattern is
+\emph{structural}: the causal-model profile owns one exogenous table
+per mechanism (an option, not a list ---
+section~\ref{sec:mt-scm}), and the pattern row carries one base
+mechanism, so the decoupled independent-worlds reading is
+unrepresentable rather than discouraged. The certified decoupling
+probe prices exactly what that unrepresentability is worth ($0$
+coupled against $\ge 1/2048$ decoupled for the same controller).
+\textbf{Witnessed}: the counterfactual harm certificates in both
+truth directions (section~\ref{sec:mt-scm}). The pattern's semantic
+bridge is machine-checked in the toolkit's Lean tree
+(\texttt{lean/qtsl/}, module \texttt{Qtsl.ScmTwin}): twin-network
+substitution --- the counterfactual event as an ordinary
+single-network event of the twin model, proven outright for acyclic
+models --- together with the box-measure and union-bound certificate
+classes the harm certificates instantiate, and the worked instance's
+landmark values as drift alarms; a sorry-free development, its axiom
+census the standard classical base.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-TWIN}]{
+  \mathsf{base} : \mathsf{Mechanism} \\
+  \{\mathsf{equations},\, \mathsf{exogenous}\} \subseteq
+  \mathrm{pop}(\mathsf{base}) \\
+  \mathsf{base} \text{ un-intervened} \\
+  \mathsf{left},\, \mathsf{right} :
+  \overrightarrow{\mathsf{InterventionRow}} \text{, each }
+  \mathsf{var} \text{ defined by a base equation, no var twice per
+  world}
+}{
+  \mathrm{TwinWorld}(\mathsf{base};\, \mathsf{left};\,
+  \mathsf{right}) : \mathsf{TwinWorldDecl}
+}
+\end{mathpar}
+Two facts about the sort, both deliberate. The conclusion is a pattern
+row, not a System. And the base's sort is $\mathsf{Mechanism}$, not
+$\mathsf{System}$: a composite base is unrepresentable, which is the
+one-exogenous-table structure stated as a premise sort --- the
+coupling is \emph{through} that table. A pre-intervened base is
+refused (world surgery is this pattern's own
+$\mathsf{left}/\mathsf{right}$; anything else would smuggle a third
+world in). An empty intervention list is a legal world --- the
+factual side of a harm query intervenes on one side only.}
+\input{chapters/api-system/S-TWIN}
+
+\section{The Stochastic-Wire Pattern}
+\label{sec:cp-stochwire}
+
+Systems coupled through probabilistic-dependency wires --- one
+conditional-table wire per dependency: the frame family of the
+graphical-model row (section~\ref{sec:mt-pgm}) and simultaneously a
+composition mode for exogenous blocks feeding dynamical frames.
+Single-system use is landed (the network rendering);
+\textbf{cross-system use awaits the marginal-compatibility
+discharge}, and the pattern row carries that residue explicitly as
+data: the citation field for the compatibility certificate is
+optional, and \emph{empty means pending}. That this residue matters
+is itself machine-checked:
+the classical obstruction --- pairwise-consistent marginal families
+with no joint law (Vorob'ev) --- is mechanized over the
+subprobability stock (\texttt{vorobev\_no\_joint}, module
+\texttt{SuFunctor.Adequacy.MarginalGlue}: not even a mass-losing
+joint exists), records glue where laws do not
+(\texttt{vorobev\_record\_glue}), and an inconsistent family denotes
+the bottom credal object rather than crashing
+(\texttt{credalCompile\_vorobevGlue}) --- so an absent $\mu$ citation
+marks a pending composite, never a silently wrong one.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{S-STOCHWIRE}]{
+  S_1, \ldots, S_k : \mathsf{System} \\
+  W : \overrightarrow{\mathsf{CrossWire}} \\
+  \mu? : \mathsf{CertFamRef}
+}{
+  \mathrm{StochasticCoupling}(S_1, \ldots, S_k;\, W) :
+  \mathsf{StochasticCouplingDecl}
+}
+\end{mathpar}
+\[
+\mathsf{CrossWire} \;=\; \langle \mathsf{sources} :
+\overrightarrow{\mathsf{PortRef}},\, \mathsf{target} :
+\mathsf{PortRef},\, \mathsf{rows} :
+\overrightarrow{\langle \mathsf{given}, \mathsf{outcome},
+\mathsf{prob} \rangle} \rangle
+\]
+Per-wire formation data, checked wire by wire: sources resolve to
+outputs and the target to an input where an interface is declared
+(directed-only at this preview); the target is not among its own
+sources; each row's $\mathsf{given}$ arity equals the source count;
+an empty source list is a marginal (an exogenous block feeding a
+frame unconditionally); and --- the exact-arithmetic gate ---
+per-$\mathsf{given}$ probabilities sum to one, exactly, with the
+computed sum as the refusal witness. $\mu?$ is the
+marginal-compatibility citation, consumed without appearing in the
+head form; its absence \emph{is} the pending residue, carried as
+data. The sort is deliberate: this is the one pattern that consumes
+Systems without
+forming one --- the coupling is certified composition data over its
+roster, and the composite System awaits exactly the discharge $\mu$
+cites.}
+\input{chapters/api-system/S-STOCHWIRE}
+
+\section{Credal-Hull Certification}
+\label{sec:cp-credal}
+
+The two grades of open nondeterminism as one pattern. A system with
+unresolved choice --- a policy slot, a scheduler slot --- is certified
+either \emph{at a declared resolution} (the resolution witness
+composed in; the closed object an ordinary citizen of the base
+frame's rows --- the polling-automaton closure of
+section~\ref{sec:mt-ma} is the landed instance) or \emph{over the
+whole hull}: per-state-action row families asserting the generator
+inequality for \emph{every} enabled choice, which covers
+deterministic, randomized (convexity --- the rows are the simplex's
+extreme points), and history-dependent resolutions at once. The
+declared grade is the hull grade restricted to one vertex; the
+certified gap between them is real and priced (the demonic fixtures
+carry named breaking policies). Denotation: the credal lower
+expectation of the imprecise-semantics layer --- and the semantics
+side of this pattern carries an adequacy receipt of its own: the
+demonic-face square of the decision-process section
+(section~\ref{sec:mt-mdp}) mechanizes, at each finite horizon, that
+the compiled, policy-free presentation determines exactly the
+closed-loop law set over the memoryless randomized class, with the
+event-bound verdicts uniform over that class. \textbf{Witnessed}: a
+cliff-walk demonic pair (uniform bound with tightness witness), and
+the polling automaton's uniform re-certification, which thinned the
+declared grade's slack from $5.13 \times 10^{-3}$ to eight parts per
+million without moving the bound.
+
+\syscatmetapat{%
+\begin{mathpar}
+\inferrule*[Right=\rulename{declared}]{
+  \mathsf{sys} : \mathsf{SysRef} \\
+  m : \mathsf{Mechanism} \text{ the subject},\
+  E(m) \neq \emptyset \\
+  \mathsf{cert} : \mathsf{CertFamRef} \\
+  \rho : \overrightarrow{\langle \mathit{state},\, \mathit{action}
+  \rangle} \text{, exactly one enabled action per open state}
+}{
+  \mathrm{CredalHull}(\mathsf{sys};\, \mathsf{cert};\,
+  \mathsf{declared}(\rho)) : \mathsf{CredalHullDecl}
+}
+\and
+\inferrule*[Right=\rulename{quantified}]{
+  \mathsf{sys} : \mathsf{SysRef} \\
+  m : \mathsf{Mechanism} \text{ the subject},\
+  E(m) \neq \emptyset \\
+  \mathsf{cert} : \mathsf{CertFamRef} \\
+  h : \overrightarrow{\langle \mathit{state},\, \mathit{action},\,
+  \mathit{driftBound} \rangle} \text{, exactly one row per pair of }
+  E(m)
+}{
+  \mathrm{CredalHull}(\mathsf{sys};\, \mathsf{cert};\,
+  \mathsf{quantified}(h)) : \mathsf{CredalHullDecl}
+}
+\end{mathpar}
+$E(m)$ is the subject's enabled choice set --- $\mathit{state}
+\mapsto \mathit{actions}$ read off its action-keyed outcome rows; a
+subject with no action-keyed structure is refused outright (no open
+choice --- nothing for either grade to range over). The subject is
+consumed as formation data without appearing in the head form: it
+travels in the row by reference ($\mathsf{sys}$), and the coverage
+premises --- one action per state for the vertex grade, since a
+partial resolution is not a vertex; one row per enabled pair for the
+hull grade, a gap's address serialized on refusal --- are checked
+against the mechanism itself. Drift bounds are exact and sign-free
+(a supermartingale certificate's generator values are typically
+nonpositive); the generator-inequality \emph{content} is the cited certificate family's
+business, recomputed at replay.}
+\input{chapters/api-system/S-CREDAL}
+
+\section{Event-Port Patterns}
+\label{sec:cp-eventport}
+
+A finished design whose primitive now carries a producer surface.
+Jump synchronization --- two mechanisms' events declared to fire
+together --- is constructible today: the toolkit's composite stratum
+stores typed fusion rows (capability legs across components'
+population edges, one firing law per event under the single-home
+discipline below), the pattern-level builder gates them, the
+coloured-net decomposition emits them, and the API block at the end
+of this section quotes the conformance constructions in both
+languages. Everything downstream of the primitive --- resource
+pools, broadcast, dispatch, rate reasoning at fused boundaries ---
+still speaks in design tense, settled to typing-rule depth (for the
+fusion core and resource pools, to certificate-transport depth) and
+recorded here so the remaining vocabulary lands on a fixed target;
+until it lands, synchronized structure beyond raw fusion lives
+inside single mechanisms, a granularity cost priced in the
+design's deferral note with its re-pricing trigger named.
+
+\subsection{Fusion}
+
+The primitive. Mechanisms expose selected transitions as \emph{event
+ports} on their interfaces; a fusion row names a set of bound ports
+across a wiring, and the named transitions fire as one joint jump ---
+a rendezvous rather than a broadcast~\cite{cleaveland18hbmc}. Enabling is conjunctive over the parties'
+local guards, evaluated on the pre-jump composite state (snapshot
+semantics: each party reads the snapshot and writes only its own
+state, so resets within a fusion commute by construction). Every port
+carries a \emph{modality}: at most one party in a fusion is
+\emph{active} --- the timing owner, whose transition kind (rate law,
+forced guard, or immediate) times the joint jump --- while passive
+parties contribute enabling conjuncts and resets only, and never
+fire outside a fusion. The design's worked example is operator~1 of
+the Mini-Fab model (the standard five-machine semiconductor
+benchmark, chapter~\ref{ch:qtsl-minifab}), who serves both
+lithography and implantation: ``load starts'' is one jump across
+station and operator --- machine ready $\wedge$ lot present $\wedge$
+operator idle --- with the operator's idle$\to$task reset riding the
+same jump. The fusion row has landed on the producer side, with the
+decomposition feeding it: the toolkit's coloured-net decomposition
+(section~\ref{sec:mt-sdcpn}) derives, for each transition, a fused
+event over the incident places' population edges --- the legs as
+(component, edge) pairs, enabling arcs riding as read legs, the one
+firing law on the row --- and emits it as the serialized fusion row
+the composite stratum stores and the pattern builder gates.
+
+\subsection{Resource Pools}
+
+A packaged pattern over fusion, not a new primitive: a shared
+resource is a pool mechanism (a counter $k \in \{0,\dots,C\}$, or a
+one-place coloured pool) with passive \emph{take}/\emph{give} ports,
+and a resource-share row family definitionally expands into that
+mechanism plus fusion rows binding each user's seize and release
+transitions. A crossing discipline (each user declares which of its
+modes count as \emph{holding} the resource; seizes enter the held
+set, releases leave it, no other transition crosses) makes the
+pattern's payoff a theorem rather than a convention --- the
+\emph{conservation law}: for a well-formed pool share, every jump of
+the composite preserves
+\[
+  k_{\mathrm{pool}} \;+\; \sum_{u \in \mathrm{users}} \#H_u \;=\; C,
+\]
+where $\#H_u$ counts user $u$'s units in held modes. The invariant is
+a count row~\cite{master25}, free by construction; raw fusion rows can express the
+same model and can also silently break the invariant --- the packaged
+rows cannot, and that refusal is what the package is for.
+
+\subsection{Broadcast Fan-Out}
+
+One sender, many receivers. The inventory deliberately carries no
+broadcast primitive; it carries the \emph{fixed-roster reduction}:
+when the receiver roster is finite and statically known --- which is
+every use the catalogue's source models have produced --- a broadcast
+is a finite family of rendezvous fusions, and optional-join broadcast
+(each receiver participates only when locally enabled) is a finite
+family indexed by the participating subsets. Genuinely dynamic
+rosters are priced and deferred with the rest of the stratum.
+
+\subsection{Dispatch: Control Through Selection}
+
+Fusion creates contention: two fusions sharing a passive party
+conflict, and the enabled-conflict set is derivable from the fusion
+rows alone. Absent further data the conflict resolves
+demonically~\cite{baier18hbmc} --- sound, and exactly as weak as it
+sounds. A dispatch row installs a
+policy: a chooser over the conflict set, reading current aggregate
+observables. Certificates are dispatch-indexed, with one free lemma
+(any dispatched policy refines the demonic envelope, so demonic
+safety transports to every policy) and one structural refusal
+(recurrence-class conclusions never cross an undispatched boundary).
+The design's worked example is first-come-first-served against
+setup-affinity dispatch on the Mini-Fab model: two policies over an
+identical composite, with per-policy certified throughput the target
+--- the setup-affinity policy's advantage being exactly the kind of
+claim that is only ever \emph{per-policy}, since the demonic envelope
+proves neither. Dispatch is the \emph{per-epoch} member of the
+inventory's control trio; its persistent sibling --- control through
+enablement, where a supervisor carves the enabled set itself rather
+than selecting within it --- is the supervision pattern
+(section~\ref{sec:cp-supervise}), and the two compose because they
+are disjoint by kind.
+
+\subsection{Delayed Trace and the Delay Media}
+\label{sec:cp-dtrace}
+
+Feedback with memory: a delayed-trace row~\cite{sprunger19a} closes a
+composite's output
+back onto its input through a delay, well-defined precisely because
+the delay breaks instantaneous self-reference~\cite{dangelo25}.
+Delays themselves are
+first-class composition elements~\cite{lavore22} in two species with a shared
+degenerate case --- an event species (a one-place coloured-token
+place whose tokens carry a time-to-go coordinate) and a signal
+species (a transport medium: pure advection over the delay interval),
+both degenerating, when time is discrete and the delay is one step,
+to the \emph{tick register}: the unit delay, which is also the
+minimal medium a delayed trace needs. The family exists so that
+delays compose like everything else --- a delay is a mechanism with
+ports, not an annotation on a wire. For the signal species in
+continuous time, the semantics tier is already receipted: the
+delay-line adequacy square of the delay-differential-equations
+section (section~\ref{sec:mt-dde}) mechanizes exactly this
+composite --- an ODE cell closed through the transport medium ---
+so the pattern arrives with its continuous-time semantics a theorem
+and its producer surface landed: the delayed trace is a wiring, and
+the toolkit's conformance corpus constructs the same composite ---
+cell, line, and the two trace wires --- through the composition
+surface (a dedicated delayed-trace row stays deliberately absent;
+the wiring is the pattern). The design's flagship
+construction is the partially observable decision process:
+environment mechanism, observation channel, and a belief-tracking
+controller closed through a delayed trace --- partial observability
+as a \emph{composition} pattern rather than a new model class
+(section~\ref{sec:mt-pomdp} grades the frame) --- with the first
+certificate, a lower bound on achieved value for the classic
+two-door problem living on the belief simplex, already exercised in
+the workshop.
+
+\subsection{Event-Rate Assume/Guarantee}
+
+Rate reasoning across fused boundaries: an event-rate atom (the
+specification catalogue's envelope pair, staged ---
+section~\ref{sec:spec-lang-rate}) bounds the
+firing rate of a shared event, a mechanism's guarantee about its side
+of a fusion becomes its neighbour's assumption, and assume/guarantee
+chains propagate rate bounds through a composite without unfolding
+it~\cite{brieger24}. The delay place enters as a \emph{rate-preserving element} ---
+tokens are conserved, so the departure rate equals the arrival rate
+shifted by the delay, and a rate assumption crosses a delay medium
+unchanged. This is the pattern that would let throughput claims
+localize: bound the bottleneck's service rate, and let
+rate-preservation carry the bound to the boundary where the
+specification states it.
+
+\syscatmetapat{%
+\emph{Producer-landed, theory-pending}: the fusion row family now
+has a builder underneath (the API block below quotes it), but no
+term former is stated ahead of its certificate-schema vocabulary ---
+the formal block enters with the event-port interface stratum's
+staging, and asserting a rule now, with no loader beneath it to
+refuse on its premises, would be exactly the invented formal block
+the first wing's frontier entries refuse.}
+\input{chapters/api-system/S-EVENTPORT}
+
+\section{Supervision: Control Through Enablement}
+\label{sec:cp-supervise}
+
+Partially observed supervisory
+control~\cite{ramadge1987supervisory,lin88} over the coloured-net frame: a
+\emph{supervisor} that can switch \emph{some}
+declared plant transitions between enabled and disabled --- not all
+of them, and never by firing them itself --- that sees only declared
+observable functions of parts of the plant's marking, and that
+springs into action only when subscribed events occur. The entry's
+organizing fact is that the control seam costs nothing, because the
+inventory already carries it: \textbf{the gate is a place, and the
+gating is an enabling arc}. The policy is an ordinary jump-only
+System that owns places; a gated transition carries an ordinary
+weight-1 enabling arc (read-no-consume) from its gate place; enabling
+is minting the gate token and disabling is draining it --- both
+ordinary jumps of the policy itself. No new arc kind, wire class, or
+row family exists for this pattern to add: enabling arcs are
+first-class in the coloured-net vocabulary at every stratum
+(section~\ref{sec:mt-sdcpn}'s arc table and the three faces of its
+adequacy development), and the inventory's seams for shaping a
+\emph{live} component's behaviour thereby form a trio at three tempos
+--- parameter setting (continuous, section~\ref{sec:cp-set}),
+\emph{enablement} (persistent, this entry), dispatch (per-epoch,
+section~\ref{sec:cp-eventport}); the supervisory \emph{edges} of mode
+switching (section~\ref{sec:cp-switch}) sit outside the trio, handing
+the active role between components rather than steering an active
+one. Gates carve the enabled set; dispatch selects within what
+survives; uncovered freedom stays demonic.
+
+What the packaged row genuinely adds is bookkeeping with one new
+census clause. The package declares the ownership split --- which
+places and which update transitions are the policy's --- and derives
+the gated roster from it (every read arc sourced at a policy place;
+row-level, decidable, never separately declared). Its well-formedness
+census closes the information channels: policy inputs factor through
+the declared observables, subscriptions are the declared events, and
+--- the clause the place-rendering itself demands ---
+\emph{arc separation}: plant transitions touch policy places through
+the declared gating read arcs only, with ordinary arcs refused in
+both directions (a plant transition producing into a gate place would
+be plant-side control of the policy's state), and policy updates
+carry no arcs on plant places at all --- the policy acts on the plant
+through enablement, full stop. Raw rows remain lawful with the census
+as admission check, as for the inventory's other packaged rows.
+Zero-order hold between wakes is not even a lemma under this
+rendering: read arcs cannot move tokens, so no plant firing can touch
+a gate, and token presence has no drift to have. Gate places carry a
+Boolean discipline by default --- capacity 1, gates as switches ---
+and the discipline is deliberately omittable: $k$ tokens in a gate
+place multiply a gated race's intensity by exactly $k$ (the ordered
+census's falling factorial at the gate place), so integer throttles
+come free by \emph{not} imposing it, while fractional modulation
+remains parameter setting on rate content. The capacity declaration
+is accordingly a \emph{must} wherever the model means Boolean gates:
+without it, an accidental second token silently doubles a rate.
+
+The semantics per gated species is read off the landed faces rather
+than added to them. A gated delay transition is race thinning: gate
+closed, the ordered census vanishes (pre-enabling was always inside
+the count); gate open, the survivor law is the integrated-rate law,
+by memorylessness. A gated immediate transition is already inside the
+cascade square: gate coordinates are marking coordinates, so the
+tangible/vanishing classification, the scheduler discipline, and the
+cascade-rank certificate quantify over them unmodified --- and the
+policy's own wake is a cascade step like any other, so one structural
+rank discharges non-Zeno for every enabling-respecting scheduler,
+policy updates included. The whole pattern lives strictly inside the
+monotone fragment: disabling by \emph{removing} a token is not a
+zero-test, enabledness stays upward closed (surplus gate tokens never
+disable a step), and the inhibitor exclusion is untouched ---
+supervision is the monotone-safe rendering of control. Closure is on
+the nose: the supervised composite --- plant places plus policy
+places, gating arcs, fused wakes --- is again a coloured net of the
+same class, so supervision is composition \emph{inside} the model
+class, and the fixed-policy adequacy statement is the net square
+applied to the supervised composite, no pattern-specific vertical.
+Mechanized at the uncoloured stratum
+(\texttt{SuFunctor.Adequacy.StochasticPetriSupervise}): the gating
+lemmas, the decidable arc-separation census with refusal witnesses in
+both directions, the Boolean-discipline preservation, and supervised
+micro-instances whose controls pin the closed, open, and
+graded race intensities as values, drive a two-step cascade
+\emph{through} the policy's own mint, and consume the landed cascade
+adequacy square at the supervised composite as an instance.
+
+The pattern is a deliberate fourfold weakening of the probabilistic
+model checker's scheduler --- the adversary that tools in the PRISM
+and Storm family
+resolve~\cite{kwiatkowska2011prism,hensel2022storm} --- and each
+axis has a formal cash-out, landed or staged as the Status note
+records:
+
+\begin{center}\small
+\begin{tabular}{@{}lp{4.2cm}p{6.2cm}@{}}
+\toprule
+axis & scheduler (limit case) & supervised variant \\
+\midrule
+control scope & resolves all nondeterminism & read arcs on a declared
+roster; races stay stochastic, uncovered conflicts stay demonic ---
+the controllable/uncontrollable partition is roster data \\
+\addlinespace
+effect & the choice \emph{is} the firing & the policy's action type
+is its own marking: mint and drain in places it owns; the plant's
+races and cascades do the firing --- and the composite is again a net
+of the same class, where a scheduler lives outside its model \\
+\addlinespace
+observation & reads full state & reads declared observables of
+declared parts; measurability transposed into typing, checked at
+formation --- adaptedness then a theorem about every well-formed
+composite, staged with the observation legs (Status note below) \\
+\addlinespace
+activation & consulted at every epoch & wakes only at subscribed
+events; hold between wakes is read-no-consume; decision epochs are a
+declared sub-point-process of the plant's event stream, non-Zeno by
+the shared rank certificate \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Certificate polarity splits cleanly over the policy family, and the
+split is the entry's payoff. \emph{Safety is free across the whole
+family}: monotone enabledness makes refinement monotone in the gated
+roster, every well-formed policy's closed-loop behaviour is contained
+in the demonic gate-envelope, so one safety certificate against the
+gate-demon transports to every partially observing policy --- the
+information constraint costs nothing at this polarity.
+\emph{Liveness over the unrestricted family is unprovable by
+construction}: the empty policy --- no updates, gates never minted
+--- is well-formed, so deliberate idling is expressible, and
+throughput claims are false over the family wherever a gated
+transition is load-bearing. That expressiveness is the commission,
+not a defect: deliberate idling is exactly the capability dispatch
+lacks (a chooser must choose; a supervisor may refuse), and it is why
+liveness certificates are per-policy here, exactly as they are
+per-dispatch in the previous entry, Kumar--Seidman teeth
+included~\cite{kumar1990dynamic}.
+The ``some transitions, not all'' clause has the same certificate-side
+reading: a total roster would make safety-under-supervision vacuous
+of plant content and family liveness never provable; partial rosters
+keep both polarities informative.
+
+One refusal survives, and it is the pattern's certificate-soundness
+story. At formation, gating is admitted on \emph{every} transition
+species --- including boundary-forced guard transitions, whose
+semantics stays total when disabled: a guard transition that is not
+pre-enabled imposes no forcing, and the run continues past its
+boundary untouched. What must not be gated, on pain of
+certificate unsoundness rather than semantic undefinedness, is a
+transition serving as a model's \emph{box-discharge witness}: the
+certificate layer quantifies colours over compact rational boxes, the
+discharge obligation is what keeps the process inside the box the
+rows quantify over, and its default witness is itself an exit-guard
+transition. Gate that transition off and the process exits its box
+with positive probability while the certificate's rows still
+quantify over it. The obligation therefore lives at the certificate
+stratum, where the discharge already does: a gated transition may not
+serve as a box-discharge witness unless the model re-discharges by
+invariance or by stopped-process reading --- a row-level lint on the
+package roster, decidable, and binding however the arcs were wired,
+because it is checked on the composite's rows rather than on any
+declared seam. On the semiconductor-fab model
+(chapter~\ref{ch:qtsl-minifab}) the lint draws exactly the right
+line: a \emph{suppressible deadline} is directly representable ---
+gate an interior maintenance-window transition and the model means
+what it says --- while the shift-boundary transitions are ungateable
+not because they are calendars but because they are their timer
+boxes' own discharge witnesses.
+
+\textbf{Status}: the gating semantics and the arc-separation census
+are mechanized, sorry-free, at the uncoloured stratum (the module
+above, over the statics square and both dynamics faces), with refusal
+witnesses on every census clause and the graded-throttle identity
+pinned as a value; the coloured packaged row --- observation legs as record-lens
+readouts, wakes as passive optional-join fusions --- stages with the
+event-port interface stratum
+(section~\ref{sec:cp-eventport}), and until it lands, supervised
+composites are hand-wired through the census door. The demonic
+gate-envelope face --- the family-level object that safety
+certificates ride --- is mechanized over the credal-hull machinery
+(section~\ref{sec:cp-credal}) at the uncoloured stratum: the
+certified policy seat is a dependent-index family (each member
+carrying its own termination rank --- no automaton-level certificate
+can be uniform across the seat), its closed-loop laws inhabit one
+envelope on the common marking space, safety verdicts transport
+uniformly over the seat at both polarities, the envelope is monotone
+in the gated roster, and deliberate idling is a member --- the
+mechanized face of the polarity split above.
+
+\syscatmetapat{%
+\emph{Former pending its strata; census landed.} The packaged row
+consumes an observation interface and a subscription list whose sorts
+stage with the event-port interface stratum
+(section~\ref{sec:cp-eventport}), so no term former is asserted ahead
+of them --- but unlike the entries that refuse their blocks outright,
+this pattern's one genuinely new formation premise already has a
+loader to refuse on it: the arc-separation census is a decidable
+row-level predicate, mechanized with refusal witnesses in both
+directions (a plant write into a gate place; a policy arc on a
+plant place). The gate map itself adds no premise sort at all --- a
+gate is a weight-1 enabling arc from a policy-owned place, an arc
+kind every stratum of the coloured-net development already carries
+--- and the ownership split is package data, invisible to the wire
+vocabulary.}
+\input{chapters/api-system/S-SUPERVISE}
+
+\section{State Sharing}
+\label{sec:cp-stateshare}
+
+The reserved axis: gluing along shared \emph{state} --- a jointly
+driven continuous variable, common noise --- rather than signal
+wires. The designed semantics is the generator's additivity over
+transitions sharing state,
+\[
+\mathcal{A}_{\mathrm{composite}} \;=\; \sum_i \mathcal{A}_i,
+\]
+so certificates compose by summing generator contributions; the
+design warrant is recorded, and the axis is reserved rather than
+staged. Its first customers: common-noise mean-field composition,
+should that frontier entry of chapter~\ref{ch:qtsl-mathematical-models} ever
+earn a producer surface, and the shared-place face of net
+composition --- two nets glued along one common place --- which is
+the one part of ``nets of nets'' that genuinely lives on this axis
+(the rest turned out not to need it;
+section~\ref{sec:cp-netsofnets}).
+
+\subsection{Continuous State Sharing: Port-Hamiltonian
+  \texorpdfstring{\mbox{Interconnection}}{Interconnection}}
+
+The one pattern in the inventory's design space that is not reducible
+to fusion: two mechanisms continuously driving one shared state have
+no events to synchronize --- the content is drift superposition. The
+disciplined form is port-Hamiltonian interconnection: each mechanism
+carries an energy function and a power port (a paired effort/flow
+boundary variable), and composition couples ports
+power-conservingly, so the composite's energy is the sum and
+energy-based certificates compose along the interconnection. The
+designed elimination has two species --- additive, for flow-summed
+sharing, and an exact linear solve with a determinant-guard witness,
+for constraint coupling --- and the guard is where the design pays
+for itself: the composite kinetic metric is a sum of pullbacks of
+positive-definite component inertias, so the division guards that
+must today be proven per model become structural consequences of the
+pattern. The design's worked example is cartpole recomposed --- cart
+and pole as separate Hamiltonian mechanisms coupled through a
+power-conserving pivot junction, recovering the standard monolithic
+dynamics as a theorem rather than an authoring choice. This design is
+in flight; this section records its intended shape.
+
+\syscatmetapat{%
+\emph{Reserved}: no term former is stated ahead of the axis's
+vocabulary. The design warrant --- generator additivity, and the
+power-conserving junction rows of the port stratum --- is recorded in
+the prose above, asserted as nothing until the axis stages.}
+\input{chapters/api-system/S-STATESHARE}
+
+\section{Nets of Nets}
+\label{sec:cp-netsofnets}
+
+A closure property rather than a pattern, recorded as its own entry
+because the catalogue once reserved ``nets of nets'' as future
+vocabulary and most of the reservation dissolved under the term
+formers now stated. The population former is parametric in its inner
+System: \rulename{S-BAG}'s premise (section~\ref{sec:mt-bag}) is
+$S : \mathsf{System}$, with nothing about $S$ consulted beyond its
+sort. And the coloured-net former concludes at exactly that sort:
+$\mathrm{SDCPN}(P;\, T;\, A) : \mathsf{System}$
+(section~\ref{sec:mt-sdcpn}). So a net whose tokens are themselves
+nets is one substitution --- put a coloured-net System in the
+token-System slot where an ODE mechanism would ordinarily go, and the
+outer net's places hold inner nets as tokens: hierarchy by
+instantiating a premise, not by any new row family. The base rung of
+the same ladder is already in the catalogue as the population
+entry's identity anchor --- a Bag of ODE tokens \emph{is} the
+single-place, zero-arc coloured net, two presentations of one System
+--- and each further rung is the same substitution one level up.
+
+What this entry deliberately does not claim: the certification story
+across nesting depth. The well-formedness is free --- that is the
+finding --- but no shipped certificate yet exercises a
+population-of-nets carrier end to end, and the grading discipline of
+chapter~\ref{ch:qtsl-mathematical-models} applies to the nested composite
+exactly as to any frame: depth adds obligations, not exemptions.
+What remains genuinely reserved is different in kind --- two nets
+glued along a \emph{shared place}, which is state sharing
+(section~\ref{sec:cp-stateshare}), not token colouring, and stays on
+that axis's reservation.
+
+No metanotation or API block: there is no former here to state ---
+the entry's formal content is two already-stated rules composing, and
+a dedicated block would only restate them.

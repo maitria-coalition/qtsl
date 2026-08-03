@@ -1,0 +1,180 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. An
+alias owes the book five artefacts: the verified 1$\to$1 unpack
+function, the filled-in application of the target rule, the
+payload-transport table, the exact algebraic identity that makes the
+respelling correct, and the soundness corollary through the target
+rule's lemma. All five are now present: the four on this page, and the
+semantic witness bound in the entry --- \texttt{qLatticeInv\_exact}
+(Proposition~\ref{prop:qli-exact} mechanized) with the
+\texttt{qLatticeInv\_sound} family
+(Proposition~\ref{prop:qli-sound}, at the semiflow \emph{and}
+behavioural strata); the payload-level elaborator itself awaits the
+schema staging (the amber box). (Tier flag, carried honestly: the
+unpack cites facet rows through the checker's recomputed lattice
+readout --- if registry-backed citation is ruled heavier than the alias
+criterion allows, the rule reclassifies as admissible with all
+machinery unchanged.)}
+
+\absentbox{payload-level elaborator pending schema staging}{The
+\emph{semantic} content of this page is now mechanized and bound in the
+entry: \texttt{qLatticeInv\_exact} is Proposition~\ref{prop:qli-exact}
+(over the discharge chain's own Birkhoff rows --- no lattice structure
+minted, the leg-7 discipline), and the \texttt{qLatticeInv\_sound}
+family is Proposition~\ref{prop:qli-sound} in both its
+through-the-target and end-to-end forms, at both semantic strata. What
+remains unmechanized is the payload-level elaborator --- the function
+taking the rule's wire payload (family object + down-set) to the single
+\rulename{QBlockInv} payload of Recipe~\ref{rec:qli-filled} --- which
+awaits the extension certificate schema's staging, per the batch
+template. The checker-side ingredients (membership of the down-set's
+realization in the lattice, down-closedness of the cell-set) are
+recomputed side conditions, already specified with the rule; the
+mechanization deliberately consumes the down-closedness and leaves the
+membership fact checker-side (soundness holds for the bare union, a
+fortiori with the extra condition).}
+
+\begin{brecipe}[the alias template]\label{rec:qli-template}
+An alias rule $A$ is warranted by a verified function
+$\mathrm{unpack} : \mathrm{Step}_A \to \mathrm{Step}_T$ into the
+payload of a \emph{single} target node $T$, such that the $A$-node and
+its image conclude the same judgement from the same premises: one node
+$\to$ one node, payload transported, nothing derived. Soundness is then
+a corollary, $\mathrm{sound}_A = \mathrm{sound}_T \circ
+\mathrm{unpack}$.
+\end{brecipe}
+
+\textbf{The rule.}\enspace The certificate supplies the family object
+(the block lattice of the \rulename{QMorseDischarge} section, with its
+recomputed readout: join-irreducible members $b$, lower covers $b^-$,
+cells $T(b) := \mathrm{cl}(b \smallsetminus b^-)$, the induced cell
+order), a cell-set $C$ of join-irreducibles that is \emph{down-closed}
+in the cell order, and one containment row
+$X_0 \subseteq \bigcup\downarrow C$. It concludes
+$\mathsf{QInvScope}\big(\bigcup\downarrow C,\ X_0\big)$, writing
+$\bigcup\downarrow C$ for the union of the cells of $C$.
+
+\begin{brecipe}[the filled-in application --- \rulename{QLatticeInv}
+rewritten \emph{into} the \rulename{QBlockInv} instance]
+\label{rec:qli-filled}
+Let $N_C := \bigvee_{b \in C} b$ --- the lattice join of the down-set's
+members, itself a member of the family object by join-closure. The
+\rulename{QLatticeInv} node rewrites to the single \rulename{QBlockInv}
+application
+\begin{mathpar}
+\inferrule*[Right=\rulename{QBlockInv}]{
+  N_C \ \text{(the member: block data from the family object)} \\
+  \bigl\{\vdash \text{facet-inward sign rows of } N_C\bigr\}
+  \ \text{(cited from the family object, byte-identical)} \\
+  \vdash X_0 \subseteq N_C \ \text{(the rule's own containment row,
+  transported verbatim)}
+}{
+  \mathcal{M} \vDash \mathsf{QInvScope}(N_C,\ X_0)
+}
+\end{mathpar}
+and the conclusion is the alias's conclusion \emph{on the nose} by
+Proposition~\ref{prop:qli-exact}: $N_C = \bigcup\downarrow C$ as
+regions. Every internal facet of $N_C$ already carries its sign row in
+the family object --- membership of $N_C$ in the lattice is exactly
+the checker's recomputed side condition, and no row is re-proven.
+\end{brecipe}
+
+\begin{bprop}[the exactness identity]\label{prop:qli-exact}
+For a down-closed set $C$ of join-irreducibles,
+\[
+\bigcup_{b \in C} T(b) \;=\; \bigvee_{b \in C} b
+\qquad \text{(equality of realizations).}
+\]
+\end{bprop}
+\begin{proof}
+Two readout facts, one lattice fact. \emph{(cells tile members)} Every
+member $N$ of the lattice is the union of the cells of the
+join-irreducibles below it, $N = \bigcup \{T(b) : b \in \mathsf{J},\
+b \subseteq N\}$: downward induction along lower covers --- $T(b)$ is
+by definition what $b$ adds over $b^-$, so peeling cells descends
+through the lattice and exhausts $N$. \emph{(Birkhoff exactness)} In a
+finite distributive lattice the map $N \mapsto \{b \in \mathsf{J} : b
+\subseteq N\}$ is an isomorphism onto down-closed sets of
+join-irreducibles \cite{birkhoff1937}; in particular, for down-closed
+$C$ the join $N_C$ satisfies $\{b \in \mathsf{J} : b \subseteq N_C\} =
+C$ --- down-closedness is precisely what forbids the join from
+absorbing new join-irreducibles. Substituting the second fact into the
+first: $N_C = \bigcup_{b \in C} T(b)$. (Where each half lives: the
+tiling is the readout's own construction, recomputed by the checker
+per certificate; the isomorphism is the one classical fact, and
+down-closedness of $C$ is the recomputed side condition that makes the
+identity exact rather than merely $\supseteq$.) \emph{Mechanization
+note, the honest disanalogy:} \texttt{qLatticeInv\_exact} proves this
+identity \emph{without} building the classifying isomorphism --- the
+well-founded descent through lower covers (leg 7's
+\texttt{exists\_cellMem\_subset}) lands every member point in the cell
+of a join-irreducible below it, and down-closedness (through the
+induced-order binding \texttt{horder}) pins that cell inside $C$: the
+same content the absorption clause names, reached directly. Nothing
+mechanized rests on the classical citation; it remains as warrant
+genealogy.
+\end{proof}
+
+\begin{brecipe}[payload transport --- field for field]
+\label{rec:qli-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{\rulename{QLatticeInv} payload} & \textbf{\rulename{QBlockInv} payload}\\
+\midrule
+family object $+$ down-set $C$ & block $N_C = \bigvee C$ (member, by join-closure)\\
+\emph{(no own rows)} & \texttt{facets} $:=$ $N_C$'s rows, cited from the family object\\
+\texttt{init\_containment} & \texttt{init\_containment} (verbatim; $\bigcup\downarrow C = N_C$)\\
+conclusion region $\bigcup\downarrow C$ & conclusion region $N_C$ (Proposition~\ref{prop:qli-exact})\\
+\end{tabular}
+\end{center}
+The checker's recomputed side conditions at the alias: $C$ down-closed
+in the recomputed cell order, and $N_C$ a member whose facet rows are
+all present --- both facts about the readout, not about the dynamics.
+\end{brecipe}
+
+\begin{bprop}[soundness corollary, through the target]
+\label{prop:qli-sound}
+If the family object's rows are valid and
+$X_0 \subseteq \bigcup\downarrow C$, then --- under the
+\rulename{QBlockInv} section's standing hypotheses (its conditional
+ledger, applied to the member $N_C$) ---
+$\mathsf{QInvScope}\big(\bigcup\downarrow C,\ X_0\big)$ holds.
+\end{bprop}
+\begin{proof}
+The member $N_C$ is a strictly facet-inward compact block of the
+family object, so the \rulename{QBlockInv} section's theorem chain
+applies to it verbatim (its rows \emph{are} rows of the family
+object); the conclusion transports along
+Proposition~\ref{prop:qli-exact}. Mechanized, this proposition is one
+composition, $\mathrm{sound}_{\textsc{QLatticeInv}} =
+\mathrm{sound}_{\textsc{QBlockInv}} \circ \mathrm{unpack}$ --- there
+is no other content, which is the alias genre working as intended: the
+through-the-target form (\texttt{Semiflow.qLatticeInv\_sound} /
+\texttt{Behavior.qLatticeInv\_sound}) takes the cited node's
+$\mathsf{QInvScope}$ conclusion as judgement-level cargo and rewrites
+along the identity; the end-to-end form (\texttt{\_of\_blockInv})
+composes through \texttt{qBlockInv\_sound} verbatim. Both strata are
+covered because the identity is dynamics-free --- the alias transports
+at every semantics for free.
+\end{proof}
+
+\begin{bremark}[why the rule earns its keep]
+Down-closed cell-sets are the invariant enclosures the Morse readout
+offers for free: once an orbit enters a member it never leaves, so the
+sequence of cells it visits is non-increasing in the cell order, and
+the down-set of any initial cell-set is forward-invariant and encloses
+the reachable set. The alias turns each such enclosure into a one-node
+citation --- the member's rows already exist in the family object ---
+where a direct proof would re-derive facet rows the certificate
+already carries. Downstream, the minted $\mathsf{QInvScope}$ judgement
+feeds \rulename{QBasin}'s safety factory and scope-restriction of
+reach obligations, which is where the row-count payoff compounds.
+\end{bremark}
+
+\begin{anchors}
+target soundness & \texttt{qBlockInv\_sound} (QtslSoundness.lean) and the \rulename{QBlockInv} section's discharge chain\\
+Proposition \ref{prop:qli-exact} & \texttt{qLatticeInv\_exact} (LatticeInv.lean, bound in the entry) via leg 7's \texttt{exists\_cellMem\_subset} descent; Birkhoff representation \cite{birkhoff1937} as warrant genealogy (nothing mechanized rests on it)\\
+``cells tile members'' & \texttt{member\_subset\_cells\_le} (principal down-set instance)\\
+alias-level corollary & \texttt{Semiflow.qLatticeInv\_sound} $+$ \texttt{\_of\_blockInv} and the behavioural-floor pair (bound in the entry); payload-level elaborator pending schema staging (the amber box)\\
+side conditions & down-closedness: consumed (\texttt{IsLowerSet} $+$ \texttt{horder}); membership of $N_C$ in the lattice: checker-side, deliberately not consumed\\
+\end{anchors}

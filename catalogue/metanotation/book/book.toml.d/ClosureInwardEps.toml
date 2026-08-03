@@ -1,0 +1,91 @@
+# ClosureDiscipline-INWARD-EPS: strict-atom closure, move 3 of 3 — full
+# literate section (B10). Lean warrant: the auxiliary structural module.
+[[rule]]
+id = "ClosureInwardEps"
+source = "../QTSL-rules.toml"
+row = "ClosureDiscipline-INWARD-EPS (T13)"
+proof = "book/proofs/ClosureInwardEps.tex"
+commentary = '''
+\rulename{ClosureDiscipline-INWARD-EPS} is the closure
+discipline\textquotesingle s move for strict literals at positive
+positions (the discipline is set out in the
+\rulename{ClosureDiscipline-EXACT} section): the literal $\{p < c\}$
+is replaced by the closed atom $\{p \le c - \varepsilon\}$ for a
+producer-chosen rational $\varepsilon > 0$. The rounded atom is
+contained in the literal, so at a position where the certified region
+must lie \emph{inside} the denotation, the substitution strengthens
+the obligation --- sound by construction --- and hands the kernel a
+closed atom it can consume.
+
+The $\varepsilon$ is real spend: the band between $c - \varepsilon$
+and $c$ is surrendered. The choice of $\varepsilon$ lives in the
+producer toolkit --- searchable, like a multiplier or a cover --- and
+its accounting travels as annotation data on the certificate, not as
+a rule. What the checker recomputes: nothing beyond the rewritten
+atom; the containment is the verified lemma, spent once, globally.
+
+The contract is soundness-only, and the honest failure mode is
+refusal: a specification exactly tight at its threshold --- the
+intended witness satisfies $p < c$ everywhere, but $p$ approaches $c$
+on the region --- admits no $\varepsilon$, and the certificate is
+refused rather than silently widened. No completeness preservation is
+claimed, deliberately.
+'''
+note = '''
+The verified statement takes any real $\varepsilon > 0$; the
+producer\textquotesingle s $\varepsilon$ being rational is a
+representation fact about certificates, subsumed by the cast ---
+soundness for every positive real is a fortiori soundness for every
+positive rational. The closedness of the rounded atom is an instance
+of the exact move\textquotesingle s closedness lemma at the shifted
+threshold.
+'''
+correspondence = '''
+Both displayed orientations bound: $\{p \le c - \varepsilon\}
+\subseteq \{p < c\}$ $\mapsto$ \texttt{closureInwardEpsLt\_sound}
+(the rounded atom entering through the bridge \texttt{roundedAtom =
+\{x | p x ≤ c − ε\}}, the strict margin as \texttt{hε : 0 < ε}), and
+the $>$-orientation $\mapsto$ \texttt{closureInwardEpsGt\_sound};
+Q(iv)\textquotesingle s closedness rider $\mapsto$
+\texttt{closureInwardEps\_isClosed} (continuity consumed there
+alone, the T13-EXACT pattern). Two width facts, one per direction of
+the display: the certified statements take \emph{any real}
+$\varepsilon > 0$ where the display asks $\varepsilon \in \Q_{>0}$
+--- producer rationality subsumed by cast, divergence D3, statement
+wider in the safe direction; and no completeness-preservation
+statement exists in the module --- the display\textquotesingle s
+``soundness-only'' is certified by absence, with total loss at a
+critical cut remaining the honest refusal mode, exactly as the
+ledger inherits it.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Structural"
+src = "../../lean/qtsl-aux/QtslAux/Structural.lean"
+intro = '''
+Both orientations of the rounding, plus the closedness rider; the
+rounded atom enters through the bridge hypothesis (\texttt{hbridge})
+fixing its compiled sublevel reading, and $\varepsilon$ enters as a
+real with $0 < \varepsilon$ (rationality of the
+producer\textquotesingle s choice is subsumed by the cast).
+'''
+decls = [
+  "closureInwardEpsLt_sound",
+  "closureInwardEpsGt_sound",
+  "closureInwardEps_isClosed",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development\textquotesingle s object is the base
+calculus\textquotesingle s wire-format checker (theory
+\texttt{qtsl\_catalogue} ports the catalogue check-function cone).
+The closure discipline is a specification-surface rewrite layer of
+the extension theory: it postdates that port, and no wire row for any
+of the three moves exists in any staged format --- there is nothing
+for a HOL statement to be about. The box becomes fillable when the
+extension\textquotesingle s certificate rows are committed to a wire format
+and the corresponding check is ported.
+'''

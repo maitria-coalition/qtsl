@@ -1,0 +1,19 @@
+# bindings.toml.d/NegFAlias.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'NegFAlias'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "negF_denot_subset"
+sha256 = "66e5f9be1114fca5c5128cd3e020a2252ec7646c7b513eed56f1333aa23af880"
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "sound_NegFAlias"
+sha256 = "aec3325ed195d07209d888ed0eff7c3070ad640613b21b03a75e5bb533c0876c"
+
+[[correspondence]]
+entry = "NegFAlias"
+steele_sha256 = "2ccb10585f047c65d14b0c187959db20cd489b5d2dfb118d8bda0737ab0f02a2"
+statements_sha256 = "cc539b6bc2e56a7440304957296de2a6a63f6b093894a26997bbfcae10ff70d2"
+prose_sha256 = "9e6197a0940034de7ada8ef55e43a0d363871a8ccf32d20778c020773b408ec9"
+

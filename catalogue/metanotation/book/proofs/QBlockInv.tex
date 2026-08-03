@@ -1,0 +1,259 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof
+at Putnam-exam-solution detail. The rule's mechanization is
+\emph{conditional}: the section descends the invariance obligation from
+an opaque interface fact to three named hypothesis families ---
+integrated facet-row clauses, grid geometry of the block, arena
+invariance --- and the ledger remark at the end states exactly what
+remains and why. Every hypothesis is used and remarked on; the
+formal-anchor table maps each step to the Lean declaration that carries
+it.}
+
+\textbf{Setting and claim.}\enspace Fix a forward semiflow $\varphi$ on
+a state space $X$ ($\Phi_0 = \mathrm{id}$,
+$\Phi_{s+t} = \Phi_t \circ \Phi_s$; the \rulename{QBasin} section's
+setting, which also fixes the $\mathsf{QInvScope}$ denotation: $S$
+forward-invariant and $X_0 \subseteq S$). The rule's data: a
+\emph{block} $N$ --- the realization of a box-union over the
+certificate's declared rational grid, a compact closed set --- sitting
+in an \emph{arena} $D \supseteq N$; per internal facet of $N$, one
+strictly-inward sign row of the base calculus (a
+\rulename{BernCone}-family sequent asserting the field's normal
+component points into the block, with an explicit positive rational
+margin; facets on $\partial D$ owe nothing); and one containment row
+$X_0 \subseteq N$. The claim: these data warrant
+$\mathsf{QInvScope}(N, X_0)$.
+
+\begin{blemma}[rule-level assembly]\label{lem:qbi-assembly}
+If $N$ is forward-invariant and $X_0 \subseteq N$, then
+$\mathsf{QInvScope}(N, X_0)$ holds.
+\end{blemma}
+\begin{proof}
+The judgement \emph{is} that conjunction. The lemma is stated to fix
+where the rule-level content ends: everything below descends the
+invariance conjunct toward the certificate's rows.
+\end{proof}
+
+\begin{blemma}[the first-exit skeleton: closed $+$ continuous $+$
+boundary dwell $\Rightarrow$ invariant]\label{lem:qbi-dwell}
+Suppose $N$ is closed, every trajectory $t \mapsto \Phi_t x$ is
+continuous, and every boundary point dwells: for each
+$x \in N \cap \partial N$ there is $\delta > 0$ with
+$\Phi_s x \in N$ for all $0 \leq s \leq \delta$. Then $N$ is
+forward-invariant.
+\end{blemma}
+\begin{proof}
+First, \emph{every} point of $N$ dwells: an interior point $x$ has
+$\Phi_0 x = x \in \mathrm{int}\,N$, so continuity of the trajectory at
+time $0$ confines a short prefix to $\mathrm{int}\,N$ --- the dwell
+hypothesis is needed only at the frontier, which is where the
+certificate's rows live.
+
+Now fix $x \in N$ and $t \geq 0$, and suppose toward a contradiction
+that $\Phi_t x \notin N$. Consider the set of \emph{prefix-confined
+times}
+\[
+S \;:=\; \{\, u \geq 0 \ :\ \Phi_s x \in N \ \text{for all } s \leq u
+\,\}.
+\]
+$S$ contains $0$, and every element of $S$ is $\leq t$ (an element
+$> t$ would confine time $t$ itself). Let $T := \sup S \leq t$. Every
+time $s < T$ is confined (it is below some element of $S$). The sup
+itself is confined: for $T > 0$ the preimage of $N$ under the
+continuous trajectory is closed and contains $[0, T)$, hence contains
+$T \in \mathrm{cl}\,[0,T)$; for $T = 0$ it is the hypothesis
+$x \in N$. So $T \in S$. But now the dwell at the point $\Phi_T x \in N$
+supplies $\delta > 0$ with $\Phi_s(\Phi_T x) \in N$ for
+$0 \leq s \leq \delta$,
+i.e. (semiflow law) $\Phi_u x \in N$ for $T \leq u \leq T + \delta$;
+combined with $T \in S$ this puts $T + \delta \in S$, contradicting
+$T = \sup S$ with $\delta > 0$.
+\end{proof}
+
+\begin{bremark}[each skeleton hypothesis is essential]
+\emph{Closedness}: on $X = \R$ with $\Phi_t x = x + t$ and the
+half-open $N = [0, 1)$, every point of $N$ dwells (interior points by
+continuity; the one frontier point of $N$, namely $0$, dwells since
+$\Phi_s 0 = s \in [0,1)$ for small $s$ --- the other frontier point
+$1$ is not in $N$), yet the trajectory from $0$ exits: the proof fails
+exactly at
+``the sup itself is confined'', which is where closedness is consumed.
+\emph{Trajectory continuity}: with a discontinuous time-dependence the
+preimage argument dies and a trajectory may jump across the frontier
+without ever presenting a boundary point to the dwell hypothesis; in
+this stratum continuity is a model-class fact (polynomial-drift flows),
+not a theorem. \emph{Dwell at the frontier}: dropping it re-opens exit
+through the boundary --- it is precisely the obligation the facet rows
+discharge (next lemma).
+\end{bremark}
+
+\begin{blemma}[the facet-row bridge: certified rows $\Rightarrow$
+boundary dwell]\label{lem:qbi-bridge}
+Suppose the certificate supplies, for block $N$ in arena $D$: finitely
+many \emph{facet observables} $\ell_1, \dots, \ell_n : X \to \R$ (the
+affine facet polynomials), margins $\varepsilon_i > 0$, and certified
+regions $F_i$ (the facet boxes, thickened to full dimension), such that
+
+\emph{(row, integrated form)} along any trajectory segment confined to
+$F_i$, $\ell_i$ grows at rate at least $\varepsilon_i$:
+if $\Phi_s x \in F_i$ for all $s \leq t$, then
+$\ell_i(\Phi_t x) \geq \ell_i(x) + \varepsilon_i\, t$; and
+
+\emph{(local wedge test)} every frontier point $x$ of $N$ has an
+\emph{active set} $A \subseteq \{1, \dots, n\}$ --- each active
+observable vanishing at $x$, each active $F_i$ a neighbourhood of $x$
+--- and a neighbourhood $U$ of $x$ such that every $y \in U$ with
+$y \in D$ and $\ell_i(y) \geq 0$ for all $i \in A$ lies in $N$.
+
+If moreover $N \subseteq D$, $D$ is forward-invariant, and trajectories
+are continuous, then every boundary point of $N$ dwells.
+\end{blemma}
+\begin{proof}
+Fix $x \in N \cap \partial N$ with active set $A$ and wedge
+neighbourhood $U$. The set $U \cap \bigcap_{i \in A} F_i$ is a finite
+intersection of neighbourhoods of $x$, hence a neighbourhood; continuity
+of the trajectory at time $0$ (where it sits at $x$) confines a prefix
+$[0, \delta]$ to it, some $\delta > 0$. Now take any
+$0 \leq s \leq \delta$
+and check the wedge test's three conditions at $y = \Phi_s x$:
+membership in $U$ is the confinement; membership in $D$ is arena
+invariance applied to $x \in N \subseteq D$; and for each active $i$,
+the whole prefix up to $s$ is confined to $F_i$, so the integrated row
+gives $\ell_i(\Phi_s x) \geq \ell_i(x) + \varepsilon_i s
+= 0 + \varepsilon_i s \geq 0$, using exactly the activation fact
+$\ell_i(x) = 0$. The wedge test re-admits $\Phi_s x \in N$. Inactive
+facets never appear: the test quotes only active ones.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{QBlockInv}, at the discharged
+floor]\label{thm:qbi-sound}
+Suppose: $N$ is closed with $N \subseteq D$; $D$ is forward-invariant;
+trajectories are continuous; the certificate's facet rows satisfy
+Lemma~\ref{lem:qbi-bridge}'s two clauses; and $X_0 \subseteq N$. Then
+$\mathsf{QInvScope}(N, X_0)$ holds.
+\end{bthm}
+\begin{proof}
+Lemma~\ref{lem:qbi-bridge} delivers the boundary dwell;
+Lemma~\ref{lem:qbi-dwell} converts it to forward invariance of $N$;
+Lemma~\ref{lem:qbi-assembly} assembles the judgement with the
+containment row.
+\end{proof}
+
+\begin{bremark}[the wedge test is one-directional by design]
+\label{rem:qbi-wedge}
+At a \emph{reentrant} corner of a box-union block --- an inner corner
+of an L-shape --- the block is locally the \emph{union} of two
+half-spaces $\{\ell_1 \geq 0\} \cup \{\ell_2 \geq 0\}$, while the
+wedge test's hypothesis set is their \emph{intersection}: the
+implication ``both $\ell_i \geq 0$ $\Rightarrow$ $y \in N$'' holds
+(the intersection sits inside the union), but its converse is false
+there --- points of $N$ with one active observable negative exist on
+the other branch. The biconditional form of the test would therefore
+be unsatisfiable at reentrant corners, while the one-directional form
+is exactly what the first-exit argument consumes
+(Lemma~\ref{lem:qbi-bridge} never needs to \emph{characterize} the
+frontier, only to re-admit prefix points). A certificate whose rows
+are jointly unsatisfiable at a boundary point --- checkerboard blocks
+touching at a corner and demanding opposite strict signs there ---
+simply makes the bridge's hypotheses unfulfillable: soundness only
+consumes what is given.
+\end{bremark}
+
+\begin{bremark}[$\partial D$-faces owe nothing; the arena regress
+terminates]
+Facets of $N$ on the arena boundary carry no rows: in
+Lemma~\ref{lem:qbi-bridge} they enter only through the conjunct
+$y \in D$, which arena invariance supplies. The arena's own invariance
+is either a nested $\mathsf{QInvScope}$ citation (a chart sub-block
+certified by its own facet rows --- this same rule, one level up) or
+the model-class fact that a chart's denotation confines trajectories to
+its domain; the regress terminates at the whole space, which is
+invariant vacuously.
+\end{bremark}
+
+\begin{bremark}[strictness of the margins: where it is and is not
+consumed]\label{rem:qbi-strict}
+The invariance conclusion of this section survives
+$\varepsilon_i = 0$: the integrated clause then says $\ell_i$ is
+non-decreasing along confined segments, and growth-from-zero still
+yields $\ell_i \geq 0$ --- consistent with the classical invariance
+theorem (Nagumo \cite{nagumo1942}), which needs only subtangentiality.
+The explicit positive rational margin is nonetheless mandatory in the
+certificate convention, for two reasons that live outside this
+section. First, exactness: a \emph{strict} field sign cannot be
+certified directly by the non-strict enclosure predicates of the base
+calculus; ``non-strict row on $\mathcal{A}\ell - \varepsilon$ with
+explicit $\varepsilon > 0$'' is how strictness becomes checkable in
+exact $\Q$. Second, the same rows are consumed by the Morse-family
+rules, where strictness is genuinely essential --- no orbit rides a
+facet, distinct fibres' invariant parts are disjoint, and the facet
+margin bounds admissible chain jumps (``strictness pays a second
+time''; see the \rulename{QMorseDischarge} section's ledger). A margin
+quietly dropped to zero would leave this rule's conclusion intact and
+break those.
+\end{bremark}
+
+\begin{bremark}[the hypothesis ledger --- what remains, named]
+\label{rem:qbi-ledger}
+The chain above discharges the rule's invariance obligation down to
+three hypothesis families, and the rule's Lean column renders with the
+hypothesis-flavoured check because of exactly these:
+
+\emph{(a) the integrated row clause.} The certificate's rows are
+pointwise: per facet box, a base-calculus sequent bounding the field's
+certified rate, $\mathcal{A}\ell_i \geq \varepsilon_i$ (the generator
+$\mathcal{A} = f \cdot \nabla$ of the deterministic model class).
+Lemma~\ref{lem:qbi-bridge} consumes the \emph{integrated} clause along
+trajectory segments. The bridge between them is one-variable calculus
+--- a mean-value argument along the trajectory --- whose surviving
+analytic content is the identification of the certified polynomial
+rate with the trajectory-wise derivative on the region: a model-class
+profile warrant (for smooth flows the identification is literal;
+switched and hybrid profiles replace it by one-sided derivative
+bounds, which is their own seam, deliberately not this section's).
+
+\emph{(b) grid geometry of the block.} Closedness of $N$,
+$N \subseteq D$, and the wedge test are finite geometry of the
+box-union over its declared rational grid --- recomputable
+combinatorics, and proved outright for grid blocks in the accompanying
+development's grid-geometry module (not bound by this section, whose
+theorems take (b) as hypotheses at the interface).
+
+\emph{(c) arena invariance.} As in the regress remark: nested
+citation, or model-class warrant, terminating at the whole space.
+
+None of the three is an opaque dynamical assumption; each names a
+specific fact with a specific owner --- (a) the profile stratum, (b)
+the checker's recompute (and the grid module), (c) the arena's own
+certificate. That is the sense in which this core rule is
+\emph{conditionally} mechanized: the cited theorems are sorry-free,
+and their hypotheses are the ledger above.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The block-with-inward-facets certificate is the exact-arithmetic
+descendant of Conley theory's isolating blocks
+\cite{conleyeaston1971}: compact sets whose boundary behaviour is
+transverse, so that dynamical claims reduce to boundary sign checks.
+The invariance argument itself is Nagumo's theorem
+\cite{nagumo1942} in first-exit form, specialized to polyhedral sets,
+where the subtangentiality condition becomes finitely many polynomial
+sign rows --- the form set-invariance control has long exploited
+\cite{blanchini1999}. What the certificate stratum adds is the
+discipline: strict signs via non-strict predicates with exact rational
+margins (Remark~\ref{rem:qbi-strict}), and a one-directional wedge
+test chosen so that box-union (nonconvex) blocks are admissible
+without any frontier characterization
+(Remark~\ref{rem:qbi-wedge}).
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qbi-assembly} & \texttt{qBlockInv\_sound} (QtslSoundness.lean)\\
+Lemma \ref{lem:qbi-dwell}, first-exit skeleton & \texttt{invariant\_of\_boundaryDwell} (Discharge.lean); composed as \texttt{qBlockInv\_sound\_of\_dwell}\\
+Lemma \ref{lem:qbi-bridge}, row shadow + wedge test & \texttt{HasFacetRows} (the definition); \texttt{HasFacetRows.boundaryDwell}\\
+Theorem \ref{thm:qbi-sound}, end-to-end & \texttt{qBlockInv\_sound\_of\_facetRows}\\
+arena regress terminus & \texttt{invariant\_univ}; nested-citation path \texttt{invariant\_of\_invScopeSat} (development)\\
+ledger item (a), the mean-value bridge & \texttt{integrated\_ge\_of\_flowDeriv\_ge} + \texttt{qBlockInv\_sound\_of\_rows} (development, not bound here)\\
+ledger item (b), grid facts & \texttt{Grid.wedge\_containment}, \texttt{Grid.qBlockInv\_sound\_of\_grid} (development, not bound here)\\
+facet rows & strictly-inward \rulename{BernCone}-family sequents with explicit rational margin (base kernel)\\
+\end{anchors}

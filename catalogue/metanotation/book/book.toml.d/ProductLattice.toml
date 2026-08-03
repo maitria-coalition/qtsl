@@ -1,0 +1,141 @@
+[[rule]]
+id = "ProductLattice"
+source = "../BL-rules.toml"
+row = "ProductLattice"
+proof = "book/proofs/ProductLattice.tex"
+commentary = '''
+\rulename{ProductLattice} composes at the certificate-\emph{family}
+level, one judgement up from the sequent rules: given certified
+attracting-block lattices for two systems over wire-disjoint hypernets,
+it certifies the join-closure of pairwise products as an
+attracting-block lattice for the product system over the disjoint
+union. The geometric fact that powers it: every internal facet of an
+axis-aligned product block is normal to one factor\textquotesingle s
+axis, so its inwardness polynomial \emph{is} that
+factor\textquotesingle s facet polynomial, with the other
+factor\textquotesingle s coordinates riding along as free box
+variables. Each composite facet sequent is therefore discharged
+\emph{by citation}: conclusion kept verbatim, the other
+factor\textquotesingle s box conjoined onto the premise as a rider.
+
+What the checker recomputes: nothing beyond the ordinary
+\rulename{BernCone}-family recompute pattern --- Bernstein-wise the
+composite facet grid is the factor grid tensored with all-ones, a
+coefficient identity, so syntactic identity of the cited conclusion is
+the whole discharge. The one side condition is wire-disjointness of the
+two hypernets.
+
+Wire-disjointness is essential twice. Structurally, the disjoint
+union of the two hypernets is only well-formed without shared wires
+(linearity and acyclicity of the union are proven \emph{from}
+disjointness). Semantically, the transport argument --- an admissible
+valuation of the union restricts to an admissible valuation of each
+factor, and factor-scoped formulas cannot tell the difference --- is
+exactly what a shared wire breaks: the rider would then constrain the
+factor\textquotesingle s own evaluation, and the factor certificate no
+longer transports freely. A single shared wire demotes the composition
+to the interface axis, which is \rulename{Promise}/small-gain
+territory, not this rule\textquotesingle s.
+'''
+note = '''
+The soundness statement is dynamics-free --- sound for flows and maps
+alike, because it certifies a \emph{lower bound} family (\textquotedblleft
+these blocks are certified\textquotedblright), never \textquotedblleft
+these are all the attractors\textquotedblright. The completeness
+reading --- that the generated lattice is the whole attractor lattice
+of the product --- is a flows-only theorem of the source literature
+and lives paper-side; the proof section exhibits the map-dynamics
+counterexample that forces the fence. No wire tag is allocated yet:
+soundness ships first, executable checking follows the family-object
+wire-format work, and the emit path refuses the rule until then.
+'''
+correspondence = '''
+The one rule of this book whose judgement sits a layer up: the
+conclusion is not a sequent but a certified \emph{family}, so the
+\rulename{Ax} frame applies one level in --- per facet sequent.
+\begin{itemize}
+\item $B_1, B_2 \mapsto$ \texttt{d.left}, \texttt{d.right} $:$
+  \texttt{CertifiedBlockLattice} over \texttt{H1}, \texttt{H2};
+  ``certified for $\varphi_i$\textquotesingle\textquotesingle{}
+  $\mapsto$ \texttt{hL}, \texttt{hR} $:$ \texttt{Valid} --- every
+  block\textquotesingle s every facet sequent semantically valid.
+  Note what does \emph{not} appear: any semiflow. The certified
+  statement is dynamics-free (the note above) --- the
+  display\textquotesingle s $\varphi_1 \times \varphi_2$ is the
+  intended reading of the facet sequents, not a consumed hypothesis.
+\item $\mathrm{wires}(H_1) \cap \mathrm{wires}(H_2) = \emptyset$
+  $\mapsto$ \texttt{d.disjoint} $:$ \texttt{H1.WireDisjoint H2}, and
+  the composite carrier $H_1 \sqcup H_2 \mapsto$
+  \texttt{Hypernet.disjUnion}.
+\item conclusion $\langle B_1 \times B_2 \rangle_{\vee}$ certified
+  $\mapsto$ a \emph{decomposed} correspondence, honestly wider than
+  one theorem: \texttt{sound\_productLattice} discharges every facet
+  of every \emph{pairwise product} block (\texttt{prodBlocks} --- the
+  join-closure\textquotesingle s meet-generators), and the joins,
+  never enumerated, discharge facet-by-facet through the standing
+  citation lemmas \texttt{sound\_productLattice\_citeLeft/Right}
+  (certified alongside, at \emph{arbitrary} rider) --- so the
+  displayed join-closure is covered by the generator theorem plus the
+  same two lemmas its proof uses, with no separate join statement.
+\item with no displayed row: well-scopedness --- the factor
+  lattices\textquotesingle{} facets and regions are confined to their
+  own hypernets (\texttt{facetsScoped}/\texttt{regionConfined}
+  fields of \texttt{CertifiedBlockLattice}), which is what makes
+  transport along the union injection sound; the undisplayed-pack
+  class of the \rulename{PSDCERT} evaluability rows.
+\end{itemize}
+Width note: the citation lemmas accept \emph{any} rider formula where
+the rule\textquotesingle s conclusion only ever conjoins the other
+factor\textquotesingle s region --- wider machinery in the safe
+direction, and exactly the generality the join-block sub-facets
+consume.
+'''
+
+[[rule.lean]]
+module = "Qtsl.ProductLattice"
+src = "../../lean/qtsl/Qtsl/ProductLattice.lean"
+decls = [
+  "BlockCert",
+  "CertifiedBlockLattice",
+  "PProductLatticeData",
+  "Sequent.semanticallyValid_extend",
+  "Sequent.semanticallyValid_weaken",
+  "sound_productLattice_citeLeft",
+  "sound_productLattice_citeRight",
+  "sound_productLattice",
+]
+full_decls = [
+  "Hypernet.WireDisjoint",
+  "CertifiedBlockLattice.Valid",
+  "citeFacet",
+  "prodBlock",
+  "PProductLatticeData.prodBlocks",
+]
+intro = '''
+\textbf{What \textquotedblleft discharge by
+citation\textquotedblright{} means, bound by display.}\enspace \texttt{citeFacet} keeps the cited
+factor facet\textquotesingle s conclusion verbatim and conjoins the
+rider onto the premise; \texttt{prodBlock} assembles a product
+block\textquotesingle s facet list as exactly the two citation
+families; \texttt{prodBlocks} enumerates only the meet-generators of
+the join-closure --- the exponentially many join blocks are never
+materialized, their sub-facets discharging through the same citation
+lemmas with smaller riders. A skeptical reader should confirm by eye
+that no definition below evaluates dynamics anywhere: the rule\textquotesingle s
+semantic content is entirely the transport-and-weaken pair quoted
+above.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+\rulename{ProductLattice} carries no base-calculus wire tag on the
+Lean side: its realized row is a judgment-layer object with its own
+row schema, outside the sequent wire format --- so the wire format
+the HOL4 development checks cannot carry the rule, and there is
+nothing at that stratum for a HOL checker statement to be
+\emph{about}. The HOL statement becomes writable when a column-side
+check for the judgment-layer row enters theory
+\texttt{qtsl\_catalogue}; until then this box is the honest state of
+the edifice.
+'''

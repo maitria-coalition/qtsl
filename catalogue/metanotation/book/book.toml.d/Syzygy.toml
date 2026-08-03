@@ -1,0 +1,201 @@
+[[rule]]
+id = "Syzygy"
+source = "../BL-rules.toml"
+row = "Syzygy"
+proof = "book/proofs/Syzygy.tex"
+commentary = '''
+\rulename{Syzygy} is the calculus\textquotesingle s composition rule: it
+combines already-proven component bounds into a bound on a weighted sum.
+Each component sequent $\Phi_i \vdash e_i \leq 0$ is a sub-proof ---
+typically ``this subsystem dissipates its storage function'' --- and the
+composite premise $\Phi$ carries, among its conjuncts,
+\emph{equality atoms} $g_k = 0$ describing how the subsystems are wired
+together (power-preserving interconnection: what one port supplies,
+another consumes). A producer reaches for the rule wherever a
+system-level argument says ``add the component certificates with weights
+$\lambda_i$ and let the internal supplies
+cancel'': the weights are found by whatever
+method the producer likes (an LP, typically), and only the resulting
+exact identity ships in the certificate.
+
+What the checker recomputes, given the payload (combination term,
+component list, conclusion term): that every entry weight is
+${}\geq 0$ --- premise \emph{equality} atoms expose both polarities to
+the matcher, so a free-sign multiplier on an equality is realized as a
+nonnegative weight on the appropriate polarity, and that freedom is what
+makes them syzygies; that every entry
+of the combination really is a component conclusion or a premise equality
+sub-conjunct, matched by exact canonical polynomial; and that the
+weighted sum of those polynomials is \emph{identically} the conclusion
+polynomial as canonical forms over $\Q$ --- coefficient-for-coefficient
+equality, not evaluation at test points. It further checks the
+bookkeeping hypotheses: each component\textquotesingle s premise is
+contained conjunct-wise in $\Phi$ (\texttt{preContains}), the conclusion
+term has a determinate finite shape (\texttt{conclShape},
+\texttt{conclFin}), and every wire in sight has positive size
+(\texttt{wiresPos}, \texttt{compPostWiresPos}).
+
+Each hypothesis is essential. Drop the sign condition on the
+inequality weights and a producer could multiply a bound by $-1$ and
+conclude its negation. Drop the entry-sourcing check and the
+``combination'' could smuggle in atoms
+nobody proved. Drop the exact-identity check and the conclusion would be
+unrelated to the premises. Drop premise containment and a component
+proved over its own operating box could be applied outside it. Drop the
+positive-size conditions and a component conclusion over a zero-size wire
+--- vacuously true, since it quantifies over no tensor entries --- could
+enter the combination with full algebraic weight and push the composite
+to a falsehood. The proof section walks these in order.
+'''
+note = '''
+Port-Hamiltonian reading: with $e_i = \mathcal{L}_i V_i -
+s_i^{\mathrm{ext}} - s_i^{\mathrm{int}}$, the equality atoms $g_k = 0$
+cancel the internal supplies and the conclusion is a dissipation
+inequality for $\sum_i \lambda_i V_i$ --- Tellegen\textquotesingle s
+theorem in certificate form. The free-body diagram is the junction tree;
+internal forces at the cuts are the separator algebra.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}. The statement bundles its data as
+\texttt{SyzygyStep} --- field-for-field the reference
+checker\textquotesingle s obligations, and field-for-field the payload
+minus the component-proof list (which enters \texttt{sound\_syzygy} as
+the validity hypothesis \texttt{hcomps}) and minus the
+denominator-bound declaration (resource accounting; zero
+proof-theoretic weight, so rightly absent from the soundness
+statement).
+\begin{itemize}
+\item the component judgements $\{\Phi_i \vdash e_i \leq 0\}_{i=1}^n$
+  $\mapsto$ \texttt{st.components : List Sequent} with
+  \texttt{hcomps}; the atoms $e_i \leq 0$ have no binders of their own
+  --- each combination entry tagged \textsc{from-component} is checked
+  against a component\textquotesingle s conclusion inside the
+  combination check, which is where the $e_i$ live.
+\item $\Phi \supseteq \Phi_i$ conjunct-wise $\mapsto$
+  \texttt{st.preContains} $:$ \texttt{premiseContains seq.pre c.pre},
+  per component.
+\item the equality sub-conjuncts $\{g_k = 0\}$ of $\Phi$ $\mapsto$ the
+  \textsc{from-wiring} entry tag: such an entry\textquotesingle s atom
+  is checked to be a sub-conjunct of \texttt{seq.pre} directly.
+\item $\lambda_i \in \Q_{\geq 0}$, $\nu_k \in \Q$, and $c \equiv
+  \sum_i \lambda_i e_i + \sum_k \nu_k g_k$ $\mapsto$
+  \texttt{st.combination} and \texttt{st.conclusion} under
+  \texttt{st.valid} $:$ \texttt{syzygyCombinationValid} --- the
+  canonical-polynomial identity is recomputed by one of \emph{three}
+  certified routes (the idx-free \texttt{syzygyCheckCore} replay, the
+  wire-coordinate \texttt{syzygyCheckW}, and the mixed
+  \texttt{syzygyCheckM}), each discharged separately in
+  \texttt{sound\_syzygy}.
+\item the evaluability and positive-size packs $\mapsto$
+  \texttt{conclShape}, \texttt{conclFin}, \texttt{wiresPos},
+  \texttt{compPostWiresPos} --- displayed inline at
+  \rulename{PBound}\textquotesingle s cell (this page\textquotesingle
+  s cell leaves them to the caption); \texttt{compPostWiresPos} is
+  the honest extension of the positive-size discipline to component
+  conclusions, whose absence has a kernel-checkable
+  vacuous-conclusion counterexample (the source docstring).
+\item $\Psi$\textquotesingle s three readings $\mapsto$
+  \texttt{st.postForm} $:$ \texttt{syzygyConclusionForm}, literally
+  the displayed three-membered disjunction; the transport of the
+  zero-normal bound to every reading is the certified-alongside
+  ge-bridge lemma \texttt{holds\_of\_syzygyConclusionForm}, applied
+  once here, inherited by \rulename{PBound} and the
+  \rulename{PSDCERT} trio.
+\end{itemize}
+Width note: nothing in the statement consumes the port-Hamiltonian
+reading --- supply rates, storage functions, and the wiring identity
+are producer-side interpretations of which the certified content is
+exactly the polynomial identity and its component sourcing; and the
+statement is proven at every hypernet and component list, with every
+hypothesis consumed.
+'''
+comparator = '''
+\badge{BadgeGray}{comparator: none for this rule} no fixture in the
+three-implementation comparator harness (compiled / kernel-interpreted /
+reference-interpreted) exercises a \rulename{Syzygy} node yet; current
+fixtures cover \rulename{BernCone} and \rulename{Norm} shapes. The
+end-to-end \rulename{Syzygy} certificate
+\texttt{DpCompositeSyzygy.lean} is a kernel-checked instance but rides
+the handshake harness, not the comparator.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["SyzygyStep", "holds_of_syzygyConclusionForm", "sound_syzygy"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "syzygyConclusionForm",
+  "atomLeZeroPolys",
+  "farkasEntries",
+  "syzygyCheckCore",
+  "syzygyCheckW",
+  "syzygyCheckM",
+  "syzygyCheck",
+  "syzygyCombinationValid",
+]
+intro = '''
+\textbf{What \texttt{syzygyCombinationValid} means --- and what it does
+not.}\enspace The rule\textquotesingle s side condition appears in the
+payload structure above as a single opaque name, so this book binds its
+meaning by displaying the definition chain in full, from the checker
+sources. Reading the chain: \texttt{syzygyCombinationValid} is precisely
+the proposition ``\texttt{syzygyCheck} returns
+\texttt{true}'', and \texttt{syzygyCheck}
+is the disjunction of three branches of one algorithm (a branch for
+index-free terms, a wire-coordinate branch for indexed terms, and a
+mixed tagged-union branch --- the newest widening --- for heterogeneous
+combinations of both kinds). All three
+branches do the same three things: decode the combination term into
+weighted entries (\texttt{farkasEntries} --- a fixed canonical encoding,
+anything else is rejected); require each weight nonnegative and each
+entry\textquotesingle s polynomial to occur among the
+$({\cdot} \leq 0)$-normal polynomials of a \emph{component conclusion} or
+of an \emph{equality sub-conjunct of the premise}
+(\texttt{atomLeZeroPolys} --- note that equality atoms contribute both
+polarities, which is exactly the free-sign multiplier discipline); and
+require the weighted fold of those polynomials to equal the conclusion
+term\textquotesingle s canonical polynomial.
+
+What a skeptical reader should confirm by eye in the definitions below:
+the conclusion term enters the check \emph{only} as the target of the
+exact-identity comparison (and through a syntactic index-freedom gate);
+the step\textquotesingle s posted formula \texttt{seq.post} does not
+appear in the check at all; and nothing in the chain evaluates, assumes,
+or otherwise consults the \emph{truth} of the conclusion --- the check
+manipulates polynomials, never valuations, so it could not covertly
+``assert the conclusion is
+true''. \texttt{seq.post} connects to the
+conclusion term only through the separate, purely syntactic field
+\texttt{postForm} --- the three readings of $c \leq 0$ enumerated by
+\texttt{syzygyConclusionForm} below --- whose semantic transport is the
+separately proven ring lemma \texttt{holds\_of\_syzygyConclusionForm}
+quoted above. Semantic truth is established only in
+\texttt{sound\_syzygy}, from the component-validity hypotheses.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = ["Definition syzygyCheckCore_def", "Definition syzygyCheck_def"]
+receipt = '''
+\texttt{hol-strict} CLEAN over the ported checker chain: theory
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host, scripts
+sha-matched verbatim to the sources cited here (git blob
+\texttt{c6ffee9c\ldots}). Downstream, the same chain carries the checker
+to a CakeML binary with the \texttt{machine\_code\_sound} tag
+\texttt{(["DISK\_THM"], [])} (theory \texttt{qtslCertProofARM8}).
+Family-level bridge lemmas for the \rulename{Syzygy} node
+(\texttt{famEq\_syz}, \texttt{qtsl\_fam\_syz}) live in their own
+development script beside the port and are outside the verification
+run quoted here. As on the \rulename{Farkas} and
+\rulename{PBound} pages: the Lean check has since grown a third (mixed
+tagged-union) branch, added 2026-07-19 after this port run --- the
+divergence is refusal-direction only, and its port is named residue.
+'''

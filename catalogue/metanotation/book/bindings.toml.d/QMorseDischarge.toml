@@ -1,0 +1,44 @@
+# bindings.toml.d/QMorseDischarge.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QMorseDischarge'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Discharge"
+decl = "HasTransitCert.disjoint_maxInv"
+sha256 = "98175865fdade57eb0f523a469212496513f6358d849f06aa4a6fd95dd27e295"
+
+[[statement]]
+module = "Qtsl.Discharge"
+decl = "HasTransitCert.maxInv_empty"
+sha256 = "f8bda30fbb557863bf61c86e2d52e3fe2edbc3684b3f1d6cf2ce49bef69c07a2"
+
+[[statement]]
+module = "Qtsl.Discharge"
+decl = "crCover_assemble"
+sha256 = "e7e899380c4b71e0a99340f09844f41648f5b12af1ea7cbd5cf48844fa83ad50"
+
+[[statement]]
+module = "Qtsl.Discharge"
+decl = "fiberUnion_isCompact"
+sha256 = "9570c16eebe60ad61e3d182474ca73a05be8d90ed32ea1da6b5808aad34b39c1"
+
+[[statement]]
+module = "Qtsl.Discharge"
+decl = "maxInv_isCompact"
+sha256 = "dd708feeb4d61c188f922fc1495facf9c78051627b4e78950fb7dc6818db5c2e"
+
+[[statement]]
+module = "Qtsl.Discharge"
+decl = "qMorseDischarge_sound_modelClass"
+sha256 = "e0c713d0f32d666379a5802450fbc221e08353aa0bb657e52d75c7f8421ccbe9"
+
+[[statement]]
+module = "Qtsl.QtslSoundness"
+decl = "qMorseDischarge_sound"
+sha256 = "fae3b5d4ee144ccc8e21a8b6b9b56610d9baf6b0333161db5623819fbe7fad06"
+
+[[correspondence]]
+entry = "QMorseDischarge"
+steele_sha256 = "b330e2f378d3d1295de369ac569d4c2c722b627aa2aa7ff2232a07215cf89c45"
+statements_sha256 = "de817f59ae8f68e36c6c2d2292b74b4804bf9f484b05f12a1cd86f5c0ae5742c"
+prose_sha256 = "51262bbf4b354a262d9341fc4daca9ea89b6d92928639e1f5ece5a6ded14b4b8"
+

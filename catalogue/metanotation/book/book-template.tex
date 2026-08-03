@@ -1,0 +1,61 @@
+\documentclass[10pt,twoside]{article}
+\usepackage[a4paper,inner=22mm,outer=18mm,top=20mm,bottom=22mm]{geometry}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{stmaryrd} %
+\usepackage{mathpartir}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+
+\directlua{luaotfload.add_fallback("bookmonofb",{
+  "file:FreeMono.otf:mode=node;",
+  "file:DejaVuSans.ttf:mode=node;",
+  "file:FreeSerif.ttf:mode=node;",
+  "file:STIX-Regular.otf:mode=node;",
+  "file:Asana-Math.otf:mode=node;",
+})}
+\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase,RawFeature={fallback=bookmonofb}]
+
+@@MACROS@@
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\newcommand{\rulesection}[3]{%
+  \clearpage
+  \refstepcounter{rulesec}%
+  {\LARGE\bfseries Rule #1.\ \rulename{#2}}\enspace
+  {\large\textcolor{NoteGray}{(#3)}}\par
+  \medskip\hrule height 0.8pt\medskip}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE,LO]{\footnotesize\textcolor{NoteGray}{@@TITLE@@}}
+\renewcommand{\headrulewidth}{0.2pt}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries @@TITLE@@}\\[6pt]
+{\large @@SUBTITLE@@}
+\end{center}
+\medskip
+
+@@PREFACE@@
+
+\par\medskip
+{\footnotesize\textcolor{NoteGray}{@@STAMP@@}}
+
+@@DASHBOARD@@
+
+@@BODY@@
+
+@@REFS@@
+
+\end{document}

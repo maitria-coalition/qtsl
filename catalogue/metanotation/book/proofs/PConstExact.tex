@@ -1,0 +1,104 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The tier taxonomy defines tier 2 as \emph{verified unpacking
+into core rules} (one node $\to$ many); this rule is the taxonomy's
+recorded boundary case --- admissible by \emph{reduction to verified
+machinery} --- and the recipe below typesets both the general template and
+the honest degenerate instance.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:pce-template}
+An admissible rule $R$ with premises $P_1, \dots, P_n$ and conclusion $C$
+is warranted by a \emph{rewrite}: a function taking any proof-tree node
+\[
+\inferrule*[Right=$R$]{\;\mathcal{T}_1 \rhd P_1 \\ \cdots \\ \mathcal{T}_n \rhd P_n\;}{C}
+\qquad\rightsquigarrow\qquad
+\mathcal{D}\bigl[\mathcal{T}_1, \dots, \mathcal{T}_n\bigr] \rhd C
+\]
+where $\mathcal{D}$ is a derivation fragment over core (and
+previously-justified admissible) rules with the same conclusion, consuming
+the premise subtrees $\mathcal{T}_i$ at its leaves. Applying the rewrite
+leaf-first eliminates every $R$-node from a finite tree in finitely many
+steps, so any judgement derivable with $R$ is derivable without it ---
+admissibility --- and the calculus's soundness theorem is conserved with
+\emph{no new kernel semantic content}. The verified object shipped per
+admissible rule is either $\mathcal{D}$ itself or (equivalently, and how
+this catalogue's Lean side does it) a soundness lemma for $R$ that factors
+through already-verified machinery.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{PConstExact} instance --- the degenerate rewrite]
+\label{rec:pce-instance}
+\rulename{PConstExact} has \emph{no proof premises} ($n = 0$), and its
+rewrite target contains \emph{zero catalogue nodes}: there is no core
+derivation of a ground fact --- before this rule the calculus could not
+state one at all ($\vdash -3/4 \leq 0$ had no derivation), which is the
+rule's entire point. The rewrite therefore discharges the node against a
+named \emph{verified theorem} rather than against catalogue structure:
+\[
+\inferrule*[Right=\rulename{PConstExact}]{\;\mathrm{evalClosed}(e_1 \bowtie e_2) = \mathsf{true}\;}{\Phi \vdash e_1 \bowtie e_2}
+\qquad\rightsquigarrow\qquad
+\text{\upshape the checker replays } \mathrm{evalClosed};\;
+\text{\texttt{holds\_of\_evalClosed\_true} stands as warrant.}
+\]
+The side condition is \emph{computational} (exact $\Q$ evaluation of a
+closed comparison --- decidable, replayed by the checker), and the warrant
+theorem is kernel-verified once, globally: soundness of the rule is
+literally ``the exact evaluator is correct.''
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:pce-sound}
+If $(\mathrm{atom}\ \bowtie\ e_1\ e_2).\mathrm{evalClosed} =
+\mathsf{some\ true}$ and the sequent's conclusion is that atom, the
+sequent is semantically valid over any hypernet, with arbitrary premise
+$\Phi$.
+\end{bprop}
+\begin{proof}
+Fix any valuation $\sigma$ (admissibility and $\sigma \models \Phi$ are
+not consulted --- the rule is premise-free, the \rulename{Norm}
+convention). By the verified evaluator theorem
+\texttt{Formula.holds\_of\_evalClosed\_true}, a formula whose closed
+evaluation returns $\mathsf{true}$ holds at \emph{every} valuation: a
+closed term's evaluation consults no wire, so $\sigma$ is never read, and
+the comparison was decided by exact arithmetic over $\Q$. That is the
+whole proof --- \texttt{sound\_pConstExact} is one \texttt{exact} step.
+\end{proof}
+
+\begin{bremark}[closedness is implied, not declared]
+There is no ``$e_1, e_2$ closed'' payload field to check:
+$\mathrm{evalClosed}$ returns $\mathsf{none}$ on any wire occurrence, so
+$\mathsf{some\ true}$ \emph{certifies} closedness as a byproduct. A
+well-formedness hypothesis that the evaluator itself enforces is one the
+payload cannot mis-declare --- unrepresentable, not discouraged.
+\end{bremark}
+
+\begin{bremark}[why $\neq$ is excluded --- the $M_3$ countermodel]
+The comparator set is confined to $\{<, \leq, =, \geq, >\}$: five of the
+six. The semantic lemma covers all six, but the calculus also maintains a
+three-valued screen (\texttt{ProofObject.m3sound}), and under the $M_3$
+countermodel a wire-free $\neq$ atom interprets to $\bot$ --- so admitting
+$\neq$ against arbitrary $\Phi$ would let a premise-free rule conclude
+something the $M_3$ screen refutes, breaking \texttt{m3sound} (the
+\texttt{notNE} payload field, mirroring \rulename{ArithAtom}'s analogous
+exclusion). A
+hypothesis whose necessity comes not from $\Q$-semantics but from a
+\emph{second} soundness invariant is exactly the kind a recipe must state,
+or the next porter re-learns it the hard way.
+\end{bremark}
+
+\begin{bremark}[the subsumed corner, and coverage]
+\rulename{PRatFact} (the scalar constant fact $c \bowtie 0$) is the corner
+$e_2 = 0$ of this rule and was subsumed when the roster was consolidated. Coverage today:
+the \texttt{Term} grammar makes every closed term rank-0, so the rule
+states every closed \emph{scalar} exact comparison; the matrix corner
+(exact closed matrix identities, MIX's use case) needs closed-tensor
+constructors and a \texttt{QTensor}-valued closed evaluator --- the named
+next leg, deliberately not hand-faked here.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:pce-instance} warrant & \texttt{sound\_pConstExact} (one step to \texttt{Formula.holds\_of\_evalClosed\_true})\\
+closedness-is-implied & \texttt{Formula.evalClosed} ($\mathsf{none}$ on any wire)\\
+the $\neq$ exclusion & \texttt{notNE} payload field; \texttt{ProofObject.m3sound}\\
+premise-freedom ($\Phi$ arbitrary) & the \rulename{Norm} convention; \texttt{pre} unused in \texttt{sound\_pConstExact}\\
+wire placement & \texttt{RuleTag.pConstExact}; wire tag not yet allocated --- the emit path refuses the rule until allocation\\
+\end{anchors}

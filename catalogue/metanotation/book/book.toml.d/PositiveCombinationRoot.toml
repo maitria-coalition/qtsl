@@ -1,0 +1,103 @@
+# PositiveCombinationRoot: root boolean combination of P-blocks — full
+# literate section (B10). Lean warrant: the auxiliary structural module.
+[[rule]]
+id = "PositiveCombinationRoot"
+source = "../QTSL-rules.toml"
+row = "PositiveCombinationRoot (T11)"
+proof = "book/proofs/PositiveCombinationRoot.tex"
+commentary = '''
+\rulename{PositiveCombinationRoot} assembles a certificate for a root
+boolean combination out of certificates for its blocks, at zero new
+row cost: if the children conclude $\mathsf{QRegionSat}(\varphi_1,
+R_1)$ and $\mathsf{QRegionSat}(\varphi_2, R_2)$, the conjunction is
+certified on $R_1 \cap R_2$ and the disjunction on $R_1 \cup R_2$ ---
+and the $n$-ary forms take $\bigcap_i R_i$ and $\bigcup_i R_i$ over a
+whole block family. A producer uses it at the top of every
+specification whose root is a positive boolean shape: each block is
+certified by its own sub-derivation (a battery, an invariance
+certificate, a nested combination), and the root costs two set
+operations.
+
+What the checker recomputes: the region intersection or union itself.
+The semantic clauses --- that the conjunction denotes the
+intersection of the denotations, the disjunction the union --- enter
+as definitional bridges supplied by the specification layer, never as
+posted premises.
+
+The word \emph{positive} in the name is essential.
+Under-approximation is preserved by intersection and union: a region
+inside each denotation is inside their intersection; a union of
+regions inside denotations is inside the union of the denotations. It
+is REVERSED by complement: the complement of an under-approximation
+over-approximates --- the empty region under-approximates every
+denotation, and its complement, the whole space, over-approximates
+every complement. A negation passed through this rule would silently
+flip the judgement kind\textquotesingle s one orientation guarantee.
+Negation therefore never passes through it; it rides the normal-form
+and closure machinery instead, where the direction swap is handled
+deliberately.
+'''
+note = '''
+Admissible, not alias: several children and two lemma directions ---
+more than a single application. The node shape (a pair of binary
+connective nodes versus one $n$-ary combination node) is an enactment
+decision still open on the schema side; the verified lemmas cover
+both forms, so neither choice waits on new mathematics.
+'''
+correspondence = '''
+The judgement kind itself is bound by display: \texttt{RegionSat R den
+= R ⊆ den} --- $\mathsf{QRegionSat}$ compiled, the formula appearing
+only through its denotation (the System bridge, module \S0). The two
+displayed binary rules $\mapsto$
+\texttt{positiveCombinationAnd\_sound} /
+\texttt{Or\_sound}: children $\mathsf{QRegionSat}(\varphi_i, R_i)$
+$\mapsto$ \texttt{h₁}/\texttt{h₂ : RegionSat Rᵢ denᵢ}; conclusions at
+$R_1 \cap R_2$ / $R_1 \cup R_2$ verbatim; and the semantic clauses
+$[\![\varphi_1 \wedge \varphi_2]\!] = [\![\varphi_1]\!] \cap
+[\![\varphi_2]\!]$ (resp.\ $\cup$) $\mapsto$ the bridge hypotheses
+\texttt{hbridge : denAnd = den₁ ∩ den₂} --- supplied by the future
+spec layer, never asserted in qtsl-aux, exactly as the roster witness
+says. The $n$-ary forms (\texttt{Inter\_sound}/\texttt{Union\_sound},
+arbitrary index) cover the staged single-node shape. Width note: pure
+lattice monotonicity over arbitrary sets --- no formula grammar, no
+positivity syntax; the ``positive connectives only'' restriction is
+enforced by which bridges exist to supply (negation has no
+intersection/union clause), not by any binder here --- refusal lives
+in the spec layer, the certified statements are the two monotone
+directions the display prices.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Structural"
+src = "../../lean/qtsl-aux/QtslAux/Structural.lean"
+intro = '''
+\texttt{RegionSat} is the compiled reading of the workhorse judgement
+kind --- the region under-approximates the denotation --- quoted in
+full because the four lemmas\textquotesingle{} meaning turns on it.
+The connective denotations enter through bridge hypotheses
+(\texttt{denAnd} $=$ intersection of the children\textquotesingle s
+denotations, \texttt{denOr} $=$ union), supplied by the specification
+layer at compile time.
+'''
+full_decls = ["RegionSat"]
+decls = [
+  "positiveCombinationAnd_sound",
+  "positiveCombinationOr_sound",
+  "positiveCombinationInter_sound",
+  "positiveCombinationUnion_sound",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development\textquotesingle s object is the base
+calculus\textquotesingle s wire-format checker (theory
+\texttt{qtsl\_catalogue} ports the catalogue check-function cone).
+This rule concludes a satisfaction judgement of the extension theory:
+it postdates that port, and no wire row for the combination node
+exists in any staged format --- there is nothing for a HOL statement
+to be about. The box becomes fillable when the
+extension\textquotesingle s certificate rows are committed to a wire format
+and the corresponding check is ported.
+'''

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# lean-cone — emit a topologically sorted, statements-only audit surface
+# for a set of Lean constants. See tools/lean-cone/README.md.
+#
+#   ./lean-cone [--pkg lean/<package>] [options] Constant.Name [Constant.Name ...]
+#
+# Requires the package to be built (`lake build` inside the package
+# directory) so its .olean files exist. All options other than --pkg are
+# forwarded to the underlying tool; if no --import is given, the
+# package's default targets (from lakefile.toml) are used as the
+# umbrella imports.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG="lean/qtsl"
+FWD=()
+HAS_IMPORT=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --pkg) PKG="$2"; shift 2;;
+    --import) HAS_IMPORT=1; FWD+=("$1" "$2"); shift 2;;
+    -h|--help)
+      sed -n '2,11p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      echo
+      echo "Tool options:"
+      cd "$ROOT/$PKG" && exec lake env lean --run "$ROOT/tools/lean-cone/LeanCone.lean" --help
+      ;;
+    *) FWD+=("$1"); shift;;
+  esac
+done
+
+PKGDIR="$ROOT/$PKG"
+[ -d "$PKGDIR" ] || { echo "lean-cone: package dir not found: $PKGDIR" >&2; exit 1; }
+
+if [ "$HAS_IMPORT" = 0 ]; then
+  # umbrella modules default to the package's defaultTargets
+  DEFAULTS=$(sed -n 's/^defaultTargets *= *\[\(.*\)\]/\1/p' "$PKGDIR/lakefile.toml" \
+    | tr -d '"' | tr ',' ' ')
+  for m in $DEFAULTS; do
+    FWD=(--import "$m" "${FWD[@]}")
+  done
+fi
+
+cd "$PKGDIR"
+exec lake env lean --run "$ROOT/tools/lean-cone/LeanCone.lean" "${FWD[@]}"

@@ -1,0 +1,21 @@
+# api.toml.d/PSDCertK.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "PSDCertK"
+
+[api.ts]
+handle = "bl.Builder.psdCertK"
+sig_file = "ts/src/bl.ts"
+sig = ["fn psdCertK"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:psdCertK"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::psd_cert_k"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn psd_cert_k"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:psd_cert_k"

@@ -1,0 +1,97 @@
+[[rule]]
+id = "Ax"
+source = "../BL-rules.toml"
+row = "Ax"
+proof = "book/proofs/Ax.tex"
+commentary = '''
+\rulename{Ax} is the leaf of every derivation: it discharges a sequent
+whose conclusion is literally its premise, $\Phi \vdash \Phi$. A
+producer uses it wherever a derivation bottoms out at an assumption ---
+the demonstration certificate cited under the comparator note below
+begins with an \rulename{Ax} node discharging its composite premise
+before a conjunction elimination extracts the region fact a
+Bernstein-cone closure consumes.
+
+What the checker recomputes is one thing: that the premise and
+conclusion are the \emph{same formula tree}, compared node for node ---
+no normalization, no reassociation, no matching. Formulas here are
+ordered trees, so \rulename{Ax} does not close
+$\Phi \vdash \Phi'$ for a logically equivalent but
+differently shaped $\Phi'$; that is re-derived through
+the conjunction rules when needed.
+
+The single hypothesis is essential in the obvious, total way: drop
+the equality and the premise-free rule concludes any sequent at all ---
+$\top \vdash \bot$ is the sharpest instance. Notably absent are
+well-typedness side conditions, and their absence is correct: whatever
+satisfaction amounts to for $\Phi$ --- even a $\Phi$ mentioning untyped
+wires or atoms that never evaluate --- it sits on both sides of the
+turnstile. The proof section contrasts this with \rulename{EqRefl},
+which concludes a freshly minted \emph{atom} and therefore does need
+typing fields.
+'''
+comparator = '''
+\badge{BadgeBlue}{comparator: exercised via the demonstration fixture}
+the composite demonstration certificate (an axiom node, a conjunction
+elimination, a Bernstein-cone closure) runs as a fixture through the
+three-implementation comparator harness (compiled / kernel-interpreted /
+reference-interpreted), so this rule\textquotesingle s node rides every
+execution path of that harness.
+'''
+correspondence = '''
+\begin{itemize}
+\item the judgement frame, shared by every structural dictionary below:
+  a sequent is the pair of its premise and conclusion formulas, so a
+  displayed judgement $\Phi \vdash \Psi$ $\mapsto$ \texttt{seq :
+  Sequent} with \texttt{seq.pre}, \texttt{seq.post} the two sides, and
+  asserting it $\mapsto$ the goal \texttt{seq.semanticallyValid H} ---
+  at every admissible valuation of the ambient hypernet \texttt{H},
+  satisfaction of \texttt{seq.pre} implies satisfaction of
+  \texttt{seq.post}.
+\item the display\textquotesingle s single metavariable $\Phi$,
+  appearing on both sides of the turnstile, $\mapsto$ the sole
+  hypothesis \texttt{h} $:$ \texttt{seq.pre = seq.post} --- sharing by
+  field equation on one sequent binder, not by a shared metavariable:
+  the statement quantifies over \emph{all} sequents and consumes the
+  identity as its only input.
+\item premise-freeness $\mapsto$ silence: no other hypothesis exists;
+  \texttt{H} and \texttt{seq} are arbitrary.
+\item the payload row \texttt{PAxData} (certified alongside) carries
+  the same single tie as certificate data (\texttt{preEqPost}), so
+  admission layer and soundness statement coincide exactly on this
+  rule.
+\end{itemize}
+No width difference in either direction: one hypothesis, consumed by
+rewriting; nothing else is stated or needed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_ax"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["PAxData"]
+intro = '''
+\textbf{How to read the payload.}\enspace A certificate node for this
+rule carries an inhabitant of the following inductive: its
+proof-obligation fields (here, one equality of formulas) are the
+rule\textquotesingle s entire side-condition surface, and the soundness
+lemma above takes exactly those fields as hypotheses. The six other
+structural sections\textquotesingle{} payloads read the same way ---
+sub-derivations plus structural equalities, nothing else.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_axScript.sml"
+theory = "qtsl_fam_ax"
+decls = [
+  "Definition checkFam_ax_def",
+  "Theorem famEq_ax",
+]
+receipt = '''
+Documentary citations. Spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node reduction: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at wire tag 0, the columnar family check holds iff the node\textquotesingle s sequent satisfies the rule\textquotesingle s own side condition ($\mathtt{sq.pre} = \mathtt{sq.post}$). There is no signed HOL receipt store yet --- these citations are documentary.
+'''

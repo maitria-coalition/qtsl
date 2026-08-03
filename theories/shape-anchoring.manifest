@@ -1,0 +1,22 @@
+# shape-anchoring.manifest — the extent-anchoring record.
+#
+# Per tensor-valued field: the consumer chain that anchors its extent
+# fields INDEPENDENTLY of the ax/shape/* rows, so a producer cannot
+# consistently forge the (extent-field, tensor) pair together. The
+# design invariant for species authors: every extent field has at
+# least one consumer independent of its shape rows. check.sh's
+# b5-anchoring-manifest leg asserts every DynTensor-codomain fun in
+# the normalized model has a row here; a new species adds its row or
+# goes red by name. (The jointly-forged value-plane fixtures and the
+# seeded checker mutants of the anchoring battery are owed at the
+# oracle layer, beside the shape-row oracles themselves.)
+#
+# field <TAB-free, space-separated> anchor-chain
+PPsdCertT/A  /n types the /term family's index domain; PsdCert.conclCheck re-ties arity to the conclusion the proof consumes; ax/applicable/PPsdCertT/post links the conclusion into the concluded judgment
+PPsdCertT/Z  witness-only payload; a forged Z can only refuse checkTri, never falsely accept (kernel fact, PsdCert.lean)
+PPsdCertDD/A as PPsdCertT/A (conclCheck arity + post linkage)
+PPsdCertDD/Z witness-only payload; refuse-only under checkDiag
+PPsdCertK/A  /nTotal types the /term family's index domain; anchored to m + k by ax/shape/PPsdCertK/nTotal (natPlusIs, checked addition) AND consumed by conclCheck at (m + k); post linkage as T
+PPsdCertK/N  m, k consumed by checkKernel's block decomposition + congruence A = L^T B L, L = (I | N); refuse-only on forgery
+PPsdCertK/B  as /N (block congruence consumes m; inner T-or-DD witness on (B, Z))
+PPsdCertK/Z  witness-only payload; refuse-only under the inner checkTri/checkDiag

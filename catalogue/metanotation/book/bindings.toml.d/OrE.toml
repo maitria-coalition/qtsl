@@ -1,0 +1,39 @@
+# bindings.toml.d/OrE.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'OrE'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Admissible"
+decl = "OrECtxStep"
+sha256 = "13f6d7c96b51e55a82ac3d082f051c90671e655672a75c85a865d291a9e36409"
+
+[[statement]]
+module = "Qtsl.Admissible"
+decl = "cx_not_derivable"
+sha256 = "581bfe72c83bb3faf3d42081f80f2a8ff9b4b98e76fe662cef00b759fd1e2de0"
+
+[[statement]]
+module = "Qtsl.Admissible"
+decl = "orECtx_not_elaborable"
+sha256 = "81ad3236826c70e127998670ebf95384c9c1d851a189f8a935e288e53384eef0"
+
+[[statement]]
+module = "Qtsl.Admissible"
+decl = "sound_orECtx"
+sha256 = "a61a44b430e291aee128c4e1ce5638252bdec0e9cbfc555fd918d1ee442a6b2e"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "POrEData"
+sha256 = "8788814fb275f0900ed92491cfe382e34a1819be3a019064fa0bdc00a4545cff"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_orE"
+sha256 = "10d333ce0ae5d02ca41a553166cefa8d11416a568a5dc55b12726c87e2dc004e"
+
+[[correspondence]]
+entry = "OrE"
+steele_sha256 = "963be9d77bd46c9855310a75402fa9a9befbdd1a7a39f408e5c7ddca7f250171"
+statements_sha256 = "31ecc70632db23bcc967b202659d4837050fc4bcc0dcb7c70993f33851b1b979"
+prose_sha256 = "c1afbe0d6e3cfb83b4288b4191ce395b7ca783fc46b12bf03968e9417067eb9e"
+

@@ -1,0 +1,42 @@
+\apilang{TypeScript}{judgment.wireCert}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function wireCert(args: {
+  wiring: WiringRef;
+  premises: ReadonlyArray<SpecRef>;
+  conclusion: SpecRef;
+  gain: Poly;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.wireCert({
+    wiring: j.wiringRef("w-loop"),
+    premises: [j.specRef("inner-a"), j.specRef("inner-b")],
+    conclusion: j.specRef("outer"),
+    gain: s.unwrap(s.poly([{ expts: [1], coeff: Q.of(1, 2) }])),
+  }),
+),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QWireCert::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(
+    wiring: WiringRef,
+    premises: Vec<SpecRef>,
+    conclusion: SpecRef,
+    slack: Slack,
+) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let wire_cert = QWireCert::new(
+    WiringRef("w-loop".into()),
+    vec![SpecRef("inner-a".into()), SpecRef("inner-b".into())],
+    SpecRef("outer".into()),
+    Slack {
+        gain: Poly::new(vec![(vec![1u32], q(1, 2))]).unwrap(),
+    },
+);
+\end{rustsrc}

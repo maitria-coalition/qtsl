@@ -1,0 +1,21 @@
+# api.toml.d/QBlockInv.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QBlockInv"
+
+[api.ts]
+handle = "rules.qtslExt.blockInv"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn blockInv", "interface BlockInvArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_block_inv.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::block_inv"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/morse.rs"
+sig = ["fn block_inv"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_block_inv"

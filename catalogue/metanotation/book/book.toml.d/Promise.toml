@@ -1,0 +1,108 @@
+[[rule]]
+id = "Promise"
+source = "../BL-rules.toml"
+row = "Promise"
+proof = "book/proofs/Promise.tex"
+commentary = '''
+\rulename{Promise} is the calculus\textquotesingle s acyclic composition
+rule: it discharges an assumption one component makes about another. The
+supplier proves the contract $Q$ from its own premises
+($\Phi_1 \vdash Q$); the consumer proves the goal \emph{using} $Q$
+($\Phi_2 \wedge Q \vdash \Psi$); the composite concludes
+$\Phi_1 \wedge \Phi_2 \vdash \Psi$ with the contract discharged
+internally --- cut, wearing interface bookkeeping. A producer reaches for
+it wherever a system decomposes along a directed interface: certify the
+downstream component against a \emph{datasheet} (the contract, written
+over the declared interface wires only), certify the upstream component
+as meeting the datasheet, and compose without ever re-deriving either
+side inside the other.
+
+What the checker recomputes: the splice plumbing and the locality
+warrant. The plumbing --- the contract sits at a payload-declared
+conjunct path in the consumer\textquotesingle s premise; the composite
+premise is the consumer\textquotesingle s with the contract replaced by
+the supplier\textquotesingle s premise at that path --- is verified by
+exact read/replace on the conjunction tree. The locality warrant is two
+wire-confinement checks: the contract\textquotesingle s free wires lie
+inside the declared interface, and the supplier\textquotesingle s wires
+meet the consumer\textquotesingle s and the goal\textquotesingle s only
+inside it.
+
+The hypotheses split by role, and the split is the
+rule\textquotesingle s point. Soundness consumes only the plumbing:
+drop the path checks and the \textquotedblleft composite\textquotedblright{}
+premise could be unrelated to the two sub-proofs. The confinement checks
+are \emph{warrant, not soundness} --- cut is sound regardless --- but
+dropping them destroys the datasheet reading: a contract mentioning
+supplier-private wires is no longer a public interface artefact, and
+every quantitative consequence hung on the interface (certificate size
+scaling with the separator rather than the components, bounded
+disclosure of component internals) quantifies over certificates that
+carry these checks. The proof section separates the two roles
+explicitly.
+'''
+note = '''
+Tier reading: proof-theoretically the rule is admissible --- one node
+unpacks into a conjunct-extraction chain, the cited sub-derivations, a
+re-insertion chain, and \rulename{Cut} --- while in the realized
+calculus it is a native constructor, kept for cost and for the
+locality-warrant payload. The tier column records the proof-theoretic
+status; constructor membership is wire placement.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; the statement bundles its data as
+\texttt{PromiseStep} (field-for-field the payload minus the two
+sub-proofs, which enter as \texttt{ihs}/\texttt{ihc}).
+\begin{itemize}
+\item $\Phi_1 \vdash Q$ $\mapsto$ \texttt{ihs} with
+  \texttt{supplierPost} $:$ \texttt{supplier.post = contract}; $Q
+  \mapsto$ \texttt{contract : Formula}; $\Phi_1 \mapsto$
+  \texttt{supplier.pre}.
+\item $\Phi_2 \wedge Q \vdash \Psi$ $\mapsto$ \texttt{ihc}, with the
+  certified statement answering the roster note\textquotesingle s open
+  payload question in the path-general direction: $Q$ sits at a
+  \emph{payload-declared conjunct path} (\texttt{pathReads} $:$
+  \texttt{consumer.pre.conjGet? path = some contract}), not at a fixed
+  position --- the ctx-$\vee$E style. $\Phi_2 \mapsto$ \texttt{ctx},
+  the consumer premise with the contract deleted at the path
+  (\texttt{ctxReads}).
+\item conclusion $\Phi_1 \wedge \Phi_2 \vdash \Psi$ $\mapsto$ the
+  goal for \texttt{st.seq}, whose premise is pinned by
+  \texttt{prePlumb}: the consumer\textquotesingle s premise with the
+  supplier\textquotesingle s premise spliced in at the same path.
+  The displayed conjunction is the head-position instance; the
+  certified statement is \emph{strictly wider} than the display here
+  --- deliberately, and in the safe direction: every displayed
+  instance is a statement instance. \texttt{postEq} carries $\Psi$
+  across unchanged.
+\item the two confinement premises ($\wires(Q) \subseteq Y$; the
+  interface-separation check) $\mapsto$ the Step fields
+  \texttt{contractConfined} and \texttt{separation} over
+  \texttt{iface} $\mapsto Y$ --- carried, checked,
+  and consumed by \emph{no} step of \texttt{sound\_promise}: the
+  displayed caption\textquotesingle s claim that they are the
+  locality warrant rather than soundness needs is visible in the
+  statement (the proof never touches them), the same
+  premise-not-consumed honesty the QTSL pages practice.
+\end{itemize}
+Width note: beyond the deliberate path-generality, neither side is
+wider; the soundness content is pure predicate-logic cut over the
+semantics, exactly as the witness column says.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["PromiseStep", "sound_promise"]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_promise_def",
+  "Theorem famEq_promise",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

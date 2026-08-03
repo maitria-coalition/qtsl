@@ -1,0 +1,22 @@
+# api.toml.d/QDistTransport.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QDistTransport"
+note = '''The corpus constructs both transport flavours (exact and defect-$\varepsilon$); the exact construction is quoted.'''
+
+[api.ts]
+handle = "rules.qtslExt.distTransport"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn distTransport", "interface DistTransportArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_dist_transport_exact.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::dist_transport"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/dist.rs"
+sig = ["fn dist_transport"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_dist_transport_exact"

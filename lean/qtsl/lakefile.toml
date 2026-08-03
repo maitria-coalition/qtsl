@@ -1,0 +1,45 @@
+name = "Qtsl"
+defaultTargets = ["Qtsl"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+# Dyadic-rational and axiom-receipt foundations from the sibling package.
+[[require]]
+name = "qtsl-aux"
+path = "../qtsl-aux"
+
+[[lean_lib]]
+name = "Qtsl"
+
+# Differential-testing harness: independent implementations adjudicated
+# over a shared corpus (instrument, not part of the trusted base).
+[[lean_exe]]
+name = "diffharness"
+root = "DiffHarness"
+
+# Comparator harness: the same certificate values evaluated through the
+# compiled, kernel, and interpreted paths.
+[[lean_exe]]
+name = "comparator"
+root = "Qtsl.ComparatorMain"
+
+# The executable certificate checker. Links only the mathlib-free
+# computational core, keeping its emitted-C closure small and auditable.
+[[lean_exe]]
+name = "checker_core"
+root = "Qtsl.Core.Main"
+
+# Wire-format end-to-end battery: embedded certificate snapshots through
+# the binary parser and obligation checker, plus negative-control mutants.
+[[lean_exe]]
+name = "wire_demo"
+root = "Qtsl.WireDemo"
+
+# File-driven wire-checker verdicts (certificate file paths in, one
+# ACCEPT/REJECT line out) for cross-implementation conformance runs.
+[[lean_exe]]
+name = "wire_check"
+root = "Qtsl.WireCheckMain"

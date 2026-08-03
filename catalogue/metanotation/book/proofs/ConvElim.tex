@@ -1,0 +1,158 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting (valuations, partial
+evaluation, elementwise atom semantics) as fixed in the \rulename{EqElim}
+section; this section additionally fixes the region-atom semantics and
+the canonical halfspace form, which the \rulename{ConvIntro} section then
+cites.}
+
+\textbf{Region atoms, in the checkable fragment.}\enspace A region atom
+$x \in \mathcal{R}(\Delta, S)$ holds at $\sigma$ when the extension set
+$S$ is tied to the simplex $\Delta$, the region term evaluates to a
+rank-1 tensor of extent equal to the ambient dimension, and the point it
+holds lies in the \emph{masked region}: it is an affine combination of
+$\Delta$'s vertices with weights summing to $1$, nonnegative on core
+vertices and \emph{nonpositive} on the vertices named by $S$. The rules
+below operate in the fragment their checker accepts --- ambient dimension
+$1$, support exactly two vertices $a, b$ at distinct coordinates
+$V_0 \neq V_1$ --- where the geometry is completely explicit: the two
+barycentric weights are \emph{determined}, affine in the point,
+\[
+\lambda_a(x) = \frac{V_1 - x}{V_1 - V_0}, \qquad
+\lambda_b(x) = \frac{x - V_0}{V_1 - V_0}, \qquad
+\lambda_a + \lambda_b \equiv 1,
+\]
+and the region is: the segment $[V_0, V_1]$ for $S = \emptyset$; the
+closed ray from $V_1$ away from $V_0$ for $S = \{a\}$ (weight of the
+extended vertex $\leq 0$); the mirror ray for $S = \{b\}$. ($S$ is a
+proper subset, so both-extended does not arise.) Determinacy of the
+weights is why elimination below is complete --- no witness is chosen,
+none rides the certificate.
+
+\textbf{The canonical halfspace form.}\enspace The conclusion is not
+``some conjunction equivalent to the sign facts'' but one \emph{pinned}
+formula, recomputed by the checker from $(x, \Delta, S)$ alone: one atom
+per support vertex, in support order, each in $(\cdot) \leq 0$ shape:
+for $v \in S$ the atom $\mathrm{canon}(\lambda_v(x)) \leq 0$, for
+$v \notin S$ the atom $\mathrm{canon}(-\lambda_v(x)) \leq 0$ (the wanted
+$\lambda_v \geq 0$ \emph{sign-folded} into the term --- the all-$\leq$
+discipline), where $\mathrm{canon}$ rescales the affine pair
+(slope, offset) by a \emph{strictly positive} rational to its
+primitive-integer representative and lays the atom body out in
+degree-sorted shape. If the build's gates fail (dimension $\neq 1$,
+support $\neq 2$ vertices, $V_0 = V_1$), the build refuses, the payload
+is uninhabitable, and the rule cannot fire: refusal is trivially sound,
+and in the degenerate-simplex case it is also where a division by zero
+would otherwise live --- made unrepresentable rather than checked-then-divided.
+
+\textbf{Claim} (\texttt{sound\_convElim}).\enspace If
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$ is semantically valid and the
+conclusion formula is the canonical halfspace form for
+$(x, \Delta, S)$, then $\Phi \vdash$ (that conjunction) is semantically
+valid.
+
+\begin{blemma}[structure of a successful build]\label{lem:convelim-spec}
+If the canonical build succeeds with output $F$, then the ambient
+dimension is $1$, $S$ is tied to $\Delta$, the support filter returns
+exactly $[a, b]$ with constant vertex coordinates $V_0 \neq V_1$, and
+$F$ is the conjunction of the two vertex atoms described above.
+\end{blemma}
+\begin{proof}
+Unfold the build: each claim is one of its gates, and the output shape
+is its final assembly. (\texttt{barycentricHalfspaceBuild\_spec}.)
+\end{proof}
+
+\begin{blemma}[canonical atom $\leftrightarrow$ raw sign fact]
+\label{lem:convelim-atom}
+Let $q$ be a defined, singleton-shaped evaluation of $x$ at $\sigma$, and
+let $(\mathit{off}, \mathit{slp})$ be an affine pair. The vertex atom for
+membership flag $m$ holds at $\sigma$ iff
+\[
+m = \mathrm{true}:\quad \mathit{off} + \mathit{slp}\cdot q \;\leq\; 0,
+\qquad\qquad
+m = \mathrm{false}:\quad 0 \;\leq\; \mathit{off} + \mathit{slp}\cdot q.
+\]
+\end{blemma}
+\begin{proof}
+Two steps. \emph{Sign-folding}: for $m = \mathrm{false}$ the build
+negates the pair before canonicalizing, so the emitted atom asserts
+$\mathrm{canon}(-\lambda) \leq 0$, i.e.\ the displayed $\geq$. \emph{The
+rescale is sign-transparent}: $\mathrm{canon}$ multiplies the pair by
+$k > 0$ --- in the generic case $k = L/g$ with $L$ a positive lcm of
+denominators and $g$ a positive gcd of the scaled numerators; in the
+zero-offset case the output slope is the sign
+$\mathrm{sgn}(\mathit{slp})$, i.e.\ the pair scaled by $1/|\mathit{slp}|$
+--- well-defined because a successful barycentric build has distinct
+vertices, so the pair it emits is nonzero and in the zero-offset case
+$\mathit{slp} \neq 0$ --- and a strictly positive rescale of an affine
+function has the same sign locus. The atom's left side evaluates (constants and one already-
+defined $q$), at singleton shape, so the elementwise reading is the
+scalar comparison of the displayed value against $0$.
+(\texttt{f4VertexAtom\_holds\_iff}; the rescale is
+\texttt{primAffine}, the layout \texttt{f4Lhs}.)
+\end{proof}
+
+\begin{blemma}[region elimination, two-vertex case]
+\label{lem:convelim-elim}
+Suppose $\sigma \models x \in \mathcal{R}(\Delta, S)$ in the fragment of
+Lemma~\ref{lem:convelim-spec}, with $q$ the evaluated coordinate. Then,
+conditionally on membership: if $a \in S$ then $\lambda_a(q) \leq 0$, if
+$a \notin S$ then $\lambda_a(q) \geq 0$; likewise for $b$.
+\end{blemma}
+\begin{proof}
+The masked-region witness consists of weights on the support summing to
+$1$ that reproduce $q$ and satisfy the sign discipline. On a two-vertex
+support the reproduction and sum equations force the weights to be
+exactly $\lambda_a(q), \lambda_b(q)$ (two linear equations, invertible
+since $V_0 \neq V_1$), so the witness's sign discipline \emph{is} the
+displayed conditional facts. (\texttt{maskRegion\_pair\_elim}.)
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{ConvElim}]\label{thm:convelim-sound}
+Under the payload's checked hypotheses, if
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$ is semantically valid, so is
+$\Phi \vdash F$ for the built conclusion $F$.
+\end{bthm}
+\begin{proof}
+Fix an admissible $\sigma \models \Phi$. Premise validity gives the
+region atom at $\sigma$: in particular $x$ \emph{evaluates}, to a rank-1
+extent-1 tensor (the atom's own shape field --- no typing pack is needed
+here; contrast Remark~\ref{rem:convelim-asym}), whose scalar is $q$.
+Lemma~\ref{lem:convelim-elim} delivers the four conditional sign facts;
+Lemma~\ref{lem:convelim-atom} converts, per vertex, the applicable one
+into the built vertex atom; Lemma~\ref{lem:convelim-spec} says the
+conclusion is exactly the conjunction of those two atoms.
+\end{proof}
+
+\begin{bremark}[why a pinned canonical spelling]\label{rem:convelim-canon}
+The combination rules downstream (\rulename{Farkas}, \rulename{Syzygy})
+match premise atoms \emph{by exact canonical polynomial}; a conclusion
+emitted in any equivalent-but-different spelling would simply never
+match, stranding the geometric fact. Pinning the spelling in the checker
+--- which recomputes the build from $(x, \Delta, S)$ and demands
+syntactic equality with the cited conclusion, trusting no producer text
+--- makes the emitted atoms the \emph{same} tokens every producer and
+every downstream matcher agrees on. The all-$\leq$ polarity keeps each
+atom in the $(\cdot) \leq 0$ normal form those rules consume, and the
+positive primitive-integer rescale makes the representative unique. Note
+the checked object is the \emph{formula}, not a semantic condition: this
+rule's side condition is one syntactic equation, decidable by
+construction.
+\end{bremark}
+
+\begin{bremark}[what is \emph{not} hypothesized]\label{rem:convelim-asym}
+No shape or finiteness fields appear in this payload: elimination reads
+definedness and shape out of the region atom itself. The mirror rule
+cannot --- its premise is the halfspace conjunction, whose atoms
+tolerate broadcast and are satisfied by a \emph{scalar} $x$ --- and that
+asymmetry is exactly where \rulename{ConvIntro}'s one extra typing field
+comes from (next section).
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:convelim-spec} & \texttt{barycentricHalfspaceBuild\_spec}\\
+build, affine data, rescale, atom layout & \texttt{barycentricHalfspaceBuild}, \texttt{baryCoeffs1D}, \texttt{primAffine}, \texttt{f4Lhs}, \texttt{f4VertexAtom}\\
+Lemma \ref{lem:convelim-atom} & \texttt{f4VertexAtom\_holds\_iff}\\
+Lemma \ref{lem:convelim-elim} & \texttt{maskRegion\_pair\_elim}\\
+Theorem \ref{thm:convelim-sound} & \texttt{sound\_convElim}; wired as core \texttt{RuleData.convElim} into \texttt{ProofObject.sound}\\
+form predicate (the checked side condition) & \texttt{barycentricHalfspaceForm} (payload field \texttt{halfspace})\\
+\end{anchors}

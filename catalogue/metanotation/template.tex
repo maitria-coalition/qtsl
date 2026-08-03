@@ -1,0 +1,80 @@
+\documentclass[10pt,twoside]{article}
+\usepackage[a4paper,landscape,twoside,inner=13mm,outer=30mm,top=15mm,bottom=16mm,marginparwidth=22mm,marginparsep=4mm]{geometry}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{mathpartir}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{marginnote}
+\usepackage{pifont}
+\usepackage{microtype}
+
+\definecolor{DiffRed}{RGB}{176,32,32}
+\definecolor{DiffBlue}{RGB}{22,80,190}
+\definecolor{MarkGreen}{RGB}{22,122,58}
+\definecolor{MarkRed}{RGB}{176,32,32}
+\definecolor{NoteGray}{RGB}{92,92,92}
+\newcommand{\dfl}[1]{\textcolor{DiffRed}{#1}}
+\newcommand{\dfr}[1]{\textcolor{DiffBlue}{#1}}
+\newcommand{\cmark}{\textcolor{MarkGreen}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{MarkRed}{\ding{55}}}
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\B}{\mathbb{B}}
+\newcommand{\ReLU}{\operatorname{relu}}
+\newcommand{\Cell}{\mathsf{cell}}
+\newcommand{\Tensor}{\mathsf{Tensor}}
+\newcommand{\sub}[2]{[#1 := #2]}
+\renewcommand{\sp}{\mathsf{sp}}
+\newcommand{\True}{\top}
+\newcommand{\False}{\bot}
+\newcommand{\rulename}[1]{\textsc{#1}}
+\newcommand{\bshape}{\mathrm{bshape}}
+\newcommand{\wires}{\mathrm{wires}}
+
+\setlength{\parindent}{0pt}
+\newlength{\colw}
+\setlength{\colw}{\dimexpr(\textwidth-2\tabcolsep-0.8pt)/2-2\tabcolsep\relax}
+\newenvironment{cellbox}{\begin{minipage}[t]{\colw}\footnotesize\setlength{\parskip}{2pt}}{\end{minipage}}
+\newcommand{\cellhead}[3]{{\normalsize\textbf{#1.\ \rulename{#2}}\enspace{\footnotesize\textcolor{NoteGray}{(#3)}}}\par\smallskip}
+\newcommand{\cellheadright}[1]{{\footnotesize #1}\par\smallskip}
+\newcommand{\witnessline}[1]{\textcolor{NoteGray}{#1}}
+\newcommand{\rulenote}[1]{\par\smallskip{\scriptsize\textcolor{NoteGray}{#1}}}
+\newcommand{\sidemarks}[1]{\marginnote{\large #1}}
+\newcommand{\rowgap}{\noalign{\vspace{4pt}\hrule height 0.2pt\vspace{4pt}}}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries @@TITLE@@}\\[4pt]
+{\large @@SUBTITLE@@}
+\end{center}
+\medskip
+
+\begin{minipage}[t]{0.48\textwidth}\footnotesize
+@@LEGEND@@
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\textwidth}\footnotesize
+@@COLOPHON@@
+\end{minipage}
+
+\bigskip
+
+\begin{longtable}{@{}p{\dimexpr\colw+2\tabcolsep\relax}!{\vrule width 0.8pt}p{\dimexpr\colw+2\tabcolsep\relax}@{}}
+\multicolumn{1}{@{}c!{\vrule width 0.8pt}}{@@LEFTHEAD@@} &
+\multicolumn{1}{c@{}}{@@RIGHTHEAD@@} \\
+\rowgap
+\endfirsthead
+\multicolumn{1}{@{}c!{\vrule width 0.8pt}}{\footnotesize\textcolor{NoteGray}{left — continued}} &
+\multicolumn{1}{c@{}}{\footnotesize\textcolor{NoteGray}{right — continued}} \\
+\rowgap
+\endhead
+@@BODY@@
+\end{longtable}
+
+\end{document}

@@ -1,0 +1,132 @@
+# QLatticeInv — alias section (batch B9), mechanized at batch M1d (
+# 2026-07-20): the exactness identity + soundness corollaries are bound
+# below (module Qtsl.LatticeInv, both semantic strata);
+# the payload-level unpack elaborator awaits schema staging (the batch
+# pattern — the proof section's amber box). No conditional flag: the
+# statements are unconditional (R1-shadow rows are the rule's own side
+# conditions, not warrant gaps). Tier ambiguity (alias vs admissible,
+# on the weight of registry-backed citation) is flagged in the roster
+# row and carried in the commentary, not resolved here.
+[[rule]]
+id = "QLatticeInv"
+source = "../QTSL-rules.toml"
+row = "QLatticeInv"
+proof = "book/proofs/QLatticeInv.tex"
+alias_target = "QBlockInv"
+commentary = '''
+\rulename{QLatticeInv} is the family object\textquotesingle s
+invariance alias: any down-closed cell-set $C$ of the recomputed
+readout names an invariant region $\bigcup\downarrow C$, and the rule
+concludes its invariance-scope judgement by citation --- the unpacking
+is a single \rulename{QBlockInv} application whose block is the
+lattice member realizing the down-set (existence by join-closure) and
+whose facet rows are that member\textquotesingle s own, already
+present in the family object. No row is re-proven; the producer merely
+selects which down-set encloses the initial region away from the avoid
+sets.
+
+What the checker recomputes: membership of the realization in the
+lattice, and down-closedness of $C$ in the recomputed cell order ---
+readout facts, not dynamics. What would break without them: a cell-set
+that is not down-closed names a region orbits can leave (an orbit
+descends the cell order out of it), and the exactness identity between
+the down-set\textquotesingle s cell union and the
+member\textquotesingle s realization fails precisely there.
+
+Mechanization state, plainly: the bound statements below are the
+exactness identity and the soundness corollaries, at both semantic
+strata (module \texttt{Qtsl.LatticeInv}).
+\texttt{qLatticeInv\_exact} proves the identity that makes the
+respelling exact --- for down-closed $C$, the union of $C$\textquotesingle
+s cells equals the union of its join-irreducible realizations --- by
+the discharge chain\textquotesingle s own well-founded descent through
+lower covers (leg 7\textquotesingle s \texttt{exists\_cellMem\_subset},
+over the same Birkhoff rows the eventual-member interface consumes,
+plus one row this alias adds: cell inside member, the readout closure
+half\textquotesingle s set-level shadow). The corollaries
+\texttt{Semiflow.qLatticeInv\_sound} /
+\texttt{Behavior.qLatticeInv\_sound} (and their
+\texttt{\_of\_blockInv} end-to-end forms) are
+$\mathrm{sound}_A = \mathrm{sound}_T \circ \mathrm{unpack}$ through
+the cited \rulename{QBlockInv} conclusion, delivered as judgement-level
+cargo. Unconditional: the lattice rows are the checker\textquotesingle
+s recomputed readout facts entering as theorem parameters (R1 shadows),
+and join-closure membership of the down-set\textquotesingle s
+realization is deliberately \emph{not} consumed --- the entailment
+holds for the bare union, so the rule is sound a fortiori with the
+checker\textquotesingle s extra side condition. The payload-level
+unpack elaborator awaits schema staging (the batch pattern; the proof
+section\textquotesingle s amber box). The tier is flagged, not forced:
+if registry-backed citation of the member\textquotesingle s rows is
+ruled heavier than the alias criterion allows, the rule reclassifies
+as admissible with all machinery unchanged.
+'''
+note = '''
+The warrant for the reading --- once an orbit enters a lattice member
+it never leaves, so visited cells descend the cell order and down-sets
+are forward-invariant --- is the same orbit combinatorics the Morse
+discharge\textquotesingle s order clause rests on, consumed here at
+its easy end.
+'''
+correspondence = '''
+The displayed judgement $\mathcal{M} \vDash
+\mathsf{QInvScope}(\bigcup\downarrow C, X_0)$ $\mapsto$
+\texttt{InvScopeSat (⋃ i ∈ C, cells i) X0}, at BOTH semantic strata
+(\texttt{Semiflow.}/\texttt{Behavior.qLatticeInv\_sound} --- the
+exactness identity is dynamics-free, so the behavioural transport is
+verbatim). The alias\textquotesingle s entire content is
+\texttt{qLatticeInv\_exact}: for down-closed \texttt{C} (\texttt{hdc
+: IsLowerSet C} --- the R1 down-closedness recompute as a binder),
+the union of $C$\textquotesingle s cells EQUALS the union of its
+join-irreducible realizations --- the member $N_C$\textquotesingle s
+realization --- so the respelling is exact, not merely one-sided.
+\begin{itemize}
+\item the E2 lattice $L$ $\mapsto$ the Birkhoff row pack, abstract:
+  \texttt{hJoin} (every block point lands in a join-irreducible below
+  it), \texttt{hcover} (strict lower covers), \texttt{hcellsSup}
+  (cell $\supseteq$ member minus cover), \texttt{horder} (order
+  reflects realization inclusion) --- byte-identical to the
+  eventual-member interface of the Morse discharge\textquotesingle s
+  leg 7, as the roster witness says: no lattice structure is minted,
+  the rows ARE the interface --- plus the one row new to this alias,
+  \texttt{hcellSub} (cell $\subseteq$ member: the readout closure
+  half\textquotesingle s set-level shadow).
+\item the cited \rulename{QBlockInv} premise $\mapsto$
+  \texttt{hMember : InvScopeSat (⋃ i ∈ C, blocks (emb i)) X0} ---
+  judgement-level cargo on the member\textquotesingle s realization
+  (the \texttt{qBasin\_sound} precedent: facet rows live in the cited
+  node, never here); \texttt{\_of\_blockInv} composes the target in
+  end-to-end (its \texttt{hInv}/\texttt{hInit} pair is
+  \texttt{qBlockInv\_sound}\textquotesingle s kit, the containment
+  row transported across the identity).
+\item \texttt{init\_containment} $\mapsto$ \texttt{hInit : X0 ⊆ ⋃ i ∈
+  C, cells i}, stated on the alias\textquotesingle s displayed region.
+\item \texttt{member\_subset\_cells\_le} exposes the
+  page\textquotesingle s ``cells tile members'' fact at the principal
+  down-set --- bound because the proof section names it.
+\end{itemize}
+Width note: the module is topology-free and dynamics-free except
+through the cited judgement --- \texttt{cells}/\texttt{blocks}
+arbitrary set families over an abstract ordered index; the grid
+realization of the lattice is R1 territory, strictly wider in the
+safe direction. Module row currently SOURCE-ONLY (no attested build
+receipt yet --- upgrades at the next attested build + re-bind, the
+tool\textquotesingle s own printed instruction).
+'''
+
+[[rule.lean]]
+module = "Qtsl.LatticeInv"
+src = "../../lean/qtsl/Qtsl/LatticeInv.lean"
+decls = ["qLatticeInv_exact", "member_subset_cells_le", "Semiflow.qLatticeInv_sound", "Semiflow.qLatticeInv_sound_of_blockInv", "Behavior.qLatticeInv_sound", "Behavior.qLatticeInv_sound_of_blockInv"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent at the judgement stratum: no judgement-stratum definition exists
+in the ported base-kernel checker scripts (verified against the
+port\textquotesingle s definition inventory), so the satisfaction-level
+witnesses --- now mechanized on the Lean side (module
+\texttt{LatticeInv}, the entry\textquotesingle s bound statements)
+--- have no HOL twin to mirror them. The target rule\textquotesingle s
+rows (facet signs, containment) ARE covered by the ported checker.
+'''

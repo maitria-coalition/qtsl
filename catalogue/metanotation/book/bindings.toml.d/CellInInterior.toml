@@ -1,0 +1,69 @@
+# bindings.toml.d/CellInInterior.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'CellInInterior'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Catalogue"
+decl = "MaskRegionStrict"
+sha256 = "30a6063673beaab5f7b4bb157b8e0fe8581752429f9fb24fd6969febda4fdc70"
+
+[[statement]]
+module = "Qtsl.Catalogue"
+decl = "SimpC.CellIntDisjoint"
+sha256 = "79dd78448eb5bb4ca897912f38a0c8cfa8a0784fa99ddffd545c5c4be1326ac1"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PCellInIntData"
+sha256 = "9d0a17b3bbdfd3437c78931f271574f0b580d70081cccbce43115a480218f84c"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "baryLambdas1D"
+sha256 = "1c2af334dcaf09759a233974675f637f2c4e5b6b66db1761477d5894a0b966b9"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellOneHotBuild"
+sha256 = "07b3086c689cb341d79084e42aa093fd987b68ff70bf2ea3ac494360233fce2d"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellOneHotForm"
+sha256 = "3db957235481a6fe22d3b9eea8664d53030ddf4fafd0ce1b5f96324404c118c4"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellStrictInteriorBuild"
+sha256 = "ab9bb539ec06a1462435514f803f0ecd5f7b47b72acd21530d2faf7f24dc1e01"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellStrictInteriorForm"
+sha256 = "39f365a1bd4ee4edf6c5e609bf566c2550a2ee9212a161279388aa2899e460cd"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "cellStrictInteriorBuild_spec"
+sha256 = "0288386b51772d12800f81fb427e58b91c9cdecfabeb975b4edb296b1f3a241b"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "holds_cellOneHot"
+sha256 = "cfbd26c2c02af612735112f179d4bb977152e0de51bc6af8358967fb60add64d"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "maskRegionStrict_pair_intro"
+sha256 = "02c0c9157157325f7e429768a42d378d9e113926983a14d2416e5e27fd39371d"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_cellInInterior"
+sha256 = "e6dc854232986f9f063c62069dae667efc582e1a74ee99cd2536e08e49aff9c4"
+
+[[correspondence]]
+entry = "CellInInterior"
+steele_sha256 = "f8d5b7ac6881d2886d5f9281689607fbca97e00afe96b009c6a6cb2f0022a869"
+statements_sha256 = "b482cc0cc905348ca15cbaf6a125db9b04f6c1f5b62b6e23f2de0ed835e509c2"
+prose_sha256 = "6ab60ae57a93833f54d9f6f64e7b2d625879665eb3e34184910b1c6e30839da6"
+

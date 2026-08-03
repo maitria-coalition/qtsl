@@ -1,0 +1,87 @@
+[[rule]]
+id = "ReLUSplit"
+source = "../BL-rules.toml"
+row = "ReLU-Split"
+proof = "book/proofs/ReLUSplit.tex"
+commentary = '''
+\rulename{ReLU-Split} is the case-split rule of the ReLU family: from
+two branch proofs — the goal with the output position replaced by $h$,
+under $\Phi$ strengthened by $h \geq 0$; and the goal with the output
+position replaced by $0$, under $\Phi$ strengthened by $h \leq 0$ —
+conclude the goal outright. It is the \emph{complete}-verification
+move of the neural-network literature (the Reluplex and
+branch-and-bound lineage): where the affine envelope of
+\rulename{LiRPA} loses too much, a producer splits on the
+neuron\textquotesingle s sign and pays with proof size — each split
+doubles the branch count, which is exactly the branch-and-bound
+tradeoff.
+
+Unlike every other rule in this book so far, \rulename{ReLU-Split} has
+\emph{no certificate node}: no payload constructor, no wire tag. A
+producer elaborates it away — the certificate that ships contains the
+\emph{derivation} the rule abbreviates (case analysis over the
+sign-split fact, equality transport in each branch, and structural
+plumbing), and the checker checks those nodes by their own rules.
+There is consequently nothing for this rule\textquotesingle s checker
+column to recompute: the unpacking \emph{is} the rule, and its
+soundness, in the strongest sense available, is its derivability.
+
+Each ingredient of the two premises is essential for the
+elaboration. The branch strengthenings ($h \geq 0$, $h \leq 0$) are
+what the case fact discharges into each branch context — remove one
+and that branch proof has no purchase on the sign information. The
+substitution alignment ($\Psi$ with the output position filled by $h$,
+respectively $0$) is what the equality transport rewrites through:
+inside the active branch the node\textquotesingle s fact $y = h$
+carries $\Psi[b \coloneqq h]$ to $\Psi$, and inside the inactive
+branch $y = 0$ carries $\Psi[b \coloneqq 0]$ to $\Psi$.
+'''
+note = '''
+The checker column remains empty for the structural reason: no
+certificate stream ever contains a \rulename{ReLU-Split} node, so
+there is nothing for the checker to recompute. The rule-level
+statement previously recorded as follow-up now exists:
+\texttt{sound\_reluSplit} takes the two branch validities to the
+conclusion\textquotesingle s validity, at the rank-$0$ scope the
+recipe\textquotesingle s own per-scalar route always meant — and the
+companion theorem \texttt{reluSplit\_rank0\_necessary} mechanizes the
+mixed-sign countermodel showing the tensor-shaped reading is false,
+upgrading the family\textquotesingle s shape-scope remark from
+derivation-obstruction to semantic necessity for this rule. The
+verified elaboration function producing the derivation remains the
+recorded follow-up. The derivation requires the context-carrying form
+of disjunction elimination — the sign-split disjunction arrives as a
+sub-conjunct of the premise, which the plain sequent form of
+$\vee$E cannot reach; see the $\vee$E section\textquotesingle s note.
+'''
+
+[[rule.lean]]
+module = "Qtsl.ReluSplit"
+src = "../../lean/qtsl/Qtsl/ReluSplit.lean"
+decls = ["sound_reluSplit", "reluSplit_rank0_necessary"]
+intro = '''
+The rule-level semantic lemma, at the rank-$0$ scope: the template
+$\Psi$ is an arbitrary formula with an arbitrary marker wire for $b$;
+the three substitution instances are hypotheses via
+\texttt{substituteInFormula} (\rulename{EqElim}\textquotesingle s
+substitution predicate); the branch strengthenings are
+\rulename{ReLU-Pos}/\rulename{ReLU-Neg}\textquotesingle s premise
+atoms verbatim; the linkage and its extraction are the
+family\textquotesingle s (\rulename{LiRPA} section). The second
+theorem is the scope\textquotesingle s necessity witness: a
+shape-$[2]$ fixture with mixed-sign input on which both branch
+premises are valid and the conclusion fails.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+\rulename{ReLU-Split} has no certificate representation on either side
+of the seam: no payload constructor, no wire tag, no check function —
+a producer elaborates the rule into its derivation, so a certificate
+stream never contains a \rulename{ReLU-Split} node and there is
+nothing for a HOL port to mirror. Any future HOL treatment would be a
+formalization of the rule-level statement or the derivation itself
+(the Lean side of the former exists — \texttt{sound\_reluSplit}), not
+a port of checker code.
+'''

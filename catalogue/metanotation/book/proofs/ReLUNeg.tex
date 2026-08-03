@@ -1,0 +1,66 @@
+
+\sourcenote{Genre: admissible rule (tier 2). The family machinery is
+stated in the \rulename{LiRPA} section's family template;
+\rulename{ReLU-Pos} is this rule's mirror, and the shared boundary
+argument is stated there.}
+
+\begin{brecipe}[the \rulename{ReLU-Neg} instance]\label{rec:reluneg-instance}
+The node, and its intended rewrite over the family's sign-split fact:
+\[
+\inferrule*[Right=\rulename{ReLU-Neg}]{
+  \mathcal{T} \rhd \Phi \vdash h \leq 0 \\
+  \ReLU_{\{h\}\to\{y\}} \in H
+}{
+  \Phi \vdash y = 0
+}
+\qquad\rightsquigarrow\qquad
+\text{case analysis on }
+(h \leq 0 \wedge y = 0) \vee (0 \leq h \wedge y = h).
+\]
+The \emph{inactive} branch discharges cleanly: its context carries the
+conjunct $y = 0$, extracted by \rulename{Ax} and $\wedge$E --- the goal
+verbatim. The \emph{boundary} branch is the mirror of
+\rulename{ReLU-Pos}'s: its context carries $0 \leq h$ and $y = h$, the
+premise supplies $h \leq 0$, and the goal $y = 0$ needs $h = 0$ --- the
+antisymmetry fact that no catalogue derivation provides (the
+enumeration argument is stated once, as
+Remark~\ref{rem:relupos-antisym} in the \rulename{ReLU-Pos} section).
+The rule is therefore admissible by reduction to verified machinery:
+the shipped warrant is the direct lemma \texttt{sound\_reluNeg}, whose
+boundary case is the same one-line antisymmetry step in the model.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:reluneg-sound}
+Suppose the linkage holds and the premise sequent --- same premise
+formula, conclusion the atom $h \leq 0$ --- is semantically valid.
+Then the sequent concluding $y = 0$ is semantically valid.
+\end{bprop}
+\begin{proof}
+Fix an admissible valuation $\sigma$ satisfying $\Phi$. The premise
+eliminates entrywise: every entry $p$ of the preactivation tensor
+satisfies $p \leq 0$. The linkage extraction
+(\texttt{reluLinked\_facts}) gives, per entry, either $p \leq 0 \wedge
+y = 0$ --- the goal entry directly --- or $0 \leq p \wedge y = p$, in
+which case $p = 0$ by antisymmetry against the premise, so $y = p =
+0$. The conclusion atom compares the output tensor entrywise against
+the rank-$0$ constant $0$. That is \texttt{sound\_reluNeg}, step for
+step.
+\end{proof}
+
+\begin{bremark}[what the premise is for, and what the rule feeds]
+Without $\Phi \vdash h \leq 0$ the rule is false at any entry with
+$h > 0$ (there $y = h \neq 0$). Downstream, the conclusion differs
+from \rulename{ReLU-Pos}'s in kind: $y = 0$ pins the output to a
+\emph{literal constant}, so \rulename{EqElim} can rewrite $y$ away
+entirely --- dead-neuron elimination inside a certificate --- after
+which ground arithmetic on the constant rides
+\rulename{PConstExact}.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:reluneg-instance} warrant & \texttt{sound\_reluNeg}\\
+family linkage extraction & \texttt{reluLinked\_facts} (see the \rulename{LiRPA} section)\\
+entrywise premise elimination & \texttt{QTensor.rel2\_const\_right\_elim}\\
+the kink antisymmetry & the \texttt{le\_antisymm} step inside \texttt{sound\_reluNeg}\\
+payload structure & \texttt{PReLUNegData} (premise proof, two wires, linkage)\\
+\end{anchors}

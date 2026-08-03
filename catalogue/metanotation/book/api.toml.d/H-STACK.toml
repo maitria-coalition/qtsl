@@ -1,0 +1,21 @@
+# api.toml.d/H-STACK.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "H-STACK"
+
+[api.ts]
+handle = "hypernet.Builder.stack"
+sig_file = "ts/src/hypernet.ts"
+sig = ["fn stack"]
+snippet_file = "ts/tests/hypernet-native.test.ts"
+snippet = "marker:H-STACK"
+
+[api.rust]
+handle = "mtk_catalogue::hypernet::HypernetBuilder::stack"
+sig_file = "crates/mtk-catalogue/src/hypernet/graph.rs"
+sig = ["fn stack"]
+snippet_file = "crates/mtk-catalogue/tests/golden_hypernet.rs"
+snippet = "marker:H-STACK"

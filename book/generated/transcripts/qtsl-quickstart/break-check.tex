@@ -1,0 +1,8 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ CHK=../../../../qtsl/checkers/supermartingales
+$ node --experimental-strip-types $CHK/check_rows.ts \
+    --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt \
+    certs/faulty_uniform/bound.rows.txt mutants/faulty_uniform/M1_false_bound.rows.txt
+ACCEPT certs/faulty_uniform/bound.rows.txt proof_nodes=3
+REJECT mutants/faulty_uniform/M1_false_bound.rows.txt berncone.coeff
+\end{Verbatim}

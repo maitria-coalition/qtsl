@@ -1,0 +1,17 @@
+# api-system.toml.d/S-SWITCH.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-SWITCH"
+entity = "composition pattern"
+ts_absent = '''The pattern-level TypeScript binding is not yet arranged: the manifest-level wiring descriptors (\texttt{WiringRow}, \texttt{SwitchEdge}, \texttt{ScheduleAssumption}) already ride the TS \texttt{system} namespace (\texttt{system.composite}), while the pattern builders and the four pattern row families are Rust-only at this preview.'''
+
+[api.rust]
+handle = "mtk_catalogue::compose::CompositeBuilder::switch_guarded"
+sig_file = "crates/mtk-catalogue/src/compose/builder.rs"
+sig = ["fn switch_guarded", "fn switch_rate", "fn switch_forced"]
+snippet_file = "crates/mtk-catalogue/tests/compose_common/mod.rs"
+snippet = "fn-body:switch_composite"

@@ -1,0 +1,24 @@
+# bindings.toml.d/RootEval.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'RootEval'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "rootEval_box_iff"
+sha256 = "2c751433747a735c2b156e11c1a07fdc091afb705d50c4bf3158f97315ec458e"
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "rootEval_eval_cast"
+sha256 = "00341bbd9427063c5b90aff991ab80314d6c1616d2f75a285d41b55b34bcb9bc"
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "rootEval_sublevel_iff"
+sha256 = "1668c9ea3ebaa97c5312e56b349e166ff69fec42e88679ea1c21b2c8f5e54ea1"
+
+[[correspondence]]
+entry = "RootEval"
+steele_sha256 = "13d95d4ef5c5f86100d5d91323f13cf929b0b64326588594424059a90151d492"
+statements_sha256 = "4cb8f7b395e71409fb216e8f0b2328424360614c20d6059c0c250b558ac14aea"
+prose_sha256 = "6b74c4ee7a95bd6a10e7fb055352b8142d05c82f367a6dcc7bbc917982c2ee14"
+

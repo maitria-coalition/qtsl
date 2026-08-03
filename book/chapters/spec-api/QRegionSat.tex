@@ -1,0 +1,37 @@
+\apilang{TypeScript}{judgment.regionSat}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function regionSat(args: {
+  formula: StatePred;
+  region: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const phi = s.polyLe(0n, s.unwrap(s.polyVar(1, 2)));
+
+const sub = s.unwrap(
+  j.regionSat({
+    formula: phi,
+    region: j.sublevel(j.certFamRef("lyap-v1"), Q.of(7, 5)),
+  }),
+);
+\end{tssrc}
+\apiprov{The box and affine region-atom variants ride sibling committed vectors in the same tests.}
+\apilang{Rust}{mtk\_catalogue::judgment::QRegionSat::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(formula: StatePred, region: RegionAtom) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let phi = StatePred::poly_le(q(0, 1), Poly::var(1, 2).unwrap());
+let sublevel = QRegionSat::new(
+    phi.clone(),
+    RegionAtom::Sublevel {
+        cert: CertFamRef("lyap-v1".into()),
+        thr: q(7, 5),
+    },
+);
+\end{rustsrc}
+\apiprov{The box and affine region-atom variants ride sibling committed vectors in the same tests.}

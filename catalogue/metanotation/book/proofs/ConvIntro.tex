@@ -1,0 +1,106 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting, region-atom semantics,
+the checkable fragment, and the canonical halfspace form as fixed in the
+\rulename{ConvElim} section.}
+
+\textbf{Claim} (\texttt{sound\_convIntro}).\enspace The payload supplies
+the region data $(x, \Delta, S)$ and two checked conditions: the premise
+concludes the canonical halfspace form for $(x, \Delta, S)$, and (the
+shape condition) $\bshape_H(x) = [\,d\,]$ where $d$ is the ambient
+dimension --- the region term is statically a rank-1 tensor of the
+ambient extent. If the premise is semantically valid, then
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$ is semantically valid.
+
+\begin{blemma}[evaluation recovered from the premise]
+\label{lem:convintro-eval}
+Suppose $\sigma$ satisfies the built conjunction. Then $x$ evaluates at
+$\sigma$.
+\end{blemma}
+\begin{proof}
+The first vertex atom holds, so its left side --- the canonicalized
+affine image of $x$, built from constants and $x$ by product and sum ---
+evaluates; evaluation of a compound is defined only if evaluation of
+every part is, so inverting the evaluator at the product node (and sum
+node, when the offset is present) yields a value for $x$ itself.
+(\texttt{f4VertexAtom\_holds\_inv}.)
+\end{proof}
+
+\begin{blemma}[shape pinned by the payload field]
+\label{lem:convintro-shape}
+With the shape condition, the evaluation of Lemma~\ref{lem:convintro-eval}
+is a rank-1 tensor of extent $1$ (the fragment has $d = 1$), hence
+singleton-shaped, with scalar $q$.
+\end{blemma}
+\begin{proof}
+Broadcast-shape soundness: a defined evaluation of a $\bshape$-typed term
+lands at the declared shape (\texttt{Term.evalQ\_bshape}), here $[\,1\,]$
+by the build's dimension gate (\rulename{ConvElim},
+Lemma~\ref{lem:convelim-spec}).
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{ConvIntro}]\label{thm:convintro-sound}
+Under the payload's checked hypotheses, if $\Phi \vdash F$ is
+semantically valid for the built conjunction $F$, so is
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$.
+\end{bthm}
+\begin{proof}
+Fix an admissible $\sigma \models \Phi$; premise validity gives both
+vertex atoms at $\sigma$. Lemmas~\ref{lem:convintro-eval} and
+\ref{lem:convintro-shape} produce the singleton evaluation $q$ of $x$.
+Reading each held atom through the canonical-atom characterization
+(\rulename{ConvElim}, Lemma~\ref{lem:convelim-atom}) yields the four
+conditional sign facts on $\lambda_a(q), \lambda_b(q)$. The two-vertex
+introduction assembles the masked-region witness from exactly these: the
+weights $\lambda_a(q), \lambda_b(q)$ sum to $1$ and reproduce $q$ by
+construction (affine identities, valid since $V_0 \neq V_1$), and the
+sign discipline --- nonnegative on core vertices, nonpositive on
+$S$-vertices --- is the four facts (\texttt{maskRegion\_pair\_intro}).
+Together with the build's tie of $S$ to $\Delta$ and the shape of
+Lemma~\ref{lem:convintro-shape}, this is the region atom's holding, term
+slot included.
+\end{proof}
+
+\begin{bremark}[why the shape condition is not decoration]
+\label{rem:convintro-cex}
+Drop it and the rule is \emph{unsound}, by the counterexample recorded in
+the soundness development's header inventory. Over $\Delta =
+\mathrm{conv}(1, 2)$, $S = \emptyset$, instantiate the region term at the
+\emph{closed scalar} $t := 3/2$. The built premise is then a conjunction
+of two closed atoms asserting $\lambda_a(3/2) \geq 0$ and
+$\lambda_b(3/2) \geq 0$ --- both true ($\lambda_a = \lambda_b = 1/2$), so
+the conjunction holds at \emph{every} valuation, and taking $\Phi$ to be
+that very conjunction, \rulename{Ax} proves the premise. The un-gated
+introduction would conclude
+$\Phi \vdash (\tfrac{3}{2} : \mathrm{Term}) \in \mathcal{R}(\Delta,
+\emptyset)$ --- unsatisfiable: a constant evaluates to a rank-0 tensor,
+and the region atom demands rank 1. Satisfiable premise, unsatisfiable
+conclusion. The mechanism is the same broadcast liberality that broke the
+un-gated \rulename{EqElim}: the halfspace atoms constrain the
+\emph{values} of the affine images and are perfectly happy with a scalar
+$x$; only the region atom cares about the tensor's shape. The shape field
+restores, at the introduction rule, the well-formedness that region
+atoms carry in the source calculus's typing discipline --- one repair
+family (the \rulename{EqElim}/\rulename{Norm} typing pattern), one
+failure family.
+\end{bremark}
+
+\begin{bremark}[elimination and introduction are exact inverses on the
+fragment]\label{rem:convintro-inv}
+On singleton-shaped, well-shaped region terms, Lemmas
+\ref{lem:convelim-elim} (elimination) and the introduction step above are
+mutually inverse readings of the same determinate-weight geometry:
+membership $\leftrightarrow$ the four sign facts $\leftrightarrow$ the
+canonical conjunction. The round trip loses nothing --- which is why the
+pair can serve as the sole interface between region atoms and the
+arithmetic fragment, with no completeness caveat inside the checkable
+fragment.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:convintro-eval} & \texttt{f4VertexAtom\_holds\_inv}\\
+Lemma \ref{lem:convintro-shape} & \texttt{Term.evalQ\_bshape}; payload field \texttt{termShape}\\
+canonical-atom reading & \texttt{f4VertexAtom\_holds\_iff} (\rulename{ConvElim} section)\\
+witness assembly & \texttt{maskRegion\_pair\_intro}\\
+Theorem \ref{thm:convintro-sound} & \texttt{sound\_convIntro}; wired as core \texttt{RuleData.convIntro} into \texttt{ProofObject.sound}\\
+Remark \ref{rem:convintro-cex} & the counterexample inventory, \texttt{Soundness.lean} header\\
+\end{anchors}

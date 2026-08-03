@@ -1,0 +1,99 @@
+# ClosureDiscipline-OUTWARD: strict-atom closure, move 2 of 3 — full
+# literate section (B10). conditional: the verified lemmas warrant the
+# atom and region faces; the composite normal-form induction lives with
+# the normal-form rules (the roster row's scope field carries this).
+# Lean warrant: the auxiliary structural module.
+[[rule]]
+id = "ClosureOutward"
+source = "../QTSL-rules.toml"
+row = "ClosureDiscipline-OUTWARD (T13)"
+proof = "book/proofs/ClosureOutward.tex"
+conditional = true
+commentary = '''
+\rulename{ClosureDiscipline-OUTWARD} is the closure
+discipline\textquotesingle s move for complements of \emph{closed}
+atoms (the discipline itself is set out in the
+\rulename{ClosureDiscipline-EXACT} section). The true complement of
+$\{p \le c\}$ is the strict set $\{c < p\}$ --- not consumable by a
+row --- and the move consumes the orientation swap $\{c \le p\}$
+instead, which contains it: an over-approximation of the true
+complement, losing only the cut $\{p = c\}$. Over-approximation is
+exactly what the consuming side wants at negative positions: there
+the atom describes a set to be excluded or avoided, and a certificate
+against a superset is a fortiori a certificate against the set.
+
+The warrant has two faces, both verified. The \emph{atom} face is the
+pointwise containment above, in both orientations. The \emph{region}
+face is the antitone kernel: a certified region under-approximates
+its denotation, so its complement over-approximates the
+denotation\textquotesingle s complement --- the direction transport
+that lets a negative position consume a child
+certificate\textquotesingle s complement soundly. What the checker
+recomputes: the orientation swap itself, which is syntactic; the
+containments are the verified lemmas\textquotesingle{} content, spent
+once, globally.
+
+The move is one-directional by design: at a \emph{positive} position
+the same swap would overclaim --- take $p$ constant at $c$: the swap
+$\{c \le p\}$ is the whole space while the true complement of
+$\{p \le c\}$ is empty, the maximal over-claim --- so the
+discipline\textquotesingle s routing table, not a side condition,
+keeps this move on the negative side.
+'''
+note = '''
+The dashboard marks this rule\textquotesingle s check as conditional:
+the verified lemmas warrant the atom face and the region face, and
+deliberately not the composite normal-form induction that pushes
+complements through connectives --- that induction is stated once,
+for all consumers, with the normal-form rewriting rules. A reader
+tracing a complement through a full specification follows this rule
+for the atom step and the normal-form sections for the traversal.
+'''
+correspondence = '''
+Three displayed clauses, three bound statements. The atom face, both
+orientations: $\mathrm{cmpl}\{p \le c\} \subseteq \{c \le p\}$
+$\mapsto$ \texttt{closureOutward\_sound} (goal \texttt{\{x | p x ≤
+c\}ᶜ ⊆ cmplAtom} under the bridge \texttt{cmplAtom = \{x | c ≤ p
+x\}}), mirrored by \texttt{closureOutwardGe\_sound} --- containments,
+not identities: the displayed ``losing only the cut $\{p = c\}$'' is
+commentary on the gap, and the certified statement claims exactly the
+over-approximation direction, nothing finer. The region face $R
+\subseteq [\![\varphi]\!] \Rightarrow \mathrm{cmpl}[\![\varphi]\!]
+\subseteq \mathrm{cmpl}\,R$ $\mapsto$ \texttt{compl\_over\_approx :
+denᶜ ⊆ Rᶜ} from \texttt{RegionSat R den} --- the antitone kernel,
+Q(iii)\textquotesingle s region face, two tokens of proof. Width
+note: the conditional mark on this row is the composite residue the
+note names --- the De Morgan \emph{traversal} of a full specification
+lives with the T12/T22 normal-form machinery, deliberately not here
+--- while the certified atom + region faces are unconditional
+set-level facts over arbitrary observables and regions; no
+topology, no continuity, no polynomiality is consumed anywhere in
+this bound set.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Structural"
+src = "../../lean/qtsl-aux/QtslAux/Structural.lean"
+intro = '''
+\texttt{RegionSat} (quoted in full) is the compiled reading of the
+workhorse judgement kind, consumed by the region face; the atom faces
+fix the consumed closed swap through the bridge hypothesis
+(\texttt{hbridge}).
+'''
+full_decls = ["RegionSat"]
+decls = ["closureOutward_sound", "closureOutwardGe_sound", "compl_over_approx"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development\textquotesingle s object is the base
+calculus\textquotesingle s wire-format checker (theory
+\texttt{qtsl\_catalogue} ports the catalogue check-function cone).
+The closure discipline is a specification-surface rewrite layer of
+the extension theory: it postdates that port, and no wire row for any
+of the three moves exists in any staged format --- there is nothing
+for a HOL statement to be about. The box becomes fillable when the
+extension\textquotesingle s certificate rows are committed to a wire format
+and the corresponding check is ported.
+'''

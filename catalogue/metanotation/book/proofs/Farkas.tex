@@ -1,0 +1,154 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe; the general admissible template is stated in the \rulename{Norm}
+section and instantiated here. \rulename{Farkas} is admissible by
+reduction to verified machinery: the affine-combination replay is
+checked computation, and one verified lemma warrants every accepted
+node.}
+
+\begin{brecipe}[the \rulename{Farkas} instance]\label{rec:fk-instance}
+\rulename{Farkas} has no proof premises --- its inputs are
+sub-conjuncts of $\Phi$ itself, not sub-derivations:
+\[
+\inferrule*[Right=\rulename{Farkas}]{
+  \{\ell_j \bowtie_j 0\}_j \subseteq \Phi \text{ conjunct-wise} \\
+  \lambda_j \geq 0 \text{ (free-signed on equalities)} \\\\
+  \textstyle\sum_j \lambda_j \ell_j \equiv c
+  \ \text{\upshape(exact canonical fold)} \\
+  c \ \text{\upshape shape-stable, finitely typed, positive-size wires}
+}{\Phi \vdash c \leq 0}
+\qquad\rightsquigarrow\qquad
+\text{\upshape the checker replays the fold;}\;
+\text{\texttt{sound\_farkas} stands as warrant.}
+\]
+The rewrite target contains zero catalogue nodes: the entire content is
+the checked combination (decoded, sign-gated, atom-sourced, folded ---
+the fragment display quoted above walks the chain) plus the semantic
+argument of Proposition~\ref{prop:fk-sound}. The catalogued stratum
+records an unpacking sketch through \rulename{BernCone} at degree $1$;
+the shipped warrant is direct, at all tensor shapes, heterogeneous
+premise-atom shapes included.
+\end{brecipe}
+
+\begin{bprop}[nonnegative combination, per entry]\label{prop:fk-comb}
+Work in an ordered field. Suppose values $a_j$ satisfy $a_j \leq 0$,
+and weights $\lambda_j \geq 0$. Then
+$\sum_j \lambda_j a_j \leq 0$. Moreover the $({\cdot} \leq 0)$-normal
+reading of each premise atom delivers such values: an atom
+$l \bowtie r$ with $\bowtie \in \{\leq, <\}$ yields
+$l - r \leq 0$; with $\bowtie \in \{\geq, >\}$ it yields
+$r - l \leq 0$; and an equality yields \emph{both}
+$l - r \leq 0$ and $r - l \leq 0$ --- so a free-sign multiplier
+$\nu$ on an equality is realized as the nonnegative weight $|\nu|$ on
+the polarity matching $\nu$'s sign.
+\end{bprop}
+\begin{proof}
+Each $\lambda_j a_j \leq \lambda_j \cdot 0 = 0$ (multiplication by a
+nonnegative element preserves $\leq$), and a finite sum of nonpositive
+elements is nonpositive, by induction. The polarity readings are the
+definitions of the normal forms; strict atoms deliver strict
+inequalities, weakened to $\leq$ before entering the sum. The
+equality discipline is the textbook sign convention for multipliers of
+equality constraints \cite[\S7.3]{schrijver1986}, realized here
+syntactically: the matcher sees both polarities, so a negative
+multiplier is unrepresentable rather than checked for.
+\end{proof}
+
+\begin{bprop}[semantic warrant]\label{prop:fk-sound}
+Suppose the payload's combination check accepts (any branch), the
+conclusion term $c$ is shape-stable and finitely typed, and every wire
+of $\Phi$ and $c$ is typed at a positive-size shape. If
+$\sigma \models \Phi$ for an admissible $\sigma$, then
+$\sigma \models c \leq 0$.
+\end{bprop}
+\begin{proof}
+The shape and finiteness fields give $c$ a defined evaluation; fix a
+conclusion entry $i$. The accepted branch fixes a variable space and a
+per-entry valuation for it: the idx-free branch reads each bare wire
+\emph{clamped} at entry $i$ (a read that serves heterogeneous premise
+atom shapes at every conclusion index); the wire-aware branch reads
+each projection $w[j]$ at its fixed coordinate; the mixed branch does
+both at once, on disjoint variable classes. In every case, each
+sourced entry polynomial is the normal form of a premise conjunct that
+\emph{holds} at $\sigma$, per-entry --- and here positive size is
+essential: an atom over a positively-sized wire has at least one
+honest entry, so its per-entry normal form is genuinely nonpositive at
+the branch's valuation (Remark~\ref{rem:fk-b14} shows what happens
+otherwise). Proposition~\ref{prop:fk-comb} bounds the weighted fold by
+$0$; the certified fold identity says the fold \emph{is} $c$'s
+polynomial in the branch's variable space; evaluating at the branch's
+valuation gives entry $i$ of $c$'s tensor $\leq 0$. Entries were
+arbitrary, so the atom $c \leq 0$ holds. \texttt{sound\_farkas}
+case-splits on the branch disjunct and runs exactly this argument
+three times.
+\end{proof}
+
+\begin{bremark}[why positive-size wires are not decoration]
+\label{rem:fk-b14}
+Comparison atoms hold per-entry, and a zero-size wire has no entries:
+at $w$ of shape $[0]$, the atoms $5 \leq w$ and $w \leq 3$ both hold
+\emph{vacuously} --- yet their $({\cdot} \leq 0)$-normal forms
+$5 - w$ and $w - 3$ are perfectly good polynomials, and with
+$\lambda = 1$ each they fold to the constant $2$. Without the
+positive-size condition the rule derives $\vdash 2 \leq 0$ from a
+satisfiable premise: the classic mismatch between empty-product
+semantics and nonempty algebra, and the reason the field exists. (A
+narrower wire discipline once masked the failure by accident of
+strength; the field is the honest general-shape guard.)
+\end{bremark}
+
+\begin{bremark}[why the conclusion's shape fields are not decoration]
+\label{rem:fk-b13}
+A conclusion mentioning an untyped wire --- say
+$c' = 0 \cdot w_{999} + c$ with $w_{999}$ untyped --- has a correct
+canonical polynomial: the dead monomial vanishes in canonical form, so
+the fold identity holds exactly as it does for $c$. But evaluation is
+structural on the \emph{term}, not on its canonical form --- it still
+reads $w_{999}$, which is untyped --- so the conclusion never
+evaluates, and the concluded atom never holds at any valuation. The shape-stability and finiteness
+fields make ``the fold is $c$'s polynomial'' imply ``$c$
+evaluates'', closing the gap between syntax and semantics.
+\end{bremark}
+
+\begin{bremark}[the three branches are one algorithm]
+\label{rem:fk-branches}
+The branches differ only in the variable space where polynomials are
+compared: canonical wire-keyed forms; projection coordinates keyed by
+an injective (wire, coordinate) pairing --- distinct wires \emph{must}
+get distinct variables, since a composite may mix projections of
+several wires and conflating $w_0[j]$ with $w_2[j]$ would let
+semantically different polynomials collide; and the mixed tagged union,
+where bare wires and projections are disjoint classes --- in
+particular a bare $w$ is never identified with $w[0]$: the
+identification variant admits a false sequent, so the tagging is a
+soundness fact, not a convenience. Entry encoding, sign gates, atom
+sourcing, and the exact fold are verbatim across branches, and each
+branch carries its own per-entry valuation in the soundness proof.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The linear ancestor is Farkas' lemma \cite{farkas1902}; the multiplier
+sign conventions ($\lambda \geq 0$ on inequalities, free on equalities)
+are \cite[\S7]{schrijver1986}. As everywhere in this calculus, only
+the sound (trivial) direction is claimed: the classical lemma's
+content --- that every valid affine consequence \emph{has} such a
+combination --- is a completeness statement about producers, never
+consulted by the kernel. Degree-blindness of the replay places the
+rule's polynomial generalizations in the Krivine--Handelman family
+\cite{krivine1964,handelman1988}, reached in this catalogue through
+\rulename{Syzygy} and \rulename{BernCone} rather than by widening this
+rule.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:fk-instance} warrant & \texttt{sound\_farkas} (branch case split); \texttt{farkasCombinationValid}\\
+entry decoding (pinned encoding) & \texttt{farkasEntries}\\
+atom normal forms, both polarities on equality & \texttt{atomLeZeroPolys} (idx-free); \texttt{atomLeZeroPolysW}, \texttt{atomLeZeroPolysM} (widened branches)\\
+the three branches & \texttt{farkasCheckCore}, \texttt{farkasCheckW}, \texttt{farkasCheckM}; disjunction \texttt{farkasCheck}\\
+projection variable spaces (Remark \ref{rem:fk-branches}) & \texttt{wireCoordKey}, \texttt{Term.asCoordPolyIdxW?}, \texttt{Term.asCoordPolyMixed?}\\
+Proposition \ref{prop:fk-comb} fold & \texttt{farkas\_fold\_eval\_nonpos}, \texttt{farkas\_fold\_eval\_nonpos\_polys}\\
+per-entry valuations & the clamped, coordinate, and mixed entry valuations consumed by \texttt{sound\_farkas}'s three cases\\
+positive-size guard (Remark \ref{rem:fk-b14}) & payload field \texttt{wiresPos} (\texttt{PFarkasData})\\
+conclusion evaluability (Remark \ref{rem:fk-b13}) & payload fields \texttt{conclShape}, \texttt{conclFin}\\
+wire placement & \texttt{RuleTag.farkas}\\
+\end{anchors}

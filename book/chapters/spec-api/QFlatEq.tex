@@ -1,0 +1,21 @@
+\apilang{TypeScript}{judgment.flatEq}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function flatEq(args: {
+  composite: SysRef;
+  flat: SysRef;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(j.flatEq({ composite: j.sysRef("comp"), flat: j.sysRef("mono") })),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QFlatEq::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(composite: SysRef, flat: SysRef) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let flat = QFlatEq::new(SysRef("comp".into()), SysRef("mono".into()));
+\end{rustsrc}

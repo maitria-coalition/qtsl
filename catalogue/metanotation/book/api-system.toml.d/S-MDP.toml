@@ -1,0 +1,24 @@
+# api-system.toml.d/S-MDP.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-MDP"
+entity = "model type"
+
+[api.ts]
+handle = "system.mdp"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_mdp", "marker:ts_sig_mdpgen"]
+snippet_file = "ts/tests/mdpgen-native.test.ts"
+snippet = "marker:ts_mdpgen"
+note = '''The quoted construction is the committed cross-language byte-identity vector's own (the patrol mechanism), with the policy passed separately --- the decision former has no policy family, and the scheduler grain at the kit call is the compiled face of the composed policy mechanism. The kit's Rust face is \texttt{mtk\_catalogue::system::mdp\_gen\_kit}; the refusal-geometry witness remains in the TS corpus beside it.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Mdp::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_mdp"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "marker:mdp_happy"

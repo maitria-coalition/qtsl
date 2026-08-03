@@ -1,0 +1,133 @@
+# Transcripts for the Geolog Quick Start chapter.
+#
+# One bash session, sandboxed in a scratch directory that mirrors what
+# the chapter asks the reader to have: the geolog binary on PATH and the
+# repository's committed example files under examples/. File fragments
+# excerpt the committed examples themselves, so the listings shown are
+# the bytes the CLI tests run against.
+
+timeout = 300
+
+inputs = [
+  "geolog-alpha:crates",
+  "geolog-alpha:Cargo.lock",
+  "geolog-alpha:examples/routes.geolog",
+  "geolog-alpha:theories/generated/PetriNet.rows.txt",
+]
+
+[session]
+env = { PATH = "{geolog-alpha}/target/release:{ENV:PATH}" }
+
+[[mount]]
+tool = "geolog-alpha"
+src = "examples/routes.geolog"
+dest = "examples/routes.geolog"
+mode = "copy"
+
+# --------------------------------------------------------- file listings
+
+[[fragment]]
+name = "theory-src"
+kind = "file"
+source = "geolog-alpha:examples/routes.geolog"
+from = '^theory Routes \{'
+to = '^\}$'
+
+[[fragment]]
+name = "instance-src"
+kind = "file"
+source = "geolog-alpha:examples/routes.geolog"
+from = '^instance Demo : Routes \{'
+to = '^\}$'
+
+# ------------------------------------------------------------- the chase
+
+[[fragment]]
+name = "chase"
+kind = "run"
+prose-assert = [
+  'Node — 4 elements \(4 seeded\)',
+  'Edge — 3 rows \(3 seeded, 0 derived\)',
+  'Path — 4 rows \(0 seeded, 4 derived\)',
+  '\+ \[src: hub, tgt: port\] Path',
+  'fixpoint: reached, no judgements',
+]
+
+  [[fragment.step]]
+  run = "geolog chase examples/routes.geolog"
+
+  [[fragment.step]]
+  run = "echo $?"
+
+# ---------------------------------------------------------------- break it
+# The reader edits the instance by hand; the regeneration makes the same
+# edit mechanically (the inserted line is the one the chapter prints) and
+# saves it under the filename the prose names.
+
+[[fragment]]
+name = "chase-cycle"
+kind = "run"
+filters = [
+  { kind = "collapse", match = '^    \[src:', marker = "    ⋮" },
+  { kind = "collapse", match = '^  \+ \[src:', marker = "    ⋮" },
+]
+prose-assert = [
+  'Edge — 4 rows \(4 seeded, 0 derived\)',
+  'Path — 12 rows \(0 seeded, 12 derived\)',
+  '(?s)denial violated: ax/no/loop at \[a: hub\].*\[a: east\].*\[a: port\]',
+]
+
+  [[fragment.step]]
+  run = """sed '/\\[src: east, tgt: port\\] Edge;/a\\  [src: port, tgt: hub]  Edge;' examples/routes.geolog > routes-cycle.geolog"""
+  show-cmd = false
+  show-out = false
+
+  [[fragment.step]]
+  run = "geolog chase routes-cycle.geolog"
+  expect-exit = 1
+
+  [[fragment.step]]
+  run = "echo $?"
+
+# ------------------------------------------------------ the theory is rows
+
+[[fragment]]
+name = "rows"
+kind = "run"
+filters = [
+  { kind = "recolumn", match = '^op\[', at = "//", column = 48 },
+  { kind = "cut", from = '^op\[   6\]', to = '^op\[   7\]', marker = "    ⋮" },
+  { kind = "clip", after = '^op\[   9\]', marker = "    ⋮" },
+]
+prose-assert = [
+  '// Declaration rows in the GeologMeta idiom',
+  'op\[   0\] elta sort=G<Theory>',
+  'value=str:"src"',
+]
+
+  [[fragment.step]]
+  run = "geolog rows examples/routes.geolog"
+
+# ----------------------------------------------- unprinted receipt checks
+# Claims the prose makes without printing a transcript, re-verified at
+# every regeneration (hidden steps: they gate, they do not render).
+
+[[fragment]]
+name = "receipt-checks"
+kind = "run"
+emit = false
+prose-assert = [
+  'geometric linter: CLEAN',              # classification is total by construction
+  '^CHECK_RC=0$',                         # ... so the check passes as written
+  '^PETRI_OPS=1239$',                     # the "1,239 ops" figure
+]
+
+  [[fragment.step]]
+  run = "geolog check examples/routes.geolog 2>&1; echo CHECK_RC=$?"
+  show-cmd = false
+  show-out = false
+
+  [[fragment.step]]
+  run = "grep -c '^op\\[' '{geolog-alpha}/theories/generated/PetriNet.rows.txt' | sed 's/^/PETRI_OPS=/'"
+  show-cmd = false
+  show-out = false

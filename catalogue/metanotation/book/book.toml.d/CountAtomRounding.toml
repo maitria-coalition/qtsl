@@ -1,0 +1,100 @@
+# Alias note: the respelling's target is an atom-denotation identity
+# consumed by QAggReduce's count rows (the closure-discipline pattern),
+# not a single target rule node — so no alias_target is declared. If the
+# renderer requires one for tier-3 rows, "QAggReduce" is the honest
+# nearest value (flagged in the batch report).
+[[rule]]
+id = "CountAtomRounding"
+source = "../QTSL-rules.toml"
+row = "CountAtomRounding (P3.3)"
+proof = "book/proofs/CountAtomRounding.tex"
+commentary = '''
+\rulename{CountAtomRounding} is the counting closure discipline: when a
+count observable $k_P$ is complemented in a hypothesis position, the
+real-arithmetic complement of $\{k_P \le j\}$ --- the open condition
+$\{k_P > j\}$ --- is replaced by the closed integer-rounded atom
+$\{k_P \ge j + 1\}$. Over reachable markings the two are \emph{equal}
+(counts are integers there), and everywhere the rounded atom is
+contained in the open one, so the rewrite is free and strictly tighter
+than the real complement: substituting it in hypothesis position never
+widens the constraint set, and the gained slab $j < k_P < j + 1$
+(unreachable, but visible to real-arithmetic relaxations) is often
+exactly what makes a downstream combination certificate feasible. It is
+the counting analogue of the strict-atom closure discipline for
+continuous observables, with integrality replacing topology.
+
+There is nothing for the checker to recompute beyond the syntactic
+rewrite itself: producers apply it before emission, and what the wire
+carries is the already-tightened atom inside an aggregation
+rule\textquotesingle s hypothesis rows. The one genuine hypothesis is
+integrality --- that $k_P$ takes integer values at every reachable
+marking. That is a guarantee of the marking-space compile (counts are
+cardinalities), not of the rewrite; in the mechanization it enters as a
+named hypothesis, discharged definitionally when the net layer ships.
+Without it the exactness identity fails (a fractional
+\textquotedblleft count\textquotedblright{} at $k_P = j + \tfrac12$
+satisfies the true complement but not the rounded atom), while the
+tightening direction survives unconditionally --- the failure mode of a
+misapplied rounding is refusal (an infeasible row), never a false
+conclusion in hypothesis position.
+'''
+note = '''
+Essential on the first worked aggregation example: a drain
+net\textquotesingle s interior row is infeasible over the real-relaxed
+off-target scope $k > 0$ (it fails at $k = \tfrac12$) and discharges
+with the rounded scope $k \ge 1$, via an exact linear-multiplier
+witness. The rewrite rides with \rulename{QAggReduce}\textquotesingle s
+family: its target is an atom-denotation identity consumed by count
+rows, not a separate rule node --- one atom in, one atom out.
+'''
+correspondence = '''
+The display\textquotesingle s two claims and its integrality premise
+map onto the three bound statements. The compile\textquotesingle s
+integrality guarantee --- the rule\textquotesingle s System bridge,
+as the roster says in words --- $\mapsto$ \texttt{hbridge : ∀ x ∈
+Reach, ∃ n : ℤ, k x = (n : ℝ)}: counts integer-valued at every
+reachable point, a named hypothesis because qtsl-aux lacks the net
+layer that guarantees it. Then: the hypothesis-position rewrite
+$\mapsto$ \texttt{countAtomRounding\_sound} (every reachable point of
+the true complement of $\{k \le j\}$ satisfies $\{j + 1 \le k\}$ ---
+the side the drain example\textquotesingle s interior row consumes);
+``unconditionally never wider'' $\mapsto$
+\texttt{countAtomRounding\_tighter}, whose binder row is the width
+find: NO integrality, NO reachable scope --- the containment $\{j+1
+\le k\} \subseteq \{j < k\}$ holds for arbitrary real observables,
+so substituting the rounded atom is safe everywhere and the
+integrality hypothesis buys only exactness; which is certified
+separately as \texttt{countAtomRounding\_eq} --- the
+catalogue\textquotesingle s ``the complement over reachable markings
+IS $\{k_P \ge j+1\}$'' verbatim as a set identity on the reachable
+locus. Width note: \texttt{k : X → ℝ} with $j : \mathbb{Z}$ cast ---
+the count-observable grammar (the $f \equiv 1$ query) is upstream;
+divergence D2\textquotesingle s question (which side is essential)
+is answered by the bind structure itself: soundness rides
+\texttt{\_sound}, the free tightening rides \texttt{\_tighter}, and
+each is consumable independently.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Structural"
+src = "../../lean/qtsl-aux/QtslAux/Structural.lean"
+decls = [
+  "countAtomRounding_sound",
+  "countAtomRounding_tighter",
+  "countAtomRounding_eq",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development checks the base calculus\textquotesingle s wire
+format (theory \texttt{qtsl\_catalogue}). This rewrite is applied
+producer-side, before emission: the wire carries the
+already-tightened atom, so the HOL statement that would matter is the
+aggregation sequent\textquotesingle s --- a node outside the wire
+format the HOL4 development checks. Nothing exists there for a HOL
+statement to be about; if a future format ever carries the un-rounded
+atom, the rewrite\textquotesingle s exactness identity becomes the
+portable statement.
+'''

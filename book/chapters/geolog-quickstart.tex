@@ -1,0 +1,189 @@
+\chapter{Quick Start}
+\label{ch:geolog-quickstart}
+
+In this chapter you will install geolog, write a theory and a handful
+of facts in one file, and run the chase: the engine will derive the
+tables your axioms entail, invent nothing you did not license, and
+report --- rather than repair or reject --- the one state your theory
+forbids. At the end you will look at the theory you wrote and find it
+is itself rows. The whole path fits in one sitting; every command is
+copy-pasteable, and every output shown is the verbatim transcript of
+a real run.\footnote{The book's build regenerates these transcripts
+by executing the printed commands against the committed examples,
+and each fragment's header records the exact tool revision it ran
+against (all runs on one commodity arm64 box).}
+
+\section{Install}
+\label{sec:gqs-install}
+
+A Rust toolchain is the only prerequisite (stable channel;
+\path{rust-toolchain.toml} pins the components).
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+git clone https://github.com/maitria-coalition/geolog-alpha
+cd geolog-alpha
+cargo install --path crates/geolog
+\end{Verbatim}
+
+\noindent A fresh clone compiled in about a minute on the commodity
+arm64 box that regenerates this book's transcripts.
+\texttt{geolog --help} lists ten verbs; the three
+this chapter uses are \texttt{check}, \texttt{chase}, and
+\texttt{rows}.
+
+\section{A theory}
+\label{sec:gqs-theory}
+
+The example is a freight network, small enough to hold in your head:
+places, direct hops, and reachability. The file
+\path{examples/routes.geolog} declares one sort, two relations, and
+three axioms:
+
+\input{generated/transcripts/geolog-quickstart/theory-src}
+
+Four things to read off the shape.
+\begin{enumerate}
+\item Relations are declared over named record fields, and axioms
+are \emph{sequents}: universally quantified entailments, each
+premise a conjunction of atoms, each conclusion here a single atom.
+The odd one out is the third axiom, whose conclusion \texttt{false}
+makes it a \emph{denial}: a state the theory forbids.
+\item The word in front of each axiom's name is its \emph{mode
+mark}, and the file's own comments state the semantics:
+\texttt{chase} fires, \texttt{report} judges, and an unmarked axiom
+means \texttt{report}. An axiom creates rows only where its author
+said so in as many words.
+\item Note what the mark does \emph{not} do: nothing in the
+\emph{declarations} marks \texttt{Path} as derived. The mode belongs
+to the axiom, and \texttt{Path} being a table nobody writes remains
+an emergent fact --- about which relations your \texttt{chase}-marked
+axioms conclude into and which your commits assert into --- not a
+schema annotation.
+\item The slash in \texttt{ax/path/edge} is nothing special:
+slash-names are ordinary identifiers, used by convention for
+namespacing. The \texttt{ax/} prefix, however, does real grammatical
+work: it makes a statement an axiom rather than a declaration, so a
+sequent written under a name like \texttt{my/rule} is a syntax
+error. The Reference Manual (chapter~\ref{ch:geolog-reference})
+spells out these name rules.
+\end{enumerate}
+
+Nothing travels beside the theory: a \path{.geolog} file is
+self-contained --- everything it draws on is either declared in it
+or imported at the top. This is the \emph{roster-totality}
+discipline: every declared relation has a decided evaluator.
+\texttt{ordinary} (asserted or chase-derived) is the default,
+declared by writing nothing. When a relation is instead decided by a
+bounded external procedure, an import line says so ---
+\texttt{import <provider>.\{rel\};} --- classifying it as a
+\emph{side-condition} awaiting that provider. The same import syntax
+authorizes builtin ground vocabulary by name
+(\texttt{import std.\{Q, q\_lt\};}). Nothing guesses on
+your behalf: an \texttt{import std} line naming something outside
+the builtin roster refuses at once, listing the importable names.
+This chapter's example needs no imports; every relation in it is
+ordinary, and the file's opening comment says so.
+
+\section{An instance}
+\label{sec:gqs-instance}
+
+The same file carries the facts, in an \texttt{instance} block ---
+element declarations first, then facts in the same record idiom the
+axioms use:
+
+\input{generated/transcripts/geolog-quickstart/instance-src}
+
+\noindent Elements are declared before use; a fact naming an
+undeclared element is an error, never a silently minted row.
+(\texttt{geolog check} validates all of this --- declarations, field
+sets, sorts --- without running anything.)
+
+The map is worth ten seconds: \texttt{hub} ships to \texttt{east}
+and to \texttt{west}, and \texttt{east} ships on to \texttt{port}.
+Before running anything, guess which pairs the axioms will put in
+\texttt{Path}.
+
+\section{The chase}
+\label{sec:gqs-chase}
+
+\input{generated/transcripts/geolog-quickstart/chase}
+
+Look at the \texttt{+} rows: tables nobody wrote.
+\texttt{[src: hub, tgt: port]} is in \texttt{Path} because
+\texttt{ax/path/trans} forces it from two rows you did write, and the
+chase ran that forcing to its \emph{least fixpoint} --- everything the
+axioms entail, nothing they do not. (The other three are your own
+hops, lifted into \texttt{Path} by \texttt{ax/path/edge}: one new
+reachability fact, four new rows.) ``Derived'' names provenance
+rather than any lesser grade of truth: these rows are as queryable
+as the seeded ones, and rerunning from the same facts re-derives
+exactly the same table.
+
+\section{Break it}
+\label{sec:gqs-break}
+
+Add one hop to the instance block --- the return leg that closes a
+loop --- and save the edited file as \path{routes-cycle.geolog}:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+  [src: port, tgt: hub]  Edge;
+\end{Verbatim}
+
+\input{generated/transcripts/geolog-quickstart/chase-cycle}
+
+Read what did \emph{not} happen. The write was not rejected: the
+facts landed, and the chase saturated over them (twelve \texttt{Path}
+rows now: each of the three places on the loop reaches all four,
+itself included). The
+violation was not repaired: no engine deleted your hop or picked a
+row to sacrifice. What happened is a \emph{judgment} --- the very
+thing \texttt{ax/no/loop}'s \texttt{report} mark asks for: the
+violated denial is reported, with the axiom's own name and the
+binding that witnesses it, and the exit code says so. Three
+judgments here, not one: the same loop, witnessed once from each
+place standing on it. If you have
+operated an event-sourced system, this is a familiar posture done
+formally: an
+append-only log can land in a state some invariant marks invalid, and
+the repair is a further ordinary commit --- made by whoever owns the
+workflow, not by the database guessing. The Tutorial
+(chapter~\ref{ch:geolog-tutorial}) makes this the centre of the
+story.
+
+\section{The theory is rows}
+\label{sec:gqs-rows}
+
+One last look before you go:
+
+\input{generated/transcripts/geolog-quickstart/rows}
+
+The theory you wrote in \S\ref{sec:gqs-theory} is itself data: a
+\texttt{Theory} element, a \texttt{Sort} element with a name row and
+a home row, \texttt{Fun} and \texttt{Field} elements for each
+relation and its columns --- rows in the \emph{meta-schema}, the
+schema language that is itself a geolog theory. As the listing's own
+header says, this is the declaration slice; axioms continue as rows
+in the same idiom, and the repository's \path{theories/generated/}
+directory carries complete committed listings --- the full Petri-net
+theory runs to 1{,}239 ops.
+Schemas, extensions, and migrations live in the same substrate they
+govern, so you can version them, diff them, and derive facts about
+them just as you would any other rows.
+
+\section{Where to next}
+\label{sec:gqs-next}
+
+The Tutorial (chapter~\ref{ch:geolog-tutorial}) works an event-sourced
+order flow with two writers: views only the merged logs can derive,
+two replicas' records identified by congruence rather than a conflict
+resolver, a witness the chase invents under an existential axiom, a
+violation that only the merge surfaces, and the signed commit log
+underneath, which can say things a broker cannot. The Reference Manual
+(chapter~\ref{ch:geolog-reference}) gives the systematic account. The
+part closes with diagrams as data (chapter~\ref{ch:qtsl-scomplexes}):
+one incidence genus, stored and checked as rows, for every diagram
+the wider toolkit traffics in. And
+for the road from a model to a checked temporal claim about it ---
+the reason this database exists in this book --- start the QTSL part
+at chapter~\ref{ch:qtsl-quickstart}.
+

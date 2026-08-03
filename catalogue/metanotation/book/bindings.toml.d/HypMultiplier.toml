@@ -1,0 +1,14 @@
+# bindings.toml.d/HypMultiplier.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'HypMultiplier'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "hypMultiplier_sound"
+sha256 = "3f00854d8ff3cf1580a45b8ffd594c9bd8b88f682dab9f2972f15cc4ce41415c"
+
+[[correspondence]]
+entry = "HypMultiplier"
+steele_sha256 = "b9632eadbe09d7cabe20c46d98074073aecbc8b28426fc9a8057a733ecaf2da8"
+statements_sha256 = "62b1f9090d46bfa10eeb9422894c6692a1643b4a0b431daa58c3fbb6752f91ca"
+prose_sha256 = "14ce16b05e36ced3fd496aa6c24fc688130672eabddf1f5d70f15540616d94e3"
+

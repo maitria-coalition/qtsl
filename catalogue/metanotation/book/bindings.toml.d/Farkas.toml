@@ -1,0 +1,39 @@
+# bindings.toml.d/Farkas.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Farkas'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Formula.conjunctList"
+sha256 = "838405d8beca2e21b9d01b3e1a7d8d3a856d73568929aaabe9d9dfd5df7675a7"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "atomLeZeroPolys"
+sha256 = "cfb91a919eda2ce0982d111b15d86b91e15904b2e59256ac98507c52c77e49ce"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "farkasCheck"
+sha256 = "f35121726d2c49ccd304d878aa275fc8398e4525e1d5d88dc6ae316fd2744e09"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "farkasCheckCore"
+sha256 = "333eb16f36dc844791f3c764dd46e6bd0fa911ae651a26817583680346614f3e"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "farkasEntries"
+sha256 = "8b97407667f7d44c9e9472404a5c8e013f4cd87fa56915dbaa0dd9e762589b6f"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_farkas"
+sha256 = "fbc23332772476185462a2c7ece9e99017119b1765973f474bda1a58f5c60b24"
+
+[[correspondence]]
+entry = "Farkas"
+steele_sha256 = "5eb0f37dd8ab593cb21a01f1940c80b862545e1d529e31753045e066e7b38601"
+statements_sha256 = "291651cfa27d9e370f51ec74b25668d8f29ba5f4ced23c4ebae20b7014212450"
+prose_sha256 = "886ecb9a90f2489f898cc130a68081f1723887230a38df91743caaa257a1773b"
+

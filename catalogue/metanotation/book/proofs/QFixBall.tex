@@ -1,0 +1,172 @@
+
+\sourcenote{Genre: core rule (tier 1) --- Banach's fixed-point theorem
+\cite{banach1922} in certificate form. Scope, stated loudly: the
+theorems are parametric in a complete metric space; the affine/Euclidean
+instantiation is mechanized, and completeness of the Wasserstein space
+is a \emph{named hypothesis}, not a discharged one. Every hypothesis of
+the rule is used below and remarked on.}
+
+\textbf{Setting and claim.}\enspace Fix a metric space $(X, d)$, a map
+$T : X \to X$, a snapshot $\hat\mu \in X$ (the object the producer
+actually computed), and rational certificate data
+$\rho \in \Q \cap [0, 1)$, $\delta, r \in \Q$. The three certified rows:
+\begin{align*}
+&\text{(H-\textsc{anchor})}\quad d(Tx, Ty) \leq \rho\, d(x, y)
+  \ \text{ for all } x, y \in \overline{B}(\hat\mu, r)
+  && \text{(two-point contraction \emph{on the ball})},\\
+&\text{(H-\textsc{resid})}\quad d(T\hat\mu, \hat\mu) \leq \delta
+  && \text{(one concrete sweep at the snapshot)},\\
+&\text{(H-\textsc{radius})}\quad \delta + \rho\, r \leq r
+  && \text{(division-free; equivalent to } r \geq \delta/(1-\rho)\text{)}.
+\end{align*}
+The claim (\texttt{sound\_QFixBall}): if $X$ is complete, there is
+\emph{exactly one} fixed point of $T$ in $\overline{B}(\hat\mu, r)$ ---
+so the description $\mathrm{fix}\,T$ is licensed on the ball, and the
+distance judgement $d(\hat\mu, \mathrm{fix}\,T) \leq r$ holds; moreover
+the sharper anchored bound $d(\hat\mu, \mathrm{fix}\,T) \leq
+\delta/(1-\rho)$ holds (\texttt{dist\_fixedPoint\_le},
+\texttt{anchored\_le\_radius}). Every hypothesis is anchored at the
+\emph{known} point $\hat\mu$; the unknown fixed point appears only in
+conclusions --- the anchoring inversion that makes the statement
+checkable at all.
+
+\begin{blemma}[the rows are sign-coherent]\label{lem:qfb-signs}
+H-\textsc{resid} forces $\delta \geq 0$; together with $\rho < 1$,
+H-\textsc{radius} forces $r \geq 0$, so the ball is honest.
+\end{blemma}
+\begin{proof}
+$0 \leq d(T\hat\mu, \hat\mu) \leq \delta$. From H-\textsc{radius},
+$(1 - \rho)\, r \geq \delta \geq 0$, and $1 - \rho > 0$.
+\end{proof}
+
+\begin{blemma}[self-mapping is derived, never assumed]\label{lem:qfb-maps}
+$T$ maps $\overline{B}(\hat\mu, r)$ into itself.
+\end{blemma}
+\begin{proof}
+Let $d(x, \hat\mu) \leq r$. Both $x$ and $\hat\mu$ lie in the ball
+(Lemma~\ref{lem:qfb-signs} for $\hat\mu$), so H-\textsc{anchor} applies
+to the pair:
+\[
+d(Tx, \hat\mu) \;\leq\; d(Tx, T\hat\mu) + d(T\hat\mu, \hat\mu)
+\;\leq\; \rho\, d(x, \hat\mu) + \delta
+\;\leq\; \rho\, r + \delta \;\leq\; r . \qedhere
+\]
+\end{proof}
+
+\begin{blemma}[in-ball uniqueness]\label{lem:qfb-unique}
+If $y, z \in \overline{B}(\hat\mu, r)$ are both fixed by $T$, then
+$y = z$.
+\end{blemma}
+\begin{proof}
+$d(y, z) = d(Ty, Tz) \leq \rho\, d(y, z)$ with $\rho < 1$ forces
+$d(y, z) \leq 0$, hence $= 0$. Note the proof consumes only the
+\emph{two-point} row, on the ball --- no iteration, no completeness.
+\end{proof}
+
+\begin{blemma}[the anchored a-priori bound]\label{lem:qfb-anchor}
+Any fixed point $y \in \overline{B}(\hat\mu, r)$ satisfies
+$d(\hat\mu, y) \leq \delta/(1 - \rho) \leq r$.
+\end{blemma}
+\begin{proof}
+One triangle inequality through the snapshot's image:
+\[
+d(\hat\mu, y) \;\leq\; d(\hat\mu, T\hat\mu) + d(T\hat\mu, Ty)
+\;\leq\; \delta + \rho\, d(\hat\mu, y),
+\]
+so $(1 - \rho)\, d(\hat\mu, y) \leq \delta$. The cap by $r$ is
+H-\textsc{radius} rearranged: $\delta \leq (1 - \rho)\, r$
+(\texttt{anchored\_le\_radius}). Uniqueness is not consumed --- the
+bound holds for \emph{any} fixed point in the ball, which is what lets
+the rule state it before existence is settled.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{QFixBall}]\label{thm:qfb-sound}
+Let $X$ be complete and let the three rows hold. Then $T$ has exactly
+one fixed point $\mu^{*}$ in $\overline{B}(\hat\mu, r)$, and
+$d(\hat\mu, \mu^{*}) \leq \delta/(1-\rho) \leq r$.
+\end{bthm}
+\begin{proof}
+\emph{Existence.} By Lemma~\ref{lem:qfb-maps} the closed ball is
+$T$-invariant; it is a closed subset of a complete space, hence
+complete, and $T$ restricted to it is a $\rho$-contraction
+(H-\textsc{anchor}). Banach's theorem \cite{banach1922} applies to the
+restriction: the Picard iterates $T^n \hat\mu$ form a Cauchy sequence
+($d(T^{n+1}\hat\mu, T^n\hat\mu) \leq \rho^n \delta$, summable) whose
+limit $\mu^{*}$ lies in the ball and is fixed. Existence is thus
+\emph{manufactured} by the contraction --- the rule consumes no
+separate existence certificate, so the concluded description is
+existential without vacuity.
+
+\emph{Uniqueness} is Lemma~\ref{lem:qfb-unique}; the \emph{bound} is
+Lemma~\ref{lem:qfb-anchor}. Together: $\mathrm{fix}\,T$ is well-defined
+on the ball (the description license the judgement carries) and the
+distance judgement holds at radius $r$, with $\delta/(1-\rho)$ as the
+sharper certified value.
+\end{proof}
+
+\begin{bprop}[the affine instantiation]\label{prop:qfb-affine}
+On a finite-dimensional Euclidean space, let $T x = A x + c$ with $A$
+linear and an operator-norm row $\lVert A \rVert \leq \rho < 1$. Then
+H-\textsc{anchor} holds globally (a fortiori on the ball), completeness
+holds by instance, and Theorem~\ref{thm:qfb-sound} applies verbatim
+(\texttt{sound\_QFixBall\_affine}).
+\end{bprop}
+\begin{proof}
+$d(Tx, Ty) = \lVert A(x - y) \rVert \leq \lVert A \rVert\,
+\lVert x - y \rVert \leq \rho\, d(x, y)$. The operator-norm row is the
+affine tier's discharge of H-\textsc{anchor}: it is certified by
+positive-semidefiniteness of $\rho^2 I - A^{\top} A$, which is
+\rulename{PSDCert}-family machinery on rational data.
+\end{proof}
+
+\begin{bremark}[why each hypothesis is needed]\label{rem:qfb-omit}
+\emph{Drop $\rho < 1$}: the identity map has residual $0$ at every
+snapshot and every radius row holds with $\rho = 1$, yet every point is
+fixed --- the description license (uniqueness) fails, so the rule
+\emph{refuses} $\rho \geq 1$ rather than concluding.
+\emph{Drop H-\textsc{radius}}: on $\R$, take $Tx = \tfrac{1}{2}x + 2$,
+$\hat\mu = 0$, so $\rho = \tfrac12$, $\delta = 2$; the unique fixed
+point is $4$. With $r = 1$ the ball $[-1, 1]$ contains no fixed point
+--- and indeed $\delta + \rho r = \tfrac52 > 1$: the radius row fails,
+correctly. \emph{Drop H-\textsc{resid}}: nothing ties the ball to the
+dynamics --- any $r$ would pass on any map with small $\rho$, concluding
+a distance bound to a fixed point that can sit arbitrarily far away.
+\emph{Weaken completeness}: on $X = \Q \cap [1, 2]$ (incomplete),
+$Tx = \tfrac{x}{2} + \tfrac{1}{x}$ maps $X$ into itself with
+$|T'| \le \tfrac12$ and contracts toward the irrational $\sqrt{2}$ ---
+iterates Cauchy, no fixed point in $X$, and the certificate rows even
+pass ($\hat\mu = \tfrac32$, $r = \tfrac12$, $\rho = \tfrac12$,
+$\delta = \tfrac{1}{12}$, with $\delta + \rho r = \tfrac13 \le
+\tfrac12$); the conclusion's existential half is exactly what
+completeness buys. The two-point row being
+required only \emph{on the ball} is deliberate: locality is what a
+finite certificate can attest (globally, $\lVert A \rVert < 1$ may even
+be false while the ball-restricted bound holds).
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The theorem is Banach's \cite{banach1922}; the closed-ball variant with
+the condition $d(T\hat\mu, \hat\mu) \leq (1 - \rho)\, r$ and the
+a-priori bound $\delta/(1-\rho)$ is the textbook local form
+\cite[\S I.1]{granasdugundji2003}. The certificate-form contribution is
+the \emph{anchoring inversion}: classical statements estimate the
+distance from an iterate to the limit; the rule re-expresses every
+hypothesis as a row checkable at the known snapshot in exact rational
+arithmetic --- contraction as an operator-norm (or two-point) row,
+residual as one evaluated sweep, radius as division-free arithmetic ---
+so the analytic content survives while everything the checker touches
+is decidable. The completeness gap for measure-space subjects
+(Wasserstein distance over a Euclidean base) is carried as a named
+hypothesis; the pilot certificate discharges it by pinning the subject
+to the affine/Euclidean reduction of
+Proposition~\ref{prop:qfb-affine}.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qfb-signs} & \texttt{delta\_nonneg}, \texttt{radius\_nonneg}\\
+Lemma \ref{lem:qfb-maps} & \texttt{mapsTo\_closedBall}\\
+Lemma \ref{lem:qfb-unique} & \texttt{fixedPoint\_unique}\\
+Lemma \ref{lem:qfb-anchor} & \texttt{dist\_fixedPoint\_le}; \texttt{anchored\_le\_radius}\\
+Theorem \ref{thm:qfb-sound} & \texttt{sound\_QFixBall} (existence via the contraction on the complete invariant ball)\\
+Proposition \ref{prop:qfb-affine} & \texttt{lipschitzWith\_affine}; \texttt{sound\_QFixBall\_affine}\\
+\end{anchors}

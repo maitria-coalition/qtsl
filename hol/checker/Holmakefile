@@ -1,0 +1,21 @@
+# The chain builds in two environments:
+#  - CAKEMLDIR set: CakeML misc/basis on the include path with the basis
+#    heap; required by the root qtsl_* theories (which ancestor CakeML's
+#    mlstring) and by the translation/CF/compile targets (qtslCert*Prog*).
+#  - CAKEMLDIR unset: holshim/misc supplies a core-heap `preamble`
+#    stand-in (see its header); the geolog/, imprec/ and temporal/
+#    subdirectories build against a plain HOL4 install.
+ifdef CAKEMLDIR
+INCLUDES = geolog $(CAKEMLDIR)/misc $(CAKEMLDIR)/basis
+else
+INCLUDES = geolog holshim/misc
+endif
+
+all: $(DEFAULT_TARGETS)
+.PHONY: all
+
+ifdef POLY
+ifdef CAKEMLDIR
+HOLHEAP = $(CAKEMLDIR)/basis/basis-heap
+endif
+endif

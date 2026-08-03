@@ -1,0 +1,28 @@
+\apilang{TypeScript}{spec.derived.boolWireSet / boolWireClear}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+boolWireSet(index: number, width: number): Result<StatePred, SpecRefusal>
+
+boolWireClear(index: number, width: number): Result<StatePred, SpecRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const gamma0 = s.unwrap(s.derived.boolWireSet(0, 2));
+const gamma1 = s.unwrap(s.derived.boolWireSet(1, 2));
+const recur0 = s.derived.recurrenceAs(gamma0);
+const recur1 = s.derived.recurrenceAs(gamma1);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::bool\_wire\_set}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn bool_wire_set(index: usize, width: usize) -> Result<StatePred, Refusal>
+
+pub fn bool_wire_clear(index: usize, width: usize) -> Result<StatePred, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let gamma0 = derived::bool_wire_set(0, 2).unwrap();
+let gamma1 = derived::bool_wire_set(1, 2).unwrap();
+let recur0 = derived::recurrence_as(gamma0).unwrap();
+let recur1 = derived::recurrence_as(gamma1).unwrap();
+\end{rustsrc}

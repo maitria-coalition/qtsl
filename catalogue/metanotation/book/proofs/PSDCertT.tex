@@ -1,0 +1,150 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a recipe by
+\emph{reduction to verified machinery} (the \rulename{PConstExact}
+pattern): no catalogue derivation of an exact matrix-positivity fact
+exists, which is the trio's point; each rule discharges against a named
+kernel-verified matrix theorem. This section also states the
+certificate-family preamble the \rulename{PSDCERT/DD} and
+\rulename{PSDCERT/K} sections reference.}
+
+\begin{brecipe}[the PSD-certificate family --- shared shape]
+\label{rec:psd-preamble}
+All three rules certify positivity of a symmetric matrix
+$A \in \Q^{n\times n}$ from an \emph{untrusted witness}, by decidable
+syntactic checks in exact rational arithmetic --- no divisions, no
+pivoting, no floating point on the trusted side. The shared discipline:
+
+\emph{(i) Soundness never consults the witness's accuracy.} The
+conclusion is a theorem of the checked premises; a forged or degraded
+witness can only cause a false REJECT, never a false ACCEPT. Producers
+may therefore run arbitrary float factorizations off-stage.
+
+\emph{(ii) The in-logic conclusion is the quadratic form, not the
+matrix.} The formula language has no matrix atoms, so the rule's
+conclusion is nonnegativity of $Q(p) = \sum_{i,j} A_{ij}\,p_i\,p_j$ at
+a payload term vector $p_1,\ldots,p_n$: the payload conclusion term $c$
+is checked --- by exact canonical-polynomial identity, the recompute
+pattern --- to \emph{be} $-\!\sum_{i,j} A_{ij}\,p_i\,p_j$, and the
+sequent's posted formula is one of three readings of $c \leq 0$ (the
+raw zero-form; the flipped $Q \geq 0$; the literal $l \leq r$ where
+$c = l - r$) --- the same conclusion-form selector displayed in the
+\rulename{Syzygy} section, so the fact slots directly into
+\rulename{Syzygy}/\rulename{Farkas} combinations as a component
+conclusion.
+
+\emph{(iii) Strictness is deliberately dropped at the formula
+boundary.} The matrix theorems certify $A \succ 0$ (for /T and /DD),
+but the premise-free atom ships the $\succcurlyeq$-shaped fact: strict
+positivity of $Q(p)$ would need $p \neq 0$, which no premise-free atom
+carries.
+
+\emph{(iv) The rules are premise-free}; $\Phi$ is arbitrary (a fact
+holding in the empty context holds under any premise). Elementwise atom
+semantics batch the conclusion: at tensor-shaped payload terms, entry
+$e$ of the conclusion is the quadratic form at the terms' entry-$e$
+values, so one node states a family of instances.
+
+The rewrite, per rule, is degenerate in the \rulename{PConstExact}
+sense: one node, zero catalogue premises, discharged by the rule's
+matrix theorem composed with the shared transport lemma
+(\texttt{sound\_psdCertOf}) that carries ``PSD over $\R$'' through
+``nonnegative at every rational point'' and the checked polynomial
+identity to the posted formula.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{PSDCERT/T} instance]\label{rec:psdt-instance}
+Witness: $Z \in \Q^{n\times n}$. Checked premises (all decidable, all
+exact): $A$ symmetric; $Z$ upper-triangular with positive diagonal;
+$M := A\,Z$ (recomputed exactly, one sparse multiply) lower-triangular
+with positive diagonal. Then
+\[
+\inferrule*[Right=\rulename{PSDCERT/T}]
+  {\;\mathrm{checkT}(A, Z) = \mathsf{true} \\
+    c \equiv -\textstyle\sum_{i,j} A_{ij}\,p_i\,p_j\;}
+  {\Phi \vdash \Psi}
+\qquad\rightsquigarrow\qquad
+\text{\upshape discharged by } \texttt{sound\_psdCertT},
+\]
+with $\Psi$ any reading of $c \leq 0$ per the preamble. The check costs
+$O(\alpha n^2)$ multiplications ($\alpha$ = average nonzeros per row of
+$A$) plus $O(n^2)$ sign/zero inspections, division-free; on integer
+inputs it runs entirely in $\mathbb{Z}$ with $\{*, +, <\}$.
+\end{brecipe}
+
+\begin{bprop}[matrix warrant]\label{prop:psdt-matrix}
+If $A$ is symmetric, $Z$ upper-triangular with $Z_{ii} > 0$, and $AZ$
+lower-triangular with $(AZ)_{ii} > 0$, then $A \succ 0$ over $\R$.
+\end{bprop}
+\begin{proof}
+Let $B := Z^{\mathsf T}(AZ)$. As a product of two lower-triangular
+matrices ($Z^{\mathsf T}$ and $AZ$) it is lower-triangular; since
+$Z^{\mathsf T} A Z$ is a congruence of the symmetric $A$ it is also
+symmetric; hence $B$ is \emph{diagonal}, and the sum
+$B_{ii} = \sum_k Z_{ki} (AZ)_{ki}$ collapses to the single term
+$Z_{ii}(AZ)_{ii} > 0$. So $B \succ 0$. Moreover
+$\det Z = \prod_i Z_{ii} > 0$ makes $Z$ invertible, and
+$A = Z^{-\mathsf T} B\, Z^{-1} \succ 0$ by congruence. (This is the
+route the kernel proof takes --- \texttt{congruence\_eq\_diagonal}
+then \texttt{posDef\_of\_congruence\_posDef} --- avoiding leading
+principal minors; the classical alternative reads $A = M Z^{-1}$ as an
+LU factorization with positive-diagonal factors and applies Sylvester's
+criterion \cite{hornjohnson2013}.)
+\end{proof}
+
+\begin{bremark}[each hypothesis, and what removing it admits]
+\emph{Symmetry of $A$}: without it $Z^{\mathsf T}(AZ)$ need not be
+symmetric, the diagonal-collapse argument dies, and the quadratic form
+reads only the symmetric part of $A$ --- the premises would say nothing
+about it. \emph{Upper-triangularity and positive diagonal of $Z$}:
+triangularity is the cheapest syntactic invertibility certificate
+($\det Z = \prod Z_{ii}$), and the diagonal signs feed
+$B_{ii} > 0$; the two sign families are determinant-linked, so
+``repairing'' a wrong pivot sign by flipping a column of $Z$ only moves
+the violation into $Z$'s own diagonal check. \emph{The pattern and sign
+checks on $AZ$}: this is the entire content --- the diagonal of $AZ$
+carries the pivot signs of $A$, and for an indefinite $A$ \emph{no}
+witness whatsoever passes (by Proposition~\ref{prop:psdt-matrix} an
+accepting witness would prove $A \succ 0$). \emph{The conclusion
+identity}: without the recomputed polynomial check the posted atom
+could be an arbitrary formula unrelated to $A$.
+\end{bremark}
+
+\begin{bremark}[/T needs an exact witness --- the honest split with /DD]
+The natural producer emits $Z \approx$ an inverse transposed Cholesky
+factor. A \emph{rounded} such $Z$ makes the strictly-upper entries of
+$AZ$ small but nonzero, and /T's pattern check rightly refuses. An
+exact witness always exists when $A \succ 0$, and rationally: LDL$^{\mathsf T}$
+elimination gives $A = L D L^{\mathsf T}$ with unit lower-triangular
+rational $L$ and positive rational diagonal $D$, so
+$Z := L^{-\mathsf T}$ is rational upper-triangular with positive
+diagonal and $A Z = L D$ is lower-triangular with positive diagonal
+--- clear denominators columnwise if integer entries are wanted (each
+column is determined up to positive scale) --- but the entries grow
+like scaled minors, i.e.\ LDL-style bit growth. (The Cholesky factor
+itself is generally irrational; the LDL route is the rational
+construction.) At sizes where that growth
+bites, the rounding-tolerant companion \rulename{PSDCERT/DD} is the
+production tier; at moderate sizes /T's $O(\alpha n^2)$ check wins the
+clock. Neither tier ever risks soundness in the trade --- only
+completeness margin moves.
+\end{bremark}
+
+\begin{bremark}[provenance]
+The triangular-inverse method is due to David ``davidad'' Dalrymple
+\cite{dalrymple2026psd}; Geoffrey Irving derived the rounding-tolerant
+integer variant and published the certificate analysis
+\cite{irving2026certificate}, then formalized that variant in Lean at
+scale (a certified $65536$-node spectral expander) in the course of a
+sorting-network formalization \cite{irvingaks}. The kernel development
+cited here is an independent in-house proof of the exact tier, grown to
+the /DD and /K companions.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:psdt-instance} warrant & \texttt{sound\_psdCertT} (Soundness); shared transport \texttt{sound\_psdCertOf}\\
+matrix theorem (Prop.\ \ref{prop:psdt-matrix}) & \texttt{PsdCert.posDef\_of\_triangular\_witness} via \texttt{congruence\_eq\_diagonal}, \texttt{posDef\_of\_congruence\_posDef}\\
+check-to-theorem bridge & \texttt{PsdCert.checkT\_posDef}; rational-points corollary \texttt{checkT\_quadForm\_nonneg}, \texttt{quadForm\_nonneg\_of\_posSemidef}\\
+the executable check & \texttt{PsdCert.checkT} (with \texttt{symB}, \texttt{upperTriPosDiagB}, \texttt{mulEntry}) --- zero-mathlib, exact $\Q$\\
+conclusion identity & \texttt{PsdCert.conclCheck} against \texttt{negQuadFormPoly} (idx-free and wire-coordinate branches)\\
+conclusion readings & the \rulename{Syzygy} section's conclusion-form selector and its transport lemma\\
+\end{anchors}

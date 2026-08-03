@@ -1,0 +1,164 @@
+import std.{Nat, Q, Str, q_le, q_lt};
+
+// Engine-decided judgements (oracle = the qtsl certification plugin
+// at the engine's ground seam): bounded computations discharged by
+// evaluation, never derivation-defined. Everything declared and not
+// imported below is ordinary (the default). This header replaces the
+// retired .registry classification sidecar.
+import qtsl.{qtsl_dtmc_genform, qtsl_dtmc_initmass, qtsl_dtmc_rowmass};
+
+// Dtmc.geolog
+//
+// Discrete-time Markov chains: the species theory for mechanisms
+// whose dynamical content is a finite-state one-step transition law
+// over named states, in exact rationals — the chain half of the
+// discrete-kernel family (the decision former, action-keyed with the
+// policy a separate mechanism, is a sibling species).
+//
+// The stored grain mirrors the mechanized adequacy square's compiled
+// rows (SuFunctor/Adequacy/Dtmc.lean: dtmc_adequacy, satAtoms_iff,
+// pathLaw_mass, trajPMF_eq; the rows structure is DtmcRows — outcome
+// rows finitely supported on ordered state pairs, initial rows
+// finitely supported on states). Consequences of that grain, stated
+// as schema decisions:
+//
+//   * SELF-LOOPS ARE LAWFUL STORED ROWS — the diagonal carries
+//     content (contrast rate grains, where the diagonal is
+//     determined). An absorbing state is its explicit self-loop row
+//     at probability one; no absorbing flag exists, because a flag
+//     would be a second rendering of one semantic object.
+//   * ZERO ENTRIES ARE ABSENT — the finitely supported grain
+//     identifies a zero value with an absent key, so the entry
+//     range below is strict at the low end as a mirror of the
+//     representation, not an extra strictness.
+//   * NO ROW-SUM AXIOM — per-source mass one is a whole-fibre
+//     aggregation fact (conformance family C-DTMC-ROWMASS, the
+//     admission demand below; the Lean hypothesis is
+//     DtmcRows.WF.row_sum). Polarity note: at the rate grain,
+//     stochasticity of the derived closure is a theorem over
+//     unconstrained rates; here it is a well-formedness obligation
+//     of the stored rows themselves. Same checker posture
+//     (re-derive, never trust), opposite direction of creation.
+//   * NO REWARD FIELD — the square certifies the trajectory law,
+//     and rewards never enter it; reward semantics belong to the
+//     return/discount specification formers.
+//
+// NOTHING TABULATES on the generator plane: the one-step transfer
+// at a certificate component is the contraction
+//   transfer(sys, c)(s) = sum_d dprob(s, d) * V_c(d)
+// (transferRow in the Lean mirror; an absent row contributes the
+// zero the sparse grain assigns it), and the generator form is
+//   gen(sys, c)(s) = transfer(sys, c)(s) - V_c(s)
+// (genRow) — the one-step drift, consumed through the qtsl_gen_form
+// seam, derived, never stored-trusted. At an absorbing state the
+// value is a computed zero — a consequence of the self-loop row,
+// not a schema clause. The recompute obligation is the admission
+// demand qtsl_dtmc_genform below (conformance family
+// C-SYS-GENFORM-DTMC); the mechanized authority that recomputed
+// rows are theorem-grade drift premises is
+// rowsLaw_expect_step_of_genForm, the discrete segment-Dynkin
+// identity a drift-row consumer spends is rowsLaw_expect_step, and
+// rowsLaw_expect_le_of_nonpos is the supermartingale corollary.
+//
+// Conformance families (admission; whole-fibre arithmetic stays at
+// the evaluator, the demands are minted per entity below):
+//   C-DTMC-ROWMASS  — per source state with any outgoing row, the
+//                     stored dprob masses total exactly one over
+//                     the chain's states (DtmcRows.WF.row_sum).
+//   C-DTMC-INITMASS — per chain, the stored dinit masses total
+//                     exactly one (DtmcRows.WF.init_sum).
+//   C-SYS-GENFORM-DTMC — a claimed generator-form row on a
+//                     chain-content system re-derives by the
+//                     contraction above from the subject's outcome
+//                     rows and the certificate component's values.
+
+theory Dtmc extends Qtsl {
+
+  Dtmc   : Set;   // entity: named, owned
+  DState : Set;   // one state of one chain
+
+  Dtmc/name : Dtmc -> Str;
+
+  DState/dtmc : DState -> Dtmc;
+  DState/idx  : DState -> Nat;
+
+  // The outcome rows: at most one probability per ordered state
+  // pair (functionality; parallel edges unrepresentable).
+  dprob : {src: DState, dst: DState} -> Q;
+
+  report ax/wf/dprob_range : forall s : DState, d : DState, p : Q.
+    p = {src: s, dst: d} dprob
+    |- {l: 0, r: p} q_lt, {l: p, r: 1} q_le;
+
+  // Equality generation across entities: a cross-chain row forces a
+  // chain merge, loud via name functionality when names differ.
+  chase ax/wf/dprob_same_dtmc : forall s : DState, d : DState, p : Q,
+      k1 : Dtmc, k2 : Dtmc.
+    p = {src: s, dst: d} dprob,
+    s DState/dtmc = k1,
+    d DState/dtmc = k2
+    |- k1 = k2;
+
+  // Initial-distribution rows (sparse; the whole-fibre mass-one
+  // total is C-DTMC-INITMASS, the demand below).
+  dinit : {chain: Dtmc, state: DState} -> Q;
+
+  report ax/wf/dinit_range : forall k : Dtmc, s : DState, p : Q.
+    p = {chain: k, state: s} dinit
+    |- {l: 0, r: p} q_lt, {l: p, r: 1} q_le;
+
+  chase ax/wf/dinit_same_dtmc : forall k : Dtmc, s : DState, p : Q,
+      k2 : Dtmc.
+    p = {chain: k, state: s} dinit,
+    s DState/dtmc = k2
+    |- k = k2;
+
+  // The species content family: at most one chain per mechanism is
+  // admission conformance (two rows would make the generator form
+  // ill-posed), the relational idiom shared by every content
+  // language on Mech.
+  mech_dtmc : {mech: Mech, chain: Dtmc} -> Prop;
+
+  // Species exclusivity: a mechanism speaks one content language,
+  // and a chain's initial data is its dinit rows — a second
+  // initial-condition language is excluded with the content
+  // languages.
+  refuse ax/wf/dtmc_manifest_excl : forall m : Mech, k : Dtmc,
+      mf : Manifest.
+    {mech: m, chain: k} mech_dtmc,
+    {mech: m, manifest: mf} mech_manifest
+    |- false;
+
+  refuse ax/wf/dtmc_initbox_excl : forall m : Mech, k : Dtmc, b : Box.
+    {mech: m, chain: k} mech_dtmc,
+    {mech: m, box: b} mech_init_box
+    |- false;
+
+  // Admission demands, minted per entity (the whole-fibre
+  // arithmetic is bounded evaluation at the engine's ground seam).
+  qtsl_dtmc_rowmass  : {chain: Dtmc} -> Prop;   // side-condition
+                                                // (C-DTMC-ROWMASS)
+  qtsl_dtmc_initmass : {chain: Dtmc} -> Prop;   // side-condition
+                                                // (C-DTMC-INITMASS)
+
+  report ax/wf/dtmc_rowmass : forall k : Dtmc.
+    |- {chain: k} qtsl_dtmc_rowmass;
+
+  report ax/wf/dtmc_initmass : forall k : Dtmc.
+    |- {chain: k} qtsl_dtmc_initmass;
+
+  // The generator-form feeding tie: a generator-form claim on a
+  // system whose mechanism carries chain content mints the
+  // chain-specific recompute demand — the discrete one-step
+  // contraction, checked against the stored outcome rows.
+  qtsl_dtmc_genform : {sys: System, cert: HypernetRef,
+                       gen: HypernetRef} -> Prop;
+      // side-condition (C-SYS-GENFORM-DTMC)
+
+  report ax/wf/dtmc_genform : forall y : System, m : Mech, k : Dtmc,
+      c : HypernetRef, g : HypernetRef.
+    {sys: y, cert: c, gen: g} qtsl_gen_form,
+    y = {mech: m} SysMech,
+    {mech: m, chain: k} mech_dtmc
+    |- {sys: y, cert: c, gen: g} qtsl_dtmc_genform;
+}

@@ -1,0 +1,1504 @@
+\chapter{Hypernets: Primitive Functions}
+\label{ch:qtsl-hypernets}
+
+\newcommand{\primentry}[2]{%
+  \par\bigskip
+  \phantomsection\label{prim:#2}%
+  \noindent{\bfseries #1}\hfill
+  {\footnotesize\textcolor{NoteGray}{Primitive Catalogue entry \texttt{#2}}}%
+  \par\nopagebreak\smallskip}
+\newcommand{\primmeta}{%
+  \par\nopagebreak{\small\bfseries The row (Computer Science Metanotation)}\par\nopagebreak\smallskip}
+
+\noindent\draftmark\medskip
+
+Three strata of this book each need, at some point, a notion of
+\emph{computation}. A System (chapter~\ref{ch:qtsl-mathematical-models})
+declares mechanisms whose fields --- drift laws, guard conditions,
+reset maps, neural controllers --- are computational objects. A
+specification (chapter~\ref{ch:qtsl-semantic-universe}) asks whether
+observables computed from a trajectory stay inside a region, and a
+certificate about it carries polynomial content of its own. The rule
+catalogue (chapter~\ref{ch:qtsl-manual}) states every inference rule
+over ``the ambient hypernet'' --- a typed computation graph that each
+rule reads facts out of. If those three strata each invented their own
+computational syntax, the toolkit would own three evaluators, three
+serialization schemes, and three subtly different answers to ``is the
+function the certificate reasons about the function the system runs?''
+
+It owns one. The shared object is the \emph{hypernet}: a typed,
+exactly representable computation graph built from ten primitive
+boxes, with one evaluator, one canonical serialization, and one
+content digest. Everything in the toolkit that computes --- an ODE
+right-hand side, a ReLU network, a guard observable, the goal
+polynomial of a Lyapunov certificate --- either \emph{is} a hypernet
+or elaborates into one by a definitional translation. This chapter
+defines the object once, so that the rest of the book can consume it by
+reference: the representation and its well-formedness discipline
+(section~\ref{sec:hyp-ir}); the ten boxes themselves
+(section~\ref{sec:hyp-boxes}); the completion theorem that fixed their
+number at ten (section~\ref{sec:hyp-why-ten}); the plate extension,
+under which one finite graph denotes a function of
+variable-dimensional state --- symbolic extents, not an eleventh box
+(section~\ref{sec:hyp-plates}); the single-genus design
+rule and the view/elaboration discipline it imposes on every other
+computational syntax (section~\ref{sec:hyp-genus}); the substitution
+operation under which hypernets compose, with its coherence and
+digest laws (section~\ref{sec:hyp-subst}); the precise sense in which
+Systems, specifications, and rules all consume the same genus
+(section~\ref{sec:hyp-core}); and the kinship between the graph-side
+contraction box and the relational engine's contraction rows
+(section~\ref{sec:hyp-tensors}). A closing ledger
+(section~\ref{sec:hyp-receipts}) states which claims in this chapter
+are machine-checked, which are proven in prose with executable
+witnesses, and which remain in the design tense.
+
+This chapter is also the toolkit's \emph{Primitive Catalogue}. Each of
+its thirteen rows --- the ten boxes, the container, the substitution
+operation, and the well-formedness preflight --- carries an anchored
+entry inside the narrative below, stating the row in compact
+metanotation and quoting its producer API, TypeScript then Rust. The
+metanotation statements are typeset by hand for notational quality;
+their mechanized ground truth is the catalogue's per-box typing rules
+and well-formedness predicates, realized twice and in agreement
+(section~\ref{sec:hyp-receipts}). The API blocks are generated, never
+hand-quoted: signatures are re-extracted from the toolkit sources at
+every regeneration, and every construction snippet is quoted verbatim
+from the conformance corpus whose emitted canonical bytes are verified
+byte-identical against the reference implementation's golden vectors.
+
+A reading map, since the chapter doubles as reference material: on a
+first pass, read the representation (section~\ref{sec:hyp-ir}), the
+table that opens section~\ref{sec:hyp-boxes}, the completion theorem
+of section~\ref{sec:hyp-why-ten} (a self-contained story), and the
+single-genus rule of section~\ref{sec:hyp-genus}; return to the
+per-box catalogue entries as later chapters cite them, and leave the
+plate extension (section~\ref{sec:hyp-plates}) until the
+token-population models of section~\ref{sec:mt-sdcpn} send you back
+for it. The mathematics is newest in the plate extension and in
+section~\ref{sec:hyp-core}, where the chapter's compositional claims
+assemble into one machine-checked inclusion theorem
+(Theorem~\ref{thm:hyp-inclusion}).
+
+\section{The intermediate representation}
+\label{sec:hyp-ir}
+
+A hypernet is a dataflow graph over \emph{tensor-typed wires}. A
+tensor type $\langle s, \delta \rangle$ pairs a shape $s$ (a finite
+list of extents; scalars have the empty shape $[\,]$) with a dtype
+$\delta$ --- Boolean, integer, or exact rational $\mathbb{Q}$ in the
+configurations this book uses. Exactness is a design commitment, not
+an optimization default: constants enter as exact
+rationals,\footnote{An IEEE float read from a model file denotes a
+dyadic rational and is stored as one, losslessly; the ACAS~Xu import
+of section~\ref{sec:hyp-receipts} carries every published network
+weight this way.} the reference evaluator computes in $\mathbb{Q}$,
+and any change of numeric representation must pass through an
+explicit box with a declared rounding mode. There is no ambient
+floating-point semantics for a certificate to be quietly wrong
+about.
+
+\begin{definition}[hypernet]
+\label{def:hypernet}
+A hypernet consists of: a \emph{wire-type table} assigning each wire
+a tensor type; a pool of simplicial complexes (the payloads of the
+branching box, section~\ref{sec:hyp-box-cell}); a finite sequence of
+\emph{applications} of the ten primitive boxes of
+section~\ref{sec:hyp-boxes}, each consuming named input wires and
+producing named output wires; and an \emph{interface}: an ordered
+list of graph inputs and an ordered list of graph outputs. It is
+\emph{well-formed} when three conditions hold:
+\begin{itemize}
+\item \textbf{linearity} --- every wire is produced by at most one
+  application (graph inputs by none) and consumed by at most one;
+\item \textbf{acyclicity} --- applications are listed in
+  static-single-assignment order: every consumed wire is a graph
+  input or the output of an earlier application;
+\item \textbf{type consistency} --- each application satisfies its
+  box's typing rule (stated per box below).
+\end{itemize}
+\end{definition}
+
+All three conditions are decidable by direct inspection of the ground
+data, and both realizations of the IR --- the Lean structure, which
+carries the three conditions as fields, and the reference
+implementation, which checks them --- enforce them at the same
+strength.
+
+\primentry{the well-formedness preflight}{H-WF}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=wf]
+  {\text{linearity}(H) \\ \text{acyclicity}(H) \\
+   \text{every application satisfies its box's typing rule}}
+  {\mathrm{wf}(H)}
+\end{mathpar}
+\noindent All three conjuncts are decidable predicates over the ground
+data of Definition~\ref{def:hypernet}; the preflight operation decides
+them and returns the (possibly empty) list of violations, each carrying
+its geometry --- the offending wire, application index, or typing
+fact. It is a producer-side courtesy: the checker replays the same
+conditions independently and believes only its own verdict.
+\input{chapters/qtsl-hypernets-api/H-WF}
+
+Linearity is the load-bearing choice. In most graph formats, sharing
+a value is implicit (draw two edges out of a node) and discarding one
+is invisible (draw none). Here both are rows: fan-out is the
+\texttt{copy} box, fan-in is the \texttt{stack} box, discard is the
+\texttt{delete} box, and exchange is the \texttt{swap} box. The
+payoff is that structure becomes syntax --- how many times a value is
+used, and where, is readable off the application list without any
+analysis pass, which is what lets the substitution operation of
+section~\ref{sec:hyp-subst} repair seams mechanically and lets
+well-formedness be preserved by a proof rather than a linter.
+
+A well-formed hypernet is a \emph{string diagram}: boxes are the
+typed, multi-input multi-output operations, wires carry the content,
+and two parallel wires between the same boxes are genuinely
+distinct. Combinatorially, string diagrams over a symmetric monoidal
+signature correspond to typed hypergraphs with interfaces, and the
+directed, Frobenius-free fragment is carved out by exactly two
+conditions --- monogamy and acyclicity (Bonchi, Gadducci, Kissinger,
+Soboci\'{n}ski, and Zanasi~\cite{bonchi22}; the companion
+paper~\cite{bonchi20} treats the unrestricted setting) --- which are
+the linearity and SSA conditions above under other names. ``Hypernet''
+names this object with its interface and canonical serialization
+made first-class.\footnote{The name comes from the graph-machine
+school that coined it \cite{ghica19,alvarezpicallo21}, whose
+hypernets are likewise monogamous directed hypergraphs. There the
+interface is read off vertex degrees; here it is declared data, and
+the canonical serialization is new.}
+
+Two near neighbours locate the design choice. Keeping monogamy makes
+an application list a term of the free symmetric monoidal syntax on
+the box signature, in which sharing, discarding, and ordering are
+rows. Dropping the consumer half of monogamy would give the
+gs-monoidal setting of term graphs, in which fan-out is absorbed
+into the wiring~\cite{fritzliang22}; dropping the producer half as
+well would give hypergraph categories~\cite{bonchi20}, in which a
+twice-produced wire asserts an equation rather than carrying a
+value. The calculus stays in the first setting because its consumers
+are certificates: how many times a value is used, and where, must be
+readable off the bytes without an analysis pass. The choice costs
+plumbing rows in the graphs. It does not cost composition: gluing
+two hypernets along a shared interface inserts no structural row at
+all, a fact section~\ref{sec:hyp-subst} states and the Lean tree
+checks.
+
+Serialization is part of the definition's job description, because
+certificates refer to computations by content. Every well-formed
+hypernet has a canonical byte serialization --- wire ids assigned by
+first appearance, complex pool deduplicated, evaluator hints and
+debug names excluded --- and its \emph{digest} is the SHA-256 hash of
+those bytes. Two design consequences are worth stating before the
+boxes: equal digests certify equal computation graphs, not merely
+equal functions (two different graphs computing one function
+deliberately do \emph{not} share a digest; extensional equality of
+programs is not decidable, and the digest never pretends otherwise);
+and every certificate row that cites a computation cites it by
+digest, so ``which function is this claim about?'' has a
+content-addressed answer.
+
+\primentry{the container}{H-GRAPH}
+\primmeta
+\begin{mathpar}
+H = \langle W,\; \mathcal{K},\; A,\; \mathit{in},\; \mathit{out} \rangle
+\and
+\mathrm{digest}(H) = \operatorname{SHA\text{-}256}\bigl(\mathrm{canon}(H)\bigr)
+\end{mathpar}
+\noindent The record of Definition~\ref{def:hypernet}: wire-type table
+$W$, complex pool $\mathcal{K}$, SSA application list $A$, interface
+$(\mathit{in}, \mathit{out})$. The canonical serialization
+$\mathrm{canon}$ assigns wire ids by first appearance, deduplicates the
+pool, and excludes evaluator hints and debug names; equal digests
+certify equal graphs, never merely equal functions.
+\input{chapters/qtsl-hypernets-api/H-GRAPH}
+
+\section{The ten primitive boxes}
+\label{sec:hyp-boxes}
+
+The calculus has ten primitive boxes. Constructor order in the
+mechanized catalogue and tag order in the wire format agree
+(tags~0--9), and the order below follows them. Throughout,
+$\langle s, \delta \rangle$ is a tensor type, $\mathbb{B}$
+abbreviates the Boolean scalar type $\langle [\,], \mathrm{B}
+\rangle$, and $k{::}s$ is the shape $s$ with a new leading axis of
+extent $k$.
+
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+ & box & signature & one-line semantics \\
+\midrule
+0 & \texttt{const} & $\varnothing \to \langle s,\delta\rangle$ & emit a literal tensor \\
+1 & \texttt{contract} & $\langle s_1,\delta\rangle,\dots,\langle s_k,\delta\rangle \to \langle s_0,\delta\rangle$ & sum of products over bound indices \\
+2 & \texttt{cast} & $\langle s,\delta\rangle \to \langle s,\delta'\rangle$ & change dtype, declared rounding \\
+3 & \texttt{cell} & $\langle [d],\mathbb{Q}\rangle \to \mathbb{B},\dots,\mathbb{B}$ & one-hot region membership \\
+4 & \texttt{reshape} & $\langle s,\delta\rangle \to \langle s',\delta\rangle$ & same entries, new shape \\
+5 & \texttt{broadcast} & $\langle s,\delta\rangle \to \langle s',\delta\rangle$ & replicate along new axes \\
+6 & \texttt{copy} & $\langle s,\delta\rangle \to \langle s,\delta\rangle^{k}$ & explicit fan-out \\
+7 & \texttt{delete} & $\langle s,\delta\rangle \to \varnothing$ & explicit discard \\
+8 & \texttt{swap} & $\tau_1, \tau_2 \to \tau_2, \tau_1$ & exchange two wires \\
+9 & \texttt{stack} & $\langle s,\delta\rangle^{k} \to \langle k{::}s,\delta\rangle$ & explicit fan-in: new leading axis \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Nine of the ten are deterministic, total, single-valued operations.
+\texttt{cell} is the deliberate exception: \emph{the calculus's only
+source of disjunction}.
+Every case split a hypernet can express --- the two sides of a ReLU,
+the five advisory regions of a collision-avoidance policy --- is some
+\texttt{cell} application's one-hot output, and every downstream
+consumer of a case split can be traced to it. A checker that must
+reason by cases knows, syntactically, where all the cases come from.
+
+\subsection{Sources and the multilinear engine: \texttt{const} and \texttt{contract}}
+\label{sec:hyp-box-contract}
+
+\textbf{\texttt{const}} takes no inputs and produces one wire of a
+declared type, carrying a literal value: network weights, gain
+matrices, sign vectors, the all-ones vector that turns a
+\texttt{stack} into a sum (section~\ref{sec:hyp-why-ten}). All
+numeric literals are exact rationals. Constants are applications like
+everything else --- a hypernet's parameters are part of its graph,
+hence part of its digest.
+
+\primentry{\texttt{const}}{H-CONST}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{const}]
+  {v \text{ a literal of type } \langle s, \delta \rangle
+   \text{ (row-major, } \mathrm{size}(s) \text{ entries, exact)}}
+  {\mathtt{const}_{v} \colon \varnothing \to \langle s, \delta \rangle}
+\end{mathpar}
+\noindent Semantics: $\mathrm{out} = v$. Tag 0; the only zero-input
+box.
+\input{chapters/qtsl-hypernets-api/H-CONST}
+
+\textbf{\texttt{contract}} is the entire multilinear engine: the
+$n$-ary generalized Einstein summation, with its index structure
+carried as explicit data rather than inferred from a notation string.
+
+\begin{definition}[contraction pattern]
+\label{def:contraction-pattern}
+A contraction pattern for inputs of ranks $r_1, \dots, r_k$ and
+output rank $r_0$ consists of a finite index set $I$, an extent
+$E_i \in \mathbb{N}$ for each $i \in I$, a binding
+$\beta_m \colon \{0,\dots,r_m{-}1\} \to I$ for each input $m$, and a
+binding $\beta_0 \colon \{0,\dots,r_0{-}1\} \to I$ for the output;
+type consistency requires every bound axis's extent to equal its
+index's extent. Writing $\nu\beta$ for the coordinate tuple obtained
+by composing an index assignment $\nu \in \prod_{i \in I} \{0,\dots,
+E_i{-}1\}$ with a binding $\beta$, the semantics is
+\[
+\mathrm{out}[c] \;=\; \sum_{\nu \,:\, \nu\beta_0 = c} \;
+\prod_{m=1}^{k} \mathrm{in}_m[\nu\beta_m].
+\]
+\end{definition}
+
+Matrix product is a contract ($ai, ij \to aj$ in einsum notation);
+so are dot products, traces, elementwise products, tensor products,
+and axis sums. Two structural facts about this box do quiet work
+later. First, a rank-0 input has no axes to bind but still
+contributes its single entry as a factor to \emph{every} term of the
+sum --- scalars multiply in; they do not add in. Second, and in the
+same direction: every term of every output entry contains a factor
+from \emph{every} input wire. \texttt{contract} is purely
+multiplicative across wires, and section~\ref{sec:hyp-why-ten} turns
+that observation into a theorem about what the box cannot do.
+
+\primentry{\texttt{contract}}{H-CONTRACT}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{contract}]
+  {\beta = \bigl(I,\, E,\, \beta_0,\, (\beta_m)_{m=1}^{k}\bigr)
+   \text{ a contraction pattern (Definition~\ref{def:contraction-pattern})} \\
+   \text{each bound axis's extent equals its index's extent}}
+  {\mathtt{contract}_{\beta} \colon
+   \langle s_1, \delta \rangle, \dots, \langle s_k, \delta \rangle
+   \to \langle s_0, \delta \rangle}
+\end{mathpar}
+\noindent Semantics: Definition~\ref{def:contraction-pattern}'s sum of
+products, $\mathrm{out}[c] = \sum_{\nu \,:\, \nu\beta_0 = c}
+\prod_{m} \mathrm{in}_m[\nu\beta_m]$. Tag 1; the entire multilinear
+engine, index structure as explicit data.
+\input{chapters/qtsl-hypernets-api/H-CONTRACT}
+
+\subsection{Representation moves: \texttt{cast}, \texttt{reshape}, \texttt{broadcast}}
+
+\textbf{\texttt{cast}} converts dtype at fixed shape, carrying an
+explicit rounding mode. It is the only box at which numeric
+representation changes, which localizes every exactness argument: a
+hypernet with no \texttt{cast} (or only exact ones, such as the
+Boolean-to-rational conversion that turns an indicator into a gate)
+computes in $\mathbb{Q}$ end to end, and one carrying rounding casts
+declares, in its syntax, where error can enter.
+
+\primentry{\texttt{cast}}{H-CAST}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{cast}]
+  {\rho \text{ a declared rounding mode for } \delta \to \delta'}
+  {\mathtt{cast}_{\delta \to \delta',\, \rho} \colon
+   \langle s, \delta \rangle \to \langle s, \delta' \rangle}
+\end{mathpar}
+\noindent Semantics: entrywise conversion under $\rho$; exact casts
+(the Boolean-to-rational indicator gate among them) introduce no
+error. Tag 2; the only box at which numeric representation changes.
+\input{chapters/qtsl-hypernets-api/H-CAST}
+
+\textbf{\texttt{reshape}} re-indexes a tensor's entries into a new
+shape of the same total size --- row-major order, no data motion in
+the semantics. \textbf{\texttt{broadcast}} replicates along new or
+singleton axes, under the trailing-axis compatibility rule familiar
+from array programming; the result is constant along each broadcast
+axis. Both are plumbing: they let \texttt{contract} patterns stay
+simple by normalizing operand shapes, and their semantics are
+entry-relabelling and entry-duplication, contributing no arithmetic of
+their own.
+
+\primentry{\texttt{reshape}}{H-RESHAPE}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{reshape}]
+  {\mathrm{size}(s') = \mathrm{size}(s)}
+  {\mathtt{reshape}_{s'} \colon \langle s, \delta \rangle \to
+   \langle s', \delta \rangle}
+\end{mathpar}
+\noindent Semantics: the same entries under row-major re-indexing; no
+data motion. Tag 4.
+\input{chapters/qtsl-hypernets-api/H-RESHAPE}
+
+\primentry{\texttt{broadcast}}{H-BROADCAST}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{broadcast}]
+  {s \trianglelefteq s' \text{ (trailing-axis compatible)}}
+  {\mathtt{broadcast}_{s'} \colon \langle s, \delta \rangle \to
+   \langle s', \delta \rangle}
+\end{mathpar}
+\noindent Semantics: replication along the new and singleton axes; the
+result is constant along each broadcast axis. Tag 5.
+\input{chapters/qtsl-hypernets-api/H-BROADCAST}
+
+\subsection{Structural plumbing: \texttt{copy}, \texttt{delete}, \texttt{swap}}
+
+\textbf{\texttt{copy}} duplicates one wire into $k$ wires of the same
+type. Under linearity it is the only way a value acquires multiple
+consumers, so sharing is always a visible row --- when the cartpole
+example of section~\ref{sec:hyp-genus} uses the pole-angle sine in
+three monomials, the graph says so with a single ternary \texttt{copy}.
+
+\primentry{\texttt{copy}}{H-COPY}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{copy}]
+  {k \ge 1}
+  {\mathtt{copy}_{k} \colon \langle s, \delta \rangle \to
+   \langle s, \delta \rangle^{k}}
+\end{mathpar}
+\noindent Semantics: $\mathrm{out}_i = \mathrm{in}$ for every branch.
+Tag 6; under linearity, the only way a value acquires a second
+consumer.
+\input{chapters/qtsl-hypernets-api/H-COPY}
+
+\textbf{\texttt{delete}} consumes one wire and produces nothing. A
+value nobody reads must be discarded by a row, never dropped by
+omission; the substitution operation of section~\ref{sec:hyp-subst}
+leans on this (``the discard is a row, never an absence'') when it
+repairs the seam between two graphs.
+
+\primentry{\texttt{delete}}{H-DELETE}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{delete}]
+  {\;}
+  {\mathtt{delete} \colon \langle s, \delta \rangle \to \varnothing}
+\end{mathpar}
+\noindent Semantics: no outputs; the input's consumption is the entire
+content. Tag 7.
+\input{chapters/qtsl-hypernets-api/H-DELETE}
+
+\textbf{\texttt{swap}} exchanges two wires, of possibly different
+types. It is the symmetry of the monoidal structure as an explicit
+application --- pure renaming, no computation --- so that wire order,
+like sharing and discarding, is syntax rather than convention.
+
+\primentry{\texttt{swap}}{H-SWAP}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{swap}]
+  {\;}
+  {\mathtt{swap} \colon \tau_1, \tau_2 \to \tau_2, \tau_1}
+\end{mathpar}
+\noindent Semantics: $(\mathrm{out}_1, \mathrm{out}_2) =
+(\mathrm{in}_2, \mathrm{in}_1)$ --- pure renaming, types possibly
+distinct. Tag 8.
+\input{chapters/qtsl-hypernets-api/H-SWAP}
+
+\subsection{Branching: \texttt{cell}}
+\label{sec:hyp-box-cell}
+
+\textbf{\texttt{cell}} is the case-analysis box. Its payload is a
+simplicial complex $K$ in ambient dimension $d$: exact-rational
+vertex coordinates, a downward-closed and conformal list of
+simplices, and a list of \emph{cells}, each a pair $(S, F)$ of a
+simplex $S$ and a proper subset $F \subsetneq S$ of its vertices
+(the \emph{extension set}). A point $x \in \mathbb{Q}^d$ lies in the
+cell $(S, F)$ when $x$ is an affine combination $x = \sum_{v \in S}
+\lambda_v\, v$ with $\sum_v \lambda_v = 1$, $\lambda_v \ge 0$ on the
+core vertices $S \setminus F$, and $\lambda_v \le 0$ on $F$. With
+$F = \varnothing$ this is the closed simplex itself; each extension
+vertex opens the region outward through the facet opposite it. The
+sign split of the line --- the instance that gates a ReLU below ---
+takes the path complex with vertices $-1$, $0$, $1$: the cell pairing
+the edge $[0,1]$ with extension set $\{1\}$ covers the nonpositive
+half-line, the cell pairing $[-1,0]$ with $\{-1\}$ covers the
+nonnegative half-line, and the two overlap only at the origin.
+
+The box's typing: input one wire $\langle [d], \mathbb{Q} \rangle$
+--- a point of the ambient space --- and output one Boolean scalar
+per listed cell. Its semantics: the outputs are one-hot, with the hot
+output naming a cell that contains the input point. Where the point
+lies in several cells at once --- on a shared boundary --- \emph{any}
+of the containing cells is an admissible choice. The hypernet's
+semantics at such a point is the set of behaviours under all
+admissible choices; a rule or certificate that cites a \texttt{cell}
+output must hold under every one of them, and the reference evaluator's
+tie-break (lowest cell index, documented as such) is a pinned
+representative, not a semantic commitment. Boundary nondeterminism is
+thereby owned by the proof obligations, not hidden in an evaluator
+convention.
+
+One box in this role is a deliberate economy. A ReLU is
+\texttt{copy}, then \texttt{cell} over the sign split of the line
+(two cells: nonnegative and nonpositive), then a gating
+\texttt{contract} of the indicator against the value; an
+argmax-style advisory head is one \texttt{cell} over the fan of
+dominance cones in difference coordinates. Piecewise structure of any
+shape enters through this single door, and ``where could this
+computation branch?'' is answerable by listing its \texttt{cell}
+applications.
+
+\primentry{\texttt{cell}}{H-CELL}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{cell}]
+  {K \text{ a valid simplicial complex in ambient dimension } d \\
+   \text{with cells } (S_0, F_0), \dots, (S_{n-1}, F_{n-1})}
+  {\mathtt{cell}_{K} \colon \langle [d], \mathbb{Q} \rangle \to
+   \mathbb{B}, \dots, \mathbb{B} \quad (n \text{ outputs})}
+\end{mathpar}
+\noindent Semantics: the outputs are one-hot; a hot index $j$ is
+admissible exactly when the input point lies in cell $(S_j, F_j)$, and
+on a shared boundary \emph{every} containing cell is admissible ---
+the nondeterminism belongs to the proof obligations, never to an
+evaluator convention. Tag 3; the calculus's only source of
+disjunction.
+\input{chapters/qtsl-hypernets-api/H-CELL}
+
+\subsection{Fan-in: \texttt{stack}}
+\label{sec:hyp-box-stack}
+
+\textbf{\texttt{stack}} takes $k$ wires of one common type $\langle
+s, \delta \rangle$ and produces a single wire of type $\langle k{::}s,
+\delta \rangle$, with semantics
+\[
+\mathrm{out}[i, \mathit{idx}] = \mathrm{in}_i[\mathit{idx}],
+\qquad i = 0, \dots, k{-}1 .
+\]
+It is \texttt{copy}'s dual --- fan-in as explicit structure, exactly
+as fan-out is explicit \texttt{copy} --- and its characteristic idiom
+is the \emph{sum}: to add wires $u$ and $v$, stack them and contract
+the stacked wire against the all-ones vector,
+\[
+u + v \;=\; \mathtt{contract}\bigl(\mathtt{stack}(u, v),\;
+\mathbf{1}_2\bigr),
+\]
+binding the new leading axis. Subtraction is the same idiom with a
+$[1, -1]$ sign vector, which keeps imported model weights
+byte-faithful: negation lives in a separate constant, never in a
+rewritten payload. \texttt{stack} adds no disjunction (its facts are
+entry equalities, structural like \texttt{copy}'s), and it is the
+newest member of the calculus --- the next section is the story of
+why it had to exist.
+
+\primentry{\texttt{stack}}{H-STACK}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=\texttt{stack}]
+  {k \ge 1 \\ \text{all inputs of one type } \langle s, \delta \rangle}
+  {\mathtt{stack}_{k} \colon \langle s, \delta \rangle^{k} \to
+   \langle k{::}s, \delta \rangle}
+\end{mathpar}
+\noindent Semantics: $\mathrm{out}[i, \mathit{idx}] =
+\mathrm{in}_i[\mathit{idx}]$. Tag 9; \texttt{copy}'s dual, and the
+$\Sigma\Pi$ boundary's visible seam.
+\input{chapters/qtsl-hypernets-api/H-STACK}
+
+\section{Why ten: a completion theorem}
+\label{sec:hyp-why-ten}
+
+The calculus was not designed to have ten boxes. It had nine ---
+\texttt{stack} was absent --- until compiling real networks forced
+the question of what the nine could not say, and the answer turned
+out to be a theorem rather than an inconvenience.
+
+\begin{proposition}[the packing gap]
+\label{prop:packing-gap}
+In the nine-box fragment (without \texttt{stack}), no wire can carry
+the sum of two independently produced wires: for any two wires $u,
+v$, no later wire has an entry whose expansion --- read with $u$ and
+$v$ as opaque sources, whatever produced them --- contains both a
+monomial with $u$-factors but no $v$-factors and a monomial with
+$v$-factors but no $u$-factors; in particular, no entry expands to
+$u + v$ itself.\footnote{The expansion stratum, not run-time values,
+is where the claim holds at this generality: two \texttt{copy}
+descendants of one wire are produced by distinct applications, yet
+twice their common value is one \texttt{contract} against a
+constant. Read over expansions with $u$ and $v$ held opaque, the
+statement needs no independence hypothesis at all, and that is the
+form the mechanization proves
+(section~\ref{sec:hyp-receipts}).}
+\end{proposition}
+
+\emph{Proof sketch.} Only \texttt{contract} combines values from more
+than one data wire ---
+\texttt{cast}, \texttt{cell}, \texttt{reshape}, \texttt{broadcast},
+\texttt{copy}, and \texttt{delete} are single-input, \texttt{const}
+is zero-input, and \texttt{swap} is a renaming. But every output
+entry of a \texttt{contract} is a sum of monomials each containing a
+factor from \emph{every} input wire
+(Definition~\ref{def:contraction-pattern}: the product runs over all
+$m$) --- the box is purely multiplicative across wires, and a
+constant input multiplies into every term rather than adding. So the
+first application to consume both $u$ and $v$ already violates the
+required shape, and single-input boxes only relabel or duplicate
+entries thereafter; induction along the SSA order closes the
+argument. \qed
+
+The practical blast radius of this small proposition was total: no
+bias can be added to a linear layer ($x - 1$ is already
+inexpressible), and after a ReLU layer splits into per-scalar gate
+indicators, nothing can reassemble the gated values into the next
+layer's input --- so no network with two or more neurons could be
+expressed at all, even though each individual matrix product and each
+individual ReLU could. Of the two sub-gaps, one (additive constants)
+admitted a workaround --- an augmented-input convention carrying a
+constant-one component --- at the price of an interface wart; the
+other (cross-wire packing of independently produced values) admitted
+none.
+
+The repair is the tenth box. \texttt{stack} closes both gaps at once:
+sums become the stack-and-ones idiom of
+section~\ref{sec:hyp-box-stack}, gate vectors assemble from
+per-scalar \texttt{cell} outputs, and with it every piecewise-%
+polynomial dataflow --- every ReLU network included --- becomes
+expressible. Alternatives were weighed and declined: a vectorized
+\texttt{cell} (fixes gates, not bias, and complicates the format); a
+polynomial node promoted to primitive rank (collapses the einsum
+discipline --- section~\ref{sec:hyp-genus} explains why the
+polynomial belongs at the view layer instead); a \texttt{contract}
+variant that also sums over a choice index (semantically equivalent
+to \texttt{stack}-then-\texttt{contract}, but it muddies the einsum
+reading, whereas \texttt{stack} keeps \emph{product} and \emph{sum}
+orthogonal). \texttt{stack} entered the calculus the same day the
+gap was written down.
+
+Two properties of the repair deserve the emphasis of a design
+principle. First, \texttt{stack} introduces no new disjunction ---
+the invariant that \texttt{cell} is the calculus's only branching
+source survives the extension untouched. Second, the division of
+labour it induces is legible in compiled graphs: products form at
+\texttt{contract} boxes, cross-wire sums form at
+\texttt{stack}-plus-ones boxes, and the boundary between the
+$\Sigma$ and the $\Pi$ of a polynomial is a visible seam in the
+graph. The worked example of the next section shows that seam
+carrying exactly one \texttt{stack}.
+
+What the ten boxes still deliberately cannot say, so that no reader
+over-extrapolates the completion: there is no transcendental
+function box, and there is no division box. An oscillator enters
+through the standard cylinder lift --- carry $s = \sin\theta$ and
+$c = \cos\theta$ as state variables with the algebraic invariant
+$s^2 + c^2 = 1$ --- rather than through a $\sin$ node; a rational
+right-hand side clears its mass matrix into implicit polynomial
+form. Both exclusions keep the genus inside piecewise-polynomial
+dataflow over $\mathbb{Q}$, which is where exact certification
+machinery has traction. The exclusion is a fact about boxes, not
+about reach: the admissible-symbol discipline of
+section~\ref{sec:hyp-genus} extends to a register of \emph{certified
+function aliases} through which sine and cosine, rational powers,
+logarithm, and exponential become available anyway --- as
+piecewise-polynomial approximations with declared domains and
+accuracy budgets, receipt-checked in exact rational arithmetic ---
+without the wire format ever learning their names. Should a
+modelling frame ever genuinely force a quotient node, the procedural
+path is the one \texttt{stack} took: a written inexpressibility
+finding, an explicit decision, and enactment at the calculus layer
+--- never a side-channel evaluator bolted onto a view.
+
+\section{Plates: symbolic extents}
+\label{sec:hyp-plates}
+
+Token-population systems --- coloured Petri nets first among them
+(section~\ref{sec:mt-sdcpn}) --- have variable-dimensional state: the
+number of tokens changes as the system runs, and is canonically
+unbounded across a run even though it is finite at every instant. A
+certificate about such a system is a function on markings ---
+multisets of token colours --- and a naive syntax would need one
+computation graph per token count: a countable family of artefacts
+where one certificate was wanted. The calculus closes this gap with
+\emph{plates}: symbolic extents, not an eleventh box.
+
+\paragraph{The data.} Two additions to
+Definition~\ref{def:hypernet}, both container-level. The container
+gains an ordered finite list of \emph{plate variables}
+$\iota_1, \dots, \iota_r$ (serialized de Bruijn by position; debug
+names excluded from canon, like wire names). And the extent alphabet
+in wire shapes and contraction-pattern index extents becomes
+$E ::= n \mid \iota$ --- a literal or a declared plate variable, with
+no extent arithmetic ($\iota + 1$ is not an extent; products of
+plates arise as multiple axes on one wire, never as extent
+products). A \emph{plated hypernet} is the same record over the
+extended alphabet plus the plate list; a plated hypernet with zero
+plates \emph{is} a hypernet, byte for byte. For an extent assignment
+$\sigma : \{\iota_1, \dots, \iota_r\} \to \mathbb{N}$,
+\emph{instantiation} $\mathrm{inst}_\sigma$ replaces every symbolic
+extent by its value, yielding an ordinary hypernet; everything
+downstream --- evaluator, canonical serialization, the whole checker
+stack --- consumes instances and only instances. The plate is marked
+on \emph{wires} (a per-token scalar is a wire of shape $[\iota]$; a
+token family of $d$-dimensional colours, $[\iota, d]$; an attention
+matrix, $[\iota, \iota]$), never as a membrane around a subgraph:
+scope would be degenerate --- plate variables are container-level ---
+and what a membrane would add beyond axes is per-index variation of
+the body, which is exactly what the equivariance theorem below must
+forbid.
+
+\paragraph{How the boxes lift.} One principle, ten instances: a box
+lifts along plate axes by whiskering --- the lifted application is
+the original box applied per index tuple, well-typed exactly when
+the box's typing clause holds over the extended alphabet, with
+extent equality read \emph{syntactically} (literal against literal
+numerically; $\iota$ against $\iota$ by name; a $\iota$-against-literal
+match is refused --- conservative, never unsound, since schematic
+typing must hold at every $\sigma$). \texttt{contract} admits
+symbolic index extents (a bound symbolic index is a pool over the
+instance's extent; a free one maps over it); \texttt{broadcast} may
+add or extend plate axes under the trailing-axis rule, the
+membrane-crossing law in wire clothing (a plate-free wire broadcast
+along $\iota$ is constant along the index); \texttt{cast},
+\texttt{copy}, \texttt{delete}, \texttt{swap} are pointwise;
+\texttt{stack} keeps literal arity (a plate-sized family is never
+$\iota$ separate wires --- it is one wire carrying the $\iota$ axis,
+from birth); \texttt{reshape} is refused on symbolic-extent wires in
+this edition (symbolic totalSize equality is decidable polynomial
+identity, but \texttt{contract} carries the demand natively, so
+nothing routes through it); and \texttt{const} --- the load-bearing
+refusal --- takes all-literal shapes only, forced rather than
+chosen: a literal tensor has finitely many entries.
+
+\paragraph{Three theorems, nearly free from one syntactic fact.} The
+language has no token literals: no expression for ``the $i$-th
+token,'' no order or successor on the index sort, no per-index
+branching (a \texttt{cell} reads colours, never indices), and
+\texttt{const} cannot utter a plate. Three consequences make the
+notation functorial rather than decorative.
+
+\begin{itemize}
+\item \textbf{Schematic well-formedness.} A well-formed plated
+  hypernet instantiates to a well-formed ordinary hypernet at
+  \emph{every} extent assignment: instantiation is a homomorphism on
+  extents, every typing clause is syntactic extent equality plus
+  extent-free conditions, and both survive substitution.
+\item \textbf{Equivariance for free.} The instance family is natural
+  in bijections of each plate's index set: every expressible plated
+  computation is equivariant under the product of symmetric groups,
+  \emph{as a theorem of the grammar} rather than a proof obligation
+  on artefacts --- plate axes are born only from the interface,
+  \texttt{broadcast}, and \texttt{contract}, all equivariant, and
+  the mutant that adds an index-literal box breaks the theorem at a
+  two-token transposition, kernel-visibly. A corollary worth the
+  emphasis: \emph{causal masking is unwritable}. A causal mask is a
+  function of the index order, and the syntax has no order to
+  consult --- the transformer this calculus can express is
+  inherently the exchangeable one.
+\item \textbf{Descent.} An output wire carrying no plate axis is
+  invariant, hence descends to the multiset quotient: the family
+  assembles into one function on the bag space
+  $\bigsqcup_{n < \omega} \mathrm{Sym}^n(B)$ --- with one plate per
+  place, precisely the coloured-net marking space of
+  section~\ref{sec:mt-sdcpn}. One finite syntax object denotes a
+  function of the whole variable-dimensional state.
+\end{itemize}
+
+Semantically the plate is a functorial box in the sense of
+Melliès~\cite{mellies06csl} --- the strong monoidal functor
+$(-)^{\otimes I}$, drawn as axes instead of a membrane --- and at
+infinite index it is the plate over a Kolmogorov product in the
+sense of categorical probability~\cite{chen2024aldoushoover}, the unique morphism
+whose finite marginals are the body's instances. The index category
+is deliberately the groupoid of finite sets and bijections, not all
+functions: aggregation is not functorial under instance
+insertions~\cite{spivak2021agg}, and equivariance is exactly the
+functoriality that survives --- which is the symmetry the
+marking space quotients by.
+
+\paragraph{The count wire.} The \texttt{const} refusal bans $\iota$
+in a literal's \emph{shape}, never the scalar. So the token count is
+three applications --- $\texttt{const}\ 1$, \texttt{broadcast} to
+$[\iota]$ (the vacuous instance of the trailing-axis rule),
+\texttt{contract} binding the index --- and each instance evaluates
+to $n$. Uncoloured counter places need nothing else: classical
+place-invariant certificates are degree-one polynomials in count
+wires, and count-bound rows ($0 \le k_P \le M_P$, linear
+conservation laws) attach to this wire. The idiom is a natural
+packaged symbol for the register of
+section~\ref{sec:hyp-genus} --- expansion as above, projection lemma
+trivial --- so certificates may cite one symbol while the wire
+format never learns it exists.
+
+\paragraph{The certificate stratum never sees a plate.} A plated
+hypernet with invariant outputs, built from \texttt{contract} pools,
+is a presentation of an aggregate polynomial in finitely many
+\emph{pooled coordinates}: token counts $\vec{k}$ and per-place
+power-sum pools $\vec{s}$ (a sum-pool is a contraction row whose
+bound index is the plate --- the relational rendering of
+section~\ref{sec:hyp-tensors} applies unchanged, side conditions
+included). Obligations about all markings at once are ordinary
+polynomial sequents over $(\vec{k}, \vec{s})$ with
+hypothesis rows --- coupling enclosures
+$l_j k_P \le s^P_j \le u_j k_P$ from the colour boxes, count rows,
+integer rounding at count atoms --- so obligation count and
+dimension are set by the net and the feature dictionary, never by
+any marking bound. The plate joins ``the checker never sees a
+probability'' and ``never sees a marking'': it compiles away through
+the pooled normal form, and what reaches the kernel is
+hypothesis-carrying polynomial rows of the standard shape. How the
+per-transition rows of a token-population system collapse to one
+row per Petri transition --- and which pooled aggregators can carry
+progress claims, not merely safety --- is taken up with the
+modelling frame itself (section~\ref{sec:mt-sdcpn}).
+
+\paragraph{Worked size.} A one-layer transformer encoder with
+degree-2 polynomial attention --- a published, empirically
+competitive attention class~\cite{letourneau24padre}, of which the
+plate-expressible fragment is precisely the exchangeable
+subclass --- over a two-dimensional colour box, with residual
+connection, invariant quadratic readout, and count wire, is
+\emph{nineteen applications}, of which the count wire is three; its
+pooled normal form is a per-token quadratic form against pooled
+third moments, an aggregate polynomial over fifteen pool coordinates
+plus the count. An executable exact-rational fixture pins the
+transcription against a per-token symbolic computation at
+$n \in \{1, 2, 3\}$, the collapse identity symbolically, and
+invariance under all $n!$ permutations.
+
+\paragraph{Status.} The type layer and the three theorems are
+mechanized in the Lean catalogue
+(\texttt{lean/qtsl}, modules \texttt{Qtsl/Plate/\{Syntax, TPlate,
+Eval, TNat, TDesc, Probes\}}): symbolic shapes and their
+instantiation homomorphism, the lifted per-box typing table with the
+schematic well-formedness theorem across all ten boxes, a reference
+evaluator with the diagonal-action equivariance theorem, the
+unwritability of causal masking (stated as a refutation: the
+one-application index-literal extension falsifies equivariance at
+$n = 2$), descent to \texttt{Multiset}-indexed denotations, and a
+symbolic count-wire evaluation theorem, under a three-mutant battery
+at preregistered loci. The certificate-stratum row family this
+section's pooled normal form calls for --- plate declarations,
+per-token feature dictionaries, aggregate wires as contraction rows,
+fold certificates with per-transition footprint rows, and the
+idempotent-gap refusal --- is landed theory vocabulary, and the
+producer emits it: the semiconductor tutorial
+(chapter~\ref{ch:qtsl-minifab}, section~\ref{sec:minifab-exact}) is
+its first exercising campaign, and the engine-side evaluator family
+for the theory's demanded side conditions now discharges them in
+that campaign's production loop, decided at the coloured
+place/transition fragment with the remainder refused by name
+(section~\ref{sec:minifab-exact-status}). The
+hypernet \emph{wire-format} extent tag itself --- symbolic extents
+on general wires, beyond the certificate rows --- remains design
+with its pieces priced; plate-free serialization is unaffected by
+construction (zero-plate graphs are byte-identical today).
+
+\section{One genus: views elaborate in}
+\label{sec:hyp-genus}
+
+A toolkit that certifies computations cannot afford two kinds of
+computation. The design rule entered the development log as a maxim
+the day the System layer adopted hypernets for its dynamical content:
+hypernets are to be re-used for
+differential-equation specifications and their kin. The maxim had an
+edge because the project had already lived through the failure once,
+when terms grew into a separate genus from hypernets and were soon
+demanding einsum machinery of their own.
+
+The rule this chapter takes from that entry, stated positively:
+
+\begin{quote}
+\textbf{The single-genus rule.} Hypernets are the one genus of
+computational content. Every other computational syntax --- a
+polynomial vector field written as a coefficient table, a term inside
+a proof obligation, a guard expression, a PDE operator --- is a
+\emph{view}: surface syntax equipped with a definitional elaboration
+into the ten boxes. A view's meaning \emph{is} the value of its
+elaboration; no view acquires its own evaluator, its own
+serialization, or its own contraction machinery.
+\end{quote}
+
+The precedent for the pattern is einsum itself. Einsum notation is
+not a second contraction engine anywhere in the toolkit; it lowers
+to explicit contraction structure (patterns here; contraction rows in
+the relational engine, section~\ref{sec:hyp-tensors}), and the
+summation it denotes is definitional --- evaluated only where a
+checker needs values. Views generalize this: convenient syntax on
+the outside, one calculus on the inside, and the translation is part
+of the definition rather than an implementation detail.
+
+The disease the rule prevents has a concrete signature, worth naming
+because it is how single-genus erodes in practice: a producer grows
+an ergonomic node --- say, a polynomial represented as its monomial
+table --- that is not among the ten boxes; artefacts begin to carry
+it \emph{instead of} applications; and some downstream consumer,
+finding no applications to read, grows an evaluator against the
+ergonomic node directly. At that moment there are two genera, two
+evaluators, and a fresh supply of questions about whether they agree.
+The repair --- performed on the polynomial node itself, and now the
+standing template --- is \emph{demotion to view} under the
+admissible-symbol discipline:
+
+\begin{itemize}
+\item an \textbf{admissible packaged symbol} is a named node with a
+  typing rule, admitted alongside (never into) the core ten;
+\item it carries a \textbf{definitional expansion} into core boxes
+  --- the node \emph{serializes as} its expansion, so the wire format
+  and the digest scheme never learn the symbol exists;
+\item a once-proven \textbf{projection lemma} establishes that the
+  symbol's declared facts follow from its expansion's facts, so rules
+  may cite the symbol soundly;
+\item and a \textbf{candidacy rule} bounds the admission: the
+  expansion's disjunctive content must come only from \texttt{cell}
+  (most packaged symbols are disjunction-free; a packaged ReLU
+  inherits its single case split from the \texttt{cell} inside its
+  expansion, and nothing else is allowed to smuggle new branching
+  into the calculus).
+\end{itemize}
+
+Four packaged symbols currently ride this register, each with its
+expansion and projection lemma mechanized: \texttt{relu} (expansion:
+copy, sign-split \texttt{cell}, gating \texttt{contract});
+\texttt{ppoly}, the monomial-table polynomial view whose expansion is
+the scheme of the worked example below; \texttt{pderiv}, the formal
+partial derivative on dense coefficient tables (expansion: one
+constant shift-and-scale matrix and one \texttt{contract});
+and \texttt{facet}, restriction of a coefficient table to a face
+(expansion: one basis-vector constant and one \texttt{contract}).
+None is an eleventh primitive; all four erase at serialization time.
+
+Three audit questions probe any proposed addition, and the calculus
+answers all three by construction: \emph{a second evaluator?} --- no; views elaborate, and
+the one exact evaluator computes. \emph{A second digest scheme?} ---
+no; the canonical serialization hashes expansions, so a view and its
+elaboration cannot drift apart behind distinct content addresses.
+\emph{A second contraction path?} --- no; the contraction pattern is
+the only index-binding construct, and any syntax ``asking for its own
+einsum'' is asking, by definition, to violate the rule.
+
+\subsection*{Beyond exactness: certified function aliases}
+
+One register remains, opened by a question the packaged symbols
+cannot answer. Modelling frames keep asking for $\sin$, $\cos$,
+$t^{p/q}$, $\ln$, and $\exp$ --- in drift coefficients, rate laws,
+guard surfaces --- and no piecewise polynomial \emph{equals} any of
+them, so no definitional expansion of the packaged-symbol kind can
+exist. What can exist, and what exact numerics has shipped for
+decades under the name of certified function
+libraries~\cite{muller2016elementary}, is an
+approximation with a proof: a piecewise-polynomial table $\hat f$
+over exact rationals, a declared domain $[a, b]$, and a declared
+budget $\varepsilon$, together with a receipt --- exact-rational
+inequalities a small checker re-derives from the table bytes alone
+--- establishing $\lvert \hat f - f \rvert \le \varepsilon$ on the
+domain. Remainder brackets of the Maclaurin kind make such receipts
+pure rational arithmetic (the checker compares coefficients against
+a factorial tail bound; it never needs to know that $e$ exists), and
+implicit relations extend the same discipline to functions the
+brackets do not reach directly: a logarithm table is certified
+through the residual $\lvert \exp(\hat w(t)) - t \rvert \le
+\eta\, t$ against exponential brackets, a rational-power table
+through the purely polynomial residual $\lvert \hat w^{\,q} - t^p
+\rvert \le \eta$ --- so no logarithm and no fractional power is ever
+enclosed by anything but polynomial comparison.
+
+A \emph{certified function alias} packages exactly this: a name and
+pinned parameters selecting one table, hence one hypernet (the
+pieces enter through \texttt{cell}, the piece polynomials through
+the \texttt{ppoly} scheme, the one-hot blend through
+\texttt{contract}); the budget $(\varepsilon; [a,b])$; and the
+receipt's citation. The alias is admitted alongside the calculus in
+the same sense as the packaged symbols --- the wire format and the
+digest scheme never learn its name; artefacts carry the expansion
+--- and the three audit questions above pass by the same erasure
+argument. What changes is the epistemic contract: a packaged
+symbol's projection lemma says \emph{equal}; an alias's receipt says
+\emph{within $\varepsilon$, on $[a,b]$} --- and the domain is a
+precondition, owed a containment argument by any consumer whose
+wires might leave it, the same obligation shape as a jump's
+reset containment. Downstream, the distinction costs nothing: a
+drift built from an alias \emph{is} piecewise-polynomial dataflow,
+its proof obligations are polynomial rows like any other, and the
+transcendental fact lives entirely in the receipt. A claim over such
+a system may then be read at either of two strengths: against the
+table as the model itself, with $\varepsilon$ a declared modelling
+tolerance of the same kind as float rounding (the reading under which
+nothing downstream changes at all); or against the band $\hat f \pm
+\varepsilon$ as a differential inclusion, whose verdict covers the
+true function by containment at the price of one rational widening
+term per obligation row.
+
+The family is closed under differentiation --- $\sin' = \cos$,
+$\exp' = \exp$, $\ln' = t^{-1}$, $(t^{p/q})' = \tfrac{p}{q}\,
+t^{p/q - 1}$ --- so an alias's derivative data is a pointer to a
+sibling alias, never new machinery. The cylinder lift met earlier in
+this chapter remains the better encoding where it applies (an
+autonomous oscillator's sine and cosine carried as state, exactly,
+with their algebraic invariant); the alias route serves the cases
+the lift cannot reach --- forced and parametric arguments,
+logarithms and powers of state variables, rate laws. The toolkit
+carries certified tables for the whole family named above. The
+exponential, the logarithm, and the rational powers arrived first,
+as quantile transforms for its distribution generators, verified by
+the residual disciplines above; sine and cosine followed as forward
+tables on a declared symmetric domain, their error bounded
+absolutely against the same factorial-tail brackets the remainder
+arguments above consume --- absolutely of necessity, since both
+functions vanish inside every interesting domain, leaving a relative
+bound no positive floor to stand on. One more fact about the
+trigonometric pair is worth the ink: $\pi$ is irrational, so
+periodic folding is not exactly available in $\mathbb{Q}$, and a
+range-reduced table would smuggle an approximation of $\pi$ into its
+own argument, outside the certificate. The declared domain is
+therefore data; coverage beyond it is refused, never clamped, and
+range reduction is the consumer's burden, priced where the consumer
+knows its own modulus.
+
+\subsection*{Worked example: a closed-loop drift, in fifteen applications}
+
+The example that carried the design discussion is small enough to
+print whole. Take the cartpole's closed loop on the cylinder lift
+$(s, c, \omega)$ --- sine and cosine of the pole angle carried as
+state, per the no-transcendentals discipline --- with a linear
+feedback law $a(s, \omega) = K_0 s + K_1 \omega$ folded in, plant
+half-length $l = \tfrac12$, gravity $g = \tfrac{49}{5}$, and exact
+rational gains $K_0 = -\tfrac{161753}{8148}$,
+$K_1 = -\tfrac{44746}{9799}$:
+\[
+\dot s = c\,\omega, \qquad
+\dot c = -s\,\omega, \qquad
+\dot\omega
+= \tfrac{g}{l}\,s + \tfrac{K_0}{l}\,c s + \tfrac{K_1}{l}\,c\,\omega .
+\]
+Its hypernet --- three input wires, three output wires, every scalar a
+rank-0 exact rational --- is fifteen applications:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+stage & applications & count \\
+\midrule
+fan-out & \texttt{copy} each of $s$, $c$, $\omega$ into its uses & 3 \\
+constants & \texttt{const} $-1$, $\tfrac{g}{l}$, $\tfrac{K_0}{l}$, $\tfrac{K_1}{l}$, $\mathbf{1}_3$ & 5 \\
+monomials & \texttt{contract}: $c\omega$; $(-1)s\omega$; $\tfrac{g}{l}s$; $\tfrac{K_0}{l}cs$; $\tfrac{K_1}{l}c\omega$ & 5 \\
+the $\Sigma\Pi$ boundary & \texttt{stack} the three $\dot\omega$ monomials into shape $[3]$ & 1 \\
+the sum & \texttt{contract} against $\mathbf{1}_3$, binding the $[3]$ axis & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{figure}[t]
+\centering
+\input{generated/fig-hyp-cartpole}
+\caption{The closed-loop cartpole drift of the worked example,
+depicted as a hypernet: fifteen applications, three inputs, three
+outputs.
+Structural plumbing (\texttt{copy}, grey) makes every act of sharing
+a visible row; constants (white) are applications like everything
+else; every monomial is one \texttt{contract} (peach); and the
+calculus's single cross-wire sum --- the three-term right-hand side
+of $\dot\omega$ --- crosses the $\Sigma\Pi$ boundary (dashed) as one
+\texttt{stack} contracted against the all-ones vector.}
+\label{fig:hyp-cartpole}
+\end{figure}
+
+Every monomial is contract-native; the single cross-wire sum in the
+system --- the three-term right-hand side of $\dot\omega$ --- is the
+single \texttt{stack} (Figure~\ref{fig:hyp-cartpole}). The table is
+not hand-lore: the polynomial
+view elaborator emits this graph, its fifteen applications digest to
+a pinned golden
+(\texttt{69b6f4c6\ldots}), and the elaborator's output is already in
+canonical form, so the digest doubles as a regression witness for the
+elaboration itself. Neither is the figure hand-lore: it is emitted,
+deterministically, from those same canonical bytes by the depiction
+tool beside the producer surface (\texttt{hypernet-tikz}), so the
+pinned digest is the drawing's witness too --- only the semantic
+names ($s$, $c$, $\omega$, $g/l$) arrive as declared labels, since
+the canonical form deliberately carries no name metadata. The same scheme compiles the goal polynomial of
+the matching Lyapunov certificate --- one more \texttt{stack}, one
+more ones-\texttt{contract} --- which is the single-genus rule doing
+exactly its job: system dynamics and certificate content share one
+representation, so one recomputation can cross-check a digest cited
+by both.
+
+\section{Substitution: how hypernets compose}
+\label{sec:hyp-subst}
+
+Hypernets compose by \emph{substitution}: plugging one graph's
+outputs into another's inputs. The operation is defined once, at the
+graph layer, and everything that composes computations --- nesting a
+component's dynamics inside a larger mechanism, elaborating a view in
+context, merging two boxed computations into one --- consumes the
+same definition.
+
+The data of a substitution: an outer hypernet, an inner hypernet, a
+\emph{port map} $\varphi$ matching some of the outer graph's inputs
+to inner outputs (type-exact; several outer inputs may consume one
+inner output), and an \emph{exposure set} of inner outputs to remain
+outputs of the composite --- by default the unmatched ones, so
+nothing is silently dropped and nothing matched is silently
+re-exposed. The construction concatenates the inner application
+list, a block of \emph{seam repairs}, and the redirected outer list,
+then renumbers into canonical form. The seam repairs are where the
+linearity discipline pays: an inner output consumed by $n$ ports and
+exposures gains exactly one consumer at the seam --- a
+\texttt{delete} when $n = 0$ (the discard is a row, never an
+absence), nothing when $n = 1$, a \texttt{copy} when $n \ge 2$ ---
+and consumer counts change nowhere else.
+
+\begin{theorem}[substitution laws]
+\label{thm:substitution}
+For well-formed hypernets and valid port structures:
+\emph{(i)} the composite is well-formed;
+\emph{(ii)} on the deterministic fragment, evaluation of the
+composite equals the composition of evaluations --- inner outputs
+feeding matched outer inputs, unmatched interface passing through;
+\emph{(iii)} substitution is unital (substituting an identity
+hypernet, in either direction, returns the other graph up to
+canonical renumbering) and associative --- and both laws hold
+\emph{on the nose} for the canonical forms, hence as equalities of
+digests, not merely up to isomorphism.
+\end{theorem}
+
+The proofs are elementary but not careless; the one choice that
+genuinely matters is \emph{where the repair blocks live}. Placing
+each seam's repairs at that seam --- between the inner and outer
+blocks it mediates --- makes the two association orders of a
+three-graph chain produce byte-identical canonical forms; the
+tempting alternative (all repairs at the end) satisfies (i) and (ii)
+equally well and breaks (iii) at the digest layer, leaving
+associativity only up to a permutation that content-addressing does
+not forgive. Coherence at the byte level is a design property, chosen
+because certificates compare bytes.
+
+Clause~(ii) as stated is a floor, and the machine-checked form is
+stronger. In the toolkit's Lean tree, composition at the aligned
+stratum --- the pushout-normal form in which the seam wires of two
+composable open hypernets are literally shared names, the form every
+composite of content-addressed hypernets reduces to --- carries the
+law family with no determinism hypothesis anywhere (module
+\texttt{Qtsl.HypernetCospan}): gluing preserves well-formedness
+wholesale --- linearity, acyclicity, type consistency, and every
+boundary clause (\texttt{glue}); a valuation of the composite is
+admissible exactly when every application of each part holds
+(\texttt{glue\_admissible\_iff}); and unit and associativity hold on
+the nose (\texttt{glue\_unit\_left}, \texttt{glue\_unit\_right},
+\texttt{glue\_assoc}) --- clause~(iii)'s shadow in pushout-normal
+form.
+
+The relational law subsumes the deterministic clause: where the
+parts' admissible relations are graphs of functions, ``every
+application holds'' is exactly ``evaluation of the composite equals
+the composition of evaluations'' --- and \texttt{cell}'s one-hot
+disjunction, the calculus's one nondeterministic citizen, passes
+through the conjunction untouched. The composition law never needed
+determinism; clause~(ii) names the fragment where ``evaluation'' is
+a function because that is the fragment the evaluator runs.
+
+Read through that normal form, the seam repairs acquire a precise
+status: they are a \emph{change of interface}, never composition
+overhead. The bridge between the two presentations is itself
+machine-checked (module \texttt{Qtsl.SubstitutionBridge}):
+substitution factors as a gluing against a small structural hypernet
+--- one \texttt{delete} or \texttt{copy} row per seam wire whose
+consumer count changes --- that mediates between the inner graph's
+interface and the interface the port map asks for, and the
+seam-repair block is that mediator's application list, verbatim.
+Gluing along an interface both sides already agree on inserts
+nothing; the rows appear exactly when the interface moves.
+
+For certificate consumers, the digest story splits into three claims
+of different strengths, and keeping them separate is what makes
+``digest coherence'' a tool rather than folklore:
+
+\begin{remark}[digest verdicts]
+\label{rem:digest-verdicts}
+\emph{(a) Determination --- a theorem.} The composite's digest is a
+function of the parts' canonical bytes and the port structure: the
+operation reads nothing else. Equal-digest parts yield an
+equal-digest composite, so a certificate may cite the parts and the
+port row and thereby pin the whole.
+\emph{(b) Coherence --- a theorem, conditional on a discipline.} The
+unit and associativity equalities of
+Theorem~\ref{thm:substitution}(iii) are digest equalities
+\emph{because} normalization is part of the operation; producers must
+emit canonical form or normalize before digesting, and the elaborators
+do (their outputs are fixed points of renumbering, checked).
+\emph{(c) Homomorphism --- refused.} There is no operation on digest
+\emph{strings} computing the composite's digest from the parts'
+digests: SHA-256 composes with nothing, by design. The checker's path
+is recomputation --- possess the parts' bytes, recompute the
+substitution, compare the claimed digest --- and every consumer in
+the toolkit uses that pattern rather than assuming an algebra of
+hashes.
+\end{remark}
+
+One boundary deserves stating before anything leans on it:
+elaboration and substitution commute \emph{semantically} (elaborating
+a polynomial composite equals substituting the elaborations, as
+functions; proven, with executable witnesses), but the two routes
+produce \emph{different graphs}, and different graphs never share a
+digest. Expanding a polynomial before elaborating re-associates its
+monomials; substituting factored graphs keeps the factoring. A
+certificate relating the two routes therefore carries a semantic
+linkage argument, never a claimed hash equality --- the digest
+refuses extensionality on purpose, and this is the first place the
+refusal does real work.
+
+\primentry{substitution}{H-SUBST}
+\primmeta
+\begin{mathpar}
+\inferrule*[Right=subst]
+  {G, H \text{ well-formed} \\\\
+   \varphi \colon \mathit{in}(G) \rightharpoonup \mathit{out}(H)
+   \text{ type-exact} \\
+   E \subseteq \mathit{out}(H)
+   \text{ (default: the unmatched outputs)}}
+  {\mathrm{subst}(G, \varphi, H, E) \colon
+   \mathit{in}(H) \mathbin{+} \bigl(\mathit{in}(G) \setminus
+   \operatorname{dom}\varphi\bigr) \to \mathit{out}(G) \mathbin{+} E}
+\end{mathpar}
+\noindent Semantics and laws: Theorem~\ref{thm:substitution} ---
+composition of evaluations on the deterministic fragment; unit and
+associativity on the nose, as digest equalities. The seam repair is
+forced by linearity: an inner output with $n$ consumers at the seam
+gains a \texttt{delete} ($n = 0$), nothing ($n = 1$), or a
+\texttt{copy} ($n \ge 2$), and consumer counts change nowhere else.
+The operation normalizes its result (the canonical renumbering); the
+identity hypernet is its unit.
+\input{chapters/qtsl-hypernets-api/H-SUBST}
+
+\section{The shared core: Systems, specifications, rules}
+\label{sec:hyp-core}
+
+The claim this chapter exists to underwrite: the three strata that
+consume computation all consume \emph{this} genus, so the chapter's
+material is common infrastructure, not one stratum's private
+concern.
+
+\subsection*{Systems: mechanism content is boxed hypernets}
+
+A System (chapter~\ref{ch:qtsl-mathematical-models}) is a structured
+presentation --- mechanisms wired together --- and the mechanism
+calculus itself deliberately contains \emph{no computational
+primitives at all}. Its vocabulary identifies variables, grades
+stochastic couplings, sequences operating modes, nests components; none
+of these operations computes a value. Wherever a mechanism has
+dynamical content --- a drift field, a jump reset, a guard, a neural
+feedback law --- that content is a hypernet, referenced by digest.
+
+The embedding has a precise grammar: a well-formed hypernet with $m$
+inputs and $n$ outputs becomes a mechanism whose ports are its wire
+types and whose causal orientation is fixed (inputs consumed, outputs
+read out) --- a \emph{deterministic directional mechanism}, sitting
+inside the System layer as what string-diagram practice calls a
+functorial box \cite{mellies06csl}: a membrane with hypernet
+calculus inside and mechanism calculus outside. Composition respects
+the membrane --- merging two boxes joined by a directed wire is
+computed by the substitution operation of
+section~\ref{sec:hyp-subst}, inside --- and the membrane is
+selective in both directions. Relational variable-identification,
+graded stochastic couplings, and mode-switching edges cannot cross
+into the box: they are not computations. Acyclicity ends at the
+membrane in the other direction: inside, SSA order is law; outside,
+feedback loops are the System layer's bread and butter, closed
+through state across box boundaries. A control loop is a cycle of
+mechanisms whose every computational fragment is internally acyclic
+--- which is how the toolkit gets both certified computation and
+real feedback without either discipline compromising the other. (In
+the vocabulary of Theorem~\ref{thm:hyp-inclusion} below: a
+functorial box packages a well-formed, deterministic loose arrow of
+the double category of open hypernets, and the membrane is that
+fragment's boundary.)
+
+\subsection*{Specifications: one digest, one referent}
+
+A specification constrains observables of a trajectory; a certificate
+discharges the constraint with computational content of its own ---
+a Lyapunov function's polynomial, a barrier's gradient bounds, the
+observable defining a guard surface. Both sides of that transaction
+are hypernets, and both cite digests under the one canonical
+serialization. The consequence is a sentence this book will rely on
+repeatedly, in both directions: \emph{the guard the certificate
+reasons about is the guard the system runs}, and the checker
+verifying the certificate can confirm as much by recomputing a hash
+--- no semantic argument, no trusted translation step, no ``the spec
+model and the implementation model surely agree.'' Where a
+certificate's content is produced by elaboration from a view, digest
+determination (Remark~\ref{rem:digest-verdicts}a) extends the same
+guarantee through the elaboration: cite the view's parameters and the
+elaborator's version, or cite the elaborated digest directly; either
+way the referent is pinned by content.
+
+\subsection*{Rules: the ambient hypernet}
+
+Every inference rule in the catalogue of chapter~\ref{ch:qtsl-manual}
+is stated over an ambient hypernet: the rule's variables are wires,
+its premises and conclusions constrain the values those wires can
+take, and its soundness theorem quantifies over \emph{every}
+hypernet and every admissible valuation. The primitive boxes supply
+the base facts --- each application contributes its defining
+equations (a \texttt{contract}'s sum-of-products identity, a
+\texttt{stack}'s entry equalities, a \texttt{cell}'s one-hot
+disjunction) as the synthesized facts rules build on. The economy of
+section~\ref{sec:hyp-boxes} becomes a proof-theoretic economy here:
+nine box families contribute equations, exactly one contributes a
+disjunction, so case analysis in the rule layer is confined to
+\texttt{cell}-shaped splits, and a packaged symbol admitted under the
+candidacy rule of section~\ref{sec:hyp-genus} cannot enlarge that
+confinement.
+
+\medskip
+
+This triple consumption is the chapter's placement argument. Systems,
+specifications, and rules each depend on the hypernet genus; the
+genus depends on none of them. Read this chapter once, and the later
+chapters' references --- ``dynamical content, by digest,''
+``the ambient hypernet,'' ``the certificate cites the graph'' ---
+resolve to one object with one definition.
+
+\medskip
+
+The placement argument also has a mathematical face, and the face is
+machine-checked.
+
+\begin{theorem}[possibilistic inclusion]
+\label{thm:hyp-inclusion}
+Open hypernets --- hypernets with declared input and output rosters
+--- form a double category: objects are wire rosters, tight arrows
+are roster inclusions, loose arrows are hypernet-decorated cospans
+in the sense of Fong~\cite{fong15}, read at double-categorical
+strength through Patterson's lens~\cite{patterson23}, and loose
+composition is gluing at the shared seam. Sending an open hypernet
+to its possibilistic content --- the set of valuations its
+applications admit --- extends to a lax double functor from this
+double category into the semantic universe of
+chapter~\ref{ch:qtsl-semantic-universe}, and the functor:
+\begin{enumerate}
+\item satisfies its unit, composition, and rename-transport laws as
+  exact equalities, with no determinism hypothesis anywhere;
+\item preserves the canonical opcartesian lifts on the nose;
+\item has its composition comparison invertible precisely on
+  seam-disjoint gluings --- which is every gluing of encoded
+  hypernets, since content addressing makes wire names rigid
+  designators: distinct off-seam wires never collide, and no
+  capture-avoiding renaming ever intervenes;
+\item identifies two hypernets precisely when they admit the same
+  valuations.
+\end{enumerate}
+\end{theorem}
+
+Every clause is a named artefact in the toolkit's Lean tree. The
+packaged functor is \texttt{hnetInclusion} (module
+\texttt{SuFunctor.HypernetDouble}), built from four transformation
+laws proved exactly, one by one, in
+\texttt{SuFunctor.HypernetInclusion}: unit, composition with no
+determinism hypothesis (section~\ref{sec:hyp-subst}'s relational law
+is this clause read at the substitution seam), rename transport at
+full generality, and the vacuous-diagram law (\texttt{theta\_unit},
+\texttt{theta\_comp}, \texttt{theta\_rename},
+\texttt{vacDnf\_dnfPull}). Lift preservation is
+\texttt{hnetInclusion\_pushGLoose}. The laxity is located, not
+hidden: clause~3 is \texttt{hnetInclusion\_\allowbreak laxComp\_\allowbreak isInvertible},
+while the unit comparison is genuinely one-way --- typing lives in
+the pattern carrier, and forgetting it is a constraint, not a
+defect. Clause~4 (\texttt{austereDnf\_eq\_iff}) says the inclusion
+is deliberately non-faithful, and makes its kernel a theorem rather
+than a folklore caveat: it is the extensionality refusal of
+section~\ref{sec:hyp-ir} standing exactly where it belongs --- two
+graphs computing one relation share a meaning and never a digest;
+syntax and its content addressing live in the double category, and
+the semantic universe sees the relation.
+
+What Systems, specifications, and rules consume is therefore not
+merely one data structure but one semantics: composing graphs and
+then taking meaning equals taking meaning and then composing
+relations.
+
+\section{Relational kinship: contraction rows}
+\label{sec:hyp-tensors}
+
+The toolkit meets tensor contraction twice: as the \texttt{contract}
+box here, and as \emph{contraction rows} in the relational engine,
+where an einsum expression lowers to stored index structure --- an
+index map and an output set as data --- with the summation
+definitional, evaluated only where a checker needs values. The two
+are one definition at two strata, and it is worth seeing the shared
+skeleton once. Over a semiring $\mathbb{S}$, with a finite family of
+input axes $A(i)$ and a map $a$ from input-axis positions into a
+finite index set, contraction along $a$ with output set $O$ sends a
+(lazily formed) product tensor to
+\[
+\Bigl(v \colon \textstyle\prod_{m \in O} B(m)\Bigr) \;\longmapsto
+\sum_{v' \colon \prod_{j \notin O} B(j)}\;
+T\bigl(i \mapsto (v \cup v')(a(i))\bigr),
+\]
+where the extent family $B$ is induced on the image of $a$ by the
+input extents, and is data only on the output axes no input hits
+(the broadcast axes, of which more below).
+Definition~\ref{def:contraction-pattern} is this formula with
+$\mathbb{S} = \mathbb{Q}$, the index set $I$ playing the target of
+$a$, the input bindings playing $a$, and the output binding
+enumerating $O$; the box evaluates it eagerly on wire values, the
+relational rendering stores it as rows and lets the checker fold the
+sum on demand. The design move is also shared: \emph{einsum lowers
+to contraction rows} in the engine for the same reason \emph{views
+elaborate into hypernets} here --- surface notation is never given
+its own machinery.
+
+Two deltas between the strata, stated so the kinship is not
+overclaimed. First, the relational side imposes a side condition the
+wire format does not: every index hit by no input must belong to the
+output set, so the case that would silently scale a result by an
+extent is \emph{unrepresentable} in rows, while in the IR the same
+case is representable and simply carries its summed semantics ---
+deterministic, if rarely what anyone meant; einsum lowerings never
+emit it on either side. Second, broadcasting: the relational
+rendering folds it into contraction itself (output axes hit by no
+input are the broadcast axes, along which the result is constant),
+while the IR keeps a separate \texttt{broadcast} box --- in a
+dataflow graph the degenerate contraction would cost a pattern where
+a relabelling suffices. Same semantics; different economies; one
+calculus.
+
+\section{Receipts}
+\label{sec:hyp-receipts}
+
+What stands behind this chapter, sorted by strength of evidence, per
+the claim discipline used throughout the book.
+
+\textbf{Machine-checked and running.} The ten-primitive calculus
+exists twice, in agreement: as a mechanized catalogue (the primitive
+type, per-box typing rules, and the well-formedness trio as decidable
+predicates over ground data, with well-formedness carried as proof
+fields of the hypernet structure) and as a reference implementation
+(the same typing and well-formedness checks, the exact-$\mathbb{Q}$
+evaluator, a float64 shadow evaluator carrying a conservative
+accumulated-rounding bound, and the canonical serialization with
+SHA-256 digests). An ONNX importer compiles all 45 networks of the
+ACAS~Xu collision-avoidance benchmark~\cite{katz2017reluplex}
+(architecture 5--50$\times$6--5, ReLU) to well-formed hypernets --- 2{,}172
+applications and 2{,}767 wires per network, exact dyadic weights ---
+with committed digest goldens (45 networks $\times$ 3 head variants,
+all 135 distinct) and an oracle gate: on 47 published verification
+instances, exact and shadow evaluation agree within the carried
+bound (largest observed gap $1.9 \times 10^{-16}$), and
+verdicts agree with an independent floating-point runtime 47/47. A
+property battery (well-formedness of random SSA slices; digest
+sensitivity --- a one-ulp weight corruption flips the digest, a clean
+recompile reproduces the golden; evaluator agreement against an
+independent forward pass) runs green in seconds. The substitution
+operation and canonical renumbering are implemented, with the
+coherence and digest laws of section~\ref{sec:hyp-subst} each
+exercised by executable digest-equality witnesses (among them the
+deliberate digest-\emph{inequality} of the two elaboration
+routes). The polynomial-view elaborator is pinned to the
+fifteen-application worked table by its committed digest golden, and
+the four packaged symbols' expansions live in the mechanized
+catalogue with their projection lemmas. The composition layer above
+the catalogue is machine-checked in the same tree: the
+aligned-stratum gluing with its relational law and on-the-nose unit
+and associativity (\texttt{Qtsl.HypernetCospan}), the reduction of
+the port-map substitution to that gluing
+(\texttt{Qtsl.SubstitutionBridge}), the four
+transformation laws of the possibilistic inclusion
+(\texttt{SuFunctor.HypernetInclusion}), and their packaging as a lax
+double functor into the semantic universe
+(\texttt{SuFunctor.HypernetDouble}) --- sorry-free, axiom census the
+standard classical base. The plate extension
+(section~\ref{sec:hyp-plates}) is machine-checked at the same grade
+in \texttt{Qtsl/Plate/\{Syntax, TPlate, Eval, TNat, TDesc,
+Probes\}}: symbolic shapes and instantiation, schematic
+well-formedness across all ten boxes, evaluator equivariance under
+the diagonal symmetric-group action, the causal-mask refutation,
+descent to multiset-indexed denotations, and the symbolic count-wire
+theorem, under a three-mutant battery at preregistered loci
+(index-literal box, widened broadcast slot, deleted contract-binding
+clause --- each refused at its predicted theorem); an exact-rational
+fixture additionally pins the nineteen-application polynomial
+transformer against per-token symbolic computation at
+$n \in \{1,2,3\}$.
+
+\textbf{Proven in prose, with executable witnesses; mechanization
+under way.} Proposition~\ref{prop:packing-gap} (the completion
+theorem behind \texttt{stack}) and Theorem~\ref{thm:substitution}
+(well-formedness preservation, the merge law, unit and associativity
+on the nose) are proven at full detail in the development record's
+design notes, and every claimed equality is additionally checked by
+the executable witnesses above. The proposition is, further,
+machine-checked in the toolkit's Lean tree (\texttt{lean/qtsl/},
+module \texttt{Qtsl.PackingGap}): a sorry-free Lean development, its axiom
+census the standard classical base, mechanizes it over the formal-expansion
+support model the proof sketch itself runs on --- assuming no
+well-formedness, quantifying over all wires rather than only later
+ones, and holding the two tracked wires opaque whatever produced
+them --- together with a positive control deriving
+the forbidden configuration once \texttt{stack} is added, so the
+nine-box hypothesis is itself proven necessary. Of
+Theorem~\ref{thm:substitution} in the port-map presentation given
+here, the linearity clause of well-formedness preservation is
+machine-checked end to end, and the laws themselves are
+machine-checked in pushout-normal form (the aligned-stratum gluing
+of section~\ref{sec:hyp-subst}: well-formedness closure, the
+relational composition law with the determinism hypothesis deleted,
+unit and associativity on the nose). The bridge --- that the
+port-map, seam-repair, and renumbering construction of this chapter
+reduces to that normal form --- is machine-checked in the same tree
+(\texttt{Qtsl.SubstitutionBridge}): under the port-validity
+hypotheses and the no-taps interface discipline, the raw composite
+is field-for-field the aligned gluing of the padded inner hypernet,
+the seam-repair block taken verbatim as the structural interpolant,
+and the redirected outer hypernet
+(\texttt{substituteRaw\_eq\_glue}), so substitution is the canonical
+renumbering of an aligned-stratum glue
+(\texttt{substitute\_eq\_glue\_renumber}) --- the structural
+reshuffle of the prose statement absorbed into the choice of
+interface lists --- and the relational composition law applies to
+the substitution itself
+(\texttt{substituteOpen\_admissible\_iff}); sorry-free, axiom census
+the standard classical base.  The presentation of this chapter and
+the normal form it reduces to are thereby machine-checked as one
+construction.
+
+\textbf{Design tense.} Higher-order hypernets (function-space wires
+--- wanted by no modelling frame currently in scope, and deliberately
+unbuilt until one forces them); the block-ordering convention that
+would sharpen the commutation of substitutions into \emph{disjoint}
+port sets from convention-conditional to unconditional; and the
+plate producer surface (the wire-format extent tag with its
+backward-compatibility golden, builder support, and the packaged
+count symbol --- the pieces named in
+section~\ref{sec:hyp-plates}'s status paragraph). All have written
+design records; nothing stated above depends on any of them.

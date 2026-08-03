@@ -1,0 +1,29 @@
+# bindings.toml.d/ConvIntro.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ConvIntro'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PConvIntroData"
+sha256 = "5cdf942ab9f3a47c41522c8222d0cecf51a8cbc1b2505bbde2ae264ec5be1491"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "barycentricHalfspaceBuild"
+sha256 = "8eeb18bae8ebe53ba603dd21293cc854b1416eba233df89e03d2de666c58f3b0"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "barycentricHalfspaceForm"
+sha256 = "bd87d44becb1fe361396deee5bafb4041db332bbf78004199d6787db615dc9d6"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_convIntro"
+sha256 = "24c1cfb6de39ea8398345b62d7be240c985a81e60aaf63b806ddcab46180a1e6"
+
+[[correspondence]]
+entry = "ConvIntro"
+steele_sha256 = "5715dcd74501ae12c1c7e59245d4d35db4c8a3205168c15e56e92a385a7f9c3f"
+statements_sha256 = "98b82427a672126449927baeadc6415eb302afbbb25f2f85c063bef5669d95b2"
+prose_sha256 = "f7f78e96bf707898f8bfd9b9298baa9c2214d7d673e046dbe51b583fdd08a8a0"
+

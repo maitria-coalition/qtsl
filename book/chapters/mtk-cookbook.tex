@@ -1,0 +1,1591 @@
+\chapter{Cookbook for Agents}
+\label{ch:mtk-cookbook}
+
+\noindent\draftmark\medskip
+
+This chapter is the toolkit's proof-production cookbook: moves in the
+P\'olya shape --- the move, its recognition conditions, a worked example
+with receipts, the failure mode it prevents, exercises --- re-derived
+from \emph{How to Solve It} \cite{polya1945solve} for minds that
+produce machine-checkable certificates. The intended reader is a large language model (or any
+capable agent) doing formal verification and heavy engineering; a human
+reads it profitably as the toolkit's operational philosophy stated
+concretely. The register follows from the founding intent: a
+meta-insight that could once only be pattern-matched through years of
+accumulated practice can now simply be \emph{stated} to an agent, in
+the agent's native language, and applied faster for being explained.
+
+Every pattern carries the same five rubrics. \emph{The move}, stated
+once at full generality. \emph{When it applies}: the recognition
+conditions --- how you notice, mid-task, that this is the situation you
+are in. \emph{Worked example from the record}: a real incident from the
+workshop record that produced this toolkit, receipts included, so the
+reader can go verify rather than take the chapter's word --- itself one
+of the cookbook's moves: a claim worth acting on ships with an artefact
+positioned to contradict it. \emph{The failure mode it prevents}: what
+happens, concretely, on the path where the move is not made. And
+\emph{exercises}: open legs from the producing campaigns' own backlogs
+at this preview, so that working an exercise produces value, not
+homework. Artefacts named in the examples migrate to the public
+repositories as they graduate; per the preview note at the front of
+this volume, treat a mention as a statement of what exists, not yet a
+link. Status words (``shipped,'' ``proposed,'' ``in design'') are as of
+this preview.
+
+The workshop's cookbook has already grown past this chapter: two
+further moves graduated after this preview's cut (one on charters as
+falsifiable predictions, one a proof-assistant transparency lesson),
+and a strong candidate --- adversarial review with planted doubts ---
+stays deliberately unwritten here, because its authoritative statement
+is a live operating document in the workshop, with measured hit rates
+across the review campaigns that shaped it, and a book copy of a live
+norm would drift from the norm. Each will be written from its receipts
+when they migrate. Behind them, a harvest queue of roughly ninety
+further candidate moves waits its turn.
+
+\section{Sloppy Proposer, Exact Disposer}
+\label{sec:ckbk-proposer-disposer}
+
+\paragraph{The move.} Split every computation whose result must be
+trusted into two roles with an explicit boundary:
+
+\begin{itemize}
+\item a \textbf{proposer} --- fast, approximate, unverified, and
+  structurally \emph{untrustable}: a float library, a
+  validated-numerics package, an ML search, an SMT heuristic, your own
+  quick script. It produces candidates: a region, a bound, a witness, a
+  decomposition, a step size.
+\item a \textbf{disposer} --- exact, minimal, independently
+  implemented. It re-derives, from the candidate data alone, everything
+  the certificate asserts (exact-$\Q$ arithmetic, from-scratch identity
+  checks) and accepts or rejects. Nothing the proposer computed appears
+  in the trusted conclusion; only what the disposer re-derived.
+\end{itemize}
+
+Then police the boundary \textbf{in both directions}:
+
+\begin{enumerate}
+\item Proposer arithmetic never enters the certificate. The trusted
+  computing base contains the disposer and nothing else; the proposer
+  is trusted only \emph{as a search heuristic}, where being wrong costs
+  retries, never soundness.
+\item Disposer arithmetic never enters the proposer's inner loop. Exact
+  computation inside a search loop is pure waste: the loop's job is to
+  find a candidate worth checking, and it should be as cheap as
+  correctness-irrelevance allows. The division of labour is the point
+  --- a proposer made rigorous is as much a design error as a disposer
+  made sloppy.
+\end{enumerate}
+
+This is the book's assurance stance (chapter~\ref{ch:exec-summary})
+applied at the scale of a single computation, and the producer stack is
+shaped by it end to end: every GPU kernel row returns witness-typed
+output built for the exact tier's disposal
+(chapter~\ref{ch:mtk-pearls}), and the checker at the bottom
+(chapter~\ref{ch:qtsl-manual}) is the disposer of last resort.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item Any time a fast-but-unverified computation must feed a
+  certificate whose soundness has to be airtight. The recognition
+  question: ``does the assurance story currently require this
+  library/model/script to be bug-free?'' If yes, restructure so it only
+  has to be \emph{useful}.
+\item Any time you notice exact or expensive computation inside a loop
+  that exists to search. The recognition sign is a profiler line: the
+  search dominating wall-clock with arithmetic whose precision the
+  final verdict never uses.
+\item When choosing whether to ``just trust'' an established
+  rigorous-numerics or solver library. The relevant question is not
+  whether the library is good (it usually is) but whether its
+  \emph{output representation} already matches something your checker
+  can re-verify --- in which case de-trusting it is nearly free.
+\end{itemize}
+
+\paragraph{Worked example from the record.} The validated-ODE
+de-trusting ladder: take enclosure claims from CAPD --- a well-regarded
+C++ validated-numerics library for rigorous ODE integration --- and
+re-found them on an exact checker, so that the assurance story never
+rests on trusting C++ interval arithmetic. The architecture is the move
+verbatim: three certificate species in which the proposer of every
+candidate --- CAPD, an in-house float Picard iterator, anything --- is
+untrusted by construction, and the checker re-derives all sequent
+polynomials from the candidate data by exact $\Q$ arithmetic. Validity
+of a proposed flow tube is a checkable fixed-point inclusion (the
+Picard operator maps the candidate box into itself --- the
+a-posteriori validation architecture formalized, kernel and all, by
+Br\'ehard, Mahboubi, and Pous \cite{lipics-itp-2019-8}), so the
+checker never integrates anything --- it verifies inclusion-invariance of what
+the untrusted integrator proposed, with zero per-instance quantitative
+side conditions: no Lipschitz constant, no contraction factor, no
+step-ratio condition in any certificate.
+
+Both directions of boundary-policing have receipts:
+
+\begin{itemize}
+\item \textbf{Direction 2, learned the expensive way.} The first
+  proposer implementation ran exact Bernstein computations inside its
+  candidate-search loop over radius and error-matrix parameters ---
+  measured at roughly forty seconds per pass of pure waste, since the
+  disposer re-derives everything anyway. The campaign's own
+  retrospective names the division of labour as one of its surprises:
+  the lesson was not ``be rigorous'' (the pipeline already was, at the
+  disposer) but ``stop being rigorous in the wrong place.''
+\item \textbf{Direction 1, cashed out when the real library arrived.}
+  CAPD, vendored and driven through the frozen proposer interface,
+  checker untouched: the exact-$\Q$ end box agreed with CAPD's
+  uncertified claim to three decimals with a tube radius about
+  $50\times$ tighter --- the cost of de-trusting was approximately zero
+  enclosure quality (wall-clock about $5\times$, spent in the checker,
+  which is the one place spending is correct). And the certified
+  envelope \emph{extended}: a Van der Pol step size the in-house float
+  proposer could not certify became certifiable with CAPD proposing. An
+  isolation probe attributed the remaining failure wall to the in-house
+  proposer's own search loop, not to CAPD --- a diagnosis only
+  available because the interface made proposers interchangeable.
+\end{itemize}
+
+Note what interchangeability bought beyond soundness: upgrading the
+proposer from quick in-house script to best-in-class library was a pure
+plug-in, no re-verification of anything, because the trust boundary
+never moved.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{Trusted-base bloat}: the assurance story ``the theorem is
+  only as trustworthy as the library plus the compiler run'' --- which
+  is CAPD's own openly stated architecture, and precisely the thing
+  being escaped. Every trusted component is a standing liability that
+  must be re-audited whenever it updates; a proposer never needs
+  auditing at all.
+\item \textbf{The dual waste}: search loops that run at certificate
+  precision, making exploration the bottleneck for zero soundness
+  benefit. This one is insidious because it \emph{feels} virtuous ---
+  rigour everywhere --- while actually signalling that the boundary was
+  never drawn.
+\item \textbf{Un-upgradeable pipelines}: when proposer and verifier
+  share arithmetic (or code), swapping in a better search engine means
+  re-validating the world. With the boundary drawn, proposers compete
+  and the checker stands still.
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The jet-transport adapter.} CAPD's \texttt{CnOdeSolver}
+  computes derivatives of the flow map (jets). The adapter interface is
+  frozen and the ladder's first-rung sequent layer is jet-ready; wire
+  \texttt{CnOdeSolver} through the same seam, checker untouched.
+  Success condition: goldens accept with CAPD-proposed jet enclosures;
+  the checker diff is empty.
+\item \textbf{Settle the flagged hypothesis.} The adapter's arrival
+  recorded that one benchmark's certifiable-step wall moved
+  \emph{inward} under CAPD, with a stated-but-unverified mechanism
+  (centred forms losing a cancellation under the checker's crude
+  absolute-value bound). Design the two-cell experiment that confirms
+  or refutes the mechanism; if confirmed, the fix belongs in the
+  disposer's bound, not the proposer.
+\item \textbf{Generalize the isolation probe.} The probe that
+  attributed the residual wall to the in-house search loop was built
+  bespoke. Extract the pattern --- swap proposers across the frozen
+  interface, hold the disposer fixed, bisect which side owns a failure
+  --- into a reusable harness verb for any proposer/disposer pipeline.
+\end{enumerate}
+
+\section{Certify the Honest Stop}
+\label{sec:ckbk-honest-stop}
+
+\paragraph{The move.} When a line of attack ends --- the rate cannot be
+improved, the constant cannot be sharpened, the method genuinely runs
+out --- do not shrug and move on, and do not quietly ship the weaker
+thing as if it had been the goal. \textbf{Prove the stop.} Convert ``we
+couldn't push further'' into one of three certified endings, and record
+which one you are in:
+
+\begin{enumerate}
+\item \textbf{The claim past the stop is false.} Produce the witness (a
+  concrete counterexample instance) \emph{and}, where the machinery
+  permits, a certificate-side proof that no valid certificate of the
+  stronger claim exists (e.g.\ any candidate decomposition is forced
+  into an inadmissible component). Then the stop is a theorem, not a
+  fatigue report.
+\item \textbf{The claim is true but this method cannot reach it.} Name
+  the missing ingredient as a first-class object --- a new prior
+  family, a stronger bridge lemma, a representation the format lacks
+  --- so the stop becomes a scoped successor leg rather than a vague
+  wall.
+\item \textbf{The claim is true at a boundary value.} Certify the
+  boundary from both sides (the bound holds at $c$; a witness attains
+  $c$), so the constant ships as sharp rather than as ``the best we
+  found.''
+\end{enumerate}
+
+In all three cases the artefact records the stop with the same rigour as
+the positive results --- ideally \emph{inside} the same certificate and
+test battery, so a future reader (or a future you, or a cheaper model
+retrying the problem) cannot re-open the question without meeting the
+proof.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item Whenever a sweep, ladder, or optimization plateaus and you are
+  about to write ``we achieved $X$'' for the $X$ you reached. The
+  recognition question: \emph{is the plateau a fact about the problem
+  or about your effort?} If you don't know, that is ending 1 to chase
+  --- the answer is usually cheaper than the next ladder rung would
+  have been.
+\item Whenever you are tempted to soften a claim's statement so that
+  what you proved matches it. Softening is sometimes right --- but only
+  with the un-softened claim's status recorded (false? open?
+  method-blocked?).
+\item When banking machinery or priors for future use: an input that
+  turned out to be \emph{unconsumable} (its only consumer is a false
+  claim) is a result about the problem's structure, worth the two
+  sentences it costs to record.
+\end{itemize}
+
+\paragraph{Worked example from the record.} The Kuramoto--Sivashinsky
+energy certificate, fourth target of a campaign producing
+exact-rational, independently replayed dissipation certificates for
+PDEs. The campaign's earlier targets had certified decay \emph{rates}
+--- viscous Burgers at the sharp rate
+$\tfrac{d}{dt}E \le -2\nu E$. For Kuramoto--Sivashinsky on the marginal
+domain $\mathbb{T}_{2\pi}$ the analogous hope --- any positive rate
+$\alpha > 0$ --- is \textbf{false}, and the artefact treats that
+falsity as a deliverable (ending 1, with ending 3 nested inside):
+
+\begin{itemize}
+\item \textbf{The witness}: at mode $k = 1$ ($u = \varepsilon\sin x$)
+  the dissipation form $k^4 - k^2$ vanishes and the nonlinearity is
+  energy-neutral, so $\tfrac{d}{dt}E \le -\alpha E$ fails for every
+  $\alpha > 0$. One line, checkable by hand.
+\item \textbf{The certificate-side impossibility}: the producer carries
+  an assert that any nonnegative-weight decomposition of the
+  $\alpha$-remainder forces weight $-\alpha$ on the $u_2^2$ square ---
+  unconditional in the free weight. The stronger claim is not merely
+  un-found; it is un-certifiable in the calculus, and the artefact
+  proves that.
+\item \textbf{The battery enforcement}: a mutant recomputes
+  \emph{everything} consistently at a positive rate --- every jet
+  identity, every replay green --- and is rejected \emph{only} by the
+  negative weight. The stop is enforced in the executable spec
+  (section~\ref{sec:ckbk-mutant-battery}): a future certificate
+  claiming a positive rate on this domain will be refused by machine,
+  not by memory.
+\item \textbf{The named residue} (ending 2): the artefact's own
+  stopping-point section states what the composed result is ---
+  energy monotonicity at the marginal domain, sharp, the strongest true
+  statement for this functional on this domain, with the stop
+  \emph{provable} --- and then names what the real literature benchmark
+  ($L > 2\pi$ mean-energy bounds, where energy genuinely grows through
+  the unstable band) additionally requires: a background functional and
+  a genuinely new prior family (Gagliardo--Nirenberg/interpolation
+  rows). Its closing words are this section's thesis in miniature:
+  ``named next leg, not tonight's overclaim.''
+\item \textbf{The unconsumed input, recorded}: a banked spectral prior
+  ($\int u_2^2 \ge \int u_0^2$) is left unconsumed, on the record ---
+  the campaign notes its only would-be consumer is the false rate
+  claim. Two sentences, and no successor will wonder why it sits
+  unused.
+\end{itemize}
+
+A sibling specimen, same campaign, showing ending 3 in both directions:
+the Fisher--KPP certificate proves the invariant region $[0,1]$ is
+maximal by mutants --- enlarged above to $[0, \tfrac98]$, all
+bookkeeping recomputed consistently, rejection comes only from a
+genuinely negative Bernstein coefficient that no subdivision can repair;
+extended below, the endpoint row itself fires. ``The certificate cannot
+be strengthened past the true boundary in either direction'' is a
+tested property of the checker, not a sentence in prose.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{The shrugged dead-end}: an unrecorded stop is a question
+  that reopens. Someone (often a cheaper agent, often you-next-week)
+  retries the false claim, burns the same compute, and --- worse ---
+  may ``succeed'' via a subtly unsound route precisely because nothing
+  in the machine refuses it.
+\item \textbf{The laundered stop}: shipping the weaker claim in the
+  stronger claim's rhetorical clothing (``we certify decay'' when the
+  hoped-for rate silently became $0$). The reader's trust is spent on
+  the discrepancy when they find it --- and in adversarial review they
+  will.
+\item \textbf{Effort-plateau mistaken for truth-plateau}: without the
+  falsity/impossibility half, ``sharp'' means ``we got tired.'' With
+  it, sharpness is a two-sided certificate and the constant is
+  settled.
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The symbolic-domain carriage.} Carry the domain length
+  $L$ symbolically through the Kuramoto--Sivashinsky certificate: for
+  $L < 2\pi$ the same form yields a \emph{positive}-rate nonlinear
+  decay; for $L > 2\pi$ it yields nothing --- the energy method
+  genuinely ends there. Certify both sides of that boundary, making the
+  method's own limit an ending-3 artefact.
+\item \textbf{The background-functional leg.} The named ending-2
+  residue: build the interpolation prior family (the first genuinely
+  new prior species in the campaign) and attack the $L > 2\pi$
+  mean-energy benchmark. The honest-stop record is the specification of
+  exactly what is missing.
+\item \textbf{Settle a flagged wall.} The CAPD adapter's arrival
+  (section~\ref{sec:ckbk-proposer-disposer}) left one
+  certifiable-step wall's inward move as a stated-but-unverified
+  hypothesis. Determine which ending it is: a true wall of the bound
+  (certify it), or an artefact of a crude inequality (fix the disposer
+  and move it back). Either way the stop stops being a guess.
+\end{enumerate}
+
+\section{The Mutant Battery Is the Spec}
+\label{sec:ckbk-mutant-battery}
+
+\paragraph{The move.} A checker's meaning is not what it accepts ---
+accepting the golden certificate is table stakes --- but what it
+\textbf{rejects}. So specify the checker by building its rejections: a
+battery of \emph{mutants}, each a certificate wrong in one deliberate,
+named way, each asserted to be rejected \textbf{at its intended check
+with its intended message}. The battery is then the executable
+specification of the trust boundary: every mutant is a theorem of the
+form ``a certificate lying in \emph{this} particular way cannot pass,''
+and the battery as a whole delimits what an ACCEPT verdict actually
+asserts.
+
+Two disciplines make the battery a spec rather than a pile of negative
+tests:
+
+\begin{enumerate}
+\item \textbf{Consistency mutants are the genre that carries the
+  spec.} The strongest mutants recompute \emph{everything downstream
+  of the lie consistently}, so that every identity, every replay, every side
+  computation is green, and rejection can only come from the single row
+  that carries the claim's truth. A mutant rejected by accidental
+  earlier breakage (a malformed field, an arithmetic slip you didn't
+  intend) tests nothing about the check you meant to test --- which is
+  why each rejection's \emph{location and message} are asserted, not
+  just the rejection.
+\item \textbf{Cover the lie taxonomy, not just arithmetic.} Wrong
+  numbers are the easy genre. The battery must also include: sharpness
+  violations in \textbf{both} directions (claim strengthened past the
+  true boundary / input weakened below it), laundered caveats (an
+  obligation's status upgraded to one no receipt backs), provenance
+  breaks (data whose justifying source is removed, dangling, or
+  unlisted), structural smuggles (declaring only a slice of the term
+  the side condition should see), and --- where claims are mechanism-
+  or context-scoped --- transport violations (a true-in-context-A claim
+  rewired into context B).
+\end{enumerate}
+
+The same discipline runs at every tier of this toolkit. The rule
+catalogue (chapter~\ref{ch:qtsl-manual}) is its proof-theory face: the
+roster is machine-checked, every mechanized rule carries receipts, and
+the coverage dashboard up front is the candid map of what the assurance
+edifice does and does not yet refuse. The composition-pattern inventory
+(chapter~\ref{ch:qtsl-composition-patterns}) is its modelling face: the
+refusals do real work there too, encoded structurally rather than
+left to the modeller's vigilance.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item Whenever you write a checker, validator, decoder, or replay tool
+  whose ACCEPT someone will trust. If the mutant battery does not
+  exist, the trust boundary exists only in your intentions.
+\item Whenever a checker gains a new check: the check's first artefact
+  is the mutant it refuses. A check without a firing mutant is
+  unfalsifiable --- you cannot distinguish ``this check works'' from
+  ``this check is dead code.''
+\item When reviewing someone else's verification claim. ``10/10 checks
+  passed'' is uninformative until you know what the 11th --- the one
+  built to fail --- would have done. Ask for the battery before the
+  benchmark.
+\end{itemize}
+
+\paragraph{Worked example from the record.} The PDE certificate
+campaign of the previous section: exact-rational dissipation
+certificates for Burgers, Fisher--KPP, and Kuramoto--Sivashinsky, each
+with a Python producer and an independent exact-fraction checker
+sharing zero polynomial code, each shipping a battery with per-mutant
+rejection messages asserted. The taxonomy, one specimen each, all on
+disk:
+
+\begin{itemize}
+\item \textbf{Consistency $+$ sharpness (above)}: a Burgers mutant
+  claims decay rate $\alpha = 3\nu$ (true rate: $2\nu$) and recomputes
+  all bookkeeping consistently --- all arithmetic passes and rejection
+  comes only from the negative combination weight: the checker enforces
+  the sharpness boundary, not mere self-consistency. The
+  Kuramoto--Sivashinsky twin pushes a linear rate of $24$ to $25$ and
+  is refused only by the forced weight $-\tfrac1{16}$.
+\item \textbf{Sharpness (below) $+$ unrepairability}: the Fisher--KPP
+  mutant widens the certified invariant region $[0,1]$ to
+  $[0,\tfrac98]$; the endpoint rows still pass (any $[0,b]$ with
+  $b \ge 1$ is inward at the ends) and the refusal comes from one
+  genuinely negative Bernstein coefficient equal to $f(\tfrac98) < 0$
+  --- no subdivision can repair it, so the battery proves the boundary
+  is the true one rather than a resolution artefact.
+\item \textbf{Structural smuggle}: advection-smuggle mutants add a term
+  the semilinear/jet-linearity side condition must see; every
+  arithmetic identity passes and only the structure check fires ---
+  establishing that the side condition, not the arithmetic, is what
+  excludes that class of false instance.
+\item \textbf{Provenance edges}: the Fisher--KPP deficit-decay
+  remainder is the campaign's first that genuinely needs a bounding
+  box, and the box is supplied \emph{by another claim in the same
+  certificate} with an explicit provenance edge. Three mutants break
+  the edge three different ways --- source removed, dangling, supplier
+  unlisted --- and each is refused by the provenance check
+  specifically.
+\item \textbf{Laundered caveat}: both laundering flavours --- a
+  hypothesis quietly dropped from the declared list, and an
+  obligation's status promoted to ``proven'' with no discharge receipt
+  --- are refused by the ledger discipline
+  (section~\ref{sec:ckbk-prior-ledgers}), tested both at the ledger and
+  inside the discharge object.
+\item \textbf{Transport (the campaign's centrepiece)}: a mutant takes
+  the linear-mechanism spectral-gap rate claim --- true, certified,
+  sharp \emph{for the linear mechanism} --- and rewires it onto the
+  nonlinear flow, where mode-1 pumping makes it false. Every jet
+  identity, weight, and spectral replay is green; rejection comes
+  \textbf{only} from the mechanism-scoped premise-transport table. In
+  the artefact's own words: ``the checker refusing a false theorem
+  whose every checkable identity is true.'' That single mutant is the
+  spec of what the transport table means.
+\end{itemize}
+
+Scale receipts, for calibration: the three batteries run 31, 18, and 29
+tests (29, 17, and 28 mutants respectively), messages asserted, with a
+combined regression replaying all three checkers green --- and each
+battery was built within its target's single working session: hours,
+not weeks.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{The golden-only checker}: passes its examples, accepts a
+  subtly-false certificate the day an adversary (or an optimizer, or a
+  bug) produces one. Without mutants you have tested the happy path of
+  a tool whose entire purpose is the unhappy path.
+\item \textbf{Dead checks}: a check that nothing exercises can be
+  broken by refactor and no test notices. The firing mutant is the
+  check's liveness monitor.
+\item \textbf{Accidental-rejection illusions}: a battery whose mutants
+  die of malformedness rather than of their intended lie certifies
+  nothing --- the dangerous mutant is the \emph{well-formed} one, and
+  only location-asserted rejections distinguish the two.
+\item \textbf{Unfalsifiable sharpness and scope claims}: ``sharp,''
+  ``maximal,'' ``linear mechanism only'' as prose adjectives, versus as
+  mutants the machine refuses. The former decay into folklore; the
+  latter are enforced.
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The spectral wire rows.} When the jet certificate
+  schema's spectral wire family ships, write its battery \emph{before}
+  its first consumer: wrong-constant discharge, missing witness mode,
+  transport onto an unlicensed mechanism --- the taxonomy above,
+  instantiated at the wire tier.
+\item \textbf{Retrofit audit.} The neural-supermartingale certificate
+  suite grew its mutant receipts incrementally across its campaign.
+  Audit its batteries against the taxonomy: which genres are missing
+  (transport? provenance? both-direction sharpness?), and add the
+  cheapest missing genre with rejection locations asserted.
+\item \textbf{The battery-of-the-battery.} The location-assertion
+  discipline currently lives in test code by convention. Build the
+  meta-check: a harness pass that runs each mutant, captures
+  \emph{which} check fired, and fails the battery if any mutant is
+  refused earlier than its declared target --- turning discipline 1 of
+  this section from prose into a tool.
+\end{enumerate}
+
+\section{Declared-Prior Ledgers}
+\label{sec:ckbk-prior-ledgers}
+
+\paragraph{The move.} Every analytic fact your certificate
+\textbf{consumes but does not prove} --- a functional inequality, a
+comparison principle, a semantic bridge between the certificate's
+algebra and the theorem's meaning --- is carried by an explicit
+\textbf{ledger} inside the certificate, under a \textbf{closed status
+vocabulary}.
+Concretely:
+
+\begin{enumerate}
+\item \textbf{Declare, never absorb.} An unproven ingredient appears as
+  a named entry (\texttt{assumed}, \texttt{named-unproven}, \ldots),
+  not as an invisible premise folded into the prose or --- worse ---
+  into the checker's silence. The certificate's ACCEPT then
+  means: \emph{these claims hold, conditional on this list.}
+\item \textbf{Close the vocabulary and back every status.} The checker
+  enforces that statuses come from a fixed set and that any status
+  implying a proof has its receipt present and replaying green. An
+  obligation promoted to ``proven'' with no receipt is a \emph{rejected
+  certificate} --- laundering is a machine-refused move, not a style
+  violation.
+\item \textbf{Discharge as an arc, with a tie.} Because the ledger is
+  explicit, an assumption can be discharged \emph{later,
+  incrementally}: a new certified object replaces \texttt{assumed} with
+  a proof-backed status, and a \textbf{tie check} verifies the
+  discharged object is the same fact the consuming row uses (same
+  integrand, same constant) --- so an internally valid proof of a
+  \emph{neighbouring} fact cannot silently license the claim.
+\end{enumerate}
+
+The ledger converts ``is this pipeline rigorous?'' from a judgement call %
+into a query: read the list. And it converts rigour-improvement from a
+rewrite into a diff: shrink the list, one discharge at a time. The rule
+catalogue's coverage dashboard (chapter~\ref{ch:qtsl-manual}) is the
+same move applied to the assurance edifice itself: a declared,
+per-rule account of which correspondences are certified and which
+remain pending, in data rather than in reputation.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item Whenever a formal artefact meets analysis (or any outside
+  theory): the bridge facts --- Parseval, Gr\"onwall, a comparison
+  principle, a solution concept's energy inequality --- are exactly the
+  ingredients a polynomial/arithmetic checker cannot re-derive. They
+  must go \emph{somewhere}; the only choice is ledger or shadow.
+\item Whenever you catch yourself writing ``standard'' or
+  ``well-known'' next to a fact your checker never sees. Standard facts
+  have names; name them in data, with a status.
+\item When planning a campaign: rungs you cannot yet prove are not
+  blockers if they can be \emph{declared} --- the pipeline ships
+  sound-modulo-ledger on day one, and the ledger is the campaign's
+  remaining-work list, machine-readable.
+\end{itemize}
+
+\paragraph{Worked example from the record.} The Wirtinger discharge arc
+in the Burgers energy certificate. The sharp-rate claim
+$\tfrac{d}{dt}E \le -2\nu E$ needs the Wirtinger/Poincar\'e inequality
+$\int u_1^2 \ge \int u_0^2$ for mean-zero data on $\mathbb{T}_{2\pi}$
+--- an analytic fact the exact-$\Q$ jet checker cannot see. It shipped
+\textbf{declared-assumed}: a named prior in the certificate, with the
+mean-zero hypothesis's \emph{invariance} itself certified (a pure
+divergence row), and the declaration stated out loud in the campaign
+record. The pipeline was already refusing laundering at this stage: the
+Fisher--KPP sibling's battery included both laundering mutants
+(hypothesis quietly dropped; status upgraded receipt-free),
+machine-refused.
+
+A later session, the same day, discharged the prior
+\emph{in-certificate}: on the torus it diagonalizes exactly, so the
+checkable kernel is the mode polynomial $q(k) = k^2 - 1 \ge 0$ on
+$|k| \ge 1$ --- certified by an exact-$\Q$ shift row
+($q(1+t) = t^2 + 2t$, nonnegative coefficients, covering every mode
+uniformly), with sharpness as a width-zero eigenvalue enclosure
+$\lambda_1 \in [1,1]$ (lower side the shift row, upper side the witness
+mode $k = 1$). The ledger flips: \emph{no assumed priors remain}. Three
+details carry the section:
+
+\begin{itemize}
+\item \textbf{The tie.} The checker verifies the consuming row's
+  integrand \emph{is} $u_1^2 - c\,u_0^2$ at the discharged constant $c$
+  --- an internally valid discharge of a different constant cannot
+  silently license the claim, and a consistency mutant enforces
+  exactly that. Discharge without a tie is a new laundering surface;
+  the arc closed it the same session it opened.
+\item \textbf{The residue is itself ledgered.} The discharge consumes
+  four analytic bridge facts of its own (Parseval,
+  derivative-coefficient, mean-is-coefficient-zero, termwise
+  summation). They did not vanish into prose: each is a named
+  \texttt{bridge:} entry citing its mathlib lemma at a pinned commit,
+  citations checked live at writing time, with one remaining gap named
+  (the $H^1$ extension of the derivative form, which holds as cited at
+  $C^1$). The ledger got \emph{shorter and sharper}, not empty by
+  fiat.
+\item \textbf{Laundering mutants re-targeted post-discharge.} With a
+  discharge object present, the new lie is tampering \emph{inside} it,
+  or claiming spectral-certified status without it; the battery grew
+  nine mutants aimed at the ledger and the discharge both. The status
+  vocabulary stayed closed the whole way.
+\end{itemize}
+
+Cost calibration, because trained priors on verification cost run
+years stale: the whole arc --- declare, ship sound-modulo-ledger,
+discharge with sharpness, tie, re-target the battery --- completed
+within one working day across three sessions. Declaring first did not
+slow the campaign; it is what \emph{let} the campaign ship while the
+discharge waited its turn. And the banked bonus paid forward the same
+day: the discharge artefact pre-certified the higher-order siblings
+($q = k^4 - k^2$, $k^4 - 1$), which the Kuramoto--Sivashinsky target
+then consumed as its spectral priors.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{The silent assumption import}: a ``verified'' pipeline
+  resting on an unnamed analytic fact --- the reader believes the
+  checker saw everything; the gap surfaces in adversarial review (or in
+  production) as ``what exactly does ACCEPT mean here?'', and the
+  answer costs the pipeline its credibility even where it was sound.
+\item \textbf{Laundering under deadline}: statuses drifting upward
+  (``assumed'' $\to$ ``known'' $\to$ ``proven'') across retellings,
+  with no machine in the path to refuse the drift. This is the
+  certificate-level twin of the documentation failure in which a
+  distilled guess hardens into quoted law: the repair in both cases is
+  provenance enforced at the artefact, not vigilance in the prose.
+\item \textbf{The wrong-theorem discharge}: proving a true neighbouring
+  fact (different constant, different function space) and letting it
+  license the claim --- refutable only if the tie between discharge and
+  consumer is checked, which is why the tie is part of the move and not
+  a refinement of it.
+\item \textbf{All-or-nothing rigour}: without a ledger, ``not fully
+  proven'' and ``not shippable'' collapse into one, and campaigns stall
+  at their hardest lemma. With one, soundness-modulo-a-shrinking-list
+  is a publishable, checkable state.
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The Lean bridge lemmas.} The four \texttt{bridge:}
+  entries in the discharge (plus the linear-mechanism spectral-support
+  obligation in the Kuramoto--Sivashinsky artefact) are named with
+  mathlib citations at a pin. Formalize the statements as Lean lemmas
+  against that pin, flipping each ledger entry from cited to
+  proof-backed --- and add the battery mutant that tampers with the new
+  receipts.
+\item \textbf{The named gap.} The derivative-coefficient bridge holds
+  at $C^1$ data; the $H^1$ extension is an explicitly named gap in the
+  ledger. Close it --- part of the exercise is determining whether the
+  gap closes at the pin or needs an upstream mathlib contribution.
+\item \textbf{A new prior species, ledger-first.} The $L > 2\pi$
+  Kuramoto--Sivashinsky benchmark needs interpolation
+  (Gagliardo--Nirenberg-type) priors --- the first genuinely new prior
+  family since Wirtinger. Introduce them the ledger-first way: declared
+  species with closed statuses and laundering mutants \emph{from
+  birth}, so the discharge arc has its rails before anyone attempts the
+  discharge.
+\end{enumerate}
+
+\section{Cheap Before Expensive}
+\label{sec:ckbk-cheap-first}
+
+\paragraph{The move.} Before committing the expensive resource --- a
+build, a rented-GPU run, a finer subdivision, a proof campaign, a
+frontier-model token stream --- spend the cheap instrument that could
+make the expensive spend unnecessary, radically smaller, or
+better-aimed. The move has three forms, in ascending machinery:
+
+\begin{enumerate}
+\item \textbf{The cheap question.} Does the record, or a free
+  qualitative argument, already settle it? Read the project log before
+  the build; check for the monotonicity observation before assembling
+  the sharp ladder. The cheapest ending to an expensive plan is
+  discovering it already happened, or was never needed.
+\item \textbf{The cheap pass.} When cost scales with a count (cells,
+  claims, pieces, obligations), run the inexpensive consolidation
+  \emph{before} paying the per-unit price --- and demand the
+  consolidation be loss-free where the theory permits it (same bound,
+  fewer pieces), so the saving is pure.
+\item \textbf{The cheap measurement.} When two routes to the same
+  certified quantity compete, race them at \emph{equal budget} on a
+  real instance before scaling either. ``Which route wins'' is an
+  empirical question with a cheap experiment, not a doctrine --- and
+  the fair comparison is at matched spend, since anything beats
+  anything given more budget.
+\end{enumerate}
+
+Two boundary clauses guard the move. First, it orders
+instruments; it never licenses deferral --- a plan that stops at the
+cheap instrument needs a stated mechanism for when the expensive one
+fires, not a vibe; and when the expensive machinery gets built anyway,
+it is \emph{banked, not wasted}: retained explicitly for the sibling
+case where the cheap argument does not apply. Second, the currency is
+latency and aim, not primarily money: in a regime of abundant
+implementation capacity, what the move conserves is the time the
+expensive spend takes, the attention it occupies, and the risk of
+aiming it at a target the cheap instrument would have moved.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item About to dispatch or build something whose success condition
+  might already be satisfied. The project record is the cheapest
+  instrument available, and the check extends to every dispatch, not
+  only the ones that feel uncertain.
+\item About to turn a budget dial --- subdivision depth, piece count,
+  degree, machine-hours, review rounds --- because the current answer is
+  not tight enough. First ask: is there a cheap restructuring (a
+  coarsen pass, a representation change) that dominates dial-turning?
+  The recognition sign is a cost that scales like
+  $\mathcal{O}(h^{-k})$ against an error shrinking like
+  $\mathcal{O}(h)$: the dial is the losing side of an exponent gap.
+\item Holding a certified artefact whose slack is visible (margins,
+  lift values, mutant-refusal exponents): slack is prepaid budget, and
+  a cheap pass can often spend it on consolidation with zero loss.
+\item Routing work to minds: at any date there is a quality/cost/speed
+  frontier of available models, and selection is by context, not by
+  rank --- the cheap capable point first, the frontier model where
+  context-understanding or taste binds. The same logic governs how
+  much deliberation to request from a given model: effort is a dial,
+  and the cheap setting is the right default for work that does not
+  need the expensive one.
+\end{itemize}
+
+\paragraph{Worked examples from the record.}
+
+\textbf{The consumed dispatch.} An overnight agent was dispatched
+toward what its brief framed as a live build: an exact certifying-tier
+GPU kernel family, on a rented machine. The agent's first instrument was
+one read of the project log --- which showed the tier had shipped
+\emph{that morning} (fused exact Bernstein slot kernels, 11/11
+device-versus-host-reference bit-exact, with two successor tasks
+already consuming them). Verdict: dispatch adjudicated consumed; a
+candidate follow-on was named without being fired; total agent runtime
+132 seconds. What a rented-machine campaign would have re-built, a
+two-minute read retired.
+
+\textbf{The slack-funded coarsen pass.} A family of fixed-shift
+projection-kernel certificates was born-certifiable with lift $0$ ---
+the theorem's manufactured slack absorbed all float noise. That slack
+is prepaid budget, and a cheap coarsen pass spent it: one
+representative solution went from 640 uniform pieces to 26 nonuniform
+dyadic pieces (89 claims), \emph{bound bit-identical}, lift still $0$
+--- the receipts' own headline was ``coarsening pays $14\times$.''
+Every downstream cost of that row (certify, reference-check, emit,
+fast-check, per claim) shrank by the same factor before any expensive
+tier ran. One detail worth copying: the coarsen pass's excess
+ledger initially under-billed (an interpolant's convexity overshoot
+went unbilled), and it was the pinned test suite that caught it --- the
+cheap pass runs under the same verification discipline as everything else.
+
+\textbf{Tube versus hull at equal claim budget.} A design note posed
+its own pricing question --- a curved-boundary ``tube'' upgrade ``pays
+exactly when hull conservatism is the binding loss --- measure first''
+--- and the measurement ran both routes to a certified enclosure of the
+same switching integral, same exact tier, budget counted in claims. At
+about 10 claims the tube already matched the hull's 112-claim width; at
+59 claims the tube was ${\sim}1300\times$ tighter than the hull at 237;
+matching the tube's width by dial-turning the hull would extrapolate to
+subdivision depth ${\sim}17$, $\mathcal{O}(10^5)$ claims. The
+receipts' verdict --- on this benchmark the tube wins by two to four
+orders of magnitude at every matched budget --- was scoped to the
+benchmark, with both scaling laws measured. One cheap head-to-head, and
+the budget dial was retired as the losing instrument for this loss
+class \emph{before}, not after, a $10^5$-claim campaign.
+
+A sibling specimen from the proof side: a closed-loop encounter
+certificate needed ``stays separated forever after exit,'' and the
+author built the full ray-clearance LP ladder --- then found the
+certified exit condition makes the exit face \emph{recede}, so
+post-exit eternity is free model algebra on already-certified facts.
+The LP machinery was demoted as unnecessary for that class and
+explicitly retained for the non-receding sibling classes: the cheap
+question asked late still pays, and the expensive machinery, banked, is
+not waste.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{The duplicate build}: re-doing shipped work because the
+  record went unread. The cost is not only the spend --- a re-built
+  sibling diverges from the shipped one, and reconciling them later
+  costs more than either.
+\item \textbf{Dial-turning into an exponent gap}: paying
+  $\mathcal{O}(h^{-k})$ for $\mathcal{O}(h)$ relief because scaling
+  the incumbent felt like progress and restructuring felt like a
+  detour. The receipts above put real numbers on how bad this gets:
+  five orders of magnitude of claims to match a route change.
+\item \textbf{Doctrine substituting for measurement}: ``the
+  sophisticated route wins'' (or ``the simple route suffices'')
+  adopted from taste, when the equal-budget race costs minutes. The
+  tube-versus-hull brief explicitly allowed the inverse outcome
+  --- the measurement declined it, and only the measurement could.
+\item \textbf{Thrift theatre}: the inverted failure --- reading this
+  section as ``spend less.'' The expensive spend is often correct; if
+  you are an agent whose cost intuitions were trained on older
+  tooling, your priors on verification cost in particular run stale
+  and high (the receipts throughout this chapter say hours where the
+  prior says months). The move is about what you learn \emph{before}
+  aiming the big spend, never about flinching from it.
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The agreement-matrix verb.} The consumed dispatch above
+  named a follow-on without firing it: a consolidated
+  float-versus-exact agreement-matrix verb over existing machinery,
+  its content currently distributed across two campaigns' receipts.
+  Build it as a standing cheap instrument (one CLI verb) so the cheap
+  question ``do the tiers agree, where, at what exponent?'' costs one
+  invocation before any future expensive exact-tier run. Success
+  condition: the verb runs against the committed receipts and emits the
+  matrix; its output for one known row matches the published receipt.
+\item \textbf{Coarsening at degree 2.} The projection-kernel receipts
+  state the boundary plainly: the degree-2 fixed-shift row is a-priori
+  sizing only --- no monotone theorem at degree 2 (the Korovkin
+  boundary, measured in the same receipts as a step change in
+  monotonicity violation). The coarsen pass is theory-backed only at
+  degree 1. Determine whether a-posteriori coarsening pays at degree
+  2: coarsen, re-certify, compare bound and claim count against the
+  uncoarsened row. Success condition: a new receipts row with
+  pieces/claims/bound/lift columns, whichever way the verdict falls ---
+  an inverse outcome would be a finding rather than a failure.
+\item \textbf{The next binding-loss measurement.} The tube route won
+  where hull conservatism was the binding loss on a two-dimensional
+  benchmark with one curved boundary. Before extending tubes (higher
+  dimension, multiple switching surfaces), run the pricing question
+  forward: construct the next benchmark, measure the hull baseline's
+  scaling first, and only build the tube generalization if the
+  exponent gap is present there too. Success condition: a
+  receipts-shaped table for the new benchmark with both routes at
+  matched budgets --- or the measured absence of the gap, banked as
+  the reason the generalization waits.
+\end{enumerate}
+
+\section{Scope and Frame}
+\label{sec:ckbk-scope-frame}
+
+\paragraph{The move.} Every claim lives in a frame --- a mechanism, an
+interface, a semantics under which its sentences are read --- and most
+catastrophic errors in certificate work are not wrong identities but
+\emph{right identities read in the wrong frame}. The move is to pin the
+frame as a first-class, machine-checked object before building, and
+then enforce scope in three places:
+
+\begin{enumerate}
+\item \textbf{Premises transport only where licensed.} A fact proven in
+  one frame (one mechanism, one solution regime, one data class) does
+  not follow the notation to a neighbouring frame. Record, per premise,
+  the frames where it holds and the mechanism that carries it there ---
+  an invariance row, a bridge obligation --- as \emph{checker data}, so
+  that using a premise outside its license is a refusal, not an
+  oversight.
+\item \textbf{Changes enter only through the seam.} When an untrusted
+  component is upgraded or swapped, the modification's entire footprint
+  is the declared interface; everything on the trusted side runs
+  byte-for-byte unchanged, and that claim is grep-verifiable, not
+  asserted.
+\item \textbf{Out-of-scope reads go vacuous, never false.} When the
+  frame itself is discovered ambiguous --- the same certificate
+  admitting two readings, one of them unsound --- the repair is
+  semantic before it is mechanical: declare the conditional reading
+  normative (the certificate asserts its conclusion \emph{given} its
+  declared environment), so a certificate whose hypotheses cannot be
+  jointly met claims nothing, rather than something false. Then add the
+  mechanical check that makes the declaration well-formed.
+\end{enumerate}
+
+The common discipline: the frame is stated where the machine can refuse
+against it. A frame that lives in prose (``this only applies to the
+linear case,'' ``don't touch the checker'') decays into folklore; a
+frame that lives in a transport table, a frozen function signature, or
+a normative semantics section with its checker pass is enforced by
+machine.
+The composition-pattern inventory
+(chapter~\ref{ch:qtsl-composition-patterns}) runs the same discipline
+at the model tier: which certificates transport across a composite
+boundary, and which are refused, is part of each pattern's definition.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item Any artefact with more than one mechanism, regime, or model of
+  the same system --- linearizations beside nonlinear flows, discrete
+  beside continuum, per-piece beside global. The recognition question:
+  ``could every \emph{identity} in this proof be true while the
+  \emph{theorem} is false, because a premise crossed a mechanism
+  boundary?'' If the answer is not obviously no, the transport
+  structure is missing.
+\item Any planned upgrade of a component inside a verified pipeline.
+  The recognition sign is the phrase ``and we'll just also need to
+  tweak the checker'' --- the seam is about to leak; freeze the
+  interface first and make the swap's footprint checkable.
+\item Any review finding of the shape ``under reading A this is sound,
+  under reading B it accepts a lie.'' That is not a bug in a check; it
+  is an unpinned semantics, and patching the check without declaring
+  the reading leaves the ambiguity for the next consumer.
+\item At design time, before requirements: the frame question (``what
+  kind of thing is this, really?'') outranks every detailed
+  requirement, because a wrong frame silently poisons all of them. The
+  workshop's own worst-case specimen was a requirements document
+  written against an implicit wrong frame --- the modelling substrate
+  read as an expressive logic rather than as a logical framework ---
+  whose review verdict was that most of the work needed re-doing. The
+  frame question costs a paragraph; its absence costs the document.
+\end{itemize}
+
+\paragraph{Worked examples from the record.}
+
+\textbf{Mechanism-scoped premise transport.} The
+Kuramoto--Sivashinsky certificate of
+sections~\ref{sec:ckbk-honest-stop} and~\ref{sec:ckbk-mutant-battery}
+certifies two decay claims on two mechanisms: the nonlinear flow
+(energy monotone, sharp at $\alpha = 0$) and the linear mechanism
+restricted to modes $|k| \ge 2$ (rate $-24$, sharp at mode 2). The
+spectral-gap premise is licensed for the linear mechanism \emph{only}
+--- under the nonlinear flow, mode 1 is pumped from pairs like
+$(3, -2)$ and the premise is not invariant --- and that license is not
+prose: every mode-exclusion premise carries a transport table keyed by
+mechanism (invariance-row kind for mean-zero, bridge-obligation kind
+for spectral support). The battery's centrepiece rewires the gap-sector
+rate claim onto the nonlinear mechanism: every jet identity, weight,
+and spectral replay is green, and rejection comes only from the
+transport table. Without the transport structure, nothing else in the
+certificate would have objected.
+
+\textbf{The frozen seam under a proposer swap.} When the real
+validated-numerics library replaced the in-house float proposer
+(section~\ref{sec:ckbk-proposer-disposer}, seen here from the scope
+side), the entire change entered through one frozen interface: the
+adapter builds its Taylor-model polynomial and feeds it through the
+frozen proposal entry point, and the exact fixed point, split-tree
+certification, and checker run byte-for-byte unchanged. The claim is
+grep-verifiable and was re-verified at this chapter's writing: the
+override parameter appears in the proposer module (the seam's
+definition) and the adapter's own files, and nowhere in the checker ---
+the checker's text is untouched by construction, not by promise. The
+payoff compounds: because the swap's footprint was the seam, an
+isolation probe could later attribute a residual certification wall to
+the in-house proposer's search loop rather than to the library --- a
+diagnosis that only type-checks when proposers are interchangeable
+behind a frame that never moved.
+
+\textbf{Vacuous, not false.} An adversarial review round found that a
+new integral-monotonicity rule in the jet certificate schema, read
+under plain all-pre-valuations sequent semantics, admitted a false
+ACCEPT: a precondition constraining a bound integral wire, plus
+free-sign equality cancellation, licensed a conclusion no trajectory
+satisfies. The repair came in the order this move prescribes ---
+semantic half first: the contract declares the binding-environment
+reading normative (a certificate asserts its sequents over environments
+satisfying its preconditions \emph{and} every binding it declares ---
+the declared-hypothesis pattern), under which the attacking certificate
+makes the hypothesis set unsatisfiable and the certificate
+\emph{vacuous} --- never a false assertion, because under this
+semantics no environment is claimed. Then the mechanical half: a new
+certificate-global binding-functionality pass (duplicate bindings of
+one wire reject; the negative control fires in isolation) makes the
+declared environment a well-formed function of wires. The residue is
+scoped rather than hidden: until the registered-environment lane ships,
+a consumer composing these certificates owns the hypothesis-set
+satisfiability check the same way it owns assumed rows --- stated in
+the normative section, where a composer will meet it.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{Premise smuggling}: a true lemma licensing a false
+  theorem across a mechanism boundary. This is the failure that green
+  batteries cannot catch from below --- every constituent identity
+  replays --- which is why the transport table has to exist as its own
+  refusal channel.
+\item \textbf{Seam leak}: an ``upgrade'' that touches the trusted side
+  ``just a little,'' after which nothing about the pipeline is a
+  plug-in and every future swap re-opens verification of the world.
+  The byte-for-byte-unchanged claim, grep-backed, is what keeps
+  upgrade cost at zero on the trusted side.
+\item \textbf{The silently-false certificate}: an artefact sound under
+  its author's intended reading and unsound under the reading a
+  consumer will actually use. Declaring the semantics normative in the
+  contract --- and making the unsound reading \emph{forbidden} rather
+  than merely undiscussed --- converts a latent soundness hole into a
+  documented conditional.
+\item \textbf{Frame-blind requirements}: detailed specification
+  against an implicit wrong frame, discovered at review, fixed by
+  ``most of this needs re-doing.''
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The registered environment.} The jet schema names the
+  successor leg for its own residue: carry the declared binding set as
+  first-class certificate data (a registry object) with a sound
+  existential-elimination/composition rule, so consumers compose
+  certificates without carrying the conditional semantics by
+  convention --- the frame promoted from normative prose to checked
+  data, this section's move applied to its own example. Success
+  condition: two certificates composed through the rule, with a mutant
+  pair (a composition whose environments conflict) refused at a named
+  check.
+\item \textbf{Transport tables as shared machinery.} Mechanism-scoped
+  premise transport currently lives in the Kuramoto--Sivashinsky
+  artefact's checker. Extract it into the PDE campaign's shared
+  checker machinery so the Burgers and Fisher--KPP artefacts consume
+  the same transport module --- the fan-out built it once where it was
+  needed; the unification makes it the family's frame discipline.
+  Success condition: all three batteries green through the shared
+  module, plus one new transport mutant per retrofitted artefact.
+\item \textbf{Unrepresentable out-of-frame states.} The modelling
+  substrate's tensor-contraction definition
+  (chapter~\ref{ch:geolog-reference}) was deliberately ratified in the
+  form whose side condition --- every un-hit index is an output ---
+  makes the value-relevant free choice (a dropped axis silently
+  scaling results) unrepresentable rather than discouraged; the side
+  condition is exactly the proof-irrelevance theorem. Realize
+  contraction rows with that condition enforced by construction, and
+  write the property test that witnesses proof-irrelevance (no
+  auxiliary choice affects any value). Success condition: the lowering
+  rejects ill-framed index maps at the type/row level, and the
+  property test runs green against the reference semantics.
+\end{enumerate}
+
+\section{Separate the Timescales}
+\label{sec:ckbk-timescales}
+
+\paragraph{The move.} When a system's rates split into well-separated
+bands, do not pay the stiffness tax in the checker --- restructure the
+\emph{proposal}. Timescale separation is a \textbf{producer strategy}:
+everything below lives in the untrusted lane and in certificate
+\emph{structure}; the checker never learns what ``stiff'' means, and
+the separation parameter $\varepsilon$ enters certificates only ever as
+an exact rational coefficient in rows, never as a concept --- no new
+rule family, no new trust surface. Four sub-moves, run in order:
+
+\begin{enumerate}
+\item \textbf{Diagnose} (cheap, float): decide whether you are in the
+  situation at all (recognition signs below). The diagnosis routes; it
+  is never a claim.
+\item \textbf{Factor} --- reparameterize into fast/slow coordinates,
+  as rungs of the toolkit's reparameterization ladder. The first rung
+  (shipped) is eigenmode coordinates: the modal matrix of the
+  linearization is float-proposed and dyadic-snapped --- the
+  proposer/disposer pattern again --- with the declared inverse
+  verified by exact multiplication and the pullback identities
+  replayed, so the frame travels with the certificate as an interface
+  hypothesis whose identities the checker replays. The eigenvector
+  matrix is the standard fast/slow splitter, and it costs nothing to
+  de-trust. Higher rungs cover patch-local slow sets (per-patch
+  affine; chart maps with certified-positive denominators) up to the
+  ladder's ceiling --- hypernet maps for genuinely nonlinear slow
+  manifolds, where the reparameterization is itself certificate
+  content cited by digest. The ceiling is frontier at this preview:
+  named, wire-format slot reserved, semantics awaiting their first
+  consumer.
+\item \textbf{Witness} --- make ``separated'' a \emph{checkable
+  claim}, not an assumption. Two readings, used per what your matrix
+  admits. The quadratic-form/Lyapunov reading (shipped): a fast-block
+  rate floor $\alpha_f$ via positive-semidefiniteness rows
+  ($P_f \succ 0$, $Q_f - \alpha_f P_f \succ 0$), a slow-block rate
+  ceiling, and the \textbf{gap row} $\alpha_f \ge 2 r \alpha_s$ as one
+  exact comparison --- and this reading works for nonsymmetric
+  linearizations, which is the generic case. The eigenvalue reading
+  (proposed, not shipped): certified spectral windows and an inertia
+  rule --- eigenvalue \emph{counting} across shifts, the one
+  conclusion shape the shipped roster does not span. When those ship,
+  ``the spectrum splits into
+  $(-\infty, -1/\varepsilon] \cup [-c, 0)$'' becomes a specific
+  certified sentence.
+\item \textbf{Compose} --- certify the blocks separately, then buy the
+  coupled conclusion with the classical two-timescale composite
+  $W = w_s^{\mathsf T} P_s w_s + \lambda\, w_f^{\mathsf T} P_f w_f$
+  (Khalil, \emph{Nonlinear Systems} \cite{khalil2002nonlinear},
+  ch.~11, in linear-quadratic form). For polynomial and linear blocks the composite's rows are
+  ordinary conclusions on the full coupled system --- the weighted sum
+  \emph{is} the certificate, and the weight $\lambda$ is the
+  producer's small-gain balancing act, float-searched and exactly
+  disposed. The general rule family is in the catalogue:
+  \rulename{SmallGain} (chapter~\ref{ch:qtsl-manual}), the calculus's
+  feedback-composition rule, which elaborates to a single
+  \rulename{Syzygy} node whose exact conclusion identity at weights
+  $(1, \lambda, 1, 1)$ makes the cross-supplies cancel by construction
+  --- nothing fixpoint-shaped survives to checking time. Timescale
+  separation is the special case in which the gain asymmetry makes the
+  small-gain product easy: the fast block's gain \emph{to} the slow
+  one scales like $1/\alpha_f$, so a real gap buys the composition its
+  slack. And carry \textbf{the full error term}: whatever the
+  slow-manifold or modal-frame approximation leaves over is a
+  \emph{certified remainder} inside the composite rows, never a
+  dropped term. In the linear case this remainder is literally visible
+  --- the exact off-diagonal entries the dyadic snap leaves in the
+  modal frame. In the nonlinear case it is a certified enclosure of
+  the approximation error: Taylor models today, with a
+  fancier-approximants ladder (Chebyshev models
+  \cite{ensl-00472509v2}, Remez with a-posteriori error
+  certification, Pad\'e with certified-positive denominators) in
+  design at this preview.
+\end{enumerate}
+
+\paragraph{When it applies.} Recognition signs, each a cheap
+float-lane probe:
+\begin{itemize}
+\item \textbf{Eigenvalue-ratio probe}: eigenvalues of the
+  linearization at a few representative points; a ratio
+  ${\gtrsim}10\times$ between rate bands is the signature (one
+  \texttt{eigvals} call).
+\item \textbf{Enclosure anisotropy}: cover refinement concentrating
+  splits along particular directions everywhere --- cells forced small
+  in two axes at once by a skewed feature is exactly what a
+  reparameterization fixes.
+\item \textbf{Step-size collapse}: an explicit integrator's stable
+  step is orders of magnitude below the timescale of the observables
+  you care about --- classical stiffness, and the reason the
+  certificate's cover would otherwise inherit the fast timescale
+  globally.
+\item \textbf{Search-space conditioning}: certificate searches
+  starving because coordinates live at wildly different scales. A
+  measured instance from the workshop record: an Adam-driven
+  certificate search starving on value ranges spanning $1$ to $10^6$,
+  fixed by a coordinate-scaling knob --- the same pathology one level
+  up, in the proposal lane's own dynamics.
+\item \textbf{The domain says so}: filters, controllers, chemical
+  networks, neural dynamics --- fast transient plus slow drift is the
+  modal architecture of engineered and biological systems both. The
+  workshop's worn witness is a deployed interactive-tracking system
+  whose fast loop runs at 72--120\,Hz against a 0.03--1\,Hz slow
+  loop, three orders of magnitude apart, named in its own
+  documentation as the decision everything else rests on.
+\end{itemize}
+
+\paragraph{Worked example from the record.} A deliberately linear toy,
+taken end to end through all four moves on shipped machinery: a
+two-fast/one-slow coupled linear system --- slow rate ${\sim}1$, fast
+rates ${\sim}64, 80$, all-dyadic entries --- exact throughout:
+
+\begin{itemize}
+\item float \texttt{eig} proposes the modal matrix; dyadic snap at
+  $2^{-12}$; exact inverse declared; the checker replays
+  $T \cdot T^{-1} = I$ and $\tilde A = T^{-1} A T$ in $\Q$;
+\item the snap's leftover off-diagonal coupling
+  (${\sim}7 \times 10^{-3}$, exact) is the certified remainder,
+  carried inside the composite;
+\item fast rate floor $\alpha_f = 117097/1024$ through the
+  \emph{unmodified} checker, slow rate $\alpha_s$ exact (a
+  $1 \times 1$ block's rate is one number), gap row
+  $\alpha_f \ge 2 \cdot 32 \cdot \alpha_s$ --- certified per-state
+  ratio $57.9\times$;
+\item the two-timescale composite with $\lambda = 8$ from a 12-point
+  float search: composite rate $\alpha_c = 455/256 \approx 90\%$ of
+  the slow quadratic bound --- the slow mode governs, which is the
+  separation story's signature;
+\item 0.81\,s end to end, a 554-byte certificate, 3/3 producer refusal
+  probes and 8/8 checker mutants refused. The probe worth naming:
+  cranking the back-coupling flips the slow mode \emph{unstable} (the
+  Schur-complement correction crosses zero) and the pipeline refuses
+  at the exact modal row --- the classical quasi-steady-state trap,
+  caught by arithmetic rather than by vigilance.
+\end{itemize}
+
+The toy is deliberately linear --- every claim rests on rows that
+exist at this preview. What the linear case cannot exhibit, and the
+frontier behind it: hypernet slow-manifold reparameterization
+(frontier), the eigenvalue-reading witness (proposed), and nonlinear
+certified remainders (in design). Each item names work in flight.
+
+\paragraph{The failure mode it prevents.}
+\begin{itemize}
+\item \textbf{Paying the stiffness tax in the cover}: without the
+  factoring, a certificate over the coupled system inherits the fast
+  timescale everywhere --- cell budgets explode along directions the
+  slow claim never needed. The reparameterization moves the tax into
+  one exact similarity replay.
+\item \textbf{The quasi-steady-state trap}: classical
+  singular-perturbation practice \emph{assumes} the fast subsystem
+  settles and substitutes its equilibrium --- sound only under
+  conditions (attractivity, weak back-coupling) that the classical
+  workflow rarely certifies. The witness sub-move makes exactly those
+  conditions the checkable content; the toy's refusal probe is the
+  trap sprung on purpose.
+\item \textbf{Monolithic non-reuse}: one big Lyapunov certificate for
+  the coupled system is re-derived from scratch whenever either block
+  changes. The composite factors the work: the fast block's
+  certificate is a reusable component, and only the small-gain
+  arithmetic re-runs when the slow side varies --- the same economy
+  the assume--guarantee layer exists to buy
+  (chapter~\ref{ch:qtsl-composition-patterns}), arriving here through
+  the gap.
+\end{itemize}
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{Land the eigenvalue reading}: the inertia and
+  spectral-window rules are scoped with priced proof obligations in
+  the workshop record. When they ship, upgrade the toy's gap row to a
+  certified spectral-window sentence and re-run the mutant battery.
+\item \textbf{Certify a worn witness}: take a production system you
+  operate that already runs a fast/slow split as engineering practice
+  (the tracking-filter shape above). State the two loops as a
+  two-mechanism system, witness the rate gap, and compose --- the
+  first deployed-system instance of this section.
+\item \textbf{Van der Pol at large $\mu$}: the classic nonlinear
+  two-timescale system. The slow manifold is a cubic --- mid-ladder
+  territory, with the approximants ladder's certified remainder as the
+  error term once it ships. Success condition: a certified
+  relaxation-oscillation enclosure whose cover is coarse along the
+  slow manifold.
+\item \textbf{Timescale $\times$ parameter box}: compose this section
+  with the campaign's parameter-boxed oscillator artefact (uniform
+  decrease over a damping box) --- a fast/slow system whose
+  \emph{rates} live in boxes, certifying separation uniformly over the
+  box. One new fixture, no new rules.
+\end{enumerate}
+
+\section{Anchor at the Known Point}
+\label{sec:ckbk-anchor}
+
+\paragraph{The move.} When you must certify something about an object
+you cannot compute --- a fixed point, a limit, an optimum --- do not
+analyse the iteration that approaches it. \textbf{Invert the
+anchoring: state every hypothesis at the concrete artefact you hold}
+(the snapshot, the candidate, the last iterate), and let one
+contraction-style row transport the conclusion to the unknown object.
+Concretely, for a fixed point $\mu_\star$ of an operator $T$ and a
+snapshot $\hat\mu$:
+
+\begin{enumerate}
+\item certify a \textbf{two-point contraction} on a ball around
+  $\hat\mu$: $d(Tx, Ty) \le \rho\, d(x, y)$ with $\rho < 1$, as
+  checkable rows;
+\item certify the \textbf{one-step residual} at the snapshot:
+  $d(T\hat\mu, \hat\mu) \le \delta$ --- one application of $T$ to a
+  concrete object, always computable;
+\item conclude $d(\hat\mu, \mu_\star) \le \delta/(1-\rho)$, with
+  existence \emph{and} uniqueness of $\mu_\star$ in the ball
+  manufactured by the contraction itself (Banach) --- no convergence
+  analysis, no iteration count, no history of how $\hat\mu$ was
+  produced.
+\end{enumerate}
+
+The inversion matters because the literature's theorems are usually
+anchored at the unknown point (``the iteration contracts \emph{toward}
+$\mu_\star$'' --- a one-point statement at a place you cannot evaluate
+anything), which is useless as a certificate hypothesis. A
+certificate's hypotheses must be checkable, and only the known point
+supports checking. The two-point form costs more analysis once, in the
+untrusted lane; every certificate after that is arithmetic at
+$\hat\mu$. This section is the producer half of a seam: the checker
+half is the catalogue's \rulename{QFixBall} rule
+(chapter~\ref{ch:qtsl-manual}), whose hypotheses are anchored at the
+known snapshot by construction and whose refusals include
+$\rho \ge 1$.
+
+The producer-side companions, from the same worked example:
+
+\begin{itemize}
+\item \textbf{Reduce before you certify.} If the operator provably
+  maps everything into a small family (a pinning lemma: any output of
+  $T$ is Gaussian with known precision, whatever the input), the
+  measure-space problem collapses to a finite-dimensional one --- and
+  the reduction is \emph{forced}, not assumed, so the certificate
+  still speaks about the full space.
+\item \textbf{Guess-and-check the spectral row.} The contraction
+  factor $\rho$ needs a norm bound on a nonnegative matrix; propose a
+  Perron row vector with floats, snap to rationals, and let the
+  checker verify the row inequality. When bare power iteration
+  oscillates (period-2 on a two-block system), iterate $(R+I)/2$
+  instead --- same fixed vector, damped rotation. Both proposals are
+  sound to check; the fix buys \emph{sharpness}, not soundness --- the
+  checker is indifferent, and that indifference is the seam working.
+\end{itemize}
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item the claim is ``the true object is within $\varepsilon$ of
+  \emph{this}'' --- distance-to-fixpoint, distance-to-optimum, a
+  posteriori error bounds --- rather than ``the algorithm
+  converges'';
+\item every hypothesis you have tried to state mentions the unknown
+  object's location (a Lipschitz constant ``near $\mu_\star$,'' a
+  curvature ``at the optimum'') --- the tell that the literature's
+  anchoring is backwards for your purpose;
+\item one application of the operator to a concrete object is cheap,
+  even though finding its fixed point is not (one coordinate-ascent
+  sweep versus the converged posterior; one Newton step versus the
+  root; one Bellman backup versus the value function);
+\item a self-mapped ball is available: contraction plus residual imply
+  $T(\overline{B}(\hat\mu, r)) \subseteq \overline{B}(\hat\mu, r)$
+  for $r \ge \delta/(1-\rho)$, so the hypotheses only need to hold on
+  a set you can name in advance.
+\end{itemize}
+
+Interval-Newton and Krawczyk verification are this move's classical
+ancestors in $\R^n$; the move generalizes them to any complete metric
+space a reduction can reach.
+
+\paragraph{Worked example from the record.} Certified Wasserstein
+balls for variational inference. The task: certify that a CAVI
+(coordinate-ascent variational inference) snapshot is within
+$\mathbb{W}_2$-distance $r$ of the true self-consistent fixed point.
+
+\begin{itemize}
+\item The literature's theorems (contraction of the CAVI iteration
+  \cite{caprio26}) are one-point statements at the unknown
+  $\mu_\star$. The certificate
+  inverts: all hypotheses at the snapshot $\hat\mu$.
+\item The pinning reduction: every CAVI output is exactly Gaussian
+  with precision $Q_{ii}$ regardless of input, so the fixed-point
+  problem in measure space collapses to an affine map on means --- and
+  the certificate quantifies over \emph{all} product measures in
+  $\mathcal{P}_2$, not just Gaussian candidates.
+\item Receipts: ACCEPT with certified $\rho = 96/181$ against true
+  contraction factor $3/(4\sqrt{2}) \approx 0.53033$; ball radius
+  $3.6 \times 10^{-7}$; ground truth (computed independently, never
+  consumed by the certifier) inside every ball with slack
+  ${\times}1.9$; 11/11 mutants refused at named obligations.
+\item The period-2 Perron oscillation appeared live: the first run's
+  bare power iteration proposed a loose $\rho = 3/4$; the $(R+I)/2$
+  fix recovered sharpness. Both fixture generations were accepted by
+  the checker --- a live specimen of the proposer being fallible and
+  the trust boundary not caring
+  (section~\ref{sec:ckbk-proposer-disposer}, observed end to end).
+\end{itemize}
+
+\paragraph{The failure mode it prevents.} Without the inversion, the
+certificate route dead-ends in one of two ways. Either the producer
+imports the literature theorem as-is and the certificate's hypotheses
+quantify over a neighbourhood of a point nobody can locate ---
+unfalsifiable rows, which a checker must either trust (trust-surface
+creep) or refuse (no certificate at all). Or the producer certifies
+the \emph{iteration history} (``$n$ steps, each contracting'') ---
+which couples the certificate to the trajectory that produced the
+snapshot, breaks on restarts and warm starts, and still needs the
+contraction constant somewhere. The anchored form is history-free: any
+snapshot from any source, certified on its own merits --- a corrupted
+snapshot simply fails the residual row (refusal, not a lie).
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{Block-Gaussian instance} --- the worked example's blocks
+  were scalars; run the same pattern with matrix blocks, exercising
+  operator-norm rows proper. Everything is staged; only the fixture
+  generator changes.
+\item \textbf{Discrete instance (2-spin Ising)} --- the
+  total-variation contraction is free at bounded couplings; this
+  produces the first \emph{discrete} Wasserstein-ball fixture and
+  tests whether the move survives leaving the Gaussian reduction.
+\item \textbf{The covariance fold-in} --- fold covariance error into
+  the ball (dropping the variance-exactness refusal); the disanalogy
+  to price is that the mean-map affinity no longer collapses the whole
+  problem.
+\item \textbf{The transfer question}, worth a page before any build:
+  which of your own stack's implicit objects (stationary laws of
+  samplers, Bellman fixed points in value-iteration producers) already
+  have a cheap one-step residual and are one two-point contraction row
+  away from an anchored ball?
+\end{enumerate}
+
+\section{Safety Walls and Liveness Tilts}
+\label{sec:ckbk-polarity}
+
+\paragraph{The move.} A specification that asks a system to be
+\emph{robustly safe while optimistically achieving a goal} has two
+halves of opposite character, and most threshold-reading errors in
+probabilistic specification come from applying one half's natural
+reading to the other. The move is to give the two halves opposite
+\textbf{polarities}, explicitly:
+
+\begin{enumerate}
+\item \textbf{Safety is a probability claim, read violation-form: a
+  wall.} Budget the mass on the bad event ---
+  $P(\mathrm{bad}) \le \beta$ --- and hold violation infinitely
+  inconsistent: the belief (the level-of-inconsistency functional of
+  chapter~\ref{ch:qtsl-semantic-universe}) is $0$ on the half-space
+  where the budget holds and $\infty$ where mass on the bad event
+  exceeds it, with nothing in between. In particular, the run that
+  halts, idles, or leaks mass incurs no inconsistency --- \emph{a
+  system that stops has not hit the wall}.
+  This is not leniency but correctness: safety is
+  closure-invariant --- adding stopping behaviours to a safe system
+  cannot make it unsafe, and leaked mass can only lower the
+  probability of reaching the bad event
+  (chapter~\ref{ch:qtsl-semantic-universe} carries this asymmetry as
+  a theorem of the partial-model semantics).
+\item \textbf{Liveness is an expectation claim, read as a tilt: a
+  hinge.} Price the shortfall of the good event's mass below its
+  target $\tau$ at a finite rate ---
+  $\lambda \cdot \bigl(\tau - \mu(\mathrm{goal})\bigr)_+$ --- and
+  charge nothing at or above the target. Beliefs take values in
+  $[0, \infty]$ (the Lawvere quantale: there are no negative levels
+  of inconsistency), so the shortfall is a saturated difference, written
+  $(\cdot)_+$, never a signed one. The hinge's two sides carry the
+  reading: the flat side means overachievement is free and buys
+  nothing --- in particular it cannot be traded against the wall ---
+  and the sloped side means a near-miss is \emph{priced}, not merely
+  refused, which is what ``optimistically'' means as mathematics.
+\end{enumerate}
+
+The two readings are one family, not two species: as
+$\lambda \to \infty$ the hinge steepens around its kink at
+$\mu(\mathrm{goal}) = \tau$ and converges --- in the epigraph sense,
+the right sense for beliefs --- to the hard threshold: $0$ at or
+above the target, $\infty$ below. A \emph{hard} liveness threshold is
+therefore the $\lambda = \infty$ endpoint of the tilt,
+satisfaction-form as it must be: the run that does nothing fails it,
+and should --- that is what a hard liveness threshold \emph{means}. Choosing
+$\lambda$ is choosing where on the family the claim lives; the trap
+(below) is only ever reading a threshold at the wrong polarity, never
+choosing a finite $\lambda$ on purpose.
+
+Compose by maximum: $\max(\mathrm{wall}, \mathrm{hinge})$ is the
+conjunction of beliefs, and it is \textbf{convex} --- the wall is
+the $\{0, \infty\}$-indicator of a half-space, the hinge is a maximum
+of an affine function with zero, and a pointwise maximum of convex
+beliefs is convex. Certification inherits the cheapness: half-space
+walls, \rulename{Farkas} combination, and the ReLU row family
+(\rulename{ReLU-Pos}, \rulename{ReLU-Above} and kin,
+chapter~\ref{ch:qtsl-manual}) --- whose native object is exactly
+$\max(\mathrm{affine}, 0)$ --- already span the composite. The
+payoff sentence: the standard reach--avoid specification, in its
+robustly-safe-while-optimistically-live form, costs nothing the
+toolkit does not already ship.
+
+\paragraph{When it applies.}
+\begin{itemize}
+\item Any specification with a ``never / at most'' half and an
+  ``eventually / at least'' half: reach--avoid, stabilize within
+  bounds, achieve a return under a resource budget. The two halves
+  are both thresholds, and they need opposite readings.
+\item Whenever the modelled system can halt, diverge, exit scope, or
+  otherwise leak mass --- partiality --- so that the two readings of
+  a threshold genuinely differ. The recognition question is: ``what
+  does this specification say about the run that does
+  \emph{nothing}?'' If safety and liveness give the same answer,
+  a polarity has been misassigned.
+\item Whenever you meet a bare threshold --- yours or someone else's
+  --- that does not carry its reading. The natural default flips sign
+  between the two halves, so ``which polarity did the author mean?''
+  is a question to settle before consuming the row, not after.
+\item When composition or certification cost binds: the wall-plus-tilt
+  composite stays convex, so the polarity discipline is also what
+  keeps the composed specification in the cheap, Farkas-certifiable
+  class.
+\end{itemize}
+
+\paragraph{Worked example.} Three outcomes suffice: \textsc{Reach}
+(the goal), \textsc{Avoid} (the bad set), \textsc{Inertia} (the run
+that never commits --- halts, idles, diverges). A distribution
+$\mu = (\mu_R, \mu_A, \mu_I)$ over the three is a point of the
+probability $2$-simplex, and the specification reads: \emph{reach with
+probability at least $\tfrac34$, never more than $\tfrac14$ on the
+bad set.} The safety wall is the violation half-space
+$\mu_A > \tfrac14$ penalized at $\infty$; the liveness tilt is the
+hinge $\lambda \cdot (\tfrac34 - \mu_R)_+$. Four distributions ---
+the three vertices and one genuine mixture --- against the wall, the
+hinge at two rates, and the hinge's hard limit:
+
+\begin{center}
+\begin{tabular}{@{}lcrrrr@{}}
+\toprule
+& $(\mu_R, \mu_A, \mu_I)$
+& \multicolumn{1}{c}{wall}
+& \multicolumn{1}{c}{$\lambda = 4$}
+& \multicolumn{1}{c}{$\lambda = 40$}
+& \multicolumn{1}{c}{$\lambda = \infty$} \\
+\midrule
+commits to the goal    & $(1, 0, 0)$ & $0$ & $0$ & $0$ & $0$ \\
+commits to the bad set & $(0, 1, 0)$ & $\infty$ & $3$ & $30$ & $\infty$ \\
+never commits          & $(0, 0, 1)$ & $0$ & $3$ & $30$ & $\infty$ \\
+the mixed run          & $\bigl(\tfrac{7}{10}, \tfrac1{20}, \tfrac14\bigr)$
+                       & $0$ & $\tfrac15$ & $2$ & $\infty$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Read the columns against the doctrine. The \textbf{wall}
+distinguishes the two failures the hinge cannot: committing to the
+bad set hits it, never committing does not --- failing dangerously
+and failing idly are different verdicts, and only the
+violation-form reading can tell them apart. The \textbf{hinge}
+carries the orthogonal information: the mixed run, with
+$\mu_R = \tfrac{7}{10}$ against the target $\tfrac34$, certifies at
+\emph{every} finite $\lambda$, paying the priced shortfall
+$\lambda \cdot \tfrac1{20}$ --- the optimistic reading, a near-miss
+ranked rather than refused --- while any distribution at or above
+the target pays exactly $0$ on the flat side. And the
+\textbf{$\lambda = \infty$ column} is the hinge steepened into the
+step: the mixed run and \textsc{Inertia} now both fail, which is
+correct precisely when the claim intended is the hard one. The
+composite $\max(\mathrm{wall}, \mathrm{hinge})$ needs both columns'
+information: drop the wall and dangerous failure is merely priced
+(a large enough achievement elsewhere could dominate it); drop the
+hinge and every near-miss collapses into undifferentiated refusal.
+
+Where this stands in the toolkit at this preview. The
+probability-threshold former \textsc{SProbGE}
+(chapter~\ref{ch:qtsl-specification-language}) is a mass floor --- lower
+probability at least $p$ --- i.e.\ the $\lambda = \infty$ liveness
+endpoint, and the credal semantics makes it feel every lost unit of
+mass, exactly as a hard liveness claim should
+(chapter~\ref{ch:qtsl-semantic-universe}: a liveness claim cannot be
+laundered through a model that is allowed to quietly stop). Safety
+already runs at the other polarity internally: the safety batteries' certified
+object is an upper bound on the violation mass
+($\overline{P}(\mathrm{bad}) \le V(x_0)$, the threshold row of
+\rulename{QSafetyBattery} and kin), which is why those certificates
+remain sound under leak --- the wall reading is already how the
+machinery works. The expectation formers
+(\textsc{SReturnGE}/\textsc{SReturnLE},
+chapter~\ref{ch:qtsl-specification-language}) are the shipped
+expectation-claim species that carry the tilt: a hinge belief over an
+indicator channel is an expected-shortfall bound. And the polarity
+itself is declared in the grammar --- as a sort, which is stronger
+than a field: the specification cap
+(chapter~\ref{ch:qtsl-specification-language}) types every threshold
+component by its face, so a mis-faced premise is a formation error,
+refused before any semantics runs, and each former's reading is
+definitional in the certificate theory rather than a habit of its
+author. One disambiguation earns its keep here, because that chapter
+also says ``safety face'' and means a different axis by it. The cap's
+polarity answers \emph{who quantifies over the admitted laws}: a
+$\mathsf{ForallSpec}$ component binds every law, an
+$\mathsf{ExistsSpec}$ component asserts some law attains. This
+section's polarity answers \emph{which way a single threshold faces}:
+wall on the violation mass, floor on the goal mass. The two axes are
+independent, and one specimen shows how far apart they sit:
+\textsc{SProbGE} --- this section's hard \emph{liveness} endpoint ---
+concludes $\mathsf{ForallSpec}$, the credal \emph{safety} face,
+because demanding the goal's mass from every admitted law is a
+guarantee about a floor. What remains the author's is this section's
+own discipline: the grammar refuses a mis-faced component, and no
+grammar can refuse a wall aimed at the wrong event.
+
+\paragraph{The failure mode it prevents.} One trap, two signs, plus
+the composite's own failure:
+\begin{itemize}
+\item \textbf{Liveness read violation-form forgives doing nothing.}
+  Two outcomes; a system that succeeds with probability $\tfrac25$
+  and otherwise halts; the claim ``reach success with probability at
+  least $\tfrac12$.'' The violation-form misreading --- refuse only
+  if mass on the \emph{failure} event exceeds $\tfrac12$ --- sees
+  zero mass on failure and passes, but $\mu(\mathrm{success}) =
+  \tfrac25 < \tfrac12$: the mass floor fails, and the correct
+  verdict is refusal. Liveness laundered through leak --- the
+  quietly-stopping system certified for a goal it does not deliver.
+\item \textbf{Safety read satisfaction-form punishes halting as if it
+  were violation.} Spell ``avoid the bad set'' as a floor on the
+  safe-completion event and the safely-idling system fails, though it
+  never approaches the bad set. The downstream rot is worse than the
+  false refusal: an author who knows the system may stop weakens the
+  floor to tolerate it, and the weakened floor now also tolerates
+  genuine violation mass. The repair was never a looser constant; it
+  was the other polarity.
+\item \textbf{The negotiable wall.} Price safety at a finite rate ---
+  treat it as one more tilt --- and conjunction-by-maximum degrades
+  into trade: enough achievement elsewhere dominates a bounded
+  safety belief, and the optimizer will find that trade.
+  ``Robustly'' means the wall is not for sale at any exchange rate,
+  and only the violation form at infinite inconsistency says so.
+\end{itemize}
+Two polarities, no trap: liveness formers are satisfaction-form by
+definition, hard at $\lambda = \infty$ and tilted at finite $\lambda$;
+the safety machinery is violation-form by construction; and the
+reading travels with the claim as data instead of living in the
+reader's habits.
+
+\paragraph{Exercises.}
+\begin{enumerate}
+\item \textbf{The face mutants, now that the sort has shipped.} The
+  cap's polarity discipline --- a mis-faced premise is a formation
+  error --- is a refusal, and this chapter's own doctrine applies to
+  it (section~\ref{sec:ckbk-mutant-battery}): a refusal without a
+  firing witness is indistinguishable from dead code. Build the
+  formation battery, each mis-faced construction fed to the grammar
+  with its refusal location asserted --- and include the one cell no
+  formation check can own: the laundering-through-leak specimen
+  above, a floor swapped for a wall on the complementary event, which
+  is well-formed at both faces and wrong only about what the author
+  meant. That last mutant's home is the semantic tier (the flipped
+  reading asserted against the partial-model semantics and refused
+  there), and placing it correctly is part of the exercise.
+\item \textbf{The epi-limit, certified.} The one-family claim ---
+  the hinge at rate $\lambda$ converges in the epigraph sense to the
+  hard threshold as $\lambda \to \infty$ --- is stated here as
+  belief mathematics. Formalize it against the belief semantics,
+  so that a hard liveness former and the $\lambda = \infty$ tilt are
+  interchangeable obligations in one worked certificate rather than
+  two spellings the reader must trust to agree.
+\item \textbf{The composite on a shipped witness.} The spec
+  catalogue's hitting-shape witness (goal reached by deadline with
+  probability at least $\tfrac34$) is a hard liveness claim beside a
+  safety wall. Restate it composite-form --- wall on the bad set,
+  hinge on the goal mass at two finite rates --- and produce the
+  certificate with half-space walls, \rulename{Farkas}, and ReLU
+  rows only; then check that the $\lambda = \infty$ run of the same
+  pipeline recovers the original hard claim. Success condition: the
+  composite certifies with no row species beyond the shipped roster,
+  and the two finite-$\lambda$ certificates price the same shortfall
+  the table above prices.
+\end{enumerate}

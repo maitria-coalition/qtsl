@@ -1,0 +1,21 @@
+# api.toml.d/FullDomainWeaken.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "FullDomainWeaken"
+
+[api.ts]
+handle = "rules.qtslCore.fullDomainWeaken"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn fullDomainWeaken", "interface FullDomainWeakenArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_full_domain_weaken.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::full_domain_weaken"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/discharge.rs"
+sig = ["fn full_domain_weaken"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_full_domain_weaken"

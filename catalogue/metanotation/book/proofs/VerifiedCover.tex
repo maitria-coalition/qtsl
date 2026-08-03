@@ -1,0 +1,108 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The rule discharges an off-scoped row by an exhaustive case
+analysis: prove the row on a cover, certify everything un-covered into
+the off-region. Its premises are ordinary sequent rows; the case
+analysis is the verified content.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:vc-template}
+An admissible rule $R$ is warranted by a rewrite replacing any
+$R$-node with a derivation fragment over core (and
+previously-justified) rules with the same conclusion, consuming the
+premise subtrees at its leaves --- or, where the conclusion has no
+catalogue derivation, discharging against a named verified theorem.
+Leaf-first application eliminates every $R$-node in finitely many
+steps; soundness is conserved with no new kernel semantic content.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{VerifiedCover} instance]\label{rec:vc-instance}
+\[
+\inferrule*[Right=\rulename{VerifiedCover}]{
+  \mathcal{T}_C \rhd\ \vdash P \ \text{on } C \\
+  \bigl\{\, \mathcal{T}_i \rhd\ \vdash K_i \subseteq \mathrm{Off} \,\bigr\}_i \\
+  D_m \smallsetminus C \subseteq \textstyle\bigcup_i K_i
+}{
+  \vdash P \ \text{on } D_m \smallsetminus \mathrm{Off}
+}
+\qquad\rightsquigarrow\qquad
+\begin{array}{l}
+\text{\upshape premise subtrees stand;}\\
+\text{\texttt{verifiedCover\_components\_sound}}\\
+\text{\upshape discharges the scoped row.}
+\end{array}
+\]
+The per-component containments $K_i \subseteq \mathrm{Off}$ are exact
+Bernstein upper-bound rows --- ordinary sequents the base kernel
+replays; the residual decomposition is checker-recomputed set
+bookkeeping over the posted components, not a proof obligation. The
+node discharges against the verified case analysis below.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant, residual form]\label{prop:vc-sound}
+If $P$ holds everywhere on $C$ and
+$D_m \smallsetminus C \subseteq \mathrm{Off}$, then $P$ holds
+everywhere on $D_m \smallsetminus \mathrm{Off}$.
+\end{bprop}
+\begin{proof}
+Fix $x \in D_m \smallsetminus \mathrm{Off}$ and split on membership in
+the cover. If $x \in C$, the cover row gives $P(x)$. If $x \notin C$,
+then $x \in D_m \smallsetminus C \subseteq \mathrm{Off}$ ---
+contradicting $x \notin \mathrm{Off}$. The two cases are exhaustive,
+so the second is vacuous and the first decides
+(\texttt{verifiedCover\_sound}).
+\end{proof}
+
+\begin{bprop}[semantic warrant, per-component form]\label{prop:vc-comp}
+If $P$ holds everywhere on $C$, the residual decomposes as
+$D_m \smallsetminus C \subseteq \bigcup_i K_i$, and each component
+satisfies $K_i \subseteq \mathrm{Off}$, then $P$ holds everywhere on
+$D_m \smallsetminus \mathrm{Off}$.
+\end{bprop}
+\begin{proof}
+The union of the components is contained in $\mathrm{Off}$ (each is),
+so $D_m \smallsetminus C \subseteq \mathrm{Off}$ and
+Proposition~\ref{prop:vc-sound} applies
+(\texttt{verifiedCover\_components\_sound}). The component index is an
+arbitrary type: no finiteness, no dimension, no ordering of components
+is consumed.
+\end{proof}
+
+\begin{bremark}[each premise family is essential]
+Drop the per-component containments and an un-covered point outside
+the off-region escapes both cases: $x \in D_m \smallsetminus C$ with
+$x \notin \mathrm{Off}$ and $P(x)$ false refutes the conclusion while
+the remaining premises hold. Drop the residual decomposition and the
+component list can silently miss part of the residual --- the same
+point, now lying in no $K_i$, escapes again. The exhaustiveness of the
+case analysis is exactly the conjunction of the two.
+\end{bremark}
+
+\begin{bremark}[the omitted premise --- deliberate, and in the sound direction]
+The catalogued statement carries a cover-bookkeeping premise
+$C \subseteq D_m$; the verified statement omits it, because the proof
+never consumes it: a cover reaching outside the domain proves more
+rows than needed, harmlessly. Omitting an un-consumed hypothesis makes
+the mechanized statement strictly stronger, in the sound direction ---
+the checker retains the containment as cover \emph{well-formedness},
+which is where it belongs.
+\end{bremark}
+
+\begin{bremark}[the kit as a spectrum]
+The corner $C = D_m$ (empty residual, no components) is
+\rulename{FullDomainWeaken}; the opposite corner $C = \varnothing$
+demands the entire domain certified into the off-region, at which
+point the scope is empty and the row vacuous. Between the corners, the
+cover is the dial trading global proof effort against per-component
+containment certificates --- and cover \emph{selection} is
+producer-side search (one-dimensional in the current toolkit), spent
+before anything ships. The verified statement is dimension-free:
+richer covers change the search, never the warrant.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:vc-instance} warrant & \texttt{verifiedCover\_components\_sound}\\
+Proposition \ref{prop:vc-sound} & \texttt{verifiedCover\_sound} (the case split)\\
+containment premises & exact Bernstein upper-bound rows (the \rulename{BernCone} section)\\
+scope reading & the \texttt{hbridge} hypothesis ($\mathrm{scope} = D_m \smallsetminus \mathrm{Off}$)\\
+degenerate corner & the \rulename{FullDomainWeaken} section\\
+\end{anchors}

@@ -1,0 +1,91 @@
+
+\sourcenote{Genre: admissible rule (tier 2). The family machinery is
+stated in the \rulename{LiRPA} section's family template. This rule is
+premise-free: $\Phi$ is arbitrary and never consulted.}
+
+\begin{brecipe}[the \rulename{ReLU-Above} instance --- worked plumbing]
+\label{rec:reluabove-instance}
+The node:
+\[
+\inferrule*[Right=\rulename{ReLU-Above}]{
+  \ReLU_{\{h\}\to\{y\}} \in H
+}{
+  \Phi \vdash y \geq h
+}
+\qquad\rightsquigarrow\qquad
+\text{case analysis on }
+(h \leq 0 \wedge y = 0) \vee (0 \leq h \wedge y = h).
+\]
+We walk the \emph{inactive} branch in full --- the family's honest
+specimen of what ``one node unpacks to many'' means in catalogue
+practice. Context $\Phi_{-}$ carries $h \leq 0$ and $y = 0$; the goal
+is $y \geq h$.
+\begin{enumerate}
+\item $\Phi_{-} \vdash h \leq 0$ --- \rulename{Ax} + $\wedge$E.
+\item $\Phi_{-} \vdash -h \geq 0$ --- the bound node's polarity-flip
+  reading (\rulename{PBound}, reading (G)): the combination is the
+  single component $h \leq 0$ with weight $1$, canonical polynomial
+  $c = h$, read as $e \geq 0$ with $e = -h$.
+\item $\Phi_{-} \vdash (-h) = (0 - h)$ --- \rulename{Norm}: equal
+  monomial canonical forms over $\Q$, same wires, shared broadcast
+  shape.
+\item $\Phi_{-} \vdash (0 - h) \geq 0$ --- \rulename{EqElim} along
+  step 3's equality (both sides shaped alike --- the transport gate is
+  met), rewriting step 2's atom.
+\item $\Phi_{-} \vdash 0 \geq h$ --- \rulename{ArithAtom} (fold): from
+  $(t_1 - t_2) \bowtie 0$ to $t_1 \bowtie t_2$ at $t_1 = 0$, $t_2 =
+  h$, $\bowtie = {\geq}$.
+\item $\Phi_{-} \vdash 0 = y$ --- \rulename{EqSym} on the context's
+  $y = 0$; then $\Phi_{-} \vdash y \geq h$ --- \rulename{EqElim} along
+  $0 = y$ at $\Psi = (a \geq h)$.
+\end{enumerate}
+The \emph{active} branch (context $0 \leq h$, $y = h$) derives $h \geq
+h$ by the same pattern --- \rulename{Norm} gives $(h - h) = 0$,
+\rulename{PConstExact} the ground fact $0 \geq 0$, \rulename{EqElim} +
+\rulename{ArithAtom} assemble $h \geq h$ --- and \rulename{EqElim}
+along $h = y$ (wire-to-wire, one shared shape) closes the goal. Six
+catalogue nodes to move one minus sign across a comparator: this is
+why the family rules exist as single nodes, and why the wire format
+prices them.
+\end{brecipe}
+
+\begin{bremark}[shape scope]
+Steps 3 and 6 of the inactive branch (and the active branch's
+\rulename{Norm} identity $(h - h) = 0$) transport along equalities
+with a rank-$0$ constant side, so the displayed derivation
+type-checks at rank-$0$ instances; the shape-general warrant is the
+direct lemma, exactly as Remark~\ref{rem:relunn-shapescope} in the
+\rulename{ReLU-NN} section states for the whole family.
+\end{bremark}
+
+\begin{bprop}[semantic warrant]\label{prop:reluabove-sound}
+If the linkage holds, the sequent concluding $y \geq h$ is
+semantically valid over any premise formula $\Phi$.
+\end{bprop}
+\begin{proof}
+Fix an admissible valuation $\sigma$. The linkage extraction
+(\texttt{reluLinked\_facts}) gives both tensors at one shared shape
+and, per entry, either $p \leq 0 \wedge y = 0$ --- whence $y = 0 \geq
+p$ --- or $y = p$ --- whence $y \geq p$ reflexively. The conclusion
+atom compares the two tensors entrywise at their shared shape. That is
+\texttt{sound\_reluAbove}, step for step.
+\end{proof}
+
+\begin{bremark}[the exact lower envelope, premise-free]
+Together with \rulename{ReLU-NN} this rule states the exact pointwise
+lower envelope of the activation, $y \geq \max(0, h)$, as two atoms a
+producer can emit with \emph{no} box knowledge whatsoever. The
+asymmetry with the upper side is structural, not an artefact: no
+affine function dominates $\max(0, h)$ on all of $\Q$ (a candidate
+with positive slope dives below $0$ as $h \to -\infty$; one with
+slope $\leq 0$ falls below $h$ as $h \to +\infty$) --- so upper
+bounds require a box and live in \rulename{LiRPA}.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:reluabove-instance} warrant & \texttt{sound\_reluAbove}\\
+family linkage extraction & \texttt{reluLinked\_facts} (see the \rulename{LiRPA} section)\\
+polarity-flip reading (step 2) & \texttt{sound\_pBound} (the \rulename{PBound} section)\\
+ground-fact leaf (active branch) & \texttt{sound\_pConstExact} (the \rulename{PConstExact} section)\\
+payload structure & \texttt{PReLUAboveData} (two wires, linkage --- no premise field)\\
+\end{anchors}

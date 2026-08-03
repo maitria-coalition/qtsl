@@ -1,0 +1,47 @@
+\apilang{TypeScript}{judgment.morse}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function morse(args: {
+  vertices: number;
+  edges: ReadonlyArray<MorseEdge>;
+  rho: ReadonlyArray<VertexRegion>;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.morse({
+    vertices: 2,
+    edges: [{ src: 0, dst: 1 }],
+    rho: [
+      { vertex: 0, region: phi },
+      { vertex: 1, region: s.TRUE },
+    ],
+  }),
+),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QMorse::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(graph: MorseGraph, rho: Vec<VertexRegion>) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let morse = QMorse::new(
+    MorseGraph {
+        vertices: 2,
+        edges: vec![MorseEdge { src: 0, dst: 1 }],
+    },
+    vec![
+        VertexRegion {
+            vertex: 0,
+            region: StatePred::poly_le(q(0, 1), Poly::var(0, 1).unwrap()),
+        },
+        VertexRegion {
+            vertex: 1,
+            region: StatePred::True,
+        },
+    ],
+)
+.unwrap();
+\end{rustsrc}

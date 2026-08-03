@@ -1,0 +1,48 @@
+# bindings.toml.d/QMorseProduct.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QMorseProduct'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "ChainRecurrentIn.fst"
+sha256 = "417a116efa6d7b0cc2c5a3d6158b739784b5cccf15367f26e9cd6c2ad9f4b3f2"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "ChainRecurrentIn.snd"
+sha256 = "cecb624389e4abd4ae118e5b81cc491a30e27685b83bccb0544ae010d6b7d1d5"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "EpsChainIn.fst"
+sha256 = "e9c84a9bbdf5255e3a437802f50f0fe9e8fb5e76c494c7f4aaa4e708437d0c59"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "EpsChainIn.snd"
+sha256 = "206db8705d9527f8117139b495e4f192778ea83daeae5ce7c1fdfb2c9bb065b9"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "MorseWitness.prod"
+sha256 = "61b152033ffa51d7fcc441c1ab871ea76ef228c71fbcc913f959a52c8511ce2d"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "alphaSet_prod_subset"
+sha256 = "57d47377e345f2db06438edda21fa272e6d5f4f9ec2d7dbd76569b497462ffc5"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "completeOrbit_prod_iff"
+sha256 = "72483a404b7a96bd4c07a2b600ce29fe65ba8b24282cc4b7a5d940216a052f11"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "omegaSet_prod_subset"
+sha256 = "f40daf932f83dd9013ed5d33be106237dbf1e9e6bb4cb69226380b7d7ee80903"
+
+[[statement]]
+module = "Qtsl.Product"
+decl = "qMorseProduct_sound"
+sha256 = "56e5b1227e20996fc534cf90accdc13faaa9697e889946ece3b65f884553b577"
+

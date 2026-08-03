@@ -1,0 +1,23 @@
+# api-system.toml.d/S-STATIC.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-STATIC"
+entity = "model type"
+
+[api.ts]
+handle = "system.staticProfile"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_static"]
+note = '''The TS conformance corpus holds no construction through this factory at this preview --- byte authority for the profile is the Rust corpus opposite; the factory takes the same init-object vocabulary as every other profile.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Static::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_static"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "marker:static_happy"
+note = '''The quoted span is the builders-suite happy path: the zero-dimensional token System (an initial box with no axes --- the unique point of the zero-dimensional carrier) and the unknown-constant System (a boxed parameter, frozen for all time). The profile is also a refusal remedy: a drift-requiring preset meeting a zero-dimensional, substrate-only mechanism refuses with a pointer to this preset by name, and the refusal suite checks that the named remedy actually accepts.'''

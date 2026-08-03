@@ -1,0 +1,74 @@
+# bindings.toml.d/ProductLattice.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ProductLattice'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "BlockCert"
+sha256 = "7c950242e431e1d8293f04a155317ba6882bfe276a6a38759f4d9e5e0c138b2a"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "CertifiedBlockLattice"
+sha256 = "c4fc86988194f0973fd96eaf87ef6cfc34f88d3b0042d8637daffdbcb6464ce2"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "CertifiedBlockLattice.Valid"
+sha256 = "91d2990214107438bac64b172ac52b258e0beb188a4ebcb545c3c02a3f61b4c7"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "Hypernet.WireDisjoint"
+sha256 = "107d2a5555493e539f4fe24467b9c371d0995f0341e399b9497965be49a160a2"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "PProductLatticeData"
+sha256 = "35631d6d6d8b9121e04238d5a7b871c43a05cf25aa57e3ff57a5fde28960c101"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "PProductLatticeData.prodBlocks"
+sha256 = "3aeaf7c51830d174b4fcb34879b933297aa19e7337abaca192602e227f14d742"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "Sequent.semanticallyValid_extend"
+sha256 = "a18fb432a12c7e4b3fc818a7170786a46a578d75286f0a091e5a066e7d69309c"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "Sequent.semanticallyValid_weaken"
+sha256 = "a9d8b372ad5b534caa247aad7a20bd0a11bac21956a8f35f3cbf1618f3601f53"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "citeFacet"
+sha256 = "9968bc97e7e915445773fa9ba80223248e43bebc7be49d5d9ef4eda26c82bb8e"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "prodBlock"
+sha256 = "42e1b9249907a17b7f8ba9063351bbc8f3d9f489be049269cc3ed262a5bfcd7f"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "sound_productLattice"
+sha256 = "8cc9a528c5f7899aa45f620da6f223c9aefb9c051ccc6940be8d2ae24a39960d"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "sound_productLattice_citeLeft"
+sha256 = "635d2bde1fb6bec11880c8da7a17c8650126adb3eda5fac18156647c5c175a1a"
+
+[[statement]]
+module = "Qtsl.ProductLattice"
+decl = "sound_productLattice_citeRight"
+sha256 = "bb322c7ef6d53e4056e188ebc917b88cd7934a34f622ab0d302a92ce7e2c5715"
+
+[[correspondence]]
+entry = "ProductLattice"
+steele_sha256 = "9d79455b6f6da7009e9d1309d46a57dcc8123e39248f60d70815485df8d299b8"
+statements_sha256 = "34ecce0be3bcd94ed7dfa3fec8e47b017f62726853efb4c754f182a5ccd0b213"
+prose_sha256 = "d2c60d53c68fdb19132230c0bc69ff968cd1988f08f4c83c177803d45c4a78ec"
+

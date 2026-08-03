@@ -1,0 +1,27 @@
+\apilang{TypeScript}{spec.TRUE / spec.FALSE}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export const TRUE: StatePred = Object.freeze({ kind: "true" as const });
+/** `SFalse` — the empty set. */
+export const FALSE: StatePred = Object.freeze({ kind: "false" as const });
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const orPart = s.or([s.FALSE, s.not(s.polyLe(0n, x1))]);
+\end{tssrc}
+\apiprov{\texttt{TRUE} rides the formers-tour root (the grammar-tour vector of the same test file).}
+\apilang{Rust}{mtk\_catalogue::spec::StatePred::\{True, False\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+/// `STrue` — the full space.
+True,
+/// `SFalse` — the empty set.
+False,
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let or_part = StatePred::or(vec![
+    StatePred::False,
+    StatePred::not(StatePred::poly_le(q(0, 1), x1())),
+]);
+\end{rustsrc}

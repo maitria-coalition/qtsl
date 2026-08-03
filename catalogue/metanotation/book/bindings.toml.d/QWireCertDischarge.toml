@@ -1,0 +1,29 @@
+# bindings.toml.d/QWireCertDischarge.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QWireCertDischarge'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslCompose.WireCertDischarge"
+decl = "IsClassK0Inf"
+sha256 = "1b6b03fe2f22095e7769d1dfd3c2ef9c8809e07ee2e7a82ff9d03dcc20b58211"
+
+[[statement]]
+module = "QtslAux.QtslCompose.WireCertDischarge"
+decl = "guarantee_leg_comp"
+sha256 = "601e614cb83612796569107d339fae987e7a003e1d1d865ce8cd87ed030342d5"
+
+[[statement]]
+module = "QtslAux.QtslCompose.WireCertDischarge"
+decl = "polynomial_discharge"
+sha256 = "04b329990ac21ae9548f3fc0a5224303469f6da78ef88b314067e8b1298b1740"
+
+[[statement]]
+module = "QtslAux.QtslCompose.WireCertDischarge"
+decl = "slack_triangle"
+sha256 = "36033b7ce6fcec610ac5c9a2db4e352930ab2812c1f68a401e06428820826c88"
+
+[[correspondence]]
+entry = "QWireCertDischarge"
+steele_sha256 = "8905705ee41cd7ee6e2be00669d54a6719b8fef8bd33ed0e403b93550f96f8f6"
+statements_sha256 = "4b174d663b9e57f4027879a706be0c10c2dc02bc3842afc429d864f4afcf842d"
+prose_sha256 = "ca37e4e47ae1f67519d02bd0d453f085f2835f1af8224d84d858a9ff841d24a8"
+

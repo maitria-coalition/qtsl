@@ -1,0 +1,22 @@
+\apilang{TypeScript}{spec.alwaysT}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function alwaysT(t: QLike, arg: StatePred): PathPred
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const boundedPart = s.probGe(Q.of(1, 2), s.notPath(s.alwaysT(3n, band)));
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::PathPred::always\_t}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn always_t(t: WitRat, arg: StatePred) -> Result<PathPred, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let bounded_part = ForallSpec::prob_ge(
+    q(1, 2),
+    PathPred::not_path(PathPred::always_t(q(3, 1), band.clone()).unwrap()),
+)
+.unwrap();
+\end{rustsrc}

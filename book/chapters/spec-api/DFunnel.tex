@@ -1,0 +1,40 @@
+\apilang{TypeScript}{spec.derived.reachThenHold}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+reachThenHold(p: QLike, t: QLike, heldRegion: StatePred): ForallSpec
+\end{tssrc}
+\apiprov{definition --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+/** Reach-then-hold (funnel) — `P_{>=p}[F_{<=t} chi]` where `chi` is
+ * a child claim's certified invariance region, cited as a region
+ * atom (the citation itself rides the judgment stratum). */
+reachThenHold(p: QLike, t: QLike, heldRegion: StatePred): ForallSpec {
+  return probGe(p, deadline(t, heldRegion));
+},
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::reach\_then\_hold}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn reach_then_hold(
+    p: WitRat,
+    t: WitRat,
+    held_region: StatePred,
+) -> Result<ForallSpec, Refusal>
+\end{rustsrc}
+\apiprov{definition --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+/// Wing C: reach-then-hold (funnel; band-hold) —
+/// `P_{>=p}[F_{<=t} chi]` where `chi` is the *certified invariance
+/// region* of a child claim (`P_{>=1}[G band]`), cited as a region
+/// atom (tower citation: a child's certified region is a parent's
+/// atom). This helper spells the outer transit; the citation itself
+/// rides the judgment stratum. Witness: the swing-up composition;
+/// the LunarLander attitude funnel.
+pub fn reach_then_hold(
+    p: WitRat,
+    t: WitRat,
+    held_region: StatePred,
+) -> Result<ForallSpec, Refusal> {
+    ForallSpec::prob_ge(p, PathPred::deadline(t, held_region, false)?)
+}
+\end{rustsrc}

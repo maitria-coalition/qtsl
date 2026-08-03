@@ -1,0 +1,104 @@
+# QUnionBound — new full section (B7). Measure-generic: the one
+# battery-family rule with NO profile residue, hence no conditional flag.
+[[rule]]
+id = "QUnionBound"
+source = "../QTSL-rules.toml"
+row = "QUnionBound"
+proof = "book/proofs/QUnionBound.tex"
+commentary = '''
+\rulename{QUnionBound} is the battery family\textquotesingle s glue:
+from two probability bounds and an event decomposition it concludes that
+the sum of the budgets bounds the failure event ---
+$\Pr[E_1] \le a$, $\Pr[E_2] \le b$, and
+$\mathrm{fail} \subseteq E_1 \cup E_2$ give
+$\Pr[\mathrm{fail}] \le a + b$. Its semantic content is monotonicity
+plus subadditivity (Boole\textquotesingle s inequality), stated over an
+\emph{arbitrary} measure: the rule is profile-generic, and its instance
+at any system-semantics profile is the same lemma applied at that
+profile\textquotesingle s path measure. Among the battery rules in this
+book it is accordingly the one whose dashboard row carries an
+unconditional check --- no profile residue at all.
+
+The hypothesis $\mathrm{fail} \subseteq E_1 \cup E_2$ is where all the
+content concentrates. The rule is sound for \emph{any} decomposition;
+the citing rule must justify the containment. The packaged instance ---
+the one the bounded-until battery cites --- is the d\'ebut
+decomposition: failure of ``stay safe until the target, by the
+deadline'' is contained in $\{$some \emph{first} stop-set visit presents
+a bad state$\}$ $\cup$ $\{$no stop-set visit by the horizon$\}$. That
+containment is pure path-set algebra over sequence space: no measure, no
+measurability, only the well-ordering of the time axis.
+
+A producer rarely writes this node by hand; it appears where a composite
+temporal property splits its failure modes across two certificates, and
+what the checker recomputes at such a node is precisely the containment
+side of the decomposition (or it discharges it by citing the packaged
+path-set lemma). The same additivity doubles as the slack-composition
+device in assume--guarantee composition, where interface slack budgets
+add across a wiring --- one lemma, two consumers.
+
+Why core rather than admissible: there is nothing to unpack into.
+Subadditivity of measure is not derivable from the other battery rules;
+it is new --- deliberately small --- semantic content at the measure
+level, and keeping it a separate node keeps every consumer\textquotesingle s
+soundness proof honest about where its additivity comes from.
+'''
+note = '''
+Stated in two forms: an extended-nonneg form (the primitive), and a
+real-valued form in the shape battery bounds actually arrive
+(certificate initial values), whose nonnegativity hypotheses are free at
+every use site.
+'''
+correspondence = '''
+The cleanest dictionary in the Q-family --- the certified statement is
+the displayed rule at full measure-generality, with no profile
+residue.
+\begin{itemize}
+\item $\mu \mapsto$ an arbitrary \texttt{Measure μ} on an arbitrary
+  measurable space --- \emph{wider} than the displayed
+  path-probability reading, in the safe direction: the rule\textquotesingle
+  s GSHS instance and the AG slack-composition use are the same lemma
+  at other measures (the roster\textquotesingle s ``one item, two
+  consumers\textquotesingle\textquotesingle).
+\item the three premises $\mu(E_1) \le a$, $\mu(E_2) \le b$,
+  $\mathrm{fail} \subseteq E_1 \cup E_2$ $\mapsto$ \texttt{h₁},
+  \texttt{h₂}, \texttt{hsub}, verbatim; conclusion $\mu(\mathrm{fail})
+  \le a + b$ $\mapsto$ the goal, verbatim. No hypothesis is unused
+  and nothing undisplayed is demanded --- not even measurability of
+  the events (monotonicity and subadditivity hold for outer measure).
+\item the \texttt{ofReal} companion carries the same rule in the
+  shape battery bounds arrive (real-valued $a$, $b$), its two
+  nonnegativity riders free at every use site, per the note.
+\item the packaged instance --- the displayed d\'ebut decomposition
+  --- $\mapsto$ \texttt{compl\_firstExit\_subset}, certified
+  alongside: pure path-set algebra over sequence space (no measure,
+  no measurability), delivering exactly the $\mathrm{fail} \subseteq
+  E_1 \cup E_2$ premise the until battery cites at $\mathit{Stop} :=
+  (A \cup R) \cup D^{\mathrm{c}}$, $\mathit{Good} := R$.
+\end{itemize}
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslBattery"
+src = "../../lean/qtsl-aux/QtslAux/QtslBattery.lean"
+decls = [
+  "sound_QUnionBound",
+  "sound_QUnionBound_ofReal",
+  "compl_firstExit_subset",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development ports the base calculus\textquotesingle s checker
+chain (theory \texttt{qtsl\_catalogue}, developed side by side with the
+base catalogue sources, stopping below the proof-object layer); it
+contains no probability or measure theory. \rulename{QUnionBound} lives
+one theory-extension edge above the base calculus, and even its small
+soundness content (measure subadditivity, a path-set decomposition over
+sequence space) has no counterpart anywhere in the ported development. A
+HOL statement of this rule would open a measure-theory development, not
+extend the ported checker chain; until one exists, this box is the
+honest state of the edifice.
+'''

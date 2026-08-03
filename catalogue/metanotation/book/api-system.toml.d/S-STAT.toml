@@ -1,0 +1,21 @@
+# api-system.toml.d/S-STAT.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-STAT"
+entity = "entry"
+
+[api.ts]
+handle = "system.PinningDecl"
+sig_file = "ts/src/system.ts"
+sig = ["interface PinningDecl", "interface TrustRow"]
+note = '''Pinning is deliberately not a profile: any sampleable mechanism carries it, and the corpus holds no pinned construction at this preview --- ledger production lives with the sampling harness.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::MechanismBuilder::pinning"
+sig_file = "crates/mtk-catalogue/src/system/manifest.rs"
+sig = ["fn pinning"]
+note = '''Pinning is deliberately not a preset (any sampleable profile carries the family); the corpus holds no pinned construction at this preview --- ledger production lives with the sampling harness.'''

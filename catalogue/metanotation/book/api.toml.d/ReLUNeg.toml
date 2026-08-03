@@ -1,0 +1,21 @@
+# api.toml.d/ReLUNeg.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "ReLUNeg"
+
+[api.ts]
+handle = "bl.Builder.reluNeg"
+sig_file = "ts/src/bl.ts"
+sig = ["fn reluNeg"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:reluNeg"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::relu_neg"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn relu_neg"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:relu_neg"

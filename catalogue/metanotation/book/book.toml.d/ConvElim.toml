@@ -1,0 +1,151 @@
+[[rule]]
+id = "ConvElim"
+source = "../BL-rules.toml"
+row = "ConvElim"
+proof = "book/proofs/ConvElim.tex"
+commentary = '''
+\rulename{ConvElim} opens a region atom: from
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$ it concludes the
+region\textquotesingle s defining barycentric halfspace conjunction ---
+one $(\cdot) \leq 0$ atom per support vertex, in a pinned canonical
+spelling. It is the entry move of every argument that reasons
+\emph{linearly} about a geometric premise: \rulename{BernCone} consumes
+region atoms natively, but the combination rules (\rulename{Farkas},
+\rulename{Syzygy}) match ordinary comparison atoms by exact canonical
+polynomial, and this rule is what turns a region fact into atoms they
+can see.
+
+What the checker recomputes: the \emph{entire} conclusion, from
+$(x, \Delta, S)$ alone --- the two barycentric affine forms of the 1-D
+two-vertex support (weights are determined on a simplex, so nothing is
+chosen and nothing rides the certificate), the sign-folding that turns
+each core vertex\textquotesingle s wanted $\lambda \geq 0$ into a
+$(-\lambda) \leq 0$ atom (the all-$\leq$ discipline the downstream
+matchers consume), and the strictly positive primitive-integer rescale
+that makes the spelling unique --- then demands syntactic equality with
+the cited conclusion. No producer text is trusted; the side condition is
+one decidable equation. Outside the checkable fragment (ambient
+dimension 1, support exactly two vertices at distinct coordinates) the
+build refuses and the rule cannot fire --- refusal is trivially sound,
+and the distinct-coordinates gate is precisely where a degenerate
+simplex\textquotesingle s division by zero is made unrepresentable.
+
+The rule needs no typing or positivity fields: definedness and shape of
+the region term are read out of the region atom\textquotesingle s own
+semantics. Dropping the premise-form equation would sever the conclusion
+from any premise at all; dropping the canonical-spelling pin would not
+make the rule unsound but would strand its conclusions --- equivalent
+spellings never match downstream --- which is why the spelling is
+checked rather than suggested.
+'''
+note = '''
+Geometric reading of extension sets, 1-D: $S = \emptyset$ is the segment
+$[V_0, V_1]$; naming one vertex stretches the region to the closed ray
+away from the other --- membership with a \emph{nonpositive} weight on
+the extended vertex. The region atom is thus the calculus\textquotesingle
+s interface between simplex geometry and sign arithmetic, and this rule
+with \rulename{ConvIntro} is that interface\textquotesingle s two
+directions, exact inverses on the fragment.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}.
+\begin{itemize}
+\item $x \mapsto$ \texttt{term : Term}; $\Delta \mapsto$
+  \texttt{simplex : Simplex}; $S \mapsto$ \texttt{S : ExtensionSet};
+  the premise judgement $\Phi \vdash x \in \mathcal{R}(\Delta, S)$
+  $\mapsto$ \texttt{ih} with the shape tie \texttt{hpremiseForm} $:$
+  \texttt{premise.post = .inRegion term simplex S}; $\Phi$ shared via
+  \texttt{hpre}.
+\item the \emph{entire} displayed conclusion --- the flat conjunction,
+  its vertex order, the per-vertex comparators $\bowtie_i$, the affine
+  spellings $\lambda_i$ --- $\mapsto$ one hypothesis, \texttt{hhalf}
+  $:$ \texttt{barycentricHalfspaceForm term simplex S seq.post}:
+  \texttt{seq.post} is literally the value of the verified canonical
+  build. The display\textquotesingle s $\lambda_i$ and $\bowtie_i$ are
+  not statement binders but \emph{outputs} of
+  \texttt{barycentricHalfspaceBuild}, quoted in full below.
+\item conclusion judgement $\mapsto$ the goal
+  \texttt{seq.semanticallyValid H}; certified alongside,
+  \texttt{barycentricHalfspaceBuild\_spec} unpacks a successful build
+  run into the geometric data the soundness proof consumes.
+\end{itemize}
+Width note, narrower and loud about it: a successful build run forces
+ambient dimension $1$ with support exactly two vertices at distinct
+coordinates (the first conjuncts of
+\texttt{barycentricHalfspaceBuild\_spec}), so the mechanized statement
+covers exactly the one-dimensional instance of the displayed
+general-dimension rule. Outside that fragment the build returns
+\texttt{none}, the hypothesis is unsatisfiable, and the rule cannot
+fire --- refusal, never unverified acceptance; the displayed rule at
+higher dimension is design intent, not yet certified statement.
+
+Spelling note: the \emph{original}-form column assigns per-vertex
+comparators ($\leq$ for extension vertices, $\geq$ for core
+vertices), while the certified build --- and the realized form
+displayed above --- emits every atom in the sign-folded all-$\leq$
+shape (\texttt{f4VertexAtom} negates the core
+vertex\textquotesingle s affine form into the term and compares
+$\leq 0$ --- the commentary describes this discipline). The two
+spellings name the same halfspaces; the certified conclusion
+\emph{formula} is the folded one, and this certification binds the
+texts as they stand today.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "barycentricHalfspaceBuild_spec",
+  "sound_convElim",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+intro = '''
+\textbf{The canonical form, meaning bound by display.}\enspace The
+conclusion formula is the value of the build displayed below ---
+affine data (\texttt{baryCoeffs1D}), positive primitive-integer rescale
+(\texttt{primAffine}), atom layout (\texttt{f4Lhs}), per-vertex
+sign-folding (\texttt{f4VertexAtom}), assembly
+(\texttt{barycentricHalfspaceBuild}) --- and the payload\textquotesingle
+s side condition is the one-line equation
+\texttt{barycentricHalfspaceForm}. A skeptical reader should confirm by
+eye that every gate failure yields \texttt{none} (refusal), that the
+rescale factor is strictly positive on every reachable branch, and that
+no valuation is consulted anywhere in the chain.
+'''
+full_decls = [
+  "baryCoeffs1D",
+  "primAffine",
+  "f4Lhs",
+  "f4VertexAtom",
+  "barycentricHalfspaceBuild",
+  "barycentricHalfspaceForm",
+  "PConvElimData",
+]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = [
+  "Definition baryCoeffs1D_def",
+  "Definition primAffine_def",
+  "Definition f4Lhs_def",
+  "Definition f4VertexAtom_def",
+  "Definition barycentricHalfspaceBuild_def",
+  "Definition barycentricHalfspaceFormB_def",
+]
+receipt = '''
+\texttt{hol-strict} CLEAN census over the ported checker theory:
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host. Loud caveat,
+stated plainly: the definitions quoted here are the canonical-form
+revision adopted into the script on 2026-07-18, which \emph{postdates}
+that census run --- the census attests the theory as then built, not
+this exact text. Re-attestation rides the next clean run; there is no
+signed HOL receipt store yet, and these citations are documentary.
+'''

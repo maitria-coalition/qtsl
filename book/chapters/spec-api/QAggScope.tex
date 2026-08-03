@@ -1,0 +1,44 @@
+\apilang{TypeScript}{judgment.aggScope}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function aggScope(args: {
+  net: SysRef;
+  aggDim: number;
+  polytope: ReadonlyArray<{ coeffs: ReadonlyArray<QLike>; ub: QLike }>;
+  stop: ScopeSemantics;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.aggScope({
+    net: j.sysRef("net-a"),
+    aggDim: 2,
+    polytope: [{ coeffs: [1n, 1n], ub: 10n }],
+    stop: "reachable",
+  }),
+),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QAggScope::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(
+    net: SysRef,
+    agg_dim: usize,
+    polytope: Vec<PolytopeRow>,
+    stop: ScopeSemantics,
+) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let agg = QAggScope::new(
+    SysRef("net-a".into()),
+    2,
+    vec![PolytopeRow {
+        coeffs: vec![q(1, 1), q(1, 1)],
+        ub: q(10, 1),
+    }],
+    ScopeSemantics::Reachable,
+)
+.unwrap();
+\end{rustsrc}

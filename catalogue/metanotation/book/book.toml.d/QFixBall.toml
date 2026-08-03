@@ -1,0 +1,118 @@
+[[rule]]
+id = "QFixBall"
+source = "../QTSL-rules.toml"
+row = "QFixBall"
+proof = "book/proofs/QFixBall.tex"
+conditional = true
+commentary = '''
+\rulename{QFixBall} is the contraction-witnessed discharge of the
+distance judgement: it certifies that a computed snapshot $\hat\mu$ lies
+within distance $r$ of the fixed point of an update map $T$ --- and, in
+the same breath, that \textquotedblleft the fixed point of
+$T$\textquotedblright{} is a well-defined description at all (exactly
+one fixed point exists in the certified ball). A producer reaches for
+it wherever an iterative solver has been run to approximate a
+fixed-point object --- a stationary law, a variational posterior, a
+self-consistent field --- and the deliverable is not the iterate but a
+certified \emph{ball} around it. Its three rows realize the anchoring
+inversion: every hypothesis is stated at the \emph{known} snapshot,
+never at the unknown fixed point --- the contraction row bounds
+$T$\textquotesingle s two-point ratio on the closed ball around
+$\hat\mu$, the residual row measures one concrete application
+$d(T\hat\mu, \hat\mu) \le \delta$, and the radius row
+$\delta + \rho\, r \le r$ is division-free arithmetic.
+
+What the checker recomputes: the contraction bound $\rho < 1$ (at the
+affine tier, an operator-norm row discharged by positive-semidefinite
+certificate machinery on $r I - A^{\top}\!A$-shaped data), the residual
+evaluation (one sweep of the map at the snapshot, exact rational
+arithmetic), and the radius inequality. Everything else --- ball
+self-mapping, existence, uniqueness, the anchored bound
+$d(\hat\mu, \mathrm{fix}\,T) \le \delta/(1-\rho) \le r$ --- is
+manufactured by the mathematics from those three rows; no existence
+stratum is consumed, so the judgement is existential without vacuity.
+
+What would break: with $\rho \ge 1$ the fixed point need not be unique
+or exist and the description license fails --- the rule refuses (the
+identity map has residual $0$ at every point and fixes all of them).
+Without the radius row the ball need not be self-mapped and can miss
+the fixed point entirely, even with a genuine contraction. Without the
+residual row nothing ties the ball to the dynamics. The completeness of
+the subject space is a genuine hypothesis, carried honestly: the
+affine/Euclidean instantiation discharges it by instance, while the
+Wasserstein-space instantiation keeps it as a named gap --- never an
+axiom smuggled in.
+'''
+note = '''
+The rule concludes onto a definite-description subject
+($\mathrm{fix}\,T$) and therefore carries the description
+well-formedness discharge inside the rule --- the one new typing
+obligation of the distance-judgement grammar. An independent
+exact-arithmetic checker replays the eleven obligations of the pilot
+certificate pattern; its mutant battery refuses each mutilated
+certificate at a named obligation. Producer strategy (proposing
+$\rho$ from iterate data, pinning the affine reduction) is deliberately
+outside the kernel.
+'''
+correspondence = '''
+The displayed conclusion splits, and so do the bound statements: the
+description license --- $\mathrm{fix}\,T$ well-defined (unique) in
+$\overline{B}(\hat\mu, r)$ --- $\mapsto$ \texttt{sound\_QFixBall :
+∃! y, y ∈ closedBall x₀ r ∧ IsFixedPt f y} (existence manufactured by
+the contraction itself; no existence stratum consumed, exactly as the
+roster says); the distance clause $\mathsf{QDist}[d](\hat\mu,
+\mathrm{fix}\,T) \le r$ is then ball membership, with the sharper
+anchored bound $\delta/(1-\rho)$ carried by
+\texttt{dist\_fixedPoint\_le} --- whose binder row shows uniqueness is
+NOT consumed (any fixed point in the ball obeys it) --- and capped by
+the radius row via \texttt{anchored\_le\_radius}.
+\begin{itemize}
+\item contraction row, two-point on the ball $\mapsto$ \texttt{hlip :
+  LipschitzOnWith K f (closedBall x₀ r)} with \texttt{K : ℝ≥0},
+  \texttt{hK : K < 1} --- the $\rho \ge 1$ refusal is the strict
+  binder; at the affine tier the operator-norm row $\mapsto$
+  \texttt{hA : ‖A‖₊ ≤ K} in \texttt{sound\_QFixBall\_affine}
+  (EuclideanSpace, the caviwball-v0 pinned mean map).
+\item residual row $\mapsto$ \texttt{hres : dist (f x₀) x₀ ≤ δ} ---
+  anchored at the snapshot, and no hypothesis anywhere mentions the
+  fixed point: the display\textquotesingle s ``never at the unknown
+  fixed point'' is a checkable property of the binder list.
+\item radius row $\mapsto$ \texttt{hrad : δ + K * r ≤ r},
+  division-free verbatim.
+\item registry completeness $\mapsto$ the instance binder
+  \texttt{[CompleteSpace α]} --- the conditional
+  mark\textquotesingle s locus: mechanized discharge for the
+  affine/Euclidean instantiation (completeness is an instance there),
+  named hypothesis for $\mathbb{W}_2$, never an axiom.
+\end{itemize}
+Width note: the subject space is an arbitrary metric space --- the
+registry-entry structure of $d$ is erased, so the certified reach
+covers every registry instantiation whose completeness discharge
+arrives, strictly wider than the displayed registry framing, safe
+direction; the VAR refusal and the Gaussian-pinning producer strategy
+are kernel-external, no Lean counterpart, correctly.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QFixBall"
+src = "../../lean/qtsl-aux/QtslAux/QFixBall.lean"
+decls = [
+  "sound_QFixBall",
+  "sound_QFixBall_affine",
+  "dist_fixedPoint_le",
+  "anchored_le_radius",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development\textquotesingle s object is the base
+calculus\textquotesingle s wire-format checker (theory
+\texttt{qtsl\_catalogue} ports the first-order check-function cone of
+the core catalogue). \rulename{QFixBall} lives one extension edge above
+that stratum --- it concludes a distance judgement of the extension
+theory, and its mechanization lives in the auxiliary Lean package. No
+HOL checker chain covers the extension stratum; the box becomes
+writable when one is ported.
+'''

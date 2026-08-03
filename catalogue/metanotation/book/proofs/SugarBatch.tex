@@ -1,0 +1,108 @@
+
+\sourcenote{Genre: alias rules (tier 3), three at once --- respelling
+templates; the batch's shared template is Recipe 1 of the
+\rulename{StreettDegenerate} section. This row is the degenerate case of
+even that template: the unpacks are \emph{definitions}, so the five
+artefacts collapse to the definitional equation, its reading, and the
+target section.}
+
+\begin{brecipe}[the filled-in applications --- three rules, three
+targets]\label{rec:sb-filled}
+\[
+\mathsf{avoid}\,\beta \;:=\; \mathsf{G}\neg\beta
+\qquad\qquad
+\mathsf{GF}\varphi \;:=\; \mathsf{Streett}((\top, \varphi))
+\qquad\qquad
+\mathsf{FG}\neg\beta \;:=\; \mathsf{Streett}((\beta, \bot))
+\]
+Each rule\textquotesingle s concluding judgement discharges through one
+existing rule: \rulename{SugarAvoid} through the safety battery
+(\rulename{QSafetyBattery}) at the
+avoid set $[\![\beta]\!]$, with $\neg\beta$ read by the semantic
+negation clause $[\![\neg\beta]\!] = S \smallsetminus [\![\beta]\!]$
+(the \rulename{NNFDuality} atom dualities supply the syntactic normal
+form --- the atom swap alone when $\beta$ is an atom, De Morgan
+propagation when it is compound); \rulename{SugarGF} through the
+degenerate bundle (\rulename{StreettDegenerate}); \rulename{SugarFG}
+through one \rulename{QStreettBundle} node at the pair
+$(\beta, \bot)$.
+\end{brecipe}
+
+\begin{brecipe}[payload transport]\label{rec:sb-transport}
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\textbf{sugar} & \textbf{expansion} & \textbf{payload}\\
+\midrule
+$\mathsf{avoid}\,\beta$ & $\mathsf{G}\neg\beta$ & the safety kit at $U := [\![\beta]\!]$, verbatim\\
+$\mathsf{GF}\varphi$ & $\mathsf{Streett}((\top, \varphi))$ & the degenerate kit, verbatim\\
+$\mathsf{FG}\neg\beta$ & $\mathsf{Streett}((\beta, \bot))$ & one bundle pair: requests $[\![\beta]\!]$, response empty\\
+\end{tabular}
+\end{center}
+No unpack function is pending here, because none will ever exist: the
+constructors \emph{are} their expansions, so there is no sugar payload
+to transport from --- the strongest possible form of
+producers-elaborate-before-emission.
+\end{brecipe}
+
+\begin{bprop}[the exactness identities]\label{prop:sb-exact}
+(i) Avoidance (\rulename{SugarAvoid}): a path always avoids
+$[\![\beta]\!]$ iff it always
+satisfies $\neg\beta$ --- definitional, by the negation clause
+$[\![\neg\beta]\!] = S \smallsetminus [\![\beta]\!]$, with
+\rulename{NNFDuality} normalizing the syntax where needed.
+(ii) Recurrence (\rulename{SugarGF}): the pair $(\top, \varphi)$ holds iff
+$\varphi$-states occur infinitely often (the degeneration identity,
+proved as Proposition 4 of the \rulename{StreettDegenerate} section).
+(iii) Eventual permanence (\rulename{SugarFG}): the pair $(\beta, \bot)$ holds iff
+$\beta$-states occur only finitely often, i.e.\ iff eventually the path
+permanently satisfies $\neg\beta$:
+\[
+\bigl(\exists^\infty n,\ \omega_n \in [\![\beta]\!]\bigr) \Rightarrow
+\bigl(\exists^\infty n,\ \omega_n \in \varnothing\bigr)
+\;\Longleftrightarrow\;
+\neg\bigl(\exists^\infty n,\ \omega_n \in [\![\beta]\!]\bigr) ,
+\]
+since the consequent is false outright --- two lines: an implication
+into falsehood is the negation of its hypothesis, and finitely many
+$\beta$-visits along a discrete path is precisely a tail of
+$\neg\beta$-states.
+\end{bprop}
+\begin{proof}
+As displayed; only (iii) has any content, and its two lines are shown.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:sb-sound}
+Each sugared judgement is concluded by its target rule's theorem, with
+no additional obligation: the sugar constructor builds the expansion,
+so the sugared judgement \emph{is} the target judgement.
+\end{bprop}
+\begin{proof}
+Definitional unfolding plus the target sections' theorems. The witness
+that the surface implementation honours the definitions --- that sugar
+constructors build expansions rather than introducing new node kinds ---
+is the reference implementation's concrete-syntax canonicality test
+battery; no checker-facing artefact depends on it, since no downstream
+representation contains a sugar node.
+\end{proof}
+
+\begin{bremark}[why $\mathsf{FG}$ costs a bundle and $\mathsf{GF}$ costs
+only its degenerate case]
+The two dual sugars land at different points of the same rule.
+$\mathsf{GF}\varphi$ requests always and so erases the request
+machinery; $\mathsf{FG}\neg\beta$ makes $\beta$ itself the request and
+forbids response --- the ranking certificate must then pay out at every
+$\beta$-visit with nothing ever refunding it, which is exactly a proof
+that $\beta$-visits are finitely many. That both directions are single
+nodes of one rule --- where automaton-primitive designs pay a product
+construction for one of them --- is the practical content of the
+Streett-primitive choice (see the \rulename{QStreettBundle} section's
+remark).
+\end{bremark}
+
+\begin{anchors}
+sugar (i) target & the \rulename{QSafetyBattery} section; negation via the \rulename{NNFDuality} atom swaps\\
+sugar (ii) target & the \rulename{StreettDegenerate} section (degeneration identity proved there)\\
+sugar (iii) target & the \rulename{QStreettBundle} section, one pair $(\beta, \bot)$\\
+the three identities, event-level & \texttt{sugarAvoid\_denot} (\texttt{rfl}, axiom-free), \texttt{sugarGF\_denot}, \texttt{sugarFG\_denot} (bound in the entry)\\
+constructors build expansions & the reference implementation\textquotesingle s concrete-syntax canonicality battery (documentary; no wire artefact exists to check)\\
+\end{anchors}

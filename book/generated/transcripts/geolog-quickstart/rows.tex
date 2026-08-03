@@ -1,0 +1,18 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ geolog rows examples/routes.geolog
+// Declaration rows in the GeologMeta idiom (the schema you wrote is
+// itself data). refs: L<n> = local element minted at op[n]; G<name> =
+// genesis identity. This is the declaration slice; axioms are rows
+// too, in the same substrate — the committed listings under
+// theories/generated/ carry complete worked examples.
+op[   0] elta sort=G<Theory>                    // Theory "Routes"
+op[   1] elta sort=G<Sort>                      // Sort "Node"
+op[   2] funa fun=G<Sort/name> args=[L1] value=str:"Node"
+op[   3] funa fun=G<Sort/theory> args=[L1] value=L0
+op[   4] elta sort=G<Fun>                       // Fun "Edge"
+op[   5] funa fun=G<Fun/name> args=[L4] value=str:"Edge"
+    ⋮
+op[   8] elta sort=G<Field>                     // Field "src" of Edge
+op[   9] funa fun=G<Field/fun> args=[L8] value=L4
+    ⋮
+\end{Verbatim}

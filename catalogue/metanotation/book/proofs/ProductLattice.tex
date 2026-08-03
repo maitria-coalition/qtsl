@@ -1,0 +1,146 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe, at the certificate-family layer: one lattice node unpacks into
+a family of cited facet sequents. Like \rulename{PConstExact}, part of
+the discharge is by reduction to verified machinery rather than to
+catalogue nodes --- the transport step is a semantic monotonicity
+lemma with no catalogue counterpart, because hypernet extension is
+invisible to the sequent calculus --- and the recipe says so.}
+
+\textbf{Setting.}\enspace A \emph{certified attracting-block lattice}
+over a hypernet $H$ (the \texttt{CertifiedBlockLattice} structure
+quoted above) is a finite family of blocks --- each a region box
+formula plus its internal-facet inwardness sequents --- carrying
+explicit index-level lattice structure and wire confinement; the family
+is \emph{valid} when every facet sequent is semantically valid over
+$H$. The rule's premises: valid families $B_1$ over $H_1$ and $B_2$
+over $H_2$, and wire-disjointness
+$\wires(H_1) \cap \wires(H_2) = \emptyset$. Conclusion: the
+join-closure $\langle B_1 \times B_2 \rangle_{\vee}$ is certified over
+the disjoint union $H_1 \sqcup H_2$.
+
+\begin{brecipe}[the \rulename{ProductLattice} instance --- one node,
+a citation family]\label{rec:pl-instance}
+The rewrite replaces the lattice node by one derivation fragment
+\emph{per facet of per product block}, each of the same two-move shape:
+\[
+\inferrule*[Right=cite]{\;s_0 \rhd \text{a factor facet sequent (cited sub-proof)}\;}{\bigl\langle \mathrm{pre}(s_0) \wedge \mathrm{rider},\ \mathrm{post}(s_0) \bigr\rangle \ \text{over } H_1 \sqcup H_2}
+\]
+where the rider is the \emph{other} factor's box. The conclusion is
+kept verbatim --- the polynomial and predicate of the cited facet,
+unchanged --- because a composite facet of an axis-aligned product is
+normal to one factor's axis: its inwardness polynomial \emph{is} that
+factor's, the other factor's coordinates riding along as free box
+variables. Only the meet-generators $\{b_1 \times b_2\}$ are
+enumerated ($O(|B_1| \cdot |B_2|)$ blocks, $O(|B_1| + |B_2|)$
+distinct cited sequents); the join-closure's remaining elements ---
+exponentially many --- are never materialized, since a union block's
+boundary decomposes into sub-facets, each again normal to one axis and
+discharged by the same citation with a smaller rider.
+\end{brecipe}
+
+\begin{blemma}[transport: validity is monotone under hypernet
+extension]\label{lem:pl-transport}
+Let $H'$ extend $H$'s wire typing and contain $H$'s applications, and
+let $s$ be semantically valid over $H$ and well-scoped in $H$. Then
+$s$ is semantically valid over $H'$.
+\end{blemma}
+\begin{proof}
+An admissible valuation $\sigma$ of $H'$ restricts to a valuation of
+$H$ (read each $H$-typed wire through the extension), and the
+restriction is admissible: every entry a per-application semantic
+predicate reads is at a port wire, typed in $H$ by type consistency,
+where the restriction agrees with $\sigma$ by construction. Formulas
+whose free wires are $H$-typed therefore evaluate identically under
+$\sigma$ and its restriction --- by induction on terms and formulas,
+the only base case being a wire read, which is where well-scopedness
+is consumed. So from $\sigma \models \mathrm{pre}(s)$: the restriction
+satisfies $\mathrm{pre}(s)$, validity over $H$ gives the restriction
+satisfies $\mathrm{post}(s)$, and evaluation-agreement carries it back
+to $\sigma$. This is \texttt{Sequent.semanticallyValid\_extend};
+the well-scopedness hypothesis is not decoration --- a sequent reading
+a wire \emph{untyped} in $H$ evaluates that read differently in an
+extension that types it, and the induction's base case fails exactly
+there.
+\end{proof}
+
+\begin{blemma}[weaken, standalone]\label{lem:pl-weaken}
+If $\langle \mathrm{pre}, \mathrm{post} \rangle$ is semantically valid
+over $H$, so is
+$\langle \mathrm{pre} \wedge \mathrm{extra}, \mathrm{post} \rangle$,
+for any formula $\mathrm{extra}$.
+\end{blemma}
+\begin{proof}
+Project the premise (\texttt{Sequent.semanticallyValid\_weaken}). The
+rider needs no side condition --- in particular it may mention wires
+the cited factor has never heard of, which is the whole point.
+\end{proof}
+
+\begin{bprop}[soundness of \rulename{ProductLattice}]
+\label{prop:pl-sound}
+Given valid families over wire-disjoint hypernets, every facet sequent
+of every product block is semantically valid over
+$H_1 \sqcup H_2$.
+\end{bprop}
+\begin{proof}
+A product block's facet list is, by construction (\texttt{prodBlock}),
+the left factor's facets cited with the right factor's region as
+rider, concatenated with the symmetric family. For a left-cited facet:
+the disjoint union extends $H_1$'s wire typing and contains its
+applications (disjointness makes the union's linearity, acyclicity,
+and type consistency inherit from the factors --- this is where the
+side condition does structural work), so
+Lemma~\ref{lem:pl-transport} transports the factor's validity to the
+union, and Lemma~\ref{lem:pl-weaken} conjoins the rider. Symmetrically
+on the right. That is the entire proof
+(\texttt{sound\_productLattice}, through the two standing citation
+lemmas \texttt{sound\_productLattice\_citeLeft}/\texttt{citeRight} ---
+which also discharge the un-enumerated join blocks' sub-facets, with
+smaller riders).
+\end{proof}
+
+\begin{bremark}[why wire-disjointness is not decoration]
+\label{rem:pl-disjoint}
+With a shared wire the recipe fails twice. Structurally, the disjoint
+union is no longer well-formed as built (linearity of the concatenated
+application lists is proven \emph{from} disjointness). Semantically, no
+single transported sequent's validity would fail ---
+Lemma~\ref{lem:pl-weaken} conjoins \emph{any} rider, shared wires
+included --- but the assembled \emph{readout} would misdescribe the
+composite: the identification of every product-block facet with a
+cited factor facet (the other factor entering only as a rider) is
+proven from disjointness, and with a shared wire the built object is
+simply not a product of the factors.
+A single shared wire is precisely an \emph{interface}, and composition
+along an interface is \rulename{Promise}/small-gain territory --- the
+rule's applicability condition is the boundary between the two
+composition regimes, not a technicality.
+\end{bremark}
+
+\begin{bremark}[the completeness fence: flows only, and the
+map counterexample]\label{rem:pl-fence}
+Proposition~\ref{prop:pl-sound} is dynamics-free --- no premise
+mentions a flow or a map, so the rule is sound for both. What is
+\emph{flows-only} is the completeness reading from the source
+literature \cite{kalieswehbe2026}: for flows, the attractor lattice of
+a product is the coproduct of the factors' lattices, so the generated
+family is everything. For maps it is not: with
+$f(x) = -\tanh(2x)$ on $[-p, p]$ (where $\tanh(2p) = p$), the factor
+attractor lattice is $\{\emptyset, P, X\}$ with $P = \{p, -p\}$, yet
+$f \times f$ has the phase-locked period-two attractors
+$\{(p,p), (-p,-p)\}$ and $\{(p,-p), (-p,p)\}$ --- neither generated by
+factor attractors; the coproduct is a proper sublattice. The Lean
+statement is shaped so this cannot overreach: it certifies a lower
+bound family, and any decomposition-level readout from a map instance
+must be stated as ``at least this structure,'' never ``exactly this.''
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:pl-instance}: citation \& product blocks & \texttt{citeFacet}, \texttt{prodBlock}, \texttt{PProductLatticeData.prodBlocks}\\
+Lemma \ref{lem:pl-transport} & \texttt{Sequent.semanticallyValid\_extend}; restriction machinery \texttt{Hypernet.Valuation.restrict}, \texttt{Formula.holds\_restrict}, \texttt{PrimApp.semOk\_restrict}\\
+Lemma \ref{lem:pl-weaken} & \texttt{Sequent.semanticallyValid\_weaken}\\
+union well-formedness from disjointness & \texttt{Hypernet.disjUnion} (fields \texttt{linearity}, \texttt{acyclic}, \texttt{typeConsistent}); \texttt{Hypernet.WireDisjoint}\\
+Proposition \ref{prop:pl-sound} & \texttt{sound\_productLattice}; \texttt{sound\_productLattice\_citeLeft}/\texttt{citeRight}\\
+nested-application confinement & \texttt{prodBlocks\_confined}\\
+family validity (premise form) & \texttt{CertifiedBlockLattice.Valid}\\
+\end{anchors}

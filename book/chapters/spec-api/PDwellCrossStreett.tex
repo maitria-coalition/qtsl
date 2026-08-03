@@ -1,0 +1,54 @@
+\apilang{TypeScript}{spec.dwellStreett / crossStreett / pairBase / pairCmpl}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function dwellStreett(pairs: ReadonlyArray<StreettPair>): PathPred
+
+export function crossStreett(pairs: ReadonlyArray<StreettPair>): PathPred
+
+export function pairBase(req: StatePred, resp: StatePred): StreettPair
+
+export function pairCmpl(req: StatePred, resp: StatePred): StreettPair
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const dwellPart = s.probGe(
+  1n,
+  s.dwellStreett([s.pairCmpl(band, s.polyGe(1n, x1))]),
+);
+const crossPart = s.probLe(
+  Q.of(1, 2),
+  s.crossStreett([s.pairBase(band, s.polyGe(1n, x1))]),
+);
+\end{tssrc}
+\apiprov{A base-exact pair is also driven (through the recurrence spelling) by the liveness vector quoted under the derived spellings.}
+\apilang{Rust}{mtk\_catalogue::spec::PathPred::\{dwell\_streett, cross\_streett\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn dwell_streett(pairs: Vec<StreettPair>) -> PathPred
+
+pub fn cross_streett(pairs: Vec<StreettPair>) -> PathPred
+
+pub fn base(req: StatePred, resp: StatePred) -> Result<StreettPair, Refusal>
+
+pub fn cmpl(req: StatePred, resp: StatePred) -> StreettPair
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let dwell_part = ForallSpec::prob_ge(
+    q(1, 1),
+    PathPred::dwell_streett(vec![StreettPair::cmpl(
+        band.clone(),
+        StatePred::poly_ge(q(1, 1), x1()),
+    )]),
+)
+.unwrap();
+let cross_part = ForallSpec::prob_le(
+    q(1, 2),
+    PathPred::cross_streett(vec![StreettPair::base(
+        band.clone(),
+        StatePred::poly_ge(q(1, 1), x1()),
+    )
+    .unwrap()]),
+)
+.unwrap();
+\end{rustsrc}

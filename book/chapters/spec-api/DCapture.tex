@@ -1,0 +1,29 @@
+\apilang{TypeScript}{spec.derived.captureWithin}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+captureWithin(steps: QLike, capture: StatePred): ForallSpec
+\end{tssrc}
+\apiprov{definition --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+/** Capture within `steps` — `P_{>=1}[F_{<=steps} capture]` as a
+ * safety-face component (the credal stratum makes this worst-case
+ * over demonic branching/init). */
+captureWithin(steps: QLike, capture: StatePred): ForallSpec {
+  return probGe(1n, deadline(steps, capture));
+},
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::capture\_within}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn capture_within(steps: WitRat, capture: StatePred) -> Result<ForallSpec, Refusal>
+\end{rustsrc}
+\apiprov{definition --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+/// Wing C: capture within `steps` — `P_{>=1}[F_{<=steps} capture]`
+/// (the credal stratum makes this worst-case over demonic
+/// branching/init). Witness: the swing-up row — capture within 139
+/// steps from every default-reset init.
+pub fn capture_within(steps: WitRat, capture: StatePred) -> Result<ForallSpec, Refusal> {
+    ForallSpec::prob_ge(rat_int(1), PathPred::deadline(steps, capture, false)?)
+}
+\end{rustsrc}

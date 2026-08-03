@@ -1,0 +1,31 @@
+// Chase fixtures for the baked pair's subject/wiring fragment, in
+// theory vocabulary (the transposed carriage's spelling: transposed
+// relations keep function names; unary functions take the
+// synthesized `arg` field, constructors their declared fields, each
+// with the minted `out`). Instance blocks in one file chase jointly
+// in one model, so element names are unique per block. The battery
+// greps the chase transcript for named derived rows and judgments —
+// never exit codes alone.
+
+instance IfaceDerivation : Qtsl {
+  ma : Mech;
+  ia : Iface;
+  sa : System;
+
+  [arg: ma, out: ia] Mech/iface;
+  [mech: ma, out: sa] SysMech;
+}
+
+instance WiringWalk : Qtsl {
+  wb : Wiring;
+  sb, sb1 : System;
+  innb, tb2 : SystemList;
+  ifsb, tb1 : IfaceList;
+  ib, jb, ob : Iface;
+
+  [inner: innb, wiring: wb, out: sb] SysWire;
+  [inner: ifsb, outer: ob, out: wb] mkWiring;
+  [head: ib, tail: tb1, out: ifsb] ilCons;
+  [head: sb1, tail: tb2, out: innb] syCons;
+  [arg: sb1, out: jb] System/iface;
+}

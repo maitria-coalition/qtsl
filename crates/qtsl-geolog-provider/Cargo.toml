@@ -1,0 +1,69 @@
+[package]
+name = "qtsl-geolog-provider"
+description = "The QTSL application's ground provider for the geolog engine: exact-rational evaluators for the QTSL certificate side-condition families (linear-combination replay, PSD certificate checks, wire-size positivity, syntactic form checks), packaged as one GroundProvider value behind geolog-alpha's plugin seam."
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+# The plugin seam (the one engine-facing contract this crate implements).
+# The pin moves deliberately, with the conformance tests, never by
+# drift. Current pin: the engine commit that minted the baked-pair
+# vocabulary chain (theories/pins/baked_v1_pins.txt names the same
+# commit) — the reprovocab::baked derivation loads the minted revision
+# bodies through this engine's own meta-schema loader, so checker and
+# mint share one grammar vintage.
+geolog-ground-api = { git = "https://github.com/maitria-coalition/geolog-alpha-dev.git", rev = "83ebe88d5007b101112941f2b47ccb9cefd97fb9" }
+# The engine's cell codec: values cross the seam as canonical envelope
+# cells, and this crate decodes them with the same validating codec the
+# engine encodes with (never a bespoke parser). Default features off:
+# only the value/cell grammar is consumed here, not the signing seam.
+geolog-envelope = { git = "https://github.com/maitria-coalition/geolog-alpha-dev.git", rev = "83ebe88d5007b101112941f2b47ccb9cefd97fb9", default-features = false }
+# The meta-schema loader half (parse/load/hash/view — the chase-facing
+# half stays off): the reprovocab::baked vocabulary derives its
+# declaration index from the minted revisions' decoded declaration rows
+# via `load_revision` + `revision_view` (`DepView`), never from a
+# transcription. Same rev as the seam pins — one engine vintage.
+geolog-meta-rows = { git = "https://github.com/maitria-coalition/geolog-alpha-dev.git", rev = "83ebe88d5007b101112941f2b47ccb9cefd97fb9", default-features = false }
+
+# The org's one canonical hypernet decoder (AXHN0001 + digest): the
+# store-seam families (qtsl_kcite_wf, the circuit fragment of
+# qtsl_tr_grain/qtsl_tr_endo, qtsl_gate_scalar) decode cited store
+# objects through it — checker-side bytes-semantics at the shared
+# bottom-of-lattice home. Same pin
+# convention as the seam deps: moves deliberately, never by drift.
+maitria-hypernet = { git = "https://github.com/maitria-coalition/kernels-dev.git", rev = "4176759c2fff7cc00b8ce15e9251fc77c2e5ed6d" }
+
+# Exact arbitrary-precision arithmetic for the evaluators (the exact
+# tier has no rounding and invents no values).
+num-bigint = "0.5"
+num-traits = "0.2"
+thiserror = "2"
+# The dabs-emit producer binary's spec format: JSON is the deliberate
+# cross-repo contract here (the experiments repo's comparison programs
+# generate specs by hand and by script; human-readable beats a binary
+# codec for that seam). The library surface never touches it. Also
+# serves tests/pyref.rs (previously a dev-dependency).
+serde_json = "1"
+# Container signing for the dabs-emit producer binary (deterministic
+# public-seed key — reproducibility framing, not authority) and the
+# synthetic test batteries (previously a dev-dependency). Same major
+# as geolog-envelope's, so cargo unifies to one crate instance.
+ed25519-dalek = "2"
+
+[dev-dependencies]
+proptest = "1"
+# The binary arm of the ProbLog differential (tests/problog_checkref.rs)
+# wraps corpus cases as `problog-v0` certificates for an external
+# reference checker: CBOR out, derived serialization for the wrapper
+# structs. Both dev-only; the provider's own surface stays untouched.
+serde = { version = "1", features = ["derive"] }
+ciborium = "0.2"
+
+[[bin]]
+name = "glc-check"
+path = "src/bin/glc_check.rs"
+
+[[bin]]
+name = "dabs-emit"
+path = "src/bin/dabs_emit.rs"

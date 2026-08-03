@@ -1,0 +1,133 @@
+import std.{Nat, Q, Str, q_le, q_lt};
+
+// Engine-decided judgements (oracle = the qtsl certification plugin at
+// the engine's ground seam): bounded computations discharged by
+// evaluation, never derivation-defined.
+import qtsl.{qtsl_dabs_wf, qtsl_dabs_absorb_bracket,
+             qtsl_dabs_posterior_bracket};
+
+// DtmcAbsorb.geolog
+//
+// Finite-horizon absorption brackets for stored-row chains: the
+// certificate species for guaranteed bounds on eventual-absorption
+// measures — and, through the posterior form, for normalized
+// conditional measures (Bayesian posteriors of discrete probabilistic
+// programs, where a program is compiled to a chain by an untrusted
+// translation).
+//
+// Evaluation semantics (the whole species in one paragraph): write
+// m_0 = the chain's dinit measure and m_{t+1} = m_t . K where K is
+// the stored dprob rows COMPLETED by self-loops at every state with
+// no stored outgoing row (rowless-is-absorbing; mass is conserved by
+// C-DTMC-ROWMASS on stored rows plus the completion). For a query q
+// with horizon T, class labeling dclass and rejection labeling
+// dreject (labeled states must be stored-absorbing — the wf demand):
+// N_c(q) = m_T restricted to class-c states, summed; S(q) = sum of
+// N_c over all classes; R(q) = 1 - S(q) - (m_T restricted to rejected
+// states, summed) — the residual: alive, rowless-held, and
+// unclassified-absorbed mass.
+//
+// Soundness (the bridge lemmas, mechanized — see the catalogue entry
+// for lemma names and grades): for every t' >= T, the t'-step
+// class-c mass of the completed chain lies in [N_c, N_c + R]; both
+// endpoints are monotone data of absorbing sets (class gain after T
+// is bounded by the non-absorbed mass at T). Consequently the
+// eventual (supremum) class measure M_c lies in [N_c, N_c + R], and
+// for the normalized measure with normalizer M = sum over classes:
+// M_c/M lies in [N_c/(S+R), (N_c+R)/(S+R)] whenever S > 0 (the
+// correlated-ratio form; the evaluator REFUSES posterior claims at
+// S = 0 — no positive evidence witness). The binding of stored rows
+// to any external program is a translation obligation outside this
+// species' trust path.
+
+theory DtmcAbsorb extends Dtmc {
+
+  // One absorption query on one chain: a horizon plus a labeling.
+  // The chain binding rides an ANCHOR STATE: the query's chain IS its
+  // anchor's chain (`q DAbsQuery/anchor DState/dtmc`). The chain
+  // entity sort shares its name with its theory, and a theory name in
+  // type position means a model of that theory in every extending
+  // scope — so the entity is reached through a state, whose sort name
+  // is unambiguous, rather than named directly.
+  DAbsQuery : Set;
+  DAbsQuery/anchor  : DAbsQuery -> DState;
+  DAbsQuery/horizon : DAbsQuery -> Nat;
+
+  // Class labeling: at most one class per state per query
+  // (functionality; a doubly-classed state is unrepresentable).
+  dclass : {q: DAbsQuery, state: DState} -> Nat;
+
+  // Rejection labeling: mass excluded from the posterior normalizer
+  // (failed hard conditioning). Nonterminating mass is likewise
+  // excluded — by never being labeled, it accrues to the residual.
+  dreject : {q: DAbsQuery, state: DState} -> Prop;
+
+  // A state is never both classed and rejected.
+  refuse ax/wf/dabs_class_reject_disjoint : forall q : DAbsQuery,
+      s : DState, c : Nat.
+    c = {q: q, state: s} dclass,
+    {q: q, state: s} dreject
+    |- false;
+
+  // Labels bind states of the query's own chain (term-form equality:
+  // the chain entity is mentioned through applications, never bound —
+  // see the anchor note above).
+  chase ax/wf/dabs_class_same_dtmc : forall q : DAbsQuery, s : DState,
+      c : Nat.
+    c = {q: q, state: s} dclass
+    |- s DState/dtmc = q DAbsQuery/anchor DState/dtmc;
+
+  chase ax/wf/dabs_reject_same_dtmc : forall q : DAbsQuery, s : DState.
+    {q: q, state: s} dreject
+    |- s DState/dtmc = q DAbsQuery/anchor DState/dtmc;
+
+  // Well-formedness demand, minted per query (side-condition
+  // C-DABS-WF): every labeled state is stored-absorbing — either no
+  // stored outgoing row, or exactly the unit self-loop. A labeled
+  // state that leaked mass would break the monotonicity the bridge
+  // lemmas rest on; the evaluator refuses it.
+  qtsl_dabs_wf : {q: DAbsQuery} -> Prop;   // side-condition
+
+  report ax/wf/dabs_wf : forall q : DAbsQuery.
+    |- {q: q} qtsl_dabs_wf;
+
+  // Unnormalized bracket claim (side-condition C-DABS-ABSORB): holds
+  // iff lo <= N_c and N_c + R <= hi, both recomputed by the T-step
+  // evaluation above. Refuses past the evaluation budget rather than
+  // verdicting.
+  qtsl_dabs_absorb_bracket : {q: DAbsQuery, class: Nat, lo: Q, hi: Q}
+    -> Prop;   // side-condition
+
+  // Normalized (posterior) bracket claim (side-condition
+  // C-DABS-POSTERIOR): holds iff lo <= N_c/(S+R) and
+  // (N_c+R)/(S+R) <= hi; refuses when S = 0.
+  qtsl_dabs_posterior_bracket : {q: DAbsQuery, class: Nat, lo: Q,
+                                 hi: Q} -> Prop;   // side-condition
+
+  // Claimed intervals are intervals.
+  report ax/wf/dabs_absorb_order : forall q : DAbsQuery, c : Nat,
+      l : Q, h : Q.
+    {q: q, class: c, lo: l, hi: h} qtsl_dabs_absorb_bracket
+    |- {l: l, r: h} q_le;
+
+  report ax/wf/dabs_posterior_order : forall q : DAbsQuery, c : Nat,
+      l : Q, h : Q.
+    {q: q, class: c, lo: l, hi: h} qtsl_dabs_posterior_bracket
+    |- {l: l, r: h} q_le;
+
+  // ==========================================================
+  // Deliberately absent (the testable negatives)
+  // ==========================================================
+  //
+  // * SOFT SCORES (weighted, non-probability rows): the score-carrying
+  //   transfer needs the multiplicative contraction strengthening of
+  //   the qtsl_gen_form seam (transfer <= c . V on a region, with exit
+  //   domination) — designed as the gen-form generalization with a
+  //   c = 1 subsumption of the supermartingale corollary, staged
+  //   separately; absent here so that every row this species reads
+  //   stays under C-DTMC-ROWMASS.
+  // * MOMENT BRACKETS (expected values, higher moments): sound moment
+  //   tails need geometric-decay data (the same contraction rows), not
+  //   conservation alone; deliberately absent until that species lands.
+  // * TAIL ASYMPTOTICS (O(c^n) claims): same dependency, same reason.
+}

@@ -1,0 +1,11 @@
+# api-system.toml.d/S-STATESHARE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-STATESHARE"
+entity = "composition pattern"
+ts_absent = '''As for Rust: reserved for a later revision of the producer surface.'''
+rust_absent = '''None by design at this preview: state-sharing / net-of-nets (gluing along shared state --- places, common noise --- rather than signal wires; the generator's additivity over transitions as the designed semantics) is reserved for a later revision of the producer surface, with its design warrant recorded; SDCPN net-of-nets and common-noise mean-field composition are its first customers.'''

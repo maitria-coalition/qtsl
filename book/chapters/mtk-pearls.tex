@@ -1,0 +1,339 @@
+\chapter{Implementation Pearls}
+\label{ch:mtk-pearls}
+
+\noindent\draftmark\medskip
+
+This chapter is written in the tradition of Bentley's \emph{Programming
+Pearls} \cite{bentley2000pearls}: short, self-contained engineering essays, one per design
+decision that earned its place in the producer stack. The genre has a
+discipline of its own --- a pearl is not advice; it is a technique with
+the measurement that decided it --- and this chapter keeps to it. Each
+essay states the problem, the technique, and the receipt: numbers from
+committed artefacts, reproducible from the public repositories where
+the artefact has migrated, and identified as workshop-record
+measurements where it has not yet (per the preview note at the front of
+this volume). The common thread is that \emph{certified-producer
+engineering} --- code whose every output faces an unforgiving checker
+--- quietly inverts several classic engineering trade-offs, and each
+pearl records one such inversion. Where the agents' cookbook
+(\bookref{ch:mtk-cookbook}{the agents' cookbook}) states the moves of a
+good untrusted producer, this chapter states the decisions that hold up
+the machinery those moves run on.
+
+\section{The Certifying Tier Is a GPU Workload Too}
+\label{sec:pearl-exact-gpu}
+
+\paragraph{The problem.} The producer stack's central split ---
+a fast float tier proposes, an exact tier certifies
+(\bookref{ch:mtk-cookbook}{the cookbook}, \emph{Sloppy Proposer, Exact
+Disposer}) --- is usually read as a hardware split: floats on the
+device, exact rationals on the host. The economics that force floats
+out of the inner search loop seem, by the same logic, to force
+exactness off the device. In the workshop prototype that seeded the
+toolkit's kernels, one per-leaf basis-change GEMV at a realistic shape
+cost $715\,\mu\mathrm{s}$ in exact-$\Q$ arithmetic on the CPU, against
+$4.65\,\mu\mathrm{s}$ in directed \texttt{f64} on the same CPU and
+$191$\,ns on the device --- three and a half orders of magnitude
+between the exact path and the device path. Leave exactness host-side
+and serial, and the moment search becomes device-fast, certificate
+assembly becomes the pipeline's ceiling.
+
+\paragraph{The technique.} Put the exact tier on the device as an
+\emph{integer} workload. The certifying kernels in \path{crates/mtk}
+represent a batch of rational tables as sign-magnitude integer
+numerators in base-$2^{64}$ limb planes over \emph{one} positive shared
+denominator per cell (the schoolbook common-denominator move,
+industrialized), so that every transform is an integer recurrence
+with an explicit denominator-bookkeeping rule: no division, no gcd, no
+floating point anywhere in the certifying path. Reduction to canonical
+form happens host-side at the boundary. Fixed-capacity limb arithmetic
+is sound only if capacity exhaustion is \emph{detected}, never wrapped,
+so every product writes into scratch of compile-time capacity with
+stated headroom lemmas, every store back is fit-checked, and the
+carry-out flag is captured and treated as overflow anyway --- the lemma
+and the flag would both have to fail. On overflow the kernel poisons
+the cell: outputs zeroed, routing flag set, the cell's work abandoned.
+A poisoned cell's outputs are never read; the promotion ladder
+re-derives it from its \emph{inputs} at the next tier --- a wider
+device width, up to sixteen limbs, then unbounded host integers. Being
+wrong about a width costs a retry one rung up, never a wrong table.
+The kernels themselves ship as embedded CUDA source, compiled at
+runtime for whatever device is present, which makes the development
+loop one \texttt{cargo run} on any machine; an ahead-of-time path can join
+later behind the same module seam (and when it does, the
+pipeline-of-record law of section~\ref{sec:pearl-lane-law} applies to
+it).
+
+\paragraph{The receipt.} The exact-tier selftest runs eleven cases
+spanning the census shapes, fused transform chains, a
+$\sim$130-digit-coefficient regime, and engineered overflow-boundary
+fixtures, demanding bit-exact equality against the host big-integer
+reference for every reduced table entry, every verdict, and every
+first-violation address --- with the promotion ladder's rungs each
+demonstrably exercised. Replaying a committed certificate from its
+bytes reproduces its certified threshold --- a 55-digit reduced
+rational --- bit-for-bit across three substrates: Python
+\texttt{fractions}, Rust \texttt{num-bigint}, and CUDA \texttt{u64}
+limb planes. The full soundness burden, including what ``bit-exact''
+means here and the residual risks, is stated in
+\path{crates/mtk/BERNX-SOUNDNESS.md} in the
+\path{maitria-coalition/mtk} repository.
+
+\section{Round Outward --- to the Verifier's Resolution}
+\label{sec:pearl-outward}
+
+\paragraph{The problem.} The base law of float participation in a
+certified system is directed rounding: on any verdict-relevant path,
+every operation rounds toward the safe side --- toward $-\infty$ for
+lower bounds, toward $+\infty$ for upper bounds --- so enclosures stay
+enclosures. The law is necessary, and it is not sufficient. A
+certifier campaign in the workshop lineage banked the counterexample:
+its checker decides transcendental sign questions by bisection on a
+dyadic lattice, deepening to a resolution of $2^{-256}$, and a
+producer emission relying on a $10^{-70}$ \emph{relative} guard alone
+can land a correctly-rounded margin \emph{below one lattice unit}.
+Every rounding outward, every claim true in $\mathbb{R}$ --- and
+undecidable at any depth the checker will ever spend: a correct
+refusal of a true claim, forever.
+
+\paragraph{The technique.} Treat the emission grid as part of the
+interface. The producer quantizes every emitted bound outward onto a
+dyadic grid coarse enough that each claimed margin clears the
+verifier's decision lattice by whole grid steps --- in the campaign
+above, one full $2^{-96}$ step outward keeps every margin decidable at
+bisection depth 16--64. The doctrine gains a clause: \emph{exactness
+lives in the direction of rounding, and the magnitude of rounding must
+respect the verifier's resolution.} The cost is $2^{-96}$ of
+tightness, unmeasurable at certificate scale; the benefit is that a
+refusal now carries information --- it indicts the claim, not the
+resolution. Two smaller dividends follow. Dyadic endpoints are
+exact rationals --- an \texttt{f64} \emph{is} a dyadic rational --- so
+the checking side compares them in exact arithmetic, and a certificate
+that confines itself to the dyadic grid never smuggles a rounding into
+its own statement. And grid-aligned emissions keep denominators
+uniform across a certificate's rows, which the exact tier's
+shared-denominator representation
+(section~\ref{sec:pearl-exact-gpu}) rewards directly.
+
+\paragraph{The receipt.} Workshop record: the continuous-latents
+certifier behind the counterexample above landed with thirteen
+artefacts accepted under truth containment, thirteen mutants refused
+at their designed loci, and a twenty-six-case property layer --- on
+the grid-clearing emission discipline. The lattice constants above
+($2^{-256}$ checker resolution, $2^{-96}$ emission step, decision
+depth 16--64) are that campaign's numbers; its artefacts migrate to
+the public repositories with their campaign, per the preview note.
+
+\section{A Lane May Change Cost, Never Verdicts}
+\label{sec:pearl-lane-law}
+
+\paragraph{The problem.} Multi-architecture fast paths rot in a
+characteristic way: not silent breakage but \emph{silent divergence},
+an optimized lane that is almost always equal to the reference.
+Hand-vectorized code that must be faster by assumption --- and equal
+by assumption --- is how fast-path crates decay. In a system whose
+outputs face a checker, a divergent producer-side lane wastes
+campaigns; a divergent screening lane on the checking side is a
+soundness incident in waiting.
+
+\paragraph{The technique.} The shared-kernels repository
+(\path{maitria-coalition/kernels}) binds every kernel to one law:
+\emph{an acceleration lane may change cost, never verdicts.} Three
+structural consequences. \emph{Reference first}: every kernel ships a
+portable scalar reference, written for obviousness, always compiled
+--- the reference is the semantics; lanes are the economics.
+\emph{Receipts before dispatch}: a property-based differential battery
+gates every lane in CI, but passing the battery earns a lane only
+existence; a lane becomes its architecture's default only with a
+measured receipt on real hardware, committed to the repository --- and
+a lane that loses to the reference on its own target stays available,
+un-dispatched, and marked. \emph{Fit-detection, never approximation}:
+fixed-width paths detect inputs they cannot represent exactly and
+refuse them to the caller's promotion ladder; no rounding exists on
+any verdict-relevant path. For JIT-compiled device lanes there is a
+fourth: the same kernel source can compile branch-free under an
+offline pipeline and branchy --- an order of magnitude slower ---
+under a runtime pipeline, so every device lane names its \emph{pipeline
+of record}, acceptance benches run that pipeline, and the disassembly
+branch count is printed at build time and recorded in the receipt as a
+watched number.
+
+\paragraph{The receipt.} The founding receipts of the
+coefficient-sweep family, committed under \path{receipts/} in the
+kernels repository: the NEON lane at $1.47$--$3.00\times$ the
+reference across shapes on a Grace-class aarch64 workstation, the AVX2
+lane at $1.25$--$3.96\times$ on a Skylake-W Xeon --- with the
+receipt's own candid reading attached, that the wins are modest at the
+largest sizes because a streaming \texttt{i64} scan leaves cache and
+becomes memory-bandwidth-bound. The dispatch code cites those numbers,
+not the intuition they corrected. And the batteries earn their keep in
+both directions: the GPU interval family's \emph{first} battery run
+falsified the oracle, not the kernels --- a naive exact-rational
+reference had missed IEEE~754's signed-zero rules \cite{ieee754} (an
+exactly-cancelling round-toward-$-\infty$ addition yields $-0.0$; an
+exact-zero product carries the XOR of the operand signs). The device
+was right; the oracle now spells the exact-zero cases out, and the
+repaired family ran sixteen-for-sixteen green at a hundred property
+examples each --- a battery its committed receipts have since grown
+to thirty-three properties, still all green at the same hundred. Exact rationals carry no signed zero, so an exactness oracle for
+float behaviour must state IEEE's sign semantics explicitly --- a
+differential battery is symmetric, and the symmetry is a feature.
+
+\section{The Babysitter Thread}
+\label{sec:pearl-babysitter}
+
+\paragraph{The problem.} An exact producer grinding a large obligation
+frontier can be legitimately silent for minutes: no intermediate
+result is trustworthy enough to print, and the hot loop has better
+things to do than I/O. But at an operator's terminal ---
+increasingly, an operating \emph{agent's} terminal --- ``no output for
+minutes'' is indistinguishable from ``hung,'' and the rational
+response to a hung-looking grinder is to kill it, wasting exactly the
+work the silence was hiding. The doubt is the cost: it can be resolved
+only by waiting longer or killing sooner, and both resolutions are
+expensive. Classic optimization-solver CLIs solved this decades ago:
+an iteration line, about once a second.
+
+\paragraph{The technique.} The toolkit's convention: any hot loop
+expected to run beyond about a second reports progress to standard
+output at least once per second --- iteration count plus whatever else
+is cheaply at hand (objective, residual, cells retired). The
+implementation keeps the reporting out of the loop's way: the hot loop
+maintains \emph{only counters}, written with relaxed atomic stores ---
+no I/O, no clock reads, no timing branches on the hot path --- while a
+\emph{babysitter thread} wakes on a system timer about once a second,
+reads the counters, and prints. Where the loop body is already chunky,
+the degenerate inline form suffices: consult the clock only every
+$N$th iteration and print when a second has elapsed --- the event-loop
+engine in \path{crates/mtk-eventloop} does exactly this in its replay
+path (every 64th application, one elapsed check) and rate-limits its
+per-pass progress lines to the same once-per-second cadence, with the
+final line always printed. Where a verb's
+standard output is a machine-consumed data channel, the collision is
+flagged and the progress line moves --- never silently dropped.
+
+\paragraph{The receipt.} The convention entered the toolkit the usual
+way: a long exact-tier run drew a ``no sign of progress'' report, and
+settling that doubt cost more than the instrumentation ever would
+have. The fix is as close to free as instrumentation gets --- a
+relaxed store per iteration and one thread sleeping on a timer --- and
+both forms are landed machinery in the \path{mtk} repository. The
+exact solver loops carry the full form
+(\path{crates/mtk/src/progress.rs}: two relaxed counters, threaded as
+an optional argument so that opting out costs nothing, with the
+\texttt{lp-solve} verb's exact path spawning the once-per-second
+monitor); the
+event-loop engine's replay path carries the inline form
+(\path{crates/mtk-eventloop/src/engine.rs}). The surface also crosses
+the language boundary. The toolkit's TypeScript bindings expose the
+same counters as a polling handle over asynchronous solve variants;
+JavaScript gives the babysitter and the baby one thread to share, so
+the solve must leave it before any timer can read a counter mid-grind.
+The printing monitor stays on the consumer's side of the boundary,
+where a collision with a machine-consumed output channel is fixable at
+the call site rather than at a process boundary. One detail is worth copying: a test in
+each ticking module, on both sides of the language boundary, asserts
+both that the counters move and that their presence changes no outcome
+--- the same run, bit-identical, with and without the observer. The pearl is the
+asymmetry: the counters cost nanoseconds per iteration; their absence
+is priced in killed runs.
+
+\section{A Certificate Is Database Content, Not a File Format}
+\label{sec:pearl-cert-rows}
+
+\paragraph{The problem.} Every bespoke certificate file format breeds
+an ecosystem tax: one parser per consumer, version skew between them,
+vendored readers drifting from the spec, and an interchange layer that
+slowly comes to carry semantics nobody proved anything about.
+The toolkit's development lineage paid this tax once --- an early
+binary certificate format grew four independent readers before it was
+deliberately retired --- and the replacement is a structural decision,
+not a better format.
+
+\paragraph{The technique.} Certificates are ordinary rows in the
+logical database: columns of exact scalars, tensor-valued content
+where the payload is genuinely tensor-shaped, stored under the
+certificate theory that the \path{qtsl} repository defines as data
+(\path{theories/Qtsl.geolog}, extending the Bernstein Logic proof
+tower of \path{theories/BernsteinLogic.geolog}), in the
+same content-addressed commits as everything else. There is no
+intermediate certificate file format to version, so there is none to
+drift; a checker's input is a sealed commit body, and the same bytes
+serve every consumer --- the production engine's incremental
+monitoring, the certified-checker route, the reflection route into a
+proof assistant's kernel --- with no translation step left to audit.
+Merge is set union plus re-derivation, and provenance questions
+(\emph{who asserted this row, and did anyone assert its
+contradiction?}) are structural properties of signed content-addressed
+commits rather than per-format afterthoughts. What remains outside the
+database is deliberately thin: the untrusted tiers exchange proposals
+and refusals as CBOR shapes in a dependency-free types crate
+(\path{CONTRACTS.md} \S1.2 in the \path{mtk} repository draws the
+boundary: witness interchange is \emph{not a proof format}), so the
+producer's conveniences can evolve freely without a byte of them
+leaking into the checked surface's semantics.
+
+\paragraph{The receipt.} The interchange layer's golden vectors decode
+a committed certificate whose payload carries 55-digit big-integer
+fractions and round-trip it losslessly through the v0 shapes
+(\path{crates/witness-types/tests/golden.rs} in the \path{mtk} repository)
+--- exactness surviving serialization is a test, not a hope. And the
+next pearl depends on this one: canonical content is what makes
+byte-identity a meaningful instrument in the first place.
+
+\section{Byte-Identity Is a Conformance Instrument}
+\label{sec:pearl-byte-identity}
+
+\paragraph{The problem.} Cross-platform reproducibility for numerical
+systems is conventionally stated in tolerances --- ``agrees to
+$10^{-9}$ across machines'' --- which reintroduces judgment exactly
+where an audit wants none: who chose the tolerance, and what drifted
+inside it? A certificate-producing system can demand more. If the
+certifying path is exact and the emission is canonical, the correct
+cross-platform claim is not agreement within tolerance; it is
+\emph{the same bytes}.
+
+\paragraph{The technique.} Make the producer deterministic by
+construction --- exact arithmetic on the certifying path, so no
+platform's float behaviour can enter
+(section~\ref{sec:pearl-exact-gpu}); fixed iteration and emission
+orders, so no hash-map enumeration nondeterminism survives; canonical
+serialization (section~\ref{sec:pearl-cert-rows}) --- and
+cross-silicon conformance collapses to \texttt{cmp}. The split this
+buys is exactly the split the system's trust story wants: the
+\emph{verdict} column of any re-run table must be identical across
+machines, while the \emph{time} column is allowed to vary and thereby
+becomes a genuine hardware measurement instead of a confound.
+
+\paragraph{The receipt.} The reproduction spine's semiconductor-fab
+case study (the worked example of \bookref{ch:qtsl-minifab}{the
+semiconductor chapter}; battery and receipts in the \path{semicon/}
+tree of \path{maitria-coalition/qtsl-experiments}) was re-run
+end-to-end on two boxes of different instruction sets --- a
+Grace-class aarch64 workstation and an x86-64 EPYC cloud instance.
+Every emitted certificate came back byte-identical to the committed
+fixtures on both: ten of ten fluid-scheduling certificates, with the
+certified slack values matching as exact rationals; six of six
+station-cover certificates by SHA-256; the policy-separation numbers
+reproduced as identical exact rationals ($\varepsilon = 1/43200$
+against $1/38880$ at the near-capacity operating point); and the
+deliberate failure probes --- the honest-stop cases --- still failing
+correctly on both machines, producer face and checker-mutant face
+alike. The checker battery ran all sixteen positive fixtures and all
+thirteen mutants to their expected verdicts on both boxes. The timing
+columns, meanwhile, differed by a uniform $1.7$--$1.9\times$
+single-core factor across producer walls and check kernels --- a
+bridge measurement that classifies every cross-box timing delta as
+hardware economics, with evidence, rather than leaving it to argument.
+Determinism turned an entire re-validation campaign into a column of
+\emph{identical} plus one real hardware number.
+
+\bigskip
+
+\noindent Six decisions, one shape: in a system where every claim must
+survive an independent checker, the engineering wins go to whoever
+moves judgment out of the pipeline and into artefacts --- exactness
+where floats were assumed, grids where guards were assumed, receipts
+where intuition was assumed, bytes where tolerances were assumed. The
+measurements above are what those trades cost and what they paid; the
+repositories carry the artefacts to re-run them.

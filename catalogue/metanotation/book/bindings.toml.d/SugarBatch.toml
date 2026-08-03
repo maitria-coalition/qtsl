@@ -1,0 +1,24 @@
+# bindings.toml.d/SugarBatch.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'SugarBatch'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "sugarAvoid_denot"
+sha256 = "d611c63a09904008bbba918a63298c234700a59aea603ffe5df925f108f11562"
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "sugarFG_denot"
+sha256 = "343a780363ee7cdca0234db36007364b44283c622bb69953a8c93e804710c6e8"
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "sugarGF_denot"
+sha256 = "846b373950564b8320c7aa7999b77f6672fbdf706e342a99ab6e0eea85620af9"
+
+[[correspondence]]
+entry = "SugarBatch"
+steele_sha256 = "b6a19cd5d71db2c7221ea042da42bccc7eda2d03ef8cd0d8570b31ed16f746a4"
+statements_sha256 = "4ebd257908606ed3e0966f1716230d743dac6a5a78d10983b85bcf0c96dd0fc1"
+prose_sha256 = "0f40184237626deda00c6e5e2eb6ca1c4839de957812c3207f7c4026e6b64c1b"
+

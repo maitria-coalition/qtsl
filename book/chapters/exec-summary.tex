@@ -1,0 +1,267 @@
+\chapter{Executive Summary}
+\label{ch:exec-summary}
+
+\noindent\draftmark\medskip
+
+MAITRIA stands for \emph{Mathematical Assurance and Interaction Toolkit
+for Reliable Intelligent Agents}: a bundle of public-good software and
+mathematics built to discharge the Safeguarded AI programme's TA1.1
+and TA1.2 objectives --- a professional-grade implementation of the
+modelling-language backend, with machine-checkable assurance carried
+through every layer. This book is that bundle's manual: quick starts,
+tutorials, and normative references for its three components, in one
+volume, written for readers who know the programme's founding
+documents and know
+category theory, CRDTs, or verification at research depth. Since it
+is addressed to machine as well as to human readers, the \LaTeX{}
+source is published beside the PDF.
+
+\section*{The three components}
+
+\textbf{Geolog} is the modelling substrate: a relational backend
+grounded in geometric logic, in which theories, models, and the
+toolkit's own rule systems are object-level data under a single
+meta-schema, with the chase as its engine. Persistence, version control, and
+synchronization are native to the data model rather than bolted on as
+diff-and-merge over text, and capability-based authorization is
+designed to converge with the Keyhive line of work. The public cut,
+\texttt{geolog-alpha}, has been factored for its debut: a tidy, easily
+auditable core that happens to contain platform-optimized decision
+procedures for the ground relations the logics need, gated behind
+feature flags, while the logics' \emph{rules} live as object-level
+entries with respect to geolog's meta-schema, not as engine code.
+
+\textbf{QTSL}, the Quantitative Temporal Specification Logic, is the
+specification layer: quantitative temporal properties --- safety,
+reach-avoidance, persistence, and recurrence at stated quantitative
+confidence --- unpacked by the logic's own proof theory into
+Streett/tower verification conditions~\cite{abate24,abate26a} over
+geolog. That proof theory
+descends from Bernstein Logic, which survives in the finished design
+as a named fragment. The discipline throughout is certificate-first:
+untrusted, fast, freely sloppy searches \emph{propose}; a small exact
+kernel \emph{disposes}. The certificates that discipline produces are
+signed, content-addressed geolog commits, and three checking paths
+consume those commits directly --- one set of bytes, no per-path
+export format, three consumers built to fail differently:
+\begin{itemize}
+\item \texttt{geolog-alpha} is the production path, live today: the
+  chase engine checks certificate rows incrementally as commits
+  arrive, running QTSL's rules as it runs any theory. Its comparative
+  advantage is throughput and integration; its acceleration lanes
+  (GPU where the hardware offers them, SIMD elsewhere) are
+  conformance-gated, so a lane may change cost, never a verdict. Its
+  assurance is engineering-grade by deliberate policy: reference
+  implementations, differential batteries, rebuild-invariance checks,
+  and mutant corpora built to fool it, rather than mechanized
+  theorems. That policy sets an assurance level; it does not offload
+  soundness. For every certificate species beyond the Bernstein Logic
+  fragment, this engine is today the only checker there is, and a
+  certificate that fooled it would be a soundness failure of the
+  toolkit. What separates it from \texttt{qtslab} is the size of the
+  trusted base and the grade of the evidence --- mechanized down to
+  the instruction set on one side, hardened against every attack we
+  could construct on the other. On the Bernstein Logic fragment,
+  whatever this engine derives can be re-checked, from the same
+  bytes, by the two paths below.
+\item \texttt{qtslab} is the certified path and the smallest trusted
+  base of the three: a standalone binary whose soundness theorem ---
+  machine-checked in HOL4 and grounded, through the CakeML verified
+  compiler~\cite{kumar14cakeml}, in the semantics of the Arm
+  instruction set itself ---
+  says that if the binary prints ACCEPT on a claim followed by an
+  arbitrary stream of bytes, the claim is semantically true; decode
+  totality over arbitrary input is part of the proof obligation, so
+  malformed bytes can end only in a refusal with a witness. It is
+  assembling now, along a demonstrated route: decode totality is
+  proven, and the same compiler-and-theorem recipe has already
+  carried a complete predecessor checker to a machine-code soundness
+  theorem on real hardware. \texttt{qtslab} only checks the Bernstein
+  Logic fragment of QTSL, so it never sees a probability. The
+  fragment --- sequents over the certificate's own declared hypernet
+  (chapter~\ref{ch:qtsl-hypernets}), certified valid under every
+  admissible valuation --- is all its input format carries today, and
+  the boundary fails closed: a certificate reaching beyond it is
+  refused, never silently accepted.
+\item Lean is the independence path: the same bytes, accepted by the
+  Lean kernel as a theorem via a reflection principle. The
+  rule-by-rule soundness lemmas the calculus rests on are developed
+  in Lean and load-bearing today; the checking route itself was
+  expected to be too slow for machine-scale certificates, and was kept
+  in the roster to measure that rather than assert it. It has been
+  measured --- twice, across two certificate-format generations ---
+  and the Experiments chapter carries the result: a scaling law and an
+  admission gate for the compiled route, a kernel-mode envelope
+  already exhausted below a kilobyte of certificate, and the
+  expectation confirmed with its boundary stated. In exchange, the
+  route ties the system to a proof kernel scrutinized by a large
+  community that owes this toolkit nothing.
+\end{itemize}
+That boundary is \texttt{qtslab}'s, not the vocabulary's: the
+certificate theory itself now encodes the full QTSL vocabulary ---
+Systems, Specs, and the judgments connecting them --- as a
+machine-checked schema, with strict well-formedness checks, a
+termination certificate for its rule set, and fixture and mutant
+batteries, all run under the \texttt{geolog-alpha} binary. That
+theory set ships in this repository as data, battery beside it:
+\path{theories/Qtsl.geolog}, extending the Bernstein Logic proof
+tower of \path{theories/BernsteinLogic.geolog}. Producer-side
+emission is live as well: the MTK producer seals certificate rows in
+this vocabulary as single signed geolog commits, and the reproduction
+spine already carries benchmark families from several of its
+campaigns in that sealed form, mutant batteries and re-checking make
+targets beside them. What remains open is
+the growth of \texttt{qtslab}'s machine-checked coverage toward the
+full logic. A certificate that
+passes all three paths has been checked by artefacts that share no
+implementation and no compiler and were built to fail differently; any one of them
+alone is already a complete answer to ``why should I believe this?''
+The Rule Catalogue chapter carries the calculus rule by rule in
+literate form, each covered entry beside its mechanized statements
+and signed check receipts, under a coverage dashboard recording how far
+mechanized verification of soundness actually extends.
+
+\textbf{MTK} is the producer stack: the machinery that makes
+certificate production cheap enough to do at scale. It contributes the
+numerically heavy proposers as GPU kernel rows --- Bernstein and
+Chebyshev table construction, cell and simplex indexing, batched linear
+programming, and eigensolves --- each returning witness-typed output that
+the exact tier can dispose of. Its agent surface is specified and
+arriving: a session protocol under which agents will drive tactic
+selection over a stateful obligation workspace, with the strategy
+intelligence supplied by the reader as the language model of their
+choice. None of it is in the trusted base: not the proposers, not the
+GPU code, not any language model driving the strategy --- all of those
+may be arbitrarily wrong without compromising a certificate that
+checks. Its cookbook chapter is agent-facing by design:
+proof-production moves in the Polya shape, written in the reader's
+native language.
+
+The stance generalizes to this book's readers: anything impressive
+ships with an assurance edifice small enough to audit end-to-end ---
+here, the exact kernel plus whichever checking path the reader elects
+--- and every load-bearing claim carries a check the reader can run.
+Where the build deliberately departs from the programme's founding
+documents, the departures are stated as narrowings, with their
+reasons.
+
+\section*{What is certified today}
+
+The Experiments chapter (chapter~\ref{ch:experiments}) is this
+volume's evidence: campaigns against benchmarks the toolkit does not
+own, each result a concrete policy or ranking function together with a
+machine-checkable certificate, every number re-derived from receipt
+files at each preview. The headlines below are compressions of that
+chapter, not claims made here: each resolves, by scrolling, to the
+section carrying its numbers, its tables, and its stated limits
+(what each claim species means, and how to read the tables, are
+themselves sections there), with the clone-and-repro path beneath
+that as the deeper tier. The chapter dates its own state, names what
+is in flight, and grows at each preview.
+
+\paragraph{A published verification table, re-done exactly.}
+\looseness=-1 All
+seventeen rows of a peer-reviewed neural-certificate results table
+(LMCS 2026)~\cite{abate23} now carry strictly better bounds from exact-rational
+certificates --- margins from $1.01\times$ on the near-tight rows to
+$58$ orders of magnitude on the conservative ones --- and the exact
+computation refuted one published ``sound'' bound. Each row's proof
+decomposes into per-obligation certificate files --- $28{,}569$
+across the campaign, most of them the $24{,}000$ lattice-piece
+certificates behind the one continuous-state row --- and the full
+corpus has replayed through three successive checker builds with zero
+refusals.
+(section~\ref{sec:exp-sweep}.)
+
+\paragraph{The first certified rows for a standard RL suite.} On
+Gymnasium's tabular tier: shipped lookup-table policies with
+certificates of exact optimality --- among them the first published
+exact value of Sutton--Barto blackjack under optimal play, a proof
+that the suite's own Taxi ``solved'' threshold is unsatisfiable, and
+belief-chain certificates for hidden-state variants (certifying the
+implementable policy, never a clairvoyant one) --- each row checking
+in microseconds to milliseconds. On the physics-engine tier, where
+analytic claims would be a category error, anytime-valid statistical
+certificates: LunarLander expected return $\ge 236.2$ (discrete) and
+$\ge 281.1$ (continuous) at confidence $99\%$ over $10^6$ episodes
+each --- to our knowledge the first certified statements of any kind
+at this claim class for Box2D environments. And the continuous-state
+analytic tier is now open: Pendulum carries a certified
+\emph{worst-case} return bound, holding for every initial state with
+no probability anywhere in the certificate.
+(section~\ref{sec:exp-gym}.)
+
+\paragraph{A hardware model-checking suite, completed with
+certificates.} On the neural model-checking line's benchmark
+(NeurIPS 2024/2025, eleven Verilog
+designs)~\cite{giacobbe24,neuralmc-2025-invariant}: all $634$ tasks across
+its three property classes certified, against $554$ for the
+strongest published tool and $617$ for the per-task union of all
+five published baselines --- every task shipping a small exact
+certificate whose consuming lemma is machine-checked in Lean, where
+every baseline ships a verdict. Replaying the whole suite --- every
+certificate and every rewrite-chain witness --- takes under a second
+on one core, against a published budget of five hours per task;
+method invention to a full first sweep of the pure-liveness class
+took about $75$ minutes, and each further class landed in a single
+working session. (section~\ref{sec:exp-circuits}.)
+
+\paragraph{An Atari console, compiled into a white-box environment.}
+\looseness=-1
+Pong and Freeway compile to synchronous circuits ($1{,}491$ flip-flops,
+${\sim}21{,}000$ AND gates) with emulator-exact fidelity receipts ---
+identical episode returns, $116$--$123$ of $128$ RAM bytes exact on
+every frame, each divergence named --- so that certified claims about
+the environment \emph{itself} become definable. The first certified
+exact-replay rows arrived as this preview closed. Among them, on
+Montezuma's Revenge (compiled the same way, its bank-switched
+cartridge's mapper hardware included), are, to our knowledge, the
+first certified returns for the suite's canonical hard-exploration
+benchmark: the first key certified at every one of the $31$ no-op
+init offsets, and a key-and-door trajectory certified at return
+exactly $400$, bit-exact against the circuit's own transition
+relation.
+Certified policy rows are in flight. The scope condition is stated there
+plainly: the circuit is examined, not learned --- system
+identification is a separate problem the toolkit does not yet
+address. (section~\ref{sec:exp-atari}.)
+
+\paragraph{Semiconductor process models: certified stable, and
+dispatched to certified optimality.} On the
+Intel Mini-Fab, the community's minimal re-entrant model, named
+dispatch policies
+carry exact drain certificates at up to $99.9\%$ of fluid capacity,
+with the probe at capacity correctly failing; on a SEMATECH-scale
+testbed, the certified load at the coarsest tractable aggregation is
+$13.2\%$, and one walk of the refinement path built into the
+certificate format lifts it to a certified $19.8\%$. Further
+refinement is measured but not yet certified, and the numbers are
+weak and shown anyway: the aggregation gap is a measured frontier,
+not fine print. On the Mini-Fab's discrete net, dispatch itself is
+now a certified quantity: joint policy+certificate synthesis returns
+a supervisor with a certified $1.9\%$ throughput-floor gain over the
+no-policy worst case; a wall-clock floor over \emph{all} dispatch
+policies --- proved in Lean, with adversarial mutants refused by the
+kernel --- is met exactly by an explicit shipped policy, so its
+certified-optimality column reads $100.00\%$, earned rather than
+rounded; and an uncertified black-box dispatcher runs inside a
+certified switching envelope whose sealed certificate re-verifies
+byte-identical after every run. One certificate covers lot counts
+from $7$ to $10^{7}$ --- its container grows six bytes across the
+sweep, and checking stays at ${\sim}2$\,ms.
+(section~\ref{sec:exp-semicon}.)
+
+\section*{Status of this volume}
+
+As of this preview (the build stamped on the title page): the table
+of contents is the book's
+normative shape; this summary is a draft, to be regenerated from the
+finished chapters; the QTSL rule
+catalogue is generated in full from the mechanized rule sources; the
+partial-completeness chapter is complete; the Experiments chapter is
+a working draft; and the remaining chapters are full drafts (the
+QTSL quick start and the proof-production tutorial carry listings
+and transcripts from real, receipted runs). The material is unevenly
+ripe by design, and each chapter states its own status, with draft
+banners, absence boxes, and status notes marking what is settled,
+what is staged, and what is still argued.

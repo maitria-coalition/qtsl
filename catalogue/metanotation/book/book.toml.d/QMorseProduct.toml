@@ -1,0 +1,90 @@
+# QMorseProduct — full section (batch B9), mechanized by the batch M1e
+# leg (Qtsl/Product.lean): the product-semiflow
+# construction, the factoring lemmas, the six-clause witness transport,
+# and the unconditional witness-level soundness theorem — the book
+# page's own lemma chain, which was written as the mechanization's
+# specification. No conditional flag: qMorseProduct_sound has no
+# interface hypotheses (the bound statements warrant the rule's
+# judgment-level entailment in full; the KW readout-transport fence is
+# certificate-stratum content, deliberately prose — see the note).
+[[rule]]
+id = "QMorseProduct"
+source = "../QTSL-rules.toml"
+row = "QMorseProduct"
+proof = "book/proofs/QMorseProduct.tex"
+commentary = '''
+\rulename{QMorseProduct} composes two global judgements along the
+state-space axis: disjoint variable sets, product arena, product spec
+graph, product regions. A producer reaches for it exactly where global
+structure is engineered compositionally --- certify each factor
+subsystem\textquotesingle s Morse graph, then take the product ---
+because the alternative (re-discharging the composite through
+\rulename{QMorseDischarge} on the composite lattice) recomputes an
+exponentially larger readout and re-derives the cell map.
+
+The rule is fenced to the deterministic-flow class, and the fence is
+the rule\textquotesingle s own mathematical content: the composite
+certificate\textquotesingle s readout --- join-irreducibles, cells,
+cell order --- must be the product of the factor readouts, and for
+flows that is a theorem (the attractor lattice of a product flow is
+the coproduct of the factor attractor lattices), while for maps it is
+false: products of maps exhibit emergent, phase-locked attractors
+outside the coproduct, so a composite readout computed from factor
+certificates would misrepresent the product\textquotesingle s global
+structure. For maps the rule must not be derived at all.
+
+What the checker recomputes: wire-disjointness of the factors, the
+product surgery on graphs and regions, and --- on the certificate
+route --- the composite lattice\textquotesingle s readout. Facet and
+transit rows ride along by citation: every composite facet is normal
+to one factor\textquotesingle s axis and its inwardness polynomial is
+that factor\textquotesingle s, the other factor\textquotesingle s
+coordinates entering as free box variables; a factor transit
+observable still decreases on cell $\times$ anything, the other
+factor\textquotesingle s drift differentiating it to zero.
+
+The witness-level lemma chain is mechanized in full: the product
+construction on the semiflow stratum (\texttt{Semiflow.prod}), the
+factoring lemmas for orbits, limit sets, and chains, the six-clause
+witness transport (\texttt{MorseWitness.prod}), and the soundness
+theorem (\texttt{qMorseProduct\_sound}) --- unconditional, with no
+interface hypotheses: from the two factor judgements, the product
+judgement, on the product arena, product order, and product regions.
+The bound statements consume neither compactness nor invariance of
+the arenas (the proof never needed them), and Hausdorffness exactly
+where the transport says ``compact, hence closed.''
+'''
+note = '''
+The proof section separates two strata deliberately: the
+witness-transport argument (compactness, invariance, location,
+disjointness, cover, order --- all coordinate-wise) is elementary and
+does not consume continuity of time, while the readout-transport
+theorem that warrants the certificate route is flow-specific. The
+fence binds the rule as catalogued; the decomposition is recorded so
+the mechanization and any map-side successor judgement know where the
+flow hypothesis actually bites. The mechanization respects the split
+exactly: the bound statements carry the witness-level entailment in
+full and import nothing of Kalies--Wehbe --- the fence's warrant
+remains at literature strength, where it belongs, since it certifies
+the canonicity of the certificate-route composite readout rather than
+the satisfaction-level soundness bound here.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Product"
+src = "../../lean/qtsl/Qtsl/Product.lean"
+decls = ["qMorseProduct_sound", "MorseWitness.prod", "completeOrbit_prod_iff", "omegaSet_prod_subset", "alphaSet_prod_subset", "EpsChainIn.fst", "EpsChainIn.snd", "ChainRecurrentIn.fst", "ChainRecurrentIn.snd"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent at the judgement stratum: the HOL4 development\textquotesingle s
+object is the base-kernel checker cone, and no Morse-family definition
+exists in the ported scripts (verified against the
+port\textquotesingle s definition inventory) --- so the
+satisfaction-judgement semantics this rule\textquotesingle s soundness
+is stated in has no HOL twin to mirror the now-complete Lean
+mechanization into. A future port has its interface fixed twice over:
+the witness clauses quoted in the \rulename{QMorseDischarge} section
+and the product lemma chain bound here.
+'''

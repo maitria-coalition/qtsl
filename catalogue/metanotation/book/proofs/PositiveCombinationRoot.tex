@@ -1,0 +1,117 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. Admissible and not alias by count: several children, and two
+lemma directions (one per connective). The rule adds zero sequent
+rows; its entire content is two one-line lattice-monotonicity facts
+about under-approximation.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:pcr-template}
+An admissible rule $R$ is warranted by a rewrite replacing any
+$R$-node with a derivation fragment over core (and
+previously-justified) rules with the same conclusion, consuming the
+premise subtrees at its leaves --- or, where the conclusion has no
+catalogue derivation, discharging against a named verified theorem.
+Leaf-first application eliminates every $R$-node in finitely many
+steps; soundness is conserved with no new kernel semantic content.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{PositiveCombinationRoot} instance]\label{rec:pcr-instance}
+\begin{mathpar}
+\inferrule*[Right=$\wedge$-form]{
+  \mathcal{T}_1 \rhd\ \mathsf{QRegionSat}(\varphi_1, R_1) \\
+  \mathcal{T}_2 \rhd\ \mathsf{QRegionSat}(\varphi_2, R_2)
+}{
+  \mathcal{M} \vDash_{R_1 \cap R_2} \varphi_1 \wedge \varphi_2
+}
+\and
+\inferrule*[Right=$\vee$-form]{
+  \mathcal{T}_1 \rhd\ \mathsf{QRegionSat}(\varphi_1, R_1) \\
+  \mathcal{T}_2 \rhd\ \mathsf{QRegionSat}(\varphi_2, R_2)
+}{
+  \mathcal{M} \vDash_{R_1 \cup R_2} \varphi_1 \vee \varphi_2
+}
+\end{mathpar}
+Each node rewrites to its children --- which stand unchanged --- plus
+one application of the corresponding lattice-monotonicity warrant
+(Propositions \ref{prop:pcr-and} and \ref{prop:pcr-or}); the $n$-ary
+forms replace the pair by a family and the binary operation by
+$\bigcap_i$ or $\bigcup_i$. No sequent row is added anywhere: the
+whole rewrite happens at the judgement layer.
+\end{brecipe}
+
+\begin{bprop}[conjunction: intersection preserves under-approximation]\label{prop:pcr-and}
+If $R_1$ under-approximates the denotation of $\varphi_1$ and $R_2$
+that of $\varphi_2$, then $R_1 \cap R_2$ under-approximates the
+denotation of $\varphi_1 \wedge \varphi_2$ (which is the intersection
+of the two denotations, by the specification layer\textquotesingle s
+definitional clause).
+\end{bprop}
+\begin{proof}
+$x \in R_1 \cap R_2$ gives $x \in R_1 \subseteq
+[\![\varphi_1]\!]$ and $x \in R_2 \subseteq [\![\varphi_2]\!]$, so
+$x \in [\![\varphi_1]\!] \cap [\![\varphi_2]\!] =
+[\![\varphi_1 \wedge \varphi_2]\!]$. One line
+(\texttt{positiveCombinationAnd\_sound}); the final equality is the
+\texttt{denAnd} bridge, supplied at compile time, never posted.
+\end{proof}
+
+\begin{bprop}[disjunction: union preserves under-approximation]\label{prop:pcr-or}
+Under the same hypotheses, $R_1 \cup R_2$ under-approximates the
+denotation of $\varphi_1 \vee \varphi_2$ (the union of the
+denotations).
+\end{bprop}
+\begin{proof}
+$x \in R_1 \cup R_2$ lies in some $R_j \subseteq [\![\varphi_j]\!]
+\subseteq [\![\varphi_1]\!] \cup [\![\varphi_2]\!] =
+[\![\varphi_1 \vee \varphi_2]\!]$. One line
+(\texttt{positiveCombinationOr\_sound}), with the \texttt{denOr}
+bridge closing it.
+\end{proof}
+
+\begin{bremark}[the $n$-ary forms, and the empty corners]
+The $n$-ary lemmas (\texttt{positiveCombinationInter\_sound},
+\texttt{positiveCombinationUnion\_sound}) quantify over an arbitrary
+index type --- no finiteness is consumed --- so a single $n$-ary
+combination node needs no new warrant beyond the binary pair. The
+empty corners are sound instances rather than exclusions: an empty
+conjunction denotes everything and $\bigcap_{i \in \varnothing} R_i$
+is the whole space, which under-approximates it; an empty disjunction
+denotes nothing and the empty union is empty, which
+under-approximates that. Neither degenerate certificate claims
+anything false; both are useless in exactly the honest way.
+\end{bremark}
+
+\begin{bremark}[the polarity fence, with the two-line counterexample]
+Complement REVERSES the direction this rule preserves: from
+$R \subseteq [\![\varphi]\!]$ nothing at all follows about
+$\mathrm{cmpl}\,R$ under-approximating
+$\mathrm{cmpl}\,[\![\varphi]\!]$ --- the containment flips. Sharpest
+instance: $R = \varnothing$ under-approximates every denotation, and
+its complement is the whole space, which under-approximates only the
+trivial one. A negation routed through this rule would silently
+convert the judgement kind\textquotesingle s under-approximation
+guarantee into its opposite. The name \emph{positive} is that fence:
+negation rides the normal-form rewrites and the closure discipline
+(the \rulename{ClosureDiscipline-EXACT} section and its siblings),
+where the direction swap is handled deliberately, one atom at a time.
+\end{bremark}
+
+\begin{bremark}[the bridge hypotheses]
+The semantic clauses $[\![\varphi_1 \wedge \varphi_2]\!] =
+[\![\varphi_1]\!] \cap [\![\varphi_2]\!]$ and its $\vee$/union twin
+enter the verified statements as named bridge hypotheses
+(\texttt{denAnd}, \texttt{denOr}), to be discharged definitionally by
+the specification layer\textquotesingle s compile. The warrant
+deliberately does not assert them: what the connectives denote is the
+specification layer\textquotesingle s to define, and this
+rule\textquotesingle s content is only that under-approximation
+respects whatever lattice structure that definition induces.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:pcr-instance}, $\wedge$-form & \texttt{positiveCombinationAnd\_sound}\\
+Recipe \ref{rec:pcr-instance}, $\vee$-form & \texttt{positiveCombinationOr\_sound}\\
+$n$-ary forms & \texttt{positiveCombinationInter\_sound}, \texttt{positiveCombinationUnion\_sound}\\
+the judgement reading & \texttt{RegionSat} (quoted in full above)\\
+the polarity fence\textquotesingle s other side & \texttt{compl\_over\_approx} (the \rulename{ClosureDiscipline-OUTWARD} section)\\
+\end{anchors}

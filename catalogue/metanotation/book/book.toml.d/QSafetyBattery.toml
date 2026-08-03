@@ -1,0 +1,179 @@
+# QSafetyBattery — GRADUATED from dashboard-only coverage to a full
+# section (B7). The two original [[coverage.lean]] blocks are preserved
+# verbatim as [[rule.lean]]; the QtslBattery block (staged-row form) is
+# added, roster-marked. Proved at the discrete-kernel profile + the PDMP
+# sub-profile end-to-end; GSHS general profile remains filed — hence
+# conditional = true.
+[[rule]]
+id = "QSafetyBattery"
+source = "../QTSL-rules.toml"
+row = "QSafetyBattery"
+proof = "book/proofs/QSafetyBattery.tex"
+conditional = true
+conditional_label = "DTMC+PDMP"
+commentary = '''
+\rulename{QSafetyBattery} is the probabilistic safety battery: from a
+family of purely polynomial premise rows about a certificate $V$, it
+concludes that with probability at least $p$ the system satisfies
+$\mathsf{G}\,\varphi$ --- \emph{forever} --- from every start state in
+the sublevel region $\{V \le \mathrm{thr}\}$. The rule concludes a
+satisfaction judgement ($\vDash$), one theory-extension edge above the
+base calculus, and every premise row is an inherited base-calculus
+sequent: \emph{interior} rows say the certificate does not increase
+along the in-mode dynamics, \emph{guard} rows say jumps do not increase
+it, \emph{floor} rows say $V \ge 1$ on the avoid set (the compiled
+over-approximation of where $\varphi$ fails), and \emph{nonneg} rows say
+$V \ge 0$ on the domain hull. The battery adds zero kernel arithmetic;
+its entire content is the supermartingale assembly one level up: $V$
+read along the process and stopped at the first failure is a nonnegative
+supermartingale, and Ville\textquotesingle s inequality converts its
+initial value into a bound on the probability of ever failing.
+
+A producer reaches for the rule wherever a quantitative safety guarantee
+over a hybrid stochastic system is wanted. The certificate is found by
+whatever synthesis method the producer likes (typically linear or
+sum-of-squares programming over the same polynomial cones the premise
+rows are checked in); only the rows ship in the certificate.
+
+What the checker recomputes are the side conditions: the domain-hull
+condition (one step from any in-scope state stays inside the hull
+$\bar{D}$, which is exactly where the floor and nonneg rows were
+checked), the fail-closed containment (one-step mass stays in
+$D \cup U$: leaving the modelled domain is counted as \emph{failure},
+never as silent success), the floor-scope resolution (the floor
+rows\textquotesingle{} scopes resolve to an exact cover of the avoid set
+within the hull), and the threshold row $p + \mathrm{thr} \le 1$ in
+exact rational arithmetic.
+
+Each hypothesis is essential. Drop the floors and failure is free of
+charge: a certificate identically $0$ satisfies every other row and
+would certify almost-sure safety of a chain that fails at its first
+step. Drop the nonnegs and the maximal inequality itself fails --- a
+signed process can pay for a barrier visit with mass borrowed from
+below. Drop the fail-closed containment and probability mass could exit
+the modelled domain unaccounted. Drop the threshold row and the
+conclusion would assert success probability $p$ alongside a failure
+budget $\mathrm{thr}$ with $p + \mathrm{thr} > 1$. The proof section
+walks each of these, with counterexamples.
+
+The conditional mark on this rule\textquotesingle s dashboard row states
+the profile honestly: the cited theorems warrant the rule at the
+\emph{discrete-kernel profile} --- system semantics a one-step Markov
+kernel on the flattened hybrid state space, interior rows read as
+one-step expected decrease (the Foster--Lyapunov reading) --- and the
+PDMP sub-profile of the continuous-time semantics is additionally
+machine-checked end-to-end. The general continuous-time profile
+(jump--diffusion) remains a stated hypothesis: filed, not proven.
+'''
+note = '''
+Fail-closed as a design reading: the underlying theorem\textquotesingle s
+concluded event is \emph{stronger} than the safety
+formula\textquotesingle s truth set --- never fail \emph{and} never
+leave the modelled domain --- and the formula tie then weakens it. The
+staged node presents its premises per mode and per jump (mode-indexed
+certificate families); the bound theorem for that shape assembles the
+flattened drift row through a sub-convex mixture decomposition of the
+one-step kernel --- the mode\textquotesingle s flow step plus the
+enabled guard jumps --- which is the presentation-to-semantics bridge,
+carried as an explicit hypothesis and quoted in the
+proof\textquotesingle s final remark.
+'''
+correspondence = '''
+Model frame as at \rulename{QBasin}, probabilistically read: the
+displayed $\mathcal{M} \vDash_{X_0} \mathsf{P}_{\ge p}[\mathsf{G}\,
+\varphi]$ $\mapsto$ the goal $\mathrm{ofReal}\ p \le$
+\texttt{pathMeasure K x \{ω | ∀ n, sat (ω n)\}} for every start in the
+concluded region --- \texttt{sat} the $\varphi$-satisfaction
+predicate, of which \emph{no measurability is asked} (the fail-closed
+event is the measurable one; the tie weakens by
+\texttt{measure\_mono}). The staged-row theorem
+\texttt{sound\_QSafetyBattery\_staged} is the amended
+display\textquotesingle s binding; the flattened
+\texttt{sound\_QSafetyBattery} is its engine.
+\begin{itemize}
+\item profile, stated plainly: both statements realize the rule at the
+  \emph{discrete-kernel profile} --- $\mathcal{M}$\textquotesingle s
+  step semantics is a Markov kernel chain (mathlib\textquotesingle s
+  \texttt{Kernel.traj}) --- with the PDMP sub-profile carried
+  end-to-end by \texttt{sound\_GSHS\_safety\_battery}; the displayed
+  judgement\textquotesingle s full model generality is the standing
+  GSHS-transport residue (the coverage table\textquotesingle s
+  conditional mark, here in words).
+\item what stands left of the $\vDash$ $\mapsto$ \texttt{hmix}, the
+  System bridge: the presentation\textquotesingle s charts compile to
+  the kernel as a sub-convex mixture of the mode\textquotesingle s
+  flow step and the enabled jumps --- an explicit hypothesis, so the
+  certified statement quantifies over exactly the Systems whose
+  compilation satisfies it.
+\item the four premise families map one-to-one: interiors $\mapsto$
+  \texttt{hB1} (per-mode one-step flow drift on $D_m \smallsetminus
+  U_m$) with the undisplayed integrability rider \texttt{hint};
+  guards $\mapsto$ \texttt{hB2} (per-jump boundary rows on the guard
+  slab); floors $\mapsto$ \texttt{hB3} (on $U \cap \bar{D}_m$, the
+  ruled fail-closed scope); nonnegs $\mapsto$ \texttt{hB4}.
+\item the threshold row $p + \mathrm{thr} \le 1$ $\mapsto$
+  \texttt{hΘ}, in exact $\Q$, cast once inside the statement ---
+  displayed vocabulary carried exactly.
+\item side conditions R3/R4 $\mapsto$ \texttt{hR3}/\texttt{hR4} at
+  the compiled kernel (hull containment; fail-closed reset
+  containment); the formula tie $U := \mathrm{cmpl}(\varphi)$
+  $\mapsto$ \texttt{hF} $:$ $\neg\,\texttt{sat}\ y \to y \in U$ ---
+  note the certified hypothesis asks only that $U$
+  \emph{over-approximate} the falsity set: strictly wider than the
+  displayed equation, in the safe direction.
+\item conclusion region $\mathsf{qraSublevel}(V, \mathrm{thr})$
+  $\mapsto$ the start conditions \texttt{z ∈ Dm m} and \texttt{V m z
+  ≤ thr}, region-level as the judgement reads.
+\end{itemize}
+Width note: measurability of the region/certificate data
+(\texttt{hDm}/\texttt{hDbarm}/\texttt{hUm}/\texttt{hVmeas}) and the
+interior integrability rider are profile-level regularity with no
+displayed rows --- the probabilistic sibling of the
+\rulename{PSDCERT} evaluability pack; everything displayed is
+consumed, and the two widenings (over-approximating $U$, sub-convex
+\texttt{hmix}) both enlarge the certified reach beyond the
+display\textquotesingle s letter.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Battery"
+src = "../../lean/qtsl-aux/QtslAux/Battery.lean"
+decls = ["sound_QSafetyBattery", "sound_QSafetyBattery_failClosed"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.LayerD.Skeleton"
+src = "../../lean/qtsl-aux/QtslAux/LayerD/Skeleton.lean"
+decls = ["sound_GSHS_safety_battery"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslBattery"
+src = "../../lean/qtsl-aux/QtslAux/QtslBattery.lean"
+decls = ["sound_QSafetyBattery_staged"]
+intro = '''
+The staged-row form binds the rule\textquotesingle s premise shapes as
+the schema realizes them: per-mode interior rows against the
+mode\textquotesingle s flow mechanism, per-jump guard rows, per-mode
+floors and nonnegs, and the exact-$\Q$ threshold row cast once ---
+assembled onto the flattened battery through the mixture bridge
+discussed in the proof section\textquotesingle s final remark.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development ports the base calculus\textquotesingle s checker
+chain (theory \texttt{qtsl\_catalogue}, developed side by side with the
+base catalogue sources, stopping below the proof-object layer); it
+contains no probability or measure theory.
+\rulename{QSafetyBattery} lives one theory-extension edge above the base
+calculus --- it concludes a satisfaction judgement, not a sequent --- and
+its soundness content is path-space measure theory (trajectory kernels,
+stopped supermartingales, Ville\textquotesingle s inequality), for which
+no counterpart exists anywhere in the ported development. A HOL
+statement of this rule would be a new measure-theoretic campaign, not an
+extension of the ported checker chain; until one exists, this box is the
+honest state of the edifice.
+'''

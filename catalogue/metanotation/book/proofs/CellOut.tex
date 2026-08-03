@@ -1,0 +1,103 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. Same family as \rulename{Cell-In-Interior}: the intended
+elaboration is a case analysis over the cell primitive's one-hot
+disjunction; the realized warrant is the degenerate rewrite discharging
+against a verified semantic lemma, for the same two reasons stated in
+that rule's first recipe (the context-carrying case analysis is not yet
+a core constructor, and the off-branch contradiction is semantic). Only
+the branch-closing argument differs --- and it is \emph{lighter}: no
+disjointness hypothesis is consumed.}
+
+\begin{brecipe}[the \rulename{Cell-Out} instance --- the realized rewrite]
+\label{rec:co-realized}
+\[
+\inferrule*[Right=\rulename{Cell-Out}]
+  {\;\mathcal{T} \rhd \Phi \vdash \lambda^{C_j}_w(x) \bowtie^{\circ} 0\;}
+  {\Phi \vdash b_j = 0}
+\qquad\rightsquigarrow\qquad
+\text{\upshape discharged by } \texttt{sound\_cellOut},
+\]
+where the premise is a \emph{single strict separating atom} at a named
+witness vertex $w$ of cell $C_j$ ($>$ if $w$ is an extended vertex, $<$
+if a core vertex --- the sign that contradicts membership), and the
+checker recomputes premise and conclusion shapes from the schema
+(\texttt{cellOutWitnessBuild}, \texttt{cellOutZeroBuild}). The payload
+names $w$ explicitly; the build refuses any $w$ outside $C_j$'s support
+mask.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:co-sound}
+Under the payload hypotheses (premise proof; cited cell application in
+the hypernet; input typed at shape $[\mathrm{ambDim}]$; outputs at total
+size $1$; premise and conclusion matching the recomputed builds), the
+conclusion sequent is semantically valid.
+\end{bprop}
+\begin{proof}[Proof sketch (the lemma's actual route)]
+Fix an admissible valuation $\sigma$ satisfying $\Phi$. The cell
+application's model-level fact yields the rational input point $x$, a
+cell choice $k$ with $x \in \mathcal{R}(\Delta_k, S_k)$, and the
+one-hot output valuation at $k$. Suppose $k = j$. On the two-vertex
+support the barycentric weights of $x$ are \emph{unique} --- they are
+determined affinely by the point --- so weak membership in cell $j$
+pins their signs: $\leq 0$ at extended vertices, $\geq 0$ at core
+vertices (the pair-elimination lemma). The premise delivers the
+\emph{strict opposite} sign for the weight at the witness vertex $w$
+(transported to the model's point through the input wire's declared
+shape), a direct contradiction. Hence $k \neq j$, and the one-hot fact
+reads entry $0$ of output $j$ as $0$; the total-size-$1$ typing lifts
+that entry to the whole-wire equality $b_j = 0$.
+\end{proof}
+
+\begin{bremark}[why a witness vertex replaces the paper's set complement]
+The source statement's premise is $x \notin \overline{C_j}$ --- a
+\emph{disjunction} of strict halfspace violations, one per bounding
+halfspace. The formula grammar is negation-free and the premise of a
+rule application must be a formula the calculus can derive, so the
+amendment serializes a choice of disjunct instead: \emph{which}
+halfspace is strictly violated, named by \emph{which} vertex carries
+the violated barycentric sign. One atom replaces the disjunction with
+no loss for producers (a point outside the closure violates at least
+one halfspace; the producer knows which) and a strict gain for the
+checker (no disjunctive reasoning at check time).
+\end{bremark}
+
+\begin{bremark}[the witness must be a support vertex of $C_j$]
+The build guards $w \in \mathrm{supp}(C_j)$. Without the guard the
+premise atom would constrain a barycentric coordinate that cell $j$'s
+membership predicate never mentions --- the sign contradiction in
+Proposition~\ref{prop:co-sound} needs the weight at $w$ to be one of
+the two the membership fact actually constrains. (On the two-vertex
+support this is also what makes the atom well-defined: the builder
+computes $\lambda^{C_j}_w$ from the support pair's coordinates.)
+\end{bremark}
+
+\begin{bremark}[boundary points, and the division of labor with
+\rulename{Cell-In-Interior}]
+The rule applies even at boundary points of \emph{other} cells: the
+contradiction is between a strict violated sign and weak membership of
+the \emph{same} cell $j$, so no interior-disjointness hypothesis is
+consumed --- a point on the shared face of $C_i$ and $C_k$ can still be
+strictly separated from a third cell $C_j$, and the rule concludes
+$b_j = 0$ regardless of which of the two adjacent cells the model
+one-hots. This is the exact complement of \rulename{Cell-In-Interior},
+whose pinning argument fails precisely on boundaries and needs
+disjointness; between them, interior points get the full one-hot vector
+and boundary points get every off-cell indicator zeroed.
+\end{bremark}
+
+\begin{bremark}[scope of the checkable fragment]
+As for \rulename{Cell-In-Interior}: the builders succeed over
+$1$-dimensional complexes with two-vertex cell supports on distinct
+coordinates, and refuse everything else. The statement is
+dimension-general; only the builder gates narrow it.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:co-realized} warrant & \texttt{sound\_cellOut} (Soundness)\\
+witness-atom extraction & \texttt{cellOutWitnessBuild\_spec}; builder \texttt{cellOutWitnessBuild} / \texttt{baryLambdas1D}\\
+weight uniqueness on the support pair & the pair-elimination lemma cited inside \texttt{sound\_cellOut} (\texttt{maskRegion\_pair\_elim})\\
+conclusion form & \texttt{cellOutZeroBuild}\\
+support-mask guard & the \texttt{guard} in \texttt{cellOutWitnessBuild}; payload field \texttt{witnessVertex}\\
+port typing ties & \texttt{PCellOutData} fields \texttt{inputShape}, \texttt{outputsScalar}\\
+\end{anchors}

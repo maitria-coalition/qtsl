@@ -1,0 +1,64 @@
+# bindings.toml.d/Syzygy.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Syzygy'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "atomLeZeroPolys"
+sha256 = "cfb91a919eda2ce0982d111b15d86b91e15904b2e59256ac98507c52c77e49ce"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "farkasEntries"
+sha256 = "8b97407667f7d44c9e9472404a5c8e013f4cd87fa56915dbaa0dd9e762589b6f"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "syzygyCheck"
+sha256 = "cd0e5b9bc4bb6ec13bbbab7047fdf9f7a2d5d082e23240519890003d2b379cb6"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "syzygyCheckCore"
+sha256 = "bc3df257d99f8a99ed18af321b0fb80e9a1fffe359cda3eb1103f871e7e68940"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "syzygyCheckM"
+sha256 = "b585e4bd954b1955d72ebcf76f93df87a39ca80bf6354f505b0230d05c56ddb3"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "syzygyCheckW"
+sha256 = "fabb6a57741bb3f5b18e734d2efb5476e7d73fd71c0e15454c22f44732d96564"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "syzygyCombinationValid"
+sha256 = "b40b5720ef96350fa679da53b67dff219dfeaf7dcf9ea01f31245ebec6dc5ac1"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "syzygyConclusionForm"
+sha256 = "81767c83cdeada73408e1bbe012f16b679dec07177d58aa7aed3ae0c758df67c"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "SyzygyStep"
+sha256 = "b000babdfcca26d7e9ac4fc6af2171150e7da0fee6faae17fab75cead6d83f65"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "holds_of_syzygyConclusionForm"
+sha256 = "72a2bf0d27ff8e509a1beb06c1c05bca89c8e993eabc8ec272170255f7765889"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_syzygy"
+sha256 = "1791c0ae051c8df72a64fcc60b8892a0d9599a99f8458aad76d2c366e5594617"
+
+[[correspondence]]
+entry = "Syzygy"
+steele_sha256 = "940d302086bcd9e7123a8456ea7c262376ce38ea33a91889796db48eac9a0290"
+statements_sha256 = "9f94863ca973bbd7920cdb1049ee717ec51cab083fffd4151b3ee924e53e71b6"
+prose_sha256 = "9bcb0454c80e3b0ccf30d011aeccf9d5a4b98aa75a7bf63eea654b759e7752b6"
+

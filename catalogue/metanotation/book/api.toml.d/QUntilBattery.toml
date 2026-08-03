@@ -1,0 +1,21 @@
+# api.toml.d/QUntilBattery.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QUntilBattery"
+
+[api.ts]
+handle = "rules.qtslCore.untilBattery"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn untilBattery", "interface UntilBatteryArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_until_battery.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::until_battery"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/battery.rs"
+sig = ["fn until_battery"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_until_battery"

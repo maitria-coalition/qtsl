@@ -1,0 +1,117 @@
+# book.toml — the literate rule catalogue's [meta] spine.
+# Design: DESIGN.md. This file carries [meta] ONLY; every [[rule]] and
+# [[coverage]] entry lives in its own fragment file under book.toml.d/
+# (one file per catalogue row — the fan seam: parallel authors never edit
+# a shared file). Steele cells are JOINED from the rules pages (never
+# duplicated); Lean/HOL statements are decl-name pointers resolved at
+# every render; hashes live in bindings.toml + bindings.toml.d/
+# (machine-maintained, `qtsl-book bind`). Section order is the roster
+# order of the pages below, not fragment filename order.
+#
+# READER MODEL (the 2026-07-19 revision): the book's reader is a COLD
+# EXTERNAL researcher with no project context. Every string that
+# renders, in this file or any fragment, must stand alone: no internal
+# work-tracking references, ruling citations, private paths, or host
+# names; receipts render as content-addressed attestations. The
+# internal rules pages'
+# `note`/`stratum` fields are never rendered by the book — the entries'
+# `commentary` and `note` fields replace them.
+#
+# Rollout state: full sections for Syzygy (core), PConstExact
+# (admissible), SmallGain (alias); dashboard-only [[coverage]] fragments
+# wire the mechanized Q-rows (decls grep-verified at wiring time;
+# `conditional = true` = warranted modulo named hypothesis gaps or on a
+# proven fragment/profile — specifics in the rule's own page row). The
+# dashboard shows every catalogue rule, covered or not.
+
+[meta]
+title = "Bernstein Logic: the literate rule catalogue"
+subtitle = "every rule with its Steele-metanotation statement, its Lean and HOL realizations, its verifier receipts, and a proof \\enspace\\(\\cdot\\)\\enspace full-roster edition: a section for every rule"
+pages = ["../BL-rules.toml", "../QTSL-rules.toml"]
+preface = '''
+\textbf{What this catalogue is.}\enspace Bernstein Logic is a small proof
+calculus for certificates about polynomial facts over networks of
+rational-tensor-valued wires: sequents $\Phi \vdash \Psi$ asserting that
+every admissible valuation of the wires satisfying the premise $\Phi$
+satisfies the conclusion $\Psi$. Its intended use is machine-checkable
+evidence for verification claims --- neural-network bounds,
+Lyapunov/dissipativity arguments, dynamical-systems certificates --- in
+which all trusted arithmetic is exact over $\Q$. A \emph{certificate} is a
+derivation tree whose nodes carry enough payload that a small checker can
+replay each rule\textquotesingle s side conditions by exact rational
+computation: no search, no optimization, no floating point in the trusted
+base. Producers (LP/SDP pipelines, abstract interpreters, hand
+constructions) do whatever clever thing \emph{finds} the certificate; the
+checker only replays.
+
+The validity judgment itself is not free-floating: it is
+kernel-checked to be the possibilistic face of the semantic
+universe\textquotesingle s satisfaction judgment
+(chapter~\ref{ch:qtsl-semantic-universe}), at the sequent\textquotesingle s
+exact valuation carrier --- a sequent is semantically valid iff the
+upper probability of its conclusion\textquotesingle s complement
+vanishes under the credal compile of its premise
+cylinder\textquotesingle s possibilistic wall
+(\texttt{semanticallyValid\_iff\_face}, module
+\texttt{SuFunctor.Plain.CheckerFace}) --- so each soundness theorem
+in this catalogue is, through that identification, a statement about
+the semantic universe\textquotesingle s own judgment.
+
+Each rule of the calculus gets one section here, carrying five
+ingredients. (i)~The rule itself, typeset in Steele\textquotesingle s
+Computer Science Metanotation~\cite{steele2017}, with prose on what the
+rule does, when a producer uses it, and why each hypothesis is there.
+(ii)~The Lean~4 declarations that realize it --- the payload structure,
+the soundness theorem, and (where a side condition\textquotesingle s
+meaning must be visible) the checker definitions in full --- extracted
+mechanically from the sources at every build of this catalogue and bound by
+hash, so quoted text cannot drift from the tree silently. (iii)~Verifier
+receipts: ed25519-signed attestations that named checking layers ---
+elaboration, kernel replay by the official external checker, a hardened
+screen, and a decorrelated second kernel --- accepted the \emph{exact
+build} being quoted, identified by the SHA-256 of the compiled module.
+(iv)~The HOL4 statement where the independent HOL4 development carries
+one, and a loud, reasoned absence where it does not. (v)~A proof at
+textbook detail: ordinary mathematics for core rules, explicit rewriting
+recipes for admissible rules, filled-in applications of the target rule
+for alias rules.
+
+\textbf{Why trust a green cell.}\enspace A green receipt row reduces to
+four things a skeptical reader can check independently: the statement
+printed on the page (hash-bound to the source file it was extracted
+from); the SHA-256 of the compiled artefact the receipt names; the
+receipt\textquotesingle s ed25519 signature against a pinned public key,
+shown by fingerprint; and the checker layers the receipt credits.
+Staleness is always visible --- a receipt attesting an older build, a
+statement that moved since its proof was written, a missing ingredient
+each render as an \emph{amber} badge, never as silence. Red is reserved
+for outright verification failure. The coverage dashboard below is the
+catalogue\textquotesingle s honest map of itself: the empty cells are the
+point.
+'''
+dashboard_intro = '''
+One table over every rule of the catalogue, whether or not this edition
+covers it yet. Each covered section joins its ingredients from
+their single sources of truth: the rule cell from the hand-authored rules
+source (the same file the two-column diff pages render), the Lean
+statements from the sources by declaration name at every render, the
+receipts from the signed store (cited and signature-verified at render,
+never re-run), the HOL4 statement from the HOL4 development or a reasoned
+absence, and the proof from its hand-authored file. Rules with no catalogue
+entry yet render as all-absent rows, loudly. Some rows carry a Lean
+column without a catalogue section yet: their soundness theorems exist in the
+mechanized development (two sibling Lean packages --- the core calculus
+and an auxiliary measure-theoretic library --- both statement-bound by
+the same hash machinery), while their proof and HOL columns honestly
+remain absent until those sections are authored. A module whose build has
+no signed attestation yet shows its receipt layers as none: statements
+are source-bound, and receipt coverage arrives when the checking gate
+next runs over that package.
+'''
+hol_store_note = '''
+HOL receipts are documentary: quoted results of \texttt{hol-strict} runs
+and census rows from the HOL4 development\textquotesingle s build
+evidence, not signed artefacts. A signed HOL receipt store (the Lean
+store\textquotesingle s twin, sharing the same trust roots) is named
+future work.
+'''

@@ -1,0 +1,39 @@
+# bindings.toml.d/ArithAtom.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ArithAtom'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PArithAtomData"
+sha256 = "a7cd6fec2e4a2e6ee228a4fd0d10b3646d0fb32f0ca35b767ba2cbb51fca785d"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "atomicCompareForm"
+sha256 = "0bef44d18704a5562dc2a057565a9ca3cf2017f878b2def76bc57e71e9e44595"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "atomicCompareZero"
+sha256 = "a119fc28832920f6b01e30f99c819991d1bd9f578d25acad246f873a46e7d99e"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "QTensor.map2_defined_of_rel2"
+sha256 = "f74509258f6a69e45e8841bed26c4b8f5fd0fc2f38b8ff0b0af42e3cf95c6e16"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_arithAtom_fold"
+sha256 = "e4e787257b4913b53096072f6fdb88b506fe96f0f1215c5c81cec5f2328461d3"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_arithAtom_unfold"
+sha256 = "85872f0db8ab5edee184f8c58cc444058c6255cd0a063b54a9f00500a49972bb"
+
+[[correspondence]]
+entry = "ArithAtom"
+steele_sha256 = "ed582ff2e00b4d0fe6e9b5583465695c9391722b0107f024aa38e38caba53648"
+statements_sha256 = "4d0a79520c329af3a29551e8b7e1a7e768b491b29146d23bdcc1f805d10a4cd2"
+prose_sha256 = "9e7c0b1ad68478f765f173ca84f04cf6ac3c73c1864eb3b10ed20ebb9c0f68bd"
+

@@ -1,0 +1,34 @@
+# bindings.toml.d/QStreettBundle.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QStreettBundle'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Excursions"
+decl = "Supermartingale.exists_ae_tendsto_of_nonneg"
+sha256 = "62600b2be5376421a5f61a84e3a753967dcae3bba446a6de6635352fa0e41c5a"
+
+[[statement]]
+module = "QtslAux.Excursions"
+decl = "ae_hits_of_ranking"
+sha256 = "a94c67283e19af5b7c49793d34e5ffe4894493aa5a82adfe678a583c34dda1ec"
+
+[[statement]]
+module = "QtslAux.Excursions"
+decl = "ranking_hitting_sum_le"
+sha256 = "6c59e764c8abfde754ff37dd934942b17e654962473bcb8c030459e2ebd68b16"
+
+[[statement]]
+module = "QtslAux.Excursions"
+decl = "streett_ae_frequently_response"
+sha256 = "90ed4256e30eb3a91c1bff1fa35fdc351b54e37c6279667e311a6c33af11e0aa"
+
+[[statement]]
+module = "QtslAux.Excursions"
+decl = "streett_window_sum_le"
+sha256 = "413d94cc54168a6e5290872b772ff74ea2d7bddc9d4d7ef3b8fe5316d20deb19"
+
+[[correspondence]]
+entry = "QStreettBundle"
+steele_sha256 = "7059788d577649b2fe7812dfb936982a9fae84caf276c9cb3c05a10659600750"
+statements_sha256 = "f6d76e88b40d192909b81c5aa477bafcfa92388de7d5a401194a5ced7989f8a1"
+prose_sha256 = "9c9edd92a71045fdbcf3615a6da26fc0dd84210d90e7e638d67229baf74605cc"
+

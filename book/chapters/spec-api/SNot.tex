@@ -1,0 +1,25 @@
+\apilang{TypeScript}{spec.not}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function not(arg: StatePred): StatePred
+
+export function preflightState(f: StatePred): Result<undefined, SpecRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const orPart = s.or([s.FALSE, s.not(s.polyLe(0n, x1))]);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::StatePred::not}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs + crates/mtk-catalogue/src/spec/typing.rs}}
+\begin{rustsrc}
+pub fn not(arg: StatePred) -> StatePred
+
+pub fn preflight_state_at(f: &StatePred, at: &FormulaPath) -> Result<(), Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let or_part = StatePred::or(vec![
+    StatePred::False,
+    StatePred::not(StatePred::poly_le(q(0, 1), x1())),
+]);
+\end{rustsrc}

@@ -1,0 +1,14 @@
+# bindings.toml.d/ReLUNN.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ReLUNN'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_reluNN"
+sha256 = "9c8e42872e19df4164f8def93f9a20ed78fa6eb97ec152fb13243da2ddf4e81e"
+
+[[correspondence]]
+entry = "ReLUNN"
+steele_sha256 = "dee2ea70808e6d9d7bce204fef462b8322e2e6be9d542362028e520154a401da"
+statements_sha256 = "783c55adce14cd1da816de0ccee831319d04329f560129947ff12cf551ff9b09"
+prose_sha256 = "cbcbf4361843256ef4d036bb519587513a5efadd33782f6398340642c58bb3f5"
+

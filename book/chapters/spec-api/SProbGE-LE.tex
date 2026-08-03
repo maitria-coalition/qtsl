@@ -1,0 +1,35 @@
+\apilang{TypeScript}{spec.probGe / probLe / probMayBeGe / probMayBeLe}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function probGe(p: QLike, path: PathPred): ForallSpec
+
+export function probLe(q: QLike, path: PathPred): ForallSpec
+
+export function probMayBeGe(p: QLike, path: PathPred): ExistsSpec
+
+export function probMayBeLe(q: QLike, path: PathPred): ExistsSpec
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const goal = s.polyGe(1n, s.unwrap(s.polyVar(0, 2)));
+const cap = s.probGe(Q.of(3, 4), s.deadline(20n, goal));
+\end{tssrc}
+\apiprov{The \textsc{MayBe} marks construct in the marks vector quoted under the seat-regret entry (the same test file).}
+\apilang{Rust}{mtk\_catalogue::spec::ForallSpec::\{prob\_ge, prob\_le\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn prob_ge(p: WitRat, path: PathPred) -> Result<ForallSpec, Refusal>
+
+pub fn prob_le(q: WitRat, path: PathPred) -> Result<ForallSpec, Refusal>
+
+pub fn prob_may_be_ge(p: WitRat, path: PathPred) -> Result<ExistsSpec, Refusal>
+
+pub fn prob_may_be_le(q: WitRat, path: PathPred) -> Result<ExistsSpec, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let goal = StatePred::poly_ge(q(1, 1), Poly::var(0, 2).unwrap());
+let cap =
+    ForallSpec::prob_ge(q(3, 4), PathPred::deadline(q(20, 1), goal, false).unwrap()).unwrap();
+\end{rustsrc}
+\apiprov{The \textsc{MayBe} marks construct in the marks vector quoted under the seat-regret entry (the same test file).}

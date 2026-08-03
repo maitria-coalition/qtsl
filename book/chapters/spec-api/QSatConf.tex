@@ -1,0 +1,33 @@
+\apilang{TypeScript}{judgment.satConf}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function satConf(args: {
+  sys: SysRef;
+  spec: SpecRef;
+  alpha: QLike;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const art = s.unwrap(
+  j.satConf({
+    sys: j.sysRef("lunarlander-cont"),
+    spec: j.specRef("return-floor-236577/1000"),
+    alpha: Q.of(1, 20),
+  }),
+);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QSatConf::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(sys: SysRef, spec: SpecRef, alpha: WitRat) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let row = QSatConf::new(
+    SysRef("lunarlander-cont".into()),
+    SpecRef("return-floor-236577/1000".into()),
+    q(1, 20),
+)
+.unwrap();
+\end{rustsrc}

@@ -1,0 +1,21 @@
+# api.toml.d/QAGCompose.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QAGCompose"
+
+[api.ts]
+handle = "rules.qtslExt.agCompose"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn agCompose", "interface AgComposeArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_ag_compose.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::ag_compose"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/compose.rs"
+sig = ["fn ag_compose"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_ag_compose"

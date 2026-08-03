@@ -1,0 +1,153 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- but of the family's
+third kind. \rulename{PConstExact} is admissible by reduction to
+verified machinery; its siblings here are admissible with shipped
+direct lemmas; \rulename{ReLU-Split} is admissible in the purest
+sense: it has \emph{no proof-term constructor and no wire tag}, and a
+producer elaborates it into the derivation below --- a certificate
+stream never contains a \rulename{ReLU-Split} node. The unpacking
+\emph{is} the rule; its soundness is its derivability --- and, since
+the mechanization shipped, also a theorem: \texttt{sound\_reluSplit}
+states the rule itself, at the rank-$0$ scope
+Remark~\ref{rem:relusplit-scope} proves is the rule's true extent.}
+
+\begin{brecipe}[the \rulename{ReLU-Split} elaboration]
+\label{rec:relusplit-instance}
+The rule, as the source catalogue states it:
+\[
+\inferrule*[Right=\rulename{ReLU-Split}]{
+  \mathcal{T}_{+} \rhd \Phi \wedge (h \geq 0) \vdash \Psi\sub{b}{h} \\
+  \mathcal{T}_{-} \rhd \Phi \wedge (h \leq 0) \vdash \Psi\sub{b}{0}
+}{
+  \Phi \vdash \Psi
+}
+\]
+where $b$ marks the occurrences of the output wire $y$ of a ReLU
+application $\ReLU_{\{h\}\to\{y\}} \in H$, so that $\Psi =
+\Psi\sub{b}{y}$. The producer emits, in place of any such node, the
+derivation:
+\begin{enumerate}
+\item the node's sign-split fact --- $(h \leq 0 \wedge y = 0) \vee
+  (0 \leq h \wedge y = h)$, the packaged semantic contract stated in
+  the \rulename{LiRPA} section's family template --- enters as a
+  sub-conjunct of the premise (the sp-axiom convention);
+\item $\vee$E \emph{in its context-carrying form} splits on it (see
+  Remark~\ref{rem:relusplit-ctxve});
+\item \emph{active branch} (context gains $0 \leq h$ and $y = h$):
+  the branch context aligns with $\mathcal{T}_{+}$'s premise $\Phi
+  \wedge (h \geq 0)$ by $\wedge$E, \rulename{Weaken}, and the
+  orientation plumbing of the \rulename{ReLU-Above} section;
+  $\mathcal{T}_{+}$ yields $\Psi\sub{b}{h}$, and \rulename{EqElim}
+  along $h = y$ (wire-to-wire, the node's one shared shape)
+  transports it to $\Psi\sub{b}{y} = \Psi$;
+\item \emph{inactive branch} (context gains $h \leq 0$ and $y = 0$):
+  symmetrically, $\mathcal{T}_{-}$ yields $\Psi\sub{b}{0}$, and
+  \rulename{EqElim} along $0 = y$ transports it to $\Psi$;
+\item \rulename{Cut} and \rulename{Weaken} stitch the case analysis
+  back under the original $\Phi$.
+\end{enumerate}
+Step 4's transport has a rank-$0$ constant side, so at tensor-shaped
+instances it is stopped by \rulename{EqElim}'s broadcast-shape gate,
+exactly as the family's shape-scope remark records
+(Remark~\ref{rem:relunn-shapescope}, \rulename{ReLU-NN} section) ---
+at such instances a producer splits per scalar node
+(\rulename{ReLU-Neg}'s direct node supplies the shape-general fact
+$y = 0$, but transporting it into an arbitrary $\Psi$ rides the same
+gate, so the per-scalar split is the general route --- and
+necessarily so: Remark~\ref{rem:relusplit-scope} proves the
+tensor-shaped reading admits a countermodel).
+\end{brecipe}
+
+\begin{bremark}[why the context-carrying $\vee$E]
+\label{rem:relusplit-ctxve}
+The disjunction being eliminated does not stand alone as the premise:
+it arrives \emph{inside} the premise conjunction, next to everything
+else $\Phi$ carries. The plain sequent form of $\vee$E ($\Phi_1
+\vdash \Psi$ and $\Phi_2 \vdash \Psi$ give $\Phi_1 \vee \Phi_2 \vdash
+\Psi$) cannot reach it --- and this is not a stylistic gap: the
+$\vee$E section records the countermodel showing the context-carrying
+form is strictly stronger than the printed one (no elaboration of the
+former into the latter exists). The derivation above is, historically,
+the essential consumer that forced that ruling; the
+context-carrying form is proven sound as a satellite lemma
+(\texttt{sound\_orECtx}).
+\end{bremark}
+
+\begin{bremark}[mechanization status --- the rule-level statement]
+\label{rem:relusplit-mech}
+The checker column remains empty for the structural reason it always
+was: no certificate ever contains the rule, so there is no payload to
+validate and no soundness case in the checker's recursion. The
+rule-level statement this remark once recorded as follow-up work now
+exists: \texttt{sound\_reluSplit} (Qtsl/ReluSplit.lean) is
+the semantic lemma --- from the validity of the two branch sequents
+and the linkage, the conclusion sequent is valid --- built from
+exactly the vocabulary the remark predicted (the linkage extraction
+\texttt{reluLinked\_facts}, the substitution predicate
+\texttt{substituteInFormula} that \rulename{EqElim}'s payload already
+uses, and the semantic transport \texttt{Formula.holds\_subst\_congr}
+that \rulename{EqElim}'s soundness already rides). The template
+$\Psi$ with its marked occurrences $b$ is an arbitrary formula over an
+arbitrary marker wire, with the three substitution instances
+($\Psi\sub{b}{h}$, $\Psi\sub{b}{0}$, $\Psi = \Psi\sub{b}{y}$) as
+hypotheses --- no freshness condition, since the proof transports
+along value equality, never syntax. ``Derivable, by inspection of
+this recipe'' is thereby upgraded to ``sound, by theorem'' at every
+instance the recipe itself reaches (rank-$0$ nodes ---
+Remark~\ref{rem:relusplit-scope}); the stronger recorded follow-up, a
+verified elaboration function producing
+Recipe~\ref{rec:relusplit-instance}'s derivation, remains open.
+\end{bremark}
+
+\begin{bremark}[the rank-$0$ scope is semantic necessity]
+\label{rem:relusplit-scope}
+\texttt{sound\_reluSplit} hypothesizes the output wire typed at
+rank~$0$, and this is the rule's true extent rather than proof
+convenience. The family's shape-scope remark
+(Remark~\ref{rem:relunn-shapescope}) records that the
+\emph{derivation}'s constant-sided transport is stopped by
+\rulename{EqElim}'s broadcast-shape gate at tensor shapes; for the
+siblings the direct lemma is nonetheless shape-general, so the gate
+reads there as a technicality of the derivation route. Not here:
+\texttt{reluSplit\_rank0\_necessary} (same module) mechanizes a
+countermodel showing the shape-general reading of
+\rulename{ReLU-Split} is \emph{false}. Template $\Psi(b) = (b = 0)
+\vee (b = h)$ over a shape-$[2]$ node, $\Phi = \top$: both premises
+are valid ($\mathcal{T}_{+}$ through $h = h$, $\mathcal{T}_{-}$
+through $0 = 0$), yet at the mixed-sign valuation $h = [1, -1]$,
+$y = [1, 0]$ neither disjunct of the conclusion holds. Mixed signs
+are exactly what the rule's case analysis cannot see from
+sign-definite branch hypotheses --- the semantic content of ``each
+split doubles the branch count'': a tensor node is $2^{n}$ scalar
+cases, not $2$. Even shape $[1]$ fails, by a different leak
+(broadcast-arity mixing: $\Psi(b) = (b = h) \vee (b + w \geq 0)$ with
+$w$ typed at $[2]$ --- the $[1]$-shaped $y + w$ atom is unsatisfiable
+by the strict-shape arithmetic while the rank-$0$ constant broadcasts;
+recorded as prose in the module header). The recipe's step-4 note
+(``the per-scalar split is the general route'') is thus not a
+workaround for a gate but the only sound reading; producers split per
+rank-$0$ node, and \texttt{sound\_reluSplit} is the rule those splits
+instantiate.
+\end{bremark}
+
+\begin{bremark}[when a producer splits]
+Splitting is the \emph{complete}-verification move of the
+neural-network literature --- Reluplex's case
+analysis~\cite{katz2017reluplex}, systematized as branch and
+bound~\cite{bunel2020branch}: exact where \rulename{LiRPA}'s envelope
+is lossy, at the price of one branch doubling per split neuron, so
+proof size is exponential in the split count. The practical frontier
+--- which neurons to split, which to relax --- is the branch-and-bound
+literature's whole subject; the calculus prices the choice honestly
+(a split is two subtrees, an envelope is one node) and takes no
+position on it.
+\end{bremark}
+
+\begin{anchors}
+the sign-split fact (step 1) & \texttt{PrimApp.SemOk} --- the packaged contract; conservativity via \texttt{relu\_projection} (\rulename{LiRPA} section)\\
+context-carrying case split (step 2) & \texttt{sound\_orECtx} (satellite lemma, Admissible.lean)\\
+equality transport (steps 3--4) & \texttt{sound\_eqElim}; \texttt{substituteInFormula}\\
+rule-level statement (rank-$0$ scope) & \texttt{sound\_reluSplit} (ReluSplit.lean) --- Remark~\ref{rem:relusplit-mech}\\
+scope necessity (mixed-sign countermodel) & \texttt{reluSplit\_rank0\_necessary}; fixture \texttt{ReluSplitScope.HSplit} --- Remark~\ref{rem:relusplit-scope}\\
+verified elaboration function & \emph{none exists} --- the remaining recorded follow-up\\
+\end{anchors}

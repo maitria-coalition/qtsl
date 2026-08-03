@@ -1,0 +1,21 @@
+# api.toml.d/QStreettBundle.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QStreettBundle"
+
+[api.ts]
+handle = "rules.qtslCore.streettBundle"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn streettBundle", "interface StreettBundleArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "marker:streettBundle"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::streett_bundle"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/battery.rs"
+sig = ["fn streett_bundle"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_streett_bundle"

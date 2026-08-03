@@ -1,0 +1,24 @@
+# api-system.toml.d/S-ODE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-ODE"
+entity = "model type"
+
+[api.ts]
+handle = "system.ode"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_ode", "marker:ts_sig_odegen"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "marker:ts_ode"
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Ode::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_ode"]
+snippet_file = "crates/mtk-catalogue/tests/common/mod.rs"
+snippet = "fn-body:ode"
+note = '''The construction is the committed \texttt{double-integrator} golden vector (fixture \texttt{ode}, standalone byte authority; the same presentation serves the composite golden as its plant component), and it doubles as the generator kit's conserved-energy closed-form control (\(\mathcal{A}(\mathrm{pos}^2+\mathrm{vel}^2)=0\)); the kit's Rust face is \texttt{mtk\_catalogue::system::ode\_gen\_kit}.'''

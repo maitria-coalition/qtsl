@@ -1,0 +1,89 @@
+// Chase fixtures for the chain species (theory Dtmc), against the
+// theory files (BL + Qtsl + Dtmc chase in one closure; the
+// transposed carriage's spelling — probability-valued fields ride
+// abstract Q elements). Instance blocks in one file chase jointly in
+// one model, so element names are unique per block. The battery
+// greps named derived rows and judgments — never exit codes alone.
+//
+// What these fixtures pin: the species' admission demands minting
+// per chain, the generator-form feeding tie minting its recompute
+// demand on a chain-content system, the cross-chain merge (equality
+// generation), and the species content riding the same subject walk
+// every former rides (System/iface through the mechanism, the
+// verdict-compile tie on the claim face). Probability VALUES,
+// mass-one arithmetic, and the one-step contraction are value-plane
+// material: warranted by the species file's conformance families
+// and the mechanized adequacy square, never faked into the chase.
+
+// ---- The end-to-end producer shape: one chain, three states (one
+// absorbing, as its explicit self-loop row; one lawful non-absorbing
+// self-loop), sparse initial row, chain content on a mechanism, the
+// mechanism as a system, a specification claim (event-4 record
+// shape: one safety component) with its compiled
+// verdict form, and the generator-form seam row at a certificate
+// component. Every stratum of the quadruple appears in one model.
+instance DtmcEndToEnd : Dtmc {
+  dk : Dtmc;
+  d0, d1, d2 : DState;
+  dm : Mech;
+  dif : Iface;
+  dy : System;
+  dsp : Spec;
+  df : ForallSpec;
+  dr : QSat;
+  dv : QVerdictForm;
+  dvc, dvg : HypernetRef;
+  dqp, dqi : Q;
+
+  [arg: d0, out: dk] DState/dtmc;
+  [arg: d1, out: dk] DState/dtmc;
+  [arg: d2, out: dk] DState/dtmc;
+
+  [src: d0, dst: d1, out: dqp] dprob;
+  [src: d0, dst: d2, out: dqp] dprob;
+  [src: d1, dst: d0, out: dqp] dprob;
+  [src: d1, dst: d1, out: dqp] dprob;
+  [src: d2, dst: d2, out: dqp] dprob;
+
+  [chain: dk, state: d0, out: dqi] dinit;
+
+  [mech: dm, chain: dk] mech_dtmc;
+  [arg: dm, out: dif] Mech/iface;
+  [mech: dm, out: dy] SysMech;
+
+  [spec: dsp, f: df] spec_forall;
+  [arg: dr, out: dy] QSat/sys;
+  [arg: dr, out: dsp] QSat/spec;
+  [sat: dr, form: dv] qsat_verdict;
+
+  [sys: dy, cert: dvc, gen: dvg] qtsl_gen_form;
+}
+
+// ---- The cross-chain merge: one stray row between states of two
+// declared chains. Chase mode merges the chains (equality
+// generation; loud via name functionality where the chains carry
+// differing name content — abstract here). The mutant battery
+// demotes the axiom and watches the merge become a pending choice.
+instance DtmcCrossMerge : Dtmc {
+  ck1, ck2 : Dtmc;
+  cs1, cs2 : DState;
+  cqp : Q;
+
+  [arg: cs1, out: ck1] DState/dtmc;
+  [arg: cs2, out: ck2] DState/dtmc;
+
+  [src: cs1, dst: cs2, out: cqp] dprob;
+}
+
+// ---- The negative spine: a generator-form row on a system whose
+// mechanism carries NO chain content must NOT mint the chain
+// recompute demand (the feeding tie is conditional on the species —
+// the battery greps this row's absence).
+instance DtmcGenFormForeign : Dtmc {
+  fm : Mech;
+  fy : System;
+  fc, fg : HypernetRef;
+
+  [mech: fm, out: fy] SysMech;
+  [sys: fy, cert: fc, gen: fg] qtsl_gen_form;
+}

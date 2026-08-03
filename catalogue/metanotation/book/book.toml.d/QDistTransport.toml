@@ -1,0 +1,128 @@
+[[rule]]
+id = "QDistTransport"
+source = "../QTSL-rules.toml"
+row = "QDistTransport (matrix cells)"
+proof = "book/proofs/QDistTransport.tex"
+conditional = true
+commentary = '''
+\rulename{QDistTransport} moves judgements across a simulation map. It
+is a \emph{matrix} of transport cells --- judgement class (strict spec
+vs.\ distance judgement) $\times$ witness class (exact intertwining
+vs.\ $\varepsilon$-approximate intertwining) --- each cell carrying its
+own conclusion form, its own lemma, and its own refusal condition. A
+producer reaches for it to certify a fine model through a coarse one:
+prove the spec on the abstraction, exhibit the simulation witness, and
+transport. The two built kernel-tier cells: under an \emph{exact}
+witness (every row of the fine kernel pushes along the readout map
+exactly onto the coarse kernel\textquotesingle s row) laws transport
+unchanged at every horizon, so any judgement about the coarse law pulls
+back with zero degradation; under an $\varepsilon$-witness (every row
+pushes to within total-variation distance $\varepsilon$) a strict
+judgement does NOT transport --- what transports is a \emph{distance}
+judgement, with $\varepsilon$ inherited and horizon-compounded: the
+pushed fine law tracks the coarse law to $n\,\varepsilon$ at declared
+horizon $n$. The degrading cell is what makes approximate simulation a
+distance-judgement \emph{producer}.
+
+What the checker recomputes: the per-row intertwining identities (exact
+case) or per-row total-variation defects against the declared
+$\varepsilon$ (approximate case), well-formedness of both kernels, and
+the horizon arithmetic. The compounding law $n\,\varepsilon$ is proved,
+never guessed: one-step defect by mixture convexity, then the coarse
+Markov operator\textquotesingle s total-variation nonexpansiveness
+(data processing --- the coarse chain cannot amplify tracking error),
+then telescoping. Sequential witnesses accumulate exactly
+$\varepsilon_1 + \varepsilon_2$; plain addition is the honest lattice
+at this tier, no slack hides in the composite.
+
+What would break: without the coarse kernel\textquotesingle s row
+stochasticity the operator could amplify differences and the telescoping
+collapses; without a genuine probability law at the start, mixture
+convexity fails; and without a contraction row the linear growth in $n$
+is sharp, which is why the $\varepsilon$-cell refuses unbounded
+horizons rather than extrapolating.
+'''
+note = '''
+The strict column is the $\varepsilon = 0$ instantiation of the family
+--- one biconditional, so the exact cell re-exports the marginal-process
+lemma rather than restating it. Analytic lineage: approximate
+(bi)simulation with quantitative degradation \cite{girardpappas2007}
+and behavioural pseudometrics for probabilistic systems
+\cite{desharnais2004}. Built at the finite-kernel tier (the scope the
+Lean statements carry); the Lipschitz-pushforward cells for
+$\mathbb{W}_p$ registry entries, the description-subject cells, and the
+per-cell composition-coherence squares are named successors.
+'''
+correspondence = '''
+The display is a matrix and the bound set is its built column, cell
+by cell. The $\varepsilon$-cell\textquotesingle s conclusion
+$\mathsf{QDist}[\mathrm{TV}](\text{fine pushed law}, \text{coarse
+law}) \le n\varepsilon$ at horizon $n$ $\mapsto$
+\texttt{sound\_QDistTransport\_eps : tvDist (push π (law K μ₀ n))
+(law Q (push π μ₀) n) ≤ n * ε} --- the compounding law as a proved
+induction (one-step defect + TV-nonexpansiveness of the coarse
+operator + triangle), never a guess.
+\begin{itemize}
+\item the $\sigma$-witness rows $\mapsto$ \texttt{EpsPushKernel π K Q
+  ε} (every fine row pushes to within TV $\varepsilon$ of the coarse
+  row at the projected state), with the exact-intertwining column
+  certified as its $\varepsilon = 0$ face:
+  \texttt{pushKernel\_iff\_eps\_zero}, and the strict cell
+  \texttt{strict\_cell\_exact} re-exporting \texttt{push\_law} ---
+  laws transport \emph{exactly} at every horizon, zero degradation.
+\item the initial row (coarse initial law $= \pi_{\#}$ fine initial)
+  $\mapsto$ carried by construction: the coarse arguments in every
+  goal ARE \texttt{push π μ₀} --- mismatched initials are
+  unrepresentable in the statement, so no hypothesis row exists.
+\item the declared horizon $\mapsto$ the explicit \texttt{n : ℕ}
+  binder; the refusal condition for unbounded horizons without a
+  contraction row is spec-side with no Lean counterpart --- the
+  honest linear rate IS the certified statement.
+\item sequential accumulation $\mapsto$ \texttt{epsPushKernel\_comp}:
+  $\varepsilon_1 + \varepsilon_2$ \emph{exactly}, plain addition as
+  the displayed lattice; the distance-judgement $\times$
+  strict-witness cell $\mapsto$ \texttt{sound\_QDistSelfTransport}
+  (TV data processing at $L = 1$).
+\item consumed regularity: the $\varepsilon$-cell alone demands
+  well-formedness (\texttt{IsMarkov} both kernels, \texttt{IsDist
+  μ₀}) --- the mixture-convexity and nonexpansiveness steps use it
+  --- while the strict cell and the composition law are
+  hypothesis-free beyond their witnesses: visible in the binder
+  rows.
+\end{itemize}
+Width note: finite-kernel tier (\texttt{Fintype},
+\texttt{DecidableEq} for fibre sums), as the display\textquotesingle s
+footline confines it; the unbuilt cells ($\mathbb{W}_p$ Lipschitz
+pushforward, description subjects, per-cell coherence squares) are
+the conditional residue, named in the note, bound by nothing --- and
+the judgement-class abstraction of the display\textquotesingle s $J$
+(``or a strict spec\textquotesingle\textquotesingle) is realized
+concretely: strict specs ride \texttt{strict\_cell\_exact}, distance
+judgements ride the TV theorems; no single parameterized $J$ exists in
+Lean, the matrix\textquotesingle s rows are separate theorems.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QDistTransport"
+src = "../../lean/qtsl-aux/QtslAux/QDistTransport.lean"
+decls = [
+  "sound_QDistTransport_eps",
+  "epsPushKernel_comp",
+  "sound_QDistSelfTransport",
+  "strict_cell_exact",
+  "pushKernel_iff_eps_zero",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development checks the base calculus\textquotesingle s wire
+format (theory \texttt{qtsl\_catalogue}). The transport
+matrix\textquotesingle s cells conclude judgements of the extension
+theory, whose rule sorts are not staged into any wire format; the
+mechanized cells live in the auxiliary Lean package. Nothing exists yet
+for a HOL statement to be about; the box becomes writable when the
+distance-judgement certificate format stages and its checker chain is
+ported.
+'''

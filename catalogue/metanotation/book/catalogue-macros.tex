@@ -1,0 +1,155 @@
+
+\definecolor{DiffRed}{RGB}{176,32,32}
+\definecolor{DiffBlue}{RGB}{22,80,190}
+\definecolor{MarkGreen}{RGB}{22,122,58}
+\definecolor{NoteGray}{RGB}{92,92,92}
+\definecolor{BadgeGreen}{RGB}{22,122,58}
+\definecolor{BadgeRed}{RGB}{176,32,32}
+\definecolor{BadgeAmber}{RGB}{176,108,12}
+\definecolor{BadgeBlue}{RGB}{22,80,190}
+\definecolor{BadgeGray}{RGB}{110,110,110}
+
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\B}{\mathbb{B}}
+\newcommand{\ReLU}{\operatorname{relu}}
+\newcommand{\Cell}{\mathsf{cell}}
+\newcommand{\Tensor}{\mathsf{Tensor}}
+\newcommand{\sub}[2]{[#1 := #2]}
+\renewcommand{\sp}{\mathsf{sp}}
+\newcommand{\True}{\top}
+\newcommand{\False}{\bot}
+\newcommand{\rulename}[1]{\textsc{#1}}
+\newcommand{\bshape}{\mathrm{bshape}}
+\newcommand{\wires}{\mathrm{wires}}
+
+\newcounter{rulesec}
+\newcommand{\ruleblock}[1]{%
+  \par\bigskip{\large\bfseries #1}\par\smallskip}
+\newcommand{\sourcenote}[1]{{\footnotesize\textcolor{NoteGray}{#1}}\par}
+\newcommand{\cataloguenote}[1]{%
+  \par\smallskip{\footnotesize\textcolor{NoteGray}{\textbf{notes}\enspace #1}}\par}
+
+\newcommand{\paradeleader}{\leaders\hbox to 0.72em{\hss.\hss}\hfill}
+\newcommand{\paradeentry}[3]{%
+  \par\noindent
+  \sbox0{$\displaystyle #1$}%
+  \ifdim\wd0>0.60\linewidth
+    \usebox0\par\nopagebreak
+    \hbox to \linewidth{\hfill\small\rulename{#2}\enspace\paradeleader\enspace\pageref{#3}}%
+  \else
+    \hbox to \linewidth{$\vcenter{\box0}$\quad{\small\rulename{#2}}\enspace\paradeleader\enspace{\small\pageref{#3}}}%
+  \fi\par\medskip}
+\newcommand{\paradeblock}[3]{%
+  \par\noindent\begin{minipage}{\linewidth}#1\end{minipage}\par\nopagebreak
+  \hbox to \linewidth{\hfill\small\rulename{#2}\enspace\paradeleader\enspace\pageref{#3}}\par\medskip}
+\newcommand{\paradesep}{\par\medskip\noindent\hrule height 0.4pt\medskip}
+
+\newcommand{\badge}[2]{%
+  \fcolorbox{#1}{#1!10}{\textcolor{#1!75!black}{\sffamily\scriptsize\bfseries #2}}}
+
+\newcommand{\declhead}[3]{%
+  \par\smallskip{\small\texttt{#1}\,\texttt{.}\,\texttt{\bfseries #2}}\hfill #3\par\nopagebreak}
+\newcommand{\holhead}[1]{%
+  \par\smallskip{\small\texttt{\bfseries #1}}\par\nopagebreak}
+\DefineVerbatimEnvironment{leansrc}{Verbatim}%
+  {fontsize=\small,frame=leftline,rulecolor=\color{DiffBlue},framesep=3mm,xleftmargin=3mm}
+\DefineVerbatimEnvironment{holsrc}{Verbatim}%
+  {fontsize=\small,frame=leftline,rulecolor=\color{MarkGreen},framesep=3mm,xleftmargin=3mm}
+
+\definecolor{ApiTsBlue}{RGB}{38,110,158}
+\definecolor{ApiRustClay}{RGB}{164,84,36}
+\newcommand{\apilang}[2]{%
+  \par\medskip{\bfseries #1}\enspace{\small\texttt{#2}}\par\nopagebreak\smallskip}
+\newcommand{\apiprov}[1]{{\footnotesize\textcolor{NoteGray}{#1}}\par\nopagebreak}
+\DefineVerbatimEnvironment{tssrc}{Verbatim}%
+  {fontsize=\footnotesize,frame=leftline,rulecolor=\color{ApiTsBlue},framesep=3mm,xleftmargin=3mm}
+\DefineVerbatimEnvironment{rustsrc}{Verbatim}%
+  {fontsize=\footnotesize,frame=leftline,rulecolor=\color{ApiRustClay},framesep=3mm,xleftmargin=3mm}
+
+\newenvironment{receipttable}
+  {\par\scriptsize\setlength{\tabcolsep}{4pt}\begin{longtable}{@{}llllll@{}}
+   \textbf{receipt} & \textbf{signer (key fingerprint)} & \textbf{minted} & \textbf{layers} & \textbf{signature} & \textbf{status}\\
+   \midrule}
+  {\end{longtable}\par}
+\newcommand{\receiptrow}[6]{\texttt{#1} & \texttt{#2} & #3 & \texttt{#4} & #5 & #6\\}
+\newcommand{\trustok}[1]{{\footnotesize\textcolor{MarkGreen}{#1}}}
+\newcommand{\trustbad}[1]{{\footnotesize\textcolor{BadgeRed}{\bfseries #1}}}
+\newcommand{\layerline}[1]{\par\smallskip{\footnotesize\textbf{gate-layer coverage of the bound build:}\par #1}\par}
+\newcommand{\layeritem}[3]{{\footnotesize\quad\texttt{#1}\ \textcolor{NoteGray}{(#2)}\enspace #3}\par}
+
+\newcommand{\absentbox}[2]{%
+  \par\smallskip
+  \fcolorbox{BadgeAmber}{BadgeAmber!6}{\begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+  {\sffamily\bfseries\textcolor{BadgeAmber!80!black}{#1}}\par\smallskip
+  {\small #2}
+  \end{minipage}}\par}
+
+\newtheorem{blemma}{Lemma}[rulesec]
+\newtheorem{bprop}[blemma]{Proposition}
+\theoremstyle{remark}
+\newtheorem{bremark}[blemma]{Remark}
+\theoremstyle{definition}
+\newtheorem{brecipe}[blemma]{Recipe}
+\theoremstyle{plain}
+\newtheorem{bthm}[blemma]{Theorem}
+\newenvironment{anchors}
+  {\par\smallskip\footnotesize\begin{longtable}{@{}p{0.42\linewidth}p{0.52\linewidth}@{}}
+   \textbf{proof step} & \textbf{formal anchor}\\\midrule}
+  {\end{longtable}\par}
+
+\newcommand{\dok}{\textcolor{MarkGreen}{\ensuremath{\checkmark}}}
+\newcommand{\dcond}[1][hyp]{\textcolor{BadgeAmber}{\ensuremath{\checkmark}}\textsuperscript{\textcolor{BadgeAmber}{\sffamily\bfseries #1}}}
+\newcommand{\dnone}{\textcolor{BadgeGray}{---}}
+\newcommand{\damber}{\textcolor{BadgeAmber}{\ensuremath{\sim}}}
+\newcommand{\dambercond}[1][hyp]{\textcolor{BadgeAmber}{\ensuremath{\sim}}\textsuperscript{\textcolor{BadgeAmber}{\sffamily\bfseries #1}}}
+\newcommand{\dchanged}{\textcolor{BadgeAmber}{\ensuremath{\times}}}
+\newcommand{\dscope}{\textcolor{BadgeBlue}{\ensuremath{\varnothing}}}
+\newcommand{\ddoc}{\textcolor{BadgeBlue}{\sffamily\scriptsize doc}}
+\newcommand{\lcur}[1]{\textcolor{MarkGreen}{\bfseries\footnotesize #1}}
+\newcommand{\lstale}[1]{\textcolor{BadgeAmber}{\footnotesize #1}}
+\newcommand{\lnone}[1]{\textcolor{BadgeGray!50}{\footnotesize #1}}
+\newcommand{\dashboardhead}[1]{%
+  \ruleblock{Coverage dashboard}
+  \sourcenote{#1}
+  \sourcenote{Legend --- one row per catalogue rule (every rules-page row
+  carrying a tier), ordered by tier class: core rules first, then
+  admissible, then alias, then the edge-discipline glue; within a class,
+  catalogue order. The small gray mark after each rule names its source
+  page (BL = the core Bernstein Logic page, AG = the assume--guarantee
+  page, QTSL = the QTSL rule roster). Lean: \dok\ statement bound and fresh; an
+  \emph{amber} checkmark marks statements bound and fresh but warranting
+  the rule \emph{conditionally} --- where the condition is a single named
+  profile or fragment, the superscript says which (\dcond[DTMC]\ = proven
+  at the discrete-kernel profile; the model-class names are the System
+  chapter's), and the generic \dcond\ marks a warrant resting on a bag of
+  named side conditions (the named hypotheses live on the rule's own
+  catalogue page); \damber\ module
+  moved since bind (\dambercond\ likewise, for a conditional-warrant row
+  --- flag and label survive staleness), \dchanged\ statement changed since
+  bind (stale --- the
+  page badges say where), --- no Lean binding. Corr: \dok\ a
+  reviewer-certified correspondence dictionary (how the Lean statements
+  interpret the displayed rule) is current against the displayed cell, the
+  statement texts, and its own prose; \damber\ a dictionary exists but its
+  certification predates a change on some side; --- no dictionary yet. The
+  correspondence claim is reviewer-grade, not machine-checked --- its
+  machine-checked successor supersedes it per rule as soundness statements
+  over rules-as-data ship. Receipt layers
+  (\texttt{b}uild/\texttt{r}eplay/\texttt{h}ardened/\texttt{d}ecorrelated):
+  \lcur{green} = a current receipt covers it, \lstale{amber} = stale
+  receipts only, \lnone{grey} = none. HOL4: \dok\ ported, \dscope\ out of
+  scope by design, --- absent; HOL rcpt: \ddoc\ = documentary citation (no
+  signed store yet). Isabelle: no Isabelle development exists for this
+  catalogue to date, so every rule's Isabelle cell reads ---. Amber throughout means
+  stale or absent; red is reserved for an outright verification failure.
+  The empty cells ARE the point: this table is the honest map of what the
+  assurance edifice does not yet cover.}
+  \par\small\begin{longtable}{@{}lp{16mm}ccccc c c@{}}
+  \textbf{rule} & \textbf{tier} & \textbf{Lean stmt} & \textbf{corr} & \textbf{receipts} & \textbf{HOL stmt} & \textbf{HOL rcpt} & \textbf{Isabelle} & \textbf{proof}\\
+  \midrule}
+\newcommand{\dashboardfoot}{\end{longtable}\par}
+\newcommand{\dashpage}[1]{\multicolumn{9}{@{}l@{}}{\footnotesize\textcolor{NoteGray}{page source: #1}}\\[1pt]}%
+\newcommand{\dashsrc}[1]{{\scriptsize\textcolor{NoteGray}{#1}}}
+\newcommand{\dashrow}[9]{#1 & \footnotesize #2 & #3 & #4 & #5 & #6 & #7 & #8 & #9\\}

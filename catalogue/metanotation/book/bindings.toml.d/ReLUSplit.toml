@@ -1,0 +1,13 @@
+# bindings.toml.d/ReLUSplit.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ReLUSplit'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.ReluSplit"
+decl = "reluSplit_rank0_necessary"
+sha256 = "ec29f38da9783471ed40bfa8d2ef465c801b915347683dce95042af876839c46"
+
+[[statement]]
+module = "Qtsl.ReluSplit"
+decl = "sound_reluSplit"
+sha256 = "a0c9fbf11394480c24325c0de5dda9d9bf00ced775fedade1a388afc80397a49"
+

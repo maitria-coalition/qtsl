@@ -1,0 +1,29 @@
+# bindings.toml.d/QFixBall.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QFixBall'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QFixBall"
+decl = "anchored_le_radius"
+sha256 = "606816e1b41a2700c497a28f2d882bd51c8d611d5114e953386ee13f4c926a05"
+
+[[statement]]
+module = "QtslAux.QFixBall"
+decl = "dist_fixedPoint_le"
+sha256 = "01f0eb1debe4261729f1ae7241c7b712da039746f7b26499983ffb3be0df7807"
+
+[[statement]]
+module = "QtslAux.QFixBall"
+decl = "sound_QFixBall"
+sha256 = "6cf39a61c54c3e1e73a9255e82f7e66c09a849d4513dfba76eee06c659a27363"
+
+[[statement]]
+module = "QtslAux.QFixBall"
+decl = "sound_QFixBall_affine"
+sha256 = "07cd9cd5282b853c5c3e88e5198360a554afb3d64085bc659f7e51cb1bea59be"
+
+[[correspondence]]
+entry = "QFixBall"
+steele_sha256 = "3b8c949db241eb906d5089641d0ddb11d48bad14d55eae98c48d12bddd5cd3c6"
+statements_sha256 = "85c5844faee85ce11f8a83bb94420ba6485915c14c9e983072985e41964ee096"
+prose_sha256 = "ef87b10250779c4eda0a60e4b47f7b31f7ff11233498683470cf80f5da1eeaf9"
+

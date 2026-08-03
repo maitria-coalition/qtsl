@@ -1,0 +1,89 @@
+# bindings.toml.d/QAGCompose.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QAGCompose'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.AGCompose.GshsParallel"
+decl = "certified"
+sha256 = "85647b52ec760ee160aeb1f1967187c033dc6662711beec7eef944da4e983a21"
+
+[[statement]]
+module = "QtslAux.AGCompose.GshsParallel"
+decl = "certified_pair"
+sha256 = "942c702a68e8f6ddf60138114c3c3e8d21f951b1d6edff35dfd075cf32fd291b"
+
+[[statement]]
+module = "QtslAux.AGCompose.GshsSeries"
+decl = "certified"
+sha256 = "5fce42c66a137b4f7cbafc1b4da2a7b27d8d59d33546be396508b1e46a0e560a"
+
+[[statement]]
+module = "QtslAux.GshsFeedbackSum"
+decl = "avoid_bound"
+sha256 = "1629100d9962dd02f21e9d6d1f119e54dc1f7d380be363027e5bed7b389a4d10"
+
+[[statement]]
+module = "QtslAux.GshsFeedbackSum"
+decl = "supermartingale"
+sha256 = "e57636e2d2934228b2761dcdf3d445200a2593c7bf7583ab763c86d7408fc756"
+
+[[statement]]
+module = "QtslAux.MaxFormPDMP"
+decl = "sound_GSHS_safety_barrier"
+sha256 = "f6b5437680a24f184c7e770757c2d4b3459181f068bee13f94f585e08b78a127"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AGCompose"
+decl = "fail_bound"
+sha256 = "3580f9ec7bd720f3478b639e99f42566e9ef58a746d8886acc03fbab198f8319"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AGCompose"
+decl = "fail_bound_out"
+sha256 = "5cb52744958c38cd1d3ed923a284b9bfa0bb837e87d9d3a4cb56bdf951fd5c05"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AGCompose"
+decl = "fail_subset"
+sha256 = "35b70705b54232ee3e191e1162deca86d24a9721ab481cc4a7da34a6be4102cb"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AGCompose"
+decl = "qualitative"
+sha256 = "c6035a31d4382b01d71cfa6dcf96f41e7bc78e8d7f382c9c5d0e73d7ddde8622"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AGCompose"
+decl = "sat_of_conform"
+sha256 = "230b2a625ff666a3bb0dbcec6ce74c28af58ded96b3fda75a78fa3b0669eaba9"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Presentation"
+decl = "System"
+sha256 = "00faecc9757b190b7cb1274b88759487cff4e8926a47fe9b59b4d2992aea2a63"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Presentation"
+decl = "System.qagTier"
+sha256 = "ef38ab0e2fe133383ac5f3675d594275914eadbe661e9697901e7befa7976962"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Presentation"
+decl = "System.qagTier_admissible_iff"
+sha256 = "a8ec6842ff5cb92034b30b5677bda3e1313e9af1733e3f208a9c68e5dfe6a770"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Presentation"
+decl = "System.qagTier_core_iff"
+sha256 = "5fe2c998b2be03f6a9e1ec15c99467bf4c603c9964e09543eb20bfe75e0ac135"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Presentation"
+decl = "admissible_constructs"
+sha256 = "44b3245feee3995b9404965450d2daeaf18e6a9480355bb59556cfdf7701c3d4"
+
+[[correspondence]]
+entry = "QAGCompose"
+steele_sha256 = "2f7cd373a0910ea29891c3d43ea35a194bf91d5b7f0503b3bc1a9b6d0e215705"
+statements_sha256 = "fff74cf891d52a85b3599fe43f099c62c8c17fbebb26a7a9e19bf03bfba2a32e"
+prose_sha256 = "3cc0a19eba66f02125bc50f1835d0dded8e84bfc9214f3cdeee22291e876e9f2"
+

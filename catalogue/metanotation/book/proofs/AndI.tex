@@ -1,0 +1,74 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as in the \rulename{Ax}
+section; counterexamples read over the one-wire hypernet.}
+
+\textbf{Claim (\texttt{sound\_andI}).}\enspace The payload supplies two
+premise sequents $\Phi \vdash \Psi_1$ and $\Phi \vdash \Psi_2$ with
+their sub-derivations and three tree identities: the two premises share
+one context (\texttt{preMatch}), the conclusion's premise is that
+context (\texttt{preEq}), and the conclusion's post is
+$\Psi_1 \wedge \Psi_2$ with the left premise's conclusion as left
+conjunct (\texttt{postEq}). If both premise sequents are semantically
+valid, so is $\Phi \vdash \Psi_1 \wedge \Psi_2$.
+
+\begin{bthm}[soundness of $\wedge$I]\label{thm:andi-sound}
+Under the three payload identities, semantic validity of both premise
+sequents implies semantic validity of the conclusion, over every
+hypernet.
+\end{bthm}
+\begin{proof}
+Let $\sigma$ be admissible with $\sigma \models \Phi$.
+
+\emph{Step 1 (left component).} By \texttt{preEq}, $\sigma$ satisfies
+the left premise's premise; left validity gives $\sigma \models \Psi_1$.
+
+\emph{Step 2 (right component).} \texttt{preMatch} transports
+$\sigma \models \Phi$ verbatim to the right premise's premise --- the
+same tree, so the same satisfaction fact; right validity gives
+$\sigma \models \Psi_2$.
+
+\emph{Step 3 (pair).} The $\wedge$-clause of satisfaction is
+meta-conjunction, so $\sigma \models \Psi_1 \wedge \Psi_2$, pinned by
+\texttt{postEq}.
+\end{proof}
+
+\begin{bremark}[\texttt{preMatch} is essential]\label{rem:andi-share}
+The rule may only pair conclusions drawn from the \emph{same}
+assumptions --- context sharing again, as at \rulename{Cut}
+\cite{girard1987}. Drop \texttt{preMatch} and take the left premise
+$\top \vdash \top$ and the right premise $w \leq 0 \vdash w \leq 0$
+(both \rulename{Ax} instances): the degenerate rule concludes
+$\top \vdash \top \wedge (w \leq 0)$ --- false at $\sigma(w) = 1$,
+because the right conjunct was earned under an assumption the
+conclusion no longer carries. \texttt{preEq}'s removal admits the
+context-swap family (the \rulename{Weaken} section); \texttt{postEq}'s
+removal frees the conclusion outright.
+\end{bremark}
+
+\begin{bremark}[order and association are data]
+\texttt{postEq} places the left premise's conclusion on the left of one
+new $\wedge$-node. The conjunction is an ordered tree: nothing in the
+core commutes or reassociates it, so $\Psi_1 \wedge \Psi_2$ and
+$\Psi_2 \wedge \Psi_1$ are different conclusions, each derivable from
+the same premises by choosing which sub-derivation rides which payload
+slot.
+\end{bremark}
+
+\begin{bremark}[the meet adjunction, split across two rules]
+\label{rem:andi-meet}
+In the lattice reading, $\wedge$I is one direction of the universal
+property of meet --- $x \leq y$ and $x \leq z$ iff
+$x \leq y \sqcap z$ --- and $\wedge$E is the other. Together the two
+rules say the $\wedge$-fragment of the calculus adds nothing beyond the
+lattice structure of entailment; the $\vee$E section makes this precise
+(and essential) through a countermodel over exactly that structure.
+With $\wedge$E the pair is also computationally lossless: the two
+projections undo pairing, and pairing the two projections rebuilds the
+identical formula tree.
+\end{bremark}
+
+\begin{anchors}
+Steps 1--3 & \texttt{sound\_andI}; payload \texttt{PAndIData} (fields \texttt{preMatch}, \texttt{preEq}, \texttt{postEq}); wired as \texttt{RuleData.andI}\\
+$\wedge$-clause of satisfaction & \texttt{Formula.holds} (case \texttt{and})\\
+lattice reading & \texttt{M3.andI\_kit}\\
+\end{anchors}

@@ -1,0 +1,107 @@
+[[rule]]
+id = "RootEval"
+source = "../QTSL-rules.toml"
+row = "RootEval (T19)"
+proof = "book/proofs/RootEval.tex"
+alias_target = "PConstExact"
+commentary = '''
+\rulename{RootEval} is the membership leaf itself, catalogued as a
+rule of its own because every initialized certificate ends with one:
+membership of the specification\textquotesingle s initial point in the
+\emph{root atom} --- the region atom concluded at the
+certificate\textquotesingle s root (``root'' names the
+certificate\textquotesingle s root claim, not roots of polynomials)
+--- by exact rational evaluation. In the staged certificate schema it
+is not a node sort at all: it is the \texttt{eval} field of the
+\texttt{QSat} claim record itself --- the record-level closing demand
+that replaced the former bridge rule (\texttt{QSatFromRegion},
+dissolved: its child citation, membership leaf, and root tie are the
+record\textquotesingle s own warrant, eval, and tie demands) --- a
+base-proof leaf. For a sublevel atom
+$\{x : V(x) \le \mathrm{thr}\}$ the leaf is one \rulename{PConstExact}
+application: substitute the rational point into the polynomial ---
+exact, no rounding anywhere --- and decide one closed comparison. For
+a box atom, the checker recomputes per-coordinate containment directly
+(the side-condition registry: conformance recomputation, not a rule
+application).
+
+What the checker recomputes: everything --- the leaf \emph{is} a
+recompute; there is no payload beyond the point and the atom. What
+would break without exactness: a point lying $\varepsilon$ outside the
+region could certify membership, and the bridge rule would conclude
+satisfaction from a false premise --- the exactness identity in the
+proof section is a literal identity of values, and it is the whole
+rule. The comparator exclusion inherited from the target ($\neq$
+inadmissible, a second-soundness-invariant exclusion unpacked in the
+target\textquotesingle s section) must survive any port.
+'''
+note = '''
+The judgement-level composition --- how the checked leaf feeds the
+instantiation that concludes root satisfaction --- is the \texttt{QSat}
+claim record\textquotesingle s demand set (warrant edge + this leaf +
+the root tie; the semantic one-liner is
+\texttt{sound\_QSatFromRegion}, the universal instantiation, axiom-free
+--- named for the dissolved bridge rule whose content it carries);
+this row owns the leaf.
+Mechanization state, plainly: the bound statements below are the
+exactness identity itself. \texttt{rootEval\_eval\_cast} (module
+\texttt{QtslAux.QtslAliases}) is the literal identity of
+values --- evaluating the $\Q$-coefficient polynomial at the rational
+point and casting equals evaluating the cast polynomial at the cast
+point --- and \texttt{rootEval\_sublevel\_iff} /
+\texttt{rootEval\_box\_iff} are its two atom shapes, each an
+\emph{equivalence}: the exact-$\Q$ comparison decides the
+real-semantics membership in both directions, which is precisely the
+content a rounded evaluator would lose. The statements are over the
+generic polynomial-evaluation vocabulary (\texttt{MvPolynomial} over
+$\Q$, cast to $\R$); the wire-term evaluator that produces the
+$\Q$-comparison is the target\textquotesingle s own kernel-verified
+theorem, quoted in the \rulename{PConstExact} section, and the
+box-atom branch\textquotesingle s registry recompute is checker-side
+by design. No profile enters; the entry carries no conditional
+flag.
+'''
+correspondence = '''
+The displayed claim --- exact rational evaluation IS the
+real-semantics membership --- $\mapsto$ three statements, and the
+strength gradation is the dictionary\textquotesingle s content.
+\texttt{rootEval\_eval\_cast} is the literal identity of values:
+$\Q$-evaluation, cast, equals $\R$-evaluation of the cast polynomial
+at the cast point (\texttt{MvPolynomial} over any variable type ---
+dimension-free). The two atom shapes are then \emph{equivalences},
+not implications: \texttt{rootEval\_sublevel\_iff} (exact-$\Q$
+comparison $\leftrightarrow$ membership in the cast sublevel atom)
+and \texttt{rootEval\_box\_iff} (per-coordinate $\Q$ containment
+$\leftrightarrow$ cast-box membership) --- two-directional exactness,
+which is precisely what a rounded evaluator would lose (one direction
+survives rounding; the iff does not): the display\textquotesingle s
+``no rounding gap anywhere'' as bind structure. Width note: the
+checker consumes only the forward directions (leaf discharge via
+\rulename{PConstExact} / the registry interval recompute); the
+certified equivalences are strictly stronger, safe direction, and no
+profile, measure, or topology enters any binder.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslAliases"
+src = "../../lean/qtsl-aux/QtslAux/QtslAliases.lean"
+decls = ["rootEval_eval_cast", "rootEval_sublevel_iff", "rootEval_box_iff"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}, not by backlog: this
+rule is staged as a \emph{field} of the \texttt{QSat} claim record
+(the \texttt{eval} slot), never as a
+node, so no wire certificate a HOL checker reads could ever contain a
+\rulename{RootEval} node; HOL coverage for this rule \emph{is} the
+target rule\textquotesingle s, and the box-atom branch is loader-side
+registry recomputation, likewise not a wire-format rule. Today even
+the target\textquotesingle s statement is not writable: the HOL4
+development (theory \texttt{qtsl\_catalogue}, the base
+catalogue\textquotesingle s check-function cone) predates
+\rulename{PConstExact}, whose wire tag is unallocated --- see that
+rule\textquotesingle s section for the honest state of the
+target\textquotesingle s own box.
+'''

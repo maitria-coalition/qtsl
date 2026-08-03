@@ -1,0 +1,7 @@
+OK
+container version=1 prereqs=0 commits=2
+commit 0: sig=0x0000000000000000 author=0x0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e deps=[] parents=0 ts=11 msg=none bodyhash=0x09517e4e3501a4965453936741279b612cd5fa6cf7a5407abddcdfab857199d4 ops=0 zones=[]
+commit 1: sig=0x0000000000000000 author=0x0707070707070707070707070707070707070707070707070707070707070707 deps=[] parents=0 ts=1700000000000000 msg=none bodyhash=0xe5b24d3ba515919d73cb9112d51397935adf9327a01d345b75d96104298641b4 ops=3 zones=[]
+op 0: elta sort=L(0)
+op 1: elta sort=L(0)
+op 2: funa fun=L(1) args=[L(0)] value=lit(4,0x726f6f74)

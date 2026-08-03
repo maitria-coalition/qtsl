@@ -1,0 +1,19 @@
+# bindings.toml.d/Promise.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Promise'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "PromiseStep"
+sha256 = "1f3fa3da51555df208812c32b27e3914de427de7256a46bafc4187f322c56ecb"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_promise"
+sha256 = "1d9b79ba4ea27d22d22f9dd73cb071ab261a1fc3c2a72c64e7e5c7bc03bc9238"
+
+[[correspondence]]
+entry = "Promise"
+steele_sha256 = "54f05a112c0d2b070b36f0e6c49febc82845deb41bdb918a6b313d43ccb90c04"
+statements_sha256 = "98d309f36aee743e894eebacea5215c8048ea3d2cc0e665f1d32787911c946a3"
+prose_sha256 = "ca286f09db0a55930ea6019fb2f4169f16e49525ac2b76be7693103ab525c762"
+

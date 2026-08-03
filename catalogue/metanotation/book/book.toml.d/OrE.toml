@@ -1,0 +1,117 @@
+[[rule]]
+id = "OrE"
+source = "../BL-rules.toml"
+row = '$\vee$E'
+proof = "book/proofs/OrE.tex"
+commentary = '''
+$\vee$E is the calculus\textquotesingle s only branching rule --- case
+analysis: from $\Phi_1 \vdash \Psi$ and $\Phi_2 \vdash \Psi$, conclude
+$\Phi_1 \vee \Phi_2 \vdash \Psi$. The disjunctions worth eliminating
+come from the hypernet\textquotesingle s synthesized primitive facts
+--- a cell indicator\textquotesingle s finite case list, a
+rectifier\textquotesingle s sign split --- and a producer eliminates
+them by proving the goal once per case over the correspondingly
+strengthened premise.
+
+The checker recomputes three tree identities: the two branch
+sub-derivations conclude the same formula, the
+conclusion\textquotesingle s premise is exactly the $\vee$-node of the
+two branch premises, and the conclusion\textquotesingle s post is the
+common branch conclusion. The conclusion-matching identity is the
+essential one --- drop it and a fact proven only in one branch
+escapes the case split (the proof section\textquotesingle s
+counterexample); the premise identity\textquotesingle s removal admits
+the context-swap family.
+
+The essential caveat of this section, though, is the
+rule\textquotesingle s \emph{reach}: the quoted form eliminates a
+disjunction only when it is the \emph{whole} premise, while in practice
+every eliminable disjunction arrives as a conjunct inside the premise
+--- and the core provably cannot restructure its way there
+(distribution of $\wedge$ over $\vee$ is underivable; the proof section
+exhibits the mechanized lattice countermodel). The context-carrying
+generalization --- same rule, plus a conjunct path addressing the
+disjunction inside the premise\textquotesingle s $\wedge$-tree --- is
+proven sound, proven to be a proper extension, and proven to collapse
+onto the quoted form at the identity path; the accompanying development
+treats it as the intended elimination rule, with the quoted plain form
+destined to become its boundary alias.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premises as at
+\rulename{Weaken}. The displayed rule corresponds to
+\texttt{sound\_orE}:
+\begin{itemize}
+\item the branch judgements $\Phi_1 \vdash \Psi$ and $\Phi_2 \vdash
+  \Psi$ $\mapsto$ \texttt{ihl}/\texttt{ihr}; the shared conclusion
+  $\Psi$ is shared by equation, \texttt{hpostMatch} $:$
+  \texttt{leftPremise.post = rightPremise.post} --- the essential
+  identity the commentary singles out.
+\item $\Phi_1 \mapsto$ \texttt{leftPremise.pre}; $\Phi_2 \mapsto$
+  \texttt{rightPremise.pre}; the conclusion\textquotesingle s premise
+  $\Phi_1 \vee \Phi_2$ $\mapsto$ \texttt{hpre} $:$ \texttt{seq.pre =
+  .or leftPremise.pre rightPremise.pre} --- the disjunction must be
+  the \emph{whole} premise tree, which is precisely the reach
+  limitation the commentary discusses.
+\item conclusion post $\mapsto$ \texttt{hpost} $:$ \texttt{seq.post =
+  leftPremise.post}; the judgement $\mapsto$ the goal
+  \texttt{seq.semanticallyValid H}.
+\end{itemize}
+Width note, deliberate and one-sided: the certified statement set also
+carries the context-carrying satellite (\texttt{OrECtxStep},
+\texttt{sound\_orECtx}, \texttt{cx\_not\_derivable},
+\texttt{orECtx\_not\_elaborable}). Those statements are \emph{about
+the generalization}, not the displayed rule: \texttt{sound\_orECtx} is
+strictly wider (a conjunct path addresses a disjunction \emph{inside}
+the premise tree; the displayed rule is its identity-path case), and
+the two negative statements certify that the extension is proper ---
+its instance is underivable in, and not elaborable into, the plain
+core. The displayed rule itself corresponds to \texttt{sound\_orE}
+with no width gap in either direction.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_orE"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["POrEData"]
+intro = '''
+Payload of the plain form, read as in the \rulename{Ax} section: two
+branch sub-derivations plus structural equalities.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Admissible"
+src = "../../lean/qtsl/Qtsl/Admissible.lean"
+decls = [
+  "OrECtxStep",
+  "sound_orECtx",
+  "cx_not_derivable",
+  "orECtx_not_elaborable",
+]
+intro = '''
+\textbf{The context-carrying satellite.}\enspace The four declarations
+below locate the context-carrying generalization precisely: its
+applicability data (a conjunct path with read/replace obligations; the
+plain rule is the $\pi = \mathrm{here}$ case), its semantic soundness
+over every hypernet, the concrete distribution instance no core
+derivation concludes, and the resulting impossibility of elaborating
+the generalization into the plain core. The proof section walks the
+countermodel argument these rest on.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_oreScript.sml"
+theory = "qtsl_fam_ore"
+decls = [
+  "Definition checkFam_ore_def",
+  "Theorem famEq_ore",
+]
+receipt = '''
+Documentary citations. Spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

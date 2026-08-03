@@ -1,0 +1,63 @@
+# bindings.toml.d/TowerCitation.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'TowerCitation'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "Acyclic"
+sha256 = "537844bde069da13b20677ba68d24ccac9eececf36882e0e382b1042858a3f30"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "Row"
+sha256 = "d2c112952f9e23dfc3b22b0f2744b756dbc4268a2bba97a12d73dbc65ba7ea55"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "Row.cited"
+sha256 = "8a6016e8c1caf7f804e4f274d5e5c572bae2329c201fd952c3f48b2b75fe2acb"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "Row.holds"
+sha256 = "41ab92b1673cc7fe32dea881bb5a4ad17f9d6bf45d451ed392b19f93dbec4f2d"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "acyclic_wellFounded"
+sha256 = "ca94256080323cb435889ce4ca2aa0ed6e2c1457572b708211e94450695de9b3"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "citeCmpl_sound"
+sha256 = "1afde7e115d3f6be138ba74adb2f75e119a593bf55f3cb9cb23d2033f3961e7f"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "citeCmpl_subset"
+sha256 = "ccedfb0e74a8093ea13b5d6699f230a0bd0672e2875e9b4d8a063fa97dd4b99f"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "citePos_sound"
+sha256 = "e4d3bea01ab1c83837320298926d6c0a13cbd41057338ab24cb8390b655d78ce"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "cites"
+sha256 = "a4b2a714abd59c00ae18b92a2441472ceed9b7c20982a29b5ac5dc6ac53ba965"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "towerCitation_root"
+sha256 = "f3ca6123ba02cc45741cef4876afae9882381733c7524bf3f16fb64595d78e37"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "towerCitation_sound"
+sha256 = "92015cb866b458ede47862f0c0f9c4d1d08b7958d2301ff3851001e2cffacbf9"
+
+[[statement]]
+module = "QtslAux.Acceptance"
+decl = "towerCitation_sound_of_wf"
+sha256 = "5c9615f892694c9a043f3355fcbc1ebe1c20e2a067bf76c310d3a90d38b5e14a"
+

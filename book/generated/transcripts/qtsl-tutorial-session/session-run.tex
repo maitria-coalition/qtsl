@@ -1,0 +1,13 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ npx tsx session.ts
+ob1: (-1)*x0^2 + (1)*x0 + (-1/4) <= 0 on [0, 1]
+menu: range/cheap probe/cheap split/cheap search/expensive
+range: inconclusive {"enclosure":["-1/4","1/4"]}
+  note: enclosure straddles 0; split, search, or probe near the suspected maximum
+split: spawned -> ob2, ob3
+refused: ob1 has open children; work the leaves (its status resolves by propagation)
+ob2 range: discharged {"enclosure":["-1/4","0"]}
+ob3 range: discharged {"enclosure":["-1/4","0"]}
+ob1: discharged (via children) {"dischargedChildren":["ob2","ob3"]}
+replayed 5 events; state identical: true
+\end{Verbatim}

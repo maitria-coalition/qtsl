@@ -1,0 +1,94 @@
+# VerifiedCover: the discharge kit's working move — full literate
+# section (B10). Lean warrant: the auxiliary structural module.
+[[rule]]
+id = "VerifiedCover"
+source = "../QTSL-rules.toml"
+row = "VerifiedCover (T3b)"
+proof = "book/proofs/VerifiedCover.tex"
+commentary = '''
+\rulename{VerifiedCover} is the discharge kit\textquotesingle s
+working move: an off-scoped row --- $P$ on
+$D_m \smallsetminus \mathrm{Off}$ --- is discharged by proving the
+row on a cover $C$ and certifying that everything of $D_m$ the cover
+misses lies inside the off-region. The un-covered residual is
+decomposed into components $K_i$, and each component ships one
+containment premise $K_i \subseteq \mathrm{Off}$, discharged by exact
+Bernstein upper bounds --- ordinary sequent rows the base kernel
+replays.
+
+A producer reaches for it when \rulename{FullDomainWeaken} fails ---
+the row genuinely needs its carve-out --- but the on-region can be
+covered cleanly. Cover \emph{selection} is producer-side search (the
+current toolkit selects one-dimensional covers); the verified
+statement is dimension-free, so richer covers need no new warrant.
+
+What the checker recomputes: the residual decomposition
+$D_m \smallsetminus C \subseteq \bigcup_i K_i$ (set bookkeeping over
+the posted components) and the per-component containment rows. The
+case analysis is exhaustive by construction: a point of the scope is
+either covered, and the row-on-$C$ premise applies, or un-covered, in
+which case it lies in some $K_i \subseteq \mathrm{Off}$ ---
+contradicting membership in the scope. Drop the per-component
+containments and an un-covered point outside the off-region escapes
+both cases; drop the decomposition and the component list could
+silently miss part of the residual.
+'''
+note = '''
+One premise of the catalogued statement is deliberately absent from
+the verified one: the cover bookkeeping $C \subseteq D_m$. The proof
+never consumes it --- a cover reaching outside the domain proves more
+rows than needed, harmlessly --- so the mechanized statement omits
+it, which is strictly stronger in the sound direction; the checker
+keeps the containment as cover well-formedness. The neighbouring
+scope-preparation steps (hull closure, cell covers, off-scope
+splitting, reset containment, floor boxes) are deliberately not rules
+at all: they are side conditions the checker recomputes, and rows for
+them would misstate that.
+'''
+correspondence = '''
+The displayed premises map onto \texttt{verifiedCover\_components\_sound}
+one for one: the cover row $\vdash P$ on $C$ $\mapsto$ \texttt{hrowC};
+the per-component containments $K_i \subseteq \mathrm{Off}$ $\mapsto$
+\texttt{hcomp : ∀ i, K i ⊆ Off} (the exact-Bernstein-upper-bound
+premises, one per component, over an \emph{arbitrary} index type ---
+the dimension-freedom the display\textquotesingle s footline claims is
+a binder fact); the recomputed residual decomposition $D_m
+\smallsetminus C \subseteq \bigcup_i K_i$ $\mapsto$ \texttt{hdecomp},
+an explicit hypothesis (recompute rendered as binder, the
+\rulename{StreettTargetCellCollapse} pattern); the conclusion scope
+$D_m \smallsetminus \mathrm{Off}$ $\mapsto$ the System-bridge equality
+\texttt{hbridge : scope = Dm \textbackslash{} Off}. The residual form
+\texttt{verifiedCover\_sound} is the same statement with the
+decomposition pre-collapsed. Width note, divergence D1 as certified:
+the catalogued well-formedness $C \subseteq D_m$ appears in NO binder
+--- soundness demonstrably never consumes it, which the module header
+banks as the divergence and the display\textquotesingle s footline now
+carries; payload \texttt{P} arbitrary, per the T3a pattern.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Structural"
+src = "../../lean/qtsl-aux/QtslAux/Structural.lean"
+intro = '''
+Stated over the compiled semantic class (sets over a bare state
+type), dimension-free. The residual form is the kernel statement; the
+per-component form is the shape the discharge plan emits, with an
+arbitrary component index --- nothing one-dimensional survives into
+the warrant.
+'''
+decls = ["verifiedCover_sound", "verifiedCover_components_sound"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development\textquotesingle s object is the base
+calculus\textquotesingle s wire-format checker (theory
+\texttt{qtsl\_catalogue} ports the catalogue check-function cone).
+This rule is scope machinery of the extension
+theory\textquotesingle s discharge kit: it postdates that port, and
+no wire row for the move exists in any staged format --- there is
+nothing for a HOL statement to be about. The box becomes fillable
+when the extension\textquotesingle s certificate rows are committed to a wire
+format and the corresponding check is ported.
+'''

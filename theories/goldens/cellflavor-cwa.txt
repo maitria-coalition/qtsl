@@ -1,0 +1,10 @@
+      1 theories; 66 axioms (0 moves; aux helpers: none)
+[2/5] geometric linter: CLEAN
+[3/5] two-run construction stability: byte-identical (17852 bytes of listing body)
+[4/5] idempotence (normalize ∘ normalize = normalize): GREEN
+[5/5] instance conformance: 17 blocks validated (ts_boxfan, ts_dup_cluster, sa_quadrants, neg_ts_orphan, neg_ts_uninhabited, neg_both_flavors, neg_sa_cellfed, neg_sa_codty, neg_farkas_diag, persist_toy, sa_rulepair, obl_dup_sel, neg_tsnode_legacy, neg_sanode_on_ts, neg_obl_orphan, neg_out_ts_ghost_cluster, neg_sel_mismatch)
+modes: 26 chase · 32 report (0 by the unmarked default) · 8 refuse
+
+move census (0 moves):
+termination (C-WA advisory): weakly acyclic (chase terminates on every seed, polynomially; special-rank 0; 23 positions, 20 edges, 10 chased axioms)
+CHECK: GREEN

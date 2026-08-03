@@ -1,0 +1,135 @@
+# QUntilBattery — new full section (B7). Admissible (tier 2), proof is a
+# recipe. Proved at the discrete-kernel profile; GSHS transport remains
+# filed — hence conditional = true.
+[[rule]]
+id = "QUntilBattery"
+source = "../QTSL-rules.toml"
+row = "QUntilBattery"
+proof = "book/proofs/QUntilBattery.tex"
+conditional = true
+conditional_label = "DTMC"
+commentary = '''
+\rulename{QUntilBattery} concludes the bounded-until judgement
+$\mathsf{P}_{\ge p}[\varphi_s\, \mathsf{U}_{\le T}\, \varphi]$ on a
+composite \emph{affine} region
+$\{V_a + c\, V_d \le 1 - p\}$, from two certificates doing different
+work: an avoid certificate $V_a$ guarding the safe-side formula
+$\varphi_s$ until the target is reached, and a deadline certificate
+$V_d$ driving the process into the target by the horizon. It is this
+catalogue\textquotesingle s exemplar admissible rule at the satisfaction
+stratum: one node unpacks into two battery slices and one
+\rulename{QUnionBound} application, and the mechanized soundness proof
+\emph{is} that unpacking --- it consumes the deadline
+battery\textquotesingle s theorem as a black box, applies the union
+bound once, and never re-proves either battery.
+
+The two floors do different work, and the asymmetry is the
+rule\textquotesingle s design. $V_a$\textquotesingle s floor is asked on
+the bad-exit set $A$ \emph{only} --- the avoid certificate is silent on
+the target region $R$, so a successful landing costs no certificate
+budget: the rule does not charge for winning. $V_d$\textquotesingle s
+floor is global off the target, exactly as its parent deadline battery
+demands. Fail-closed: leaving the modelled domain joins the stop set on
+the \emph{bad} side, while an $R$-landing succeeds wherever it lands
+(the target\textquotesingle s formula tie is global).
+
+What the checker recomputes: the side conditions inherited from both
+battery slices, plus the one arithmetic hypothesis binding the slices
+together --- the rate tie $\beta^{T} \le c$ on the affine
+atom\textquotesingle s second coefficient. The catalogued instance
+$c = q^{-1}$ with $q \le e^{\theta T}$ and $\beta = e^{-\theta}$
+satisfies the tie; at this profile the whole certificate is exact
+rational arithmetic, with no transcendental leaf (one becomes available
+by the deadline battery\textquotesingle s Taylor-leaf pattern when
+$\theta$-rates are wanted). Drop the tie and the affine atom
+under-budgets the miss mass; drop either slice\textquotesingle s rows
+and that slice\textquotesingle s own counterexamples apply.
+
+Tier, argued: admissible, not alias --- three premise sub-derivations,
+not a respelling of one. And deliberately not monolithic core: a third
+self-contained lemma would duplicate two batteries\textquotesingle{}
+soundness; the mechanized assembly vindicates the choice by factoring
+through the named machinery instead. The conditional mark states the
+profile: proven at the discrete-kernel profile; the continuous-time
+transport remains a stated hypothesis, filed.
+'''
+note = '''
+The concluded region is the affine region atom with rows
+$[(1, V_a), (c, V_d)]$ and threshold $1 - p$ --- an affine sublevel
+region over certificate values, the region-vocabulary generalization
+whose $k = 1$ case is the ordinary sublevel atom.
+'''
+correspondence = '''
+Model frame and profile as at \rulename{QSafetyBattery}
+(discrete-kernel; GSHS transport filed). One structural honesty first:
+the display presents three premises --- two battery \emph{slices} and
+a \rulename{QUnionBound} application --- while the certified statement
+\texttt{sound\_QUntilBattery} takes the two slices\textquotesingle{}
+row families \emph{inline} (flattened hypothesis lists over one
+kernel) and performs the union bound internally; the admissible-tier
+unpacking is realized by the \emph{proof}, which consumes the T6
+theorem as a black box, not by the statement\textquotesingle s shape.
+\begin{itemize}
+\item the concluded judgement $\mathcal{M} \vDash \mathsf{P}_{\ge
+  p}[\varphi_s\,\mathsf{U}_{\le T}\,\varphi]$ $\mapsto$ the goal
+  $\mathrm{ofReal}\ p \le$ \texttt{pathMeasure K x \{ω | ∃ n ≤ T, sat
+  (ω n) ∧ ∀ j < n, sat\_s (ω j)\}} --- the until event verbatim, both
+  satisfaction predicates measurability-free.
+\item the two formula ties, opposite polarities (the T13 directions):
+  $A$ \emph{over}-approximates the falsity set of $\varphi_s$
+  (\texttt{hFs}) and $R$ \emph{under}-approximates the truth set of
+  $\varphi$ (\texttt{hFt}) --- both safe-direction widenings of the
+  displayed equalities.
+\item the T5 slice for $V_a$ $\mapsto$ \texttt{hVadrift}/\texttt{hVaint}
+  (drift at the composite stop set $(A \cup R) \cup D^{\mathrm{c}}$,
+  encoded as $y \in D,\ y \notin A \cup R$),
+  \texttt{hVafloor} --- on $A$ \emph{only}, the display\textquotesingle
+  s ``two floors doing different work\textquotesingle\textquotesingle{}
+  --- and \texttt{hVanonneg}.
+\item the T6 slice for $V_d$ $\mapsto$
+  \texttt{hVddecay}/\texttt{hVdint} ($\beta$-decay off $A \cup R$),
+  \texttt{hVdfloor} (global off-target), \texttt{hVdnonneg},
+  \texttt{hVdM}.
+\item the rate tie $\beta^T \le c$ $\mapsto$ \texttt{hc} with
+  \texttt{hβ} $:$ $0 \le \beta$ --- fully rational at this profile;
+  the catalogue\textquotesingle s $c = q^{-1}$ is one instance.
+\item the concluded \texttt{qraAffine} atom $[(1, V_a), (c, V_d)]$ at
+  threshold $1 - p$ $\mapsto$ the start condition \texttt{hthr} $:$
+  \texttt{Va x + c·Vd x ≤ 1 − p}, verbatim affine row.
+\item side conditions and regularity as at the siblings
+  (\texttt{hR3}/\texttt{hR4} at the composite stop set; the
+  measurability pack undisplayed).
+\end{itemize}
+Width note: beyond the two safe-direction ties, neither side is wider
+--- every displayed row lands on a named hypothesis, and the
+statement\textquotesingle s flattening loses nothing the display
+promises (each inline family is exactly its slice\textquotesingle s
+row family, stopped where the display stops it).
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslBattery"
+src = "../../lean/qtsl-aux/QtslAux/QtslBattery.lean"
+decls = [
+  "sound_QUntilBattery",
+  "sound_QUntilBattery_firstHit",
+  "measure_firstBad_le",
+  "measure_missTarget_le",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development ports the base calculus\textquotesingle s checker
+chain (theory \texttt{qtsl\_catalogue}, developed side by side with the
+base catalogue sources, stopping below the proof-object layer); it
+contains no probability or measure theory. \rulename{QUntilBattery}
+lives one theory-extension edge above the base calculus and its
+soundness content is path-space measure theory (a stopped-supermartingale
+slice, a discounted-supermartingale slice, and a union bound over a
+d\'ebut decomposition), for which no counterpart exists anywhere in the
+ported development. A HOL statement of this rule would be a new
+measure-theoretic campaign, not an extension of the ported checker
+chain; until one exists, this box is the honest state of the edifice.
+'''

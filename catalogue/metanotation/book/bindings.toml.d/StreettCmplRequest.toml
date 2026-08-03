@@ -1,0 +1,24 @@
+# bindings.toml.d/StreettCmplRequest.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'StreettCmplRequest'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "denot_elimNeg"
+sha256 = "fab29c7a1d77e1d5e084bf93232c9e74d54f92f4473b47015409ad663be463cf"
+
+[[statement]]
+module = "QtslAux.QStreett"
+decl = "sound_QStreettBundle_tie"
+sha256 = "d9937dce2bed959a3040b9e6173bc1871d79dfc0141924b9d360d5cbec326c50"
+
+[[statement]]
+module = "QtslAux.QStreett"
+decl = "streett_event_mono"
+sha256 = "6e02281735c88f78a996a16462f1513b0a660463d1894a7a3da1601c92c7b037"
+
+[[correspondence]]
+entry = "StreettCmplRequest"
+steele_sha256 = "f8241fd8b48852ecd66c238c897688d5b55ad03e4a3cd7ba841dfeae67132756"
+statements_sha256 = "06ef0d2b0b4164479f95db4a49d7f22b28555da683856f84d1edebb25b528e83"
+prose_sha256 = "d7196f5d869ecfeeb493a9d46bff116af846fd3615b1341acc69e645a69e5fad"
+

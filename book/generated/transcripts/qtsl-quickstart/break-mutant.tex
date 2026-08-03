@@ -1,0 +1,7 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ sed 's|448999/|449000/|' certs/faulty_uniform/bound.rows.txt > my_broken.rows.txt
+$ node --experimental-strip-types $CHK/check_rows.ts \
+    --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt \
+    my_broken.rows.txt
+REJECT my_broken.rows.txt berncone.coeff
+\end{Verbatim}

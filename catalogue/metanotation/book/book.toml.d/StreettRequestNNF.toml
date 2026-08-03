@@ -1,0 +1,119 @@
+# StreettRequestNNF (T22): alias — per-pair normalization into the Streett
+# bundle's input shape, with the polarity theorem.
+
+[[rule]]
+id = "StreettRequestNNF"
+source = "../QTSL-rules.toml"
+row = "StreettRequestNNF (T22)"
+proof = "book/proofs/StreettRequestNNF.tex"
+alias_target = "QStreettBundle"
+commentary = '''
+\rulename{StreettRequestNNF} normalizes each Streett pair into the
+bundle\textquotesingle s expected input shape (the source catalogue
+labels it T22): base-typed requests pass through unchanged, and a
+complement-typed request has its formula rewritten to negation normal
+form --- negations pushed to the atoms by the \rulename{NNFDuality}
+rewrites --- so that the complement is applied at the \emph{consumption
+boundary} (the atom swaps, or the complement-request rule), never
+carried as a formula literal. It is an alias: the rewrite is a $1 \to 1$
+respelling of one pair inside one \rulename{QStreettBundle} node, and
+its warrant is denotation preservation of the normalization pass ---
+the region the pair constrains is unchanged, so the judgement transports
+verbatim.
+
+The essential extra is the \emph{polarity theorem}: the surviving
+negative literals of the normal form are exactly the odd-polarity atom
+occurrences of the input formula. Its consequence is that the typing
+pass\textquotesingle s rejection of negated probability literals ---
+which guards against smuggling a probability \emph{upper} bound through
+an even number of negations --- is equivalent to a surface-level
+polarity check on the un-normalized formula: normalization can never
+manufacture a rejected literal that was not already there at odd
+polarity, and never loses one. What would break without it: a
+normalization pass without the polarity invariant could present a
+well-typed surface whose normal form hides a rejected literal, and the
+consumption boundary would silently consume a bound in the wrong
+direction.
+
+Mechanization state, plainly: the pass and both theorems are
+machine-checked structurally, and the bound statements below are their
+statements (module \texttt{QtslAux.NNFDuality}): the
+normalizer \texttt{Form.nnf} lands in a literal normal form whose
+\emph{type} has no negation node --- negation-freedom by construction,
+the strongest form of the well-formedness claim --- with denotation
+preservation \texttt{denot\_nnf} (the displayed
+$[\![\mathrm{nnf}(\rho_i)]\!] = [\![\rho_i]\!]$), the polarity
+theorem \texttt{negLits\_nnf} (surviving negative literals $=$
+odd-polarity atom occurrences) and its rejection face
+\texttt{nnf\_no\_negLit\_iff}, and the consumption-boundary
+elimination \texttt{denot\_elimNeg}. The rule\textquotesingle s scope
+is the propositional skeleton, deliberately --- the path-operator nodes
+of the spec surface are handled by their own ruled aliases and typing
+rejections, never by this pass --- and the witnesses cover that scope in
+full, so the entry carries no conditional flag.
+'''
+note = '''
+The pass is a reference implementation on the producer side; nothing
+checker-facing depends on running it. What the certificate format sees
+is only the normalized result, and the typing pass independently
+rejects any surviving negative probability literal --- so a defective
+producer normalization can produce rejections, never unsoundness.
+'''
+correspondence = '''
+The display\textquotesingle s ``negation-freedom holds by
+construction of the normal-form grammar'' is certified \emph{by
+type}: the target grammar \texttt{NForm} (positive/negative literals
+under $\wedge$/$\vee$) has no negation constructor, so no theorem
+about negation-freedom exists to state --- the inductive definition
+is the certificate. The remaining display constituents map onto the
+four bound statements:
+\begin{itemize}
+\item $[\![\mathrm{elimNeg}(\mathrm{nnf}(\rho_i))]\!] =
+  [\![\rho_i]\!]$ $\mapsto$ the composition of \texttt{denot\_nnf}
+  (\texttt{(φ.nnf).denot den = φ.denot den} --- the normalizer
+  preserves the region, T12\textquotesingle s dualities consumed as
+  the induction) with \texttt{denot\_elimNeg}, whose hypothesis
+  \texttt{hd : ∀ a, den (d a) = (den a)ᶜ} is the per-duality
+  definitional-axiom pack: elimination is lawful exactly where a
+  dual atom exists, which is the display\textquotesingle s
+  ``the complement applies at the consumption boundary, never as a
+  literal'' --- the retained $\mathrm{cmpl}$ tag consumes at T9b
+  through this same lemma (the roster resync\textquotesingle s
+  counterexample-driven fix, now certified in both artefacts).
+\item the polarity theorem $\mapsto$ \texttt{negLits\_nnf :
+  (φ.nnf).negLits = φ.occs false} --- surviving negative literals
+  are \emph{exactly} the odd-polarity atom occurrences --- with the
+  rejection face \texttt{nnf\_no\_negLit\_iff} certifying the
+  display\textquotesingle s ``the neg-P rejection is a surface
+  polarity check, stable under normalization.''
+\end{itemize}
+Width note: atoms and denotations are fully abstract (\texttt{α},
+\texttt{den : α → Set σ}) --- the per-pair Streett context, the
+base-typed-request pass-through, and the probability flavour of the
+neg-P check are all consumers of these statements, not content of
+them; unconditional, \texttt{propext} alone, set-level witnesses
+covering the catalogued claim in full.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.NNFDuality"
+src = "../../lean/qtsl-aux/QtslAux/NNFDuality.lean"
+decls = [
+  "denot_nnf",
+  "negLits_nnf",
+  "nnf_no_negLit_iff",
+  "denot_elimNeg",
+]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}: the normalization is a
+producer-side rewrite completed before emission --- certificates carry
+only its output, and the output\textquotesingle s well-formedness is
+enforced by the typing pass, not by a checker replay of the rewrite. No
+wire object exists for a HOL statement to be about. Checked against the
+HOL sources: the \texttt{qtsl\_catalogue} theory carries no spec-surface
+formula grammar.
+'''

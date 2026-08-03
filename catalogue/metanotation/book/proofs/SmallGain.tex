@@ -1,0 +1,185 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. An alias
+owes the book five artefacts: the verified 1$\to$1 unpack function, the
+filled-in application of the target rule, the payload-transport table, the
+exact algebraic identity that makes the respelling correct, and the
+soundness corollary through the target rule's lemma. All five follow.
+(The tier criterion counts derivation nodes, not instantiation work: the
+unpack \emph{computes} the weighting, but its image is a single
+\rulename{Syzygy} node, so the rule is an alias.)}
+
+\begin{brecipe}[the alias template]\label{rec:sg-template}
+An alias rule $A$ is warranted by a verified function
+$\mathrm{unpack} : \mathrm{Step}_A \to \mathrm{Step}_T$ into the payload
+of a \emph{single} target node $T$ (core or admissible), such that the
+$A$-node and its image conclude the same sequent from the same premises:
+one node $\to$ one node, payload transported, nothing derived. Soundness
+is then a corollary, $\mathrm{sound}_A = \mathrm{sound}_T \circ
+\mathrm{unpack}$, and the wire format need never carry $A$ at all ---
+producers elaborate before emission, which is why \rulename{SmallGain} has
+no \texttt{RuleTag}.
+\end{brecipe}
+
+\begin{brecipe}[the filled-in application --- \rulename{SmallGain}'s
+premises rewritten \emph{into} the \rulename{Syzygy} instance]
+\label{rec:sg-filled}
+A \rulename{SmallGain} step carries four component proofs: the two
+dissipation sequents (over their own boxes $\Phi_1, \Phi_2$) and the two
+gain-membership sequents (over the declared operating box $\Phi_w$).
+Define the four atom terms and the substitution into
+\rulename{Syzygy}'s metavariables:
+\[
+e_1 \equiv \mathcal{L}_1 V_1 + \alpha_1 - \sigma_1, \qquad
+e_2 \equiv \mathcal{L}_2 V_2 + \alpha_2 - \sigma_2, \qquad
+m_1 \equiv \lambda\sigma_2 - (1{-}\theta)\,\alpha_1, \qquad
+m_2 \equiv \sigma_1 - \lambda(1{-}\theta)\,\alpha_2,
+\]
+\[
+n := 4, \qquad
+(e_1, e_2, e_3, e_4) := (e_1, e_2, m_1, m_2), \qquad
+(\Phi_1, \Phi_2, \Phi_3, \Phi_4) := (\Phi_1, \Phi_2, \Phi_w, \Phi_w),
+\]
+\[
+(\lambda_1, \lambda_2, \lambda_3, \lambda_4) := (1, \lambda, 1, 1),
+\qquad
+\{g_k\}_k := \varnothing \ \text{(no equality entries)}, \qquad
+c := \mathcal{L}(V_1 + \lambda V_2) + \theta\,(\alpha_1 + \lambda\alpha_2),
+\]
+with $\lambda \in \Q_{>0}$ and $\theta \in \Q \cap (0,1)$ from the
+payload. Under this substitution the \rulename{SmallGain} node \emph{is}
+the following \rulename{Syzygy} application (compare the rule display in
+the \rulename{Syzygy} section, field for field):
+\begin{mathpar}
+\inferrule*[Right=\rulename{Syzygy}]{
+  \Phi_1 \vdash e_1 \leq 0 \\
+  \Phi_2 \vdash e_2 \leq 0 \\
+  \Phi_w \vdash m_1 \leq 0 \\
+  \Phi_w \vdash m_2 \leq 0 \\\\
+  (1, \lambda, 1, 1) \in \Q_{\geq 0}^{\,4} \\
+  c \;\equiv\; 1\cdot e_1 + \lambda\cdot e_2 + 1\cdot m_1 + 1\cdot m_2
+  \ \text{(exact canonical polynomial)}
+}{
+  \Phi \vdash c \leq 0
+}
+\end{mathpar}
+with $\Phi \supseteq \Phi_1, \Phi_2, \Phi_w$ conjunct-wise (the
+four-way \texttt{preContains} split). Discharging \rulename{Syzygy}'s
+obligations at this instance: the nonnegativity checks are $1 \geq 0$
+(three times) and $\lambda \geq 0$ (from $\lambda > 0$ --- the
+\emph{only} use soundness makes of $\lambda$'s sign); the sourcing check
+is immediate (each of the four entries is the corresponding component's
+posted atom, verbatim); and the exact-identity check is
+Proposition~\ref{prop:sg-identity} below. The dead premise slots of
+\rulename{Syzygy} are honestly dead: no equality sub-conjuncts of $\Phi$
+enter (the $\nu$-row is empty), because the cross-supply cancellation is
+performed by the membership atoms themselves. The verified function
+computing this rewriting is \texttt{SmallGainStep.toSyzygy}, quoted
+above.
+\end{brecipe}
+
+\begin{bprop}[the conclusion identity]\label{prop:sg-identity}
+As an identity of exact canonical polynomials,
+\[
+e_1 + \lambda e_2 + m_1 + m_2
+\;=\;
+\mathcal{L}(V_1 + \lambda V_2) \;+\; \theta\,(\alpha_1 + \lambda\alpha_2).
+\]
+\end{bprop}
+\begin{proof}
+Expand and collect --- two lines, which is the point:
+\begin{align*}
+e_1 + \lambda e_2 + m_1 + m_2
+&= \bigl(\mathcal{L}_1 V_1 + \lambda\,\mathcal{L}_2 V_2\bigr)
+ + \alpha_1 + \lambda\alpha_2
+ \underbrace{-\,\sigma_1 - \lambda\sigma_2
+ + \lambda\sigma_2 + \sigma_1}_{=\,0\ \text{(cross-supplies cancel)}}
+ - (1{-}\theta)\alpha_1 - \lambda(1{-}\theta)\alpha_2\\
+&= \mathcal{L}(V_1 + \lambda V_2)
+ + \bigl(1 - (1{-}\theta)\bigr)\alpha_1
+ + \lambda\bigl(1 - (1{-}\theta)\bigr)\alpha_2
+\;=\; \mathcal{L}(V_1 + \lambda V_2) + \theta\,(\alpha_1 + \lambda\alpha_2).
+\end{align*}
+The cross-supply cancellation is \emph{by construction of the
+multipliers}: the membership sequents were chosen so that their
+polynomials supply exactly $+\lambda\sigma_2$ and $+\sigma_1$. The checker
+replays this as \rulename{Syzygy}'s exact canonical-polynomial identity
+$(\ast)$ and \textbf{never sees a fixpoint} --- the classical small-gain
+contraction argument is dissolved into two lines of ring arithmetic at
+certificate-checking time.
+\end{proof}
+
+\begin{brecipe}[payload transport --- \texttt{toSyzygy}, field for field]
+\label{rec:sg-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{\texttt{SmallGainStep}} & \textbf{\texttt{SyzygyStep}}\\
+\midrule
+\texttt{seq} & \texttt{seq}\\
+\texttt{diss1, diss2, mem1, mem2} & \texttt{components} (that order = combination order)\\
+\texttt{combTerm} \textnormal{(weights $(1,\lambda,1,1)$)} & \texttt{combination}\\
+\texttt{concl} & \texttt{conclusion}\\
+\texttt{pre1, pre2, preM1, preM2} & \texttt{preContains} (four-way case split)\\
+\texttt{conclShape, conclFin} & \texttt{conclShape, conclFin} (verbatim)\\
+\texttt{wiresPos, compPostWiresPos} & \texttt{wiresPos, compPostWiresPos} (verbatim)\\
+\texttt{combValid} & \texttt{valid}\\
+\texttt{postEq} & \texttt{postForm} $=$ \textnormal{(Z$\leq$), the zero-normal reading}\\
+\end{tabular}
+\end{center}
+The alias declares the \emph{zero-normal} reading of the both-polarity
+conclusion form: \rulename{SmallGain}'s own contract stays
+$\leq$-only, and any polarity flexibility is inherited from
+\rulename{Syzygy}'s side of the fence (the reading-transport lemma
+\texttt{holds\_of\_syzygyConclusionForm}, proved in the \rulename{Syzygy}
+section), not re-justified here.
+\end{brecipe}
+
+\begin{bprop}[soundness corollary]\label{prop:sg-sound}
+If the four component sequents are semantically valid, the composite
+sequent
+$\Phi \vdash \mathcal{L}(V_1 + \lambda V_2) + \theta(\alpha_1 +
+\lambda\alpha_2) \leq 0$ is semantically valid.
+\end{bprop}
+\begin{proof}
+\texttt{sound\_smallGain} $=$ \texttt{sound\_syzygy} applied to
+\texttt{st.toSyzygy}, feeding the four validities through the four-way
+membership case split. There is no other content --- which is the alias
+genre working as intended.
+\end{proof}
+
+\begin{bremark}[$\theta$'s range is well-formedness, not soundness]
+The identity of Proposition~\ref{prop:sg-identity} holds at \emph{any}
+$\theta$; the memberships self-police (an infeasible $(\lambda, \theta)$
+simply yields unprovable membership sequents). The $(0,1)$ range check
+backs the \emph{published meaning} of $\theta$ as a guard modulus --- a
+first-class robustness radius travelling in the proof term, per-node in
+the payload, with the certificate header publishing the composite
+modulus as the min over nodes --- and $\lambda > 0$ enters soundness
+only as $\lambda \geq 0$.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The rule certificate-izes the Lyapunov small-gain construction: two ISS-style
+dissipation inequalities with gain interconnection conditions yield a
+composite Lyapunov function $V_1 + \lambda V_2$ --- the nonlinear
+small-gain theorem of Jiang--Teel--Praly \cite{jiangteelpraly1994} in its
+Lyapunov formulation \cite{jiangmareelswang1996}, sitting inside the
+dissipativity-composition tradition \cite{willems1972,moylanhill1978}.
+Where the classical theorems close a fixpoint/contraction argument, the
+certificate form closes a ring identity: the analytic content is moved
+into the \emph{choice} of $(\lambda, \theta)$ and the membership
+certificates, and the kernel checks only arithmetic. The contracts are
+\emph{signed polynomial} inequalities rather than norm gains by
+necessity: {\AA}str\"om--Furuta's swing-up analysis \cite{astromfuruta2000}
+exploits the sign of $\dot\vartheta\cos\vartheta$, which no norm-gain
+contract can express. $n$-component generalizations (cycle conditions
+over interconnection graphs) and $(\lambda,\theta)$-existence results
+are deliberately outside the checker, left as research residue.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:sg-transport} unpack & \texttt{SmallGainStep.toSyzygy} (Composition.lean); \texttt{toSyzygy\_components}\\
+Proposition \ref{prop:sg-identity} & \texttt{combValid}'s fold identity (\texttt{foldEq} $\cdot$ \texttt{conclPoly}), replayed as \rulename{Syzygy}'s $(\ast)$\\
+Proposition \ref{prop:sg-sound} & \texttt{sound\_smallGain} (a \texttt{sound\_syzygy} corollary)\\
+no wire tag, by design & \texttt{RuleTag} comment block (Core/Catalogue.lean): producers elaborate before emission\\
+end-to-end instance & \texttt{Handshake/DpCompositeSmallGain.lean} (kernel-checked upstream of the unpack)\\
+\end{anchors}

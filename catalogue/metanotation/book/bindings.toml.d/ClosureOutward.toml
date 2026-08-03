@@ -1,0 +1,29 @@
+# bindings.toml.d/ClosureOutward.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ClosureOutward'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "RegionSat"
+sha256 = "c0cf0e31c15b8c80f591bd35c70eb53d85b75bde04e1b628eb410c148f67b4a0"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureOutwardGe_sound"
+sha256 = "593b4985c9b34c35bca8f2bb6803dbb56c394bb2842f4db4531aea51ad4ab3a3"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureOutward_sound"
+sha256 = "8166bb94fa5595b35bad48ca2084952f681daea1553f557d395be4642b7ee63d"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "compl_over_approx"
+sha256 = "6f1d542afe9f1660659f238c5d0bf8e104dd7ef2bd8e294cd4f23625493e1c39"
+
+[[correspondence]]
+entry = "ClosureOutward"
+steele_sha256 = "211c80146386cf38aeaf8bc3db115e46a25261616e3791d5aa6367234805f566"
+statements_sha256 = "bcd37c2837ebfe3ddfe579556a14f7a64ea9d36e8c954d15fce11a9c5541e1d9"
+prose_sha256 = "ddf08fbbbaf7e90acbdf7132dad914afdeecc2427a619eae2f244c1e12f385c6"
+

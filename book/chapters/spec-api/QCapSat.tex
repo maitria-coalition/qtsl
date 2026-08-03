@@ -1,0 +1,35 @@
+\apilang{TypeScript}{judgment.capSat}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function capSat(args: {
+  cap: ForallSpec;
+  region: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.capSat({
+    cap: s.probGe(Q.of(9, 10), s.always(phi)),
+    region: j.sublevel(j.certFamRef("lyap-v1"), Q.of(1, 10)),
+  }),
+),
+\end{tssrc}
+\apiprov{Entered at revision event 4 as the interim typed conclusion for the cap-discharging rules (batteries, transports, reach tables); at revision event 6 the warrant seam is entity-keyed and the producer's rule rows are re-staged against it, and this kind remains the typed conclusion those rules place on the wire pending a verdict-form producer.}
+\apilang{Rust}{mtk\_catalogue::judgment::QCapSat::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(cap: ForallSpec, region: RegionAtom) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let phi = StatePred::poly_le(q(0, 1), Poly::var(0, 1).unwrap());
+let row = QCapSat::new(
+    ForallSpec::prob_ge(q(9, 10), PathPred::always(phi)).unwrap(),
+    RegionAtom::Sublevel {
+        cert: CertFamRef("lyap-v1".into()),
+        thr: q(1, 10),
+    },
+);
+\end{rustsrc}
+\apiprov{Entered at revision event 4 as the interim typed conclusion for the cap-discharging rules (batteries, transports, reach tables); at revision event 6 the warrant seam is entity-keyed and the producer's rule rows are re-staged against it, and this kind remains the typed conclusion those rules place on the wire pending a verdict-form producer.}

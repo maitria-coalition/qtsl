@@ -1,0 +1,38 @@
+name = "su-functor-legacy"
+version = "0.1.0"
+defaultTargets = ["SuFunctorLegacy"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+# The certificate calculus (proof objects, per-rule soundness).
+[[require]]
+name = "Qtsl"
+path = "../qtsl"
+
+# Pseudo double categories and lax double functors.
+[[require]]
+name = "double-cat"
+path = "../double-cat"
+
+# Finite-support imprecise probability.
+[[require]]
+name = "qtsl-aux"
+path = "../qtsl-aux"
+
+# The live semantic-universe package.  The dependency direction is
+# one-way on purpose: this archive imports the live package, and the
+# live package cannot import this one — any surviving reference to a
+# retired module from `su-functor` fails its build.
+[[require]]
+name = "su-functor"
+path = "../su-functor"
+
+[[lean_lib]]
+name = "SuFunctorLegacy"
+globs = ["SuFunctorLegacy", "SuFunctorLegacy.+"]

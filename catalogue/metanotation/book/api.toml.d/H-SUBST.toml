@@ -1,0 +1,22 @@
+# api.toml.d/H-SUBST.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "H-SUBST"
+note = '''The normal form (\texttt{renumber}) and the unit (the identity hypernet) are quoted alongside \texttt{substitute}. The corpus construction exercises a fan-out seam, a delete seam, an explicit exposure, and a pass-through port; the composite's bytes are verified against the reference operation's output.'''
+
+[api.ts]
+handle = "hypernet.substitute"
+sig_file = "ts/src/hypernet.ts"
+sig = ["fn substitute", "fn renumber", "fn identity"]
+snippet_file = "ts/tests/hypernet-native.test.ts"
+snippet = "marker:H-SUBST"
+
+[api.rust]
+handle = "mtk_catalogue::hypernet::substitute"
+sig_file = "crates/mtk-catalogue/src/hypernet/subst.rs"
+sig = ["fn substitute", "fn renumber", "fn identity_hypernet"]
+snippet_file = "crates/mtk-catalogue/tests/golden_hypernet.rs"
+snippet = "marker:H-SUBST"

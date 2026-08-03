@@ -1,0 +1,127 @@
+[[rule]]
+id = "ArithAtom"
+source = "../BL-rules.toml"
+row = "ArithAtom"
+proof = "book/proofs/ArithAtom.tex"
+commentary = '''
+\rulename{ArithAtom} toggles a comparison atom between its two
+spellings: the \emph{direct form} $t_1 \bowtie t_2$ and the
+\emph{zero-normal form} $(t_1 - t_2) \bowtie 0$, in both directions
+(one payload constructor each), for
+$\bowtie \in \{<, \leq, =, \geq, >\}$. It is the adapter at the
+calculus\textquotesingle s normal-form boundary: the combination rules
+(\rulename{Farkas}, \rulename{Syzygy}) and the canonical conclusions of
+the geometry rules live in $(\cdot) \leq 0$-normal shapes, while
+human-facing specifications, box premises of the relaxation rules, and
+final theorem statements live in direct forms. A producer folds a
+zero-form conclusion into the literal bound a downstream rule wants, or
+unfolds a specification atom so its polynomial content can be matched.
+
+What the checker recomputes: two syntactic form equations --- the
+premise (respectively conclusion) must be \emph{literally} the atom
+built from the same payload terms with the syntactic difference
+$t_1 - t_2$ against the literal constant $0$ --- plus the comparator
+gate $\bowtie \neq \mathord{\neq}$ and the shared-context equation.
+Deliberately severe: no term evaluating to zero, no algebraic
+rearrangement qualifies (a producer wanting those routes through
+\rulename{Norm} first); the severity is what keeps the side conditions
+decidable by construction and the trusted surface at two equations.
+
+There is no droppable typing hypothesis, and that is the
+rule\textquotesingle s quiet achievement: both forms mention the same
+wires, so each form evaluates exactly when the other does --- in the
+fold direction the difference\textquotesingle s definedness arrives with
+the premise, and in the unfold direction it is manufactured from the
+fact that a \emph{holding} elementwise comparison already certifies
+broadcast compatibility, on exactly which subtraction is total. The
+comparator gate is the one non-structural field: the rational semantics
+would accept $\neq$ (the entrywise bridge is comparator-uniform), and
+the gate instead protects an auxiliary three-valued interpretation the
+development maintains, under which $\neq$ atoms take a nonclassical
+value (see the proof section\textquotesingle s closing remark).
+'''
+note = '''
+The transported object is the per-entry rational comparison
+$(p - q) \bowtie 0 \iff p \bowtie q$ --- translation invariance of the
+order of $\Q$ --- lifted entrywise through the broadcast discipline by
+an invertible totality argument. Exact arithmetic end to end: no
+rounding, no tolerance, in either direction.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}.
+\begin{itemize}
+\item the display\textquotesingle s two inference lines $\mapsto$ the
+  lemma pair, mirroring the payload\textquotesingle s two
+  constructors: \rulename{ArithAtom} (zero-form premise, direct
+  conclusion) $\mapsto$ \texttt{sound\_arithAtom\_fold};
+  \rulename{ArithAtom}$^{-1}$ $\mapsto$
+  \texttt{sound\_arithAtom\_unfold}.
+\item $t_1, t_2 \mapsto$ \texttt{termL termR : Term}; $\bowtie
+  \mapsto$ \texttt{b : BowTie}; the two spellings $\mapsto$ the form
+  predicates quoted below, each a one-line syntactic equation:
+  \texttt{atomicCompareForm} (the atom is literally $t_1 \bowtie t_2$)
+  and \texttt{atomicCompareZero} (literally $(t_1 - t_2) \bowtie 0$,
+  syntactic difference against the literal constant).
+\item $\Phi \mapsto$ the shared context via \texttt{hpre}; the
+  premise judgement $\mapsto$ \texttt{ih}; the conclusion $\mapsto$ the
+  goal \texttt{seq.semanticallyValid H}. Certified alongside:
+  \texttt{QTensor.map2\_defined\_of\_rel2}, the totality bridge with
+  which the unfold direction manufactures the
+  difference\textquotesingle s definedness from the holding premise.
+\end{itemize}
+Width note, deliberate and essential (the \rulename{PConstExact}
+pattern): the display restricts $\bowtie \in \{<, \leq, =, \geq, >\}$,
+while both lemmas are proven for \emph{all} constructors of
+\texttt{BowTie}, including $\neq$ --- no $\bowtie \neq \mathord{\neq}$
+hypothesis appears in either statement. The exclusion is an
+admission-layer fact: the payload\textquotesingle s \texttt{notNE}
+field refuses $\neq$ certificates to protect the three-valued screen
+the commentary describes. The mechanized statements are therefore
+strictly wider than the displayed rule, and the displayed rule is
+exactly the admitted fragment of them.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "QTensor.map2_defined_of_rel2",
+  "sound_arithAtom_fold",
+  "sound_arithAtom_unfold",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+intro = '''
+\textbf{The two form equations, in full.}\enspace Everything this rule
+checks is displayed below: two one-line syntactic equations and the
+payload\textquotesingle s two constructors (one per direction) with the
+comparator gate \texttt{notNE}. No valuation is consulted; semantic
+truth enters only through the soundness lemmas.
+'''
+full_decls = [
+  "atomicCompareForm",
+  "atomicCompareZero",
+  "PArithAtomData",
+]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = [
+  "Definition atomicCompareFormB_def",
+  "Definition atomicCompareZeroB_def",
+]
+receipt = '''
+\texttt{hol-strict} CLEAN census over the ported checker theory:
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host. The script has
+been revised since that run (2026-07-18, in the barycentric-build
+region, away from the definitions cited here), so the census attests the
+theory as then built; there is no signed HOL receipt store yet --- these
+citations are documentary.
+'''

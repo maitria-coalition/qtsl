@@ -1,0 +1,25 @@
+name = "qtsl-aux"
+version = "0.1.0"
+defaultTargets = ["QtslAux"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+# Sibling package: continuous-time optional sampling for right-continuous
+# nonnegative supermartingales (same toolchain, same mathlib pin).
+[[require]]
+name = "optional-sampling-rc"
+path = "../optional-sampling"
+
+[[lean_lib]]
+name = "QtslAux"
+globs = ["QtslAux", "QtslAux.+"]
+
+[[lean_lib]]
+name = "AxiomReceipts"
+globs = ["AxiomReceipts"]

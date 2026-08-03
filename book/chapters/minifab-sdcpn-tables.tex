@@ -1,0 +1,318 @@
+
+{\footnotesize
+\setlength{\tabcolsep}{3.5pt}%
+\renewcommand{\arraystretch}{0.92}%
+
+\noindent
+\begin{minipage}[t]{0.40\textwidth}
+\begin{center}
+\begin{tabular}{@{}rlllr@{}}
+\multicolumn{5}{@{}l@{}}{\textbf{Places} (species \texttt{HPlate})}\\
+\toprule
+\# & plate & colour & Bag carrier & init\\
+\midrule
+0 & $q_0$ & --- & $\mathrm{Bag}(\mathbf{1}) \cong \mathbb{N}$ & $N$\\
+1 & $q_1$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 0\\
+2 & $q_2$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 0\\
+3 & $q_3$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 0\\
+4 & $q_4$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 0\\
+5 & $q_5$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 0\\
+6 & $q_6$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 0\\
+7 & $p_1$ & $[0, 225]$ & $\mathrm{Bag}([0,225])$ & 0\\
+8 & $p_2$ & $[0, 30]$ & $\mathrm{Bag}([0,30])$ & 0\\
+9 & $p_3$ & $[0, 55]$ & $\mathrm{Bag}([0,55])$ & 0\\
+10 & $p_4$ & $[0, 50]$ & $\mathrm{Bag}([0,50])$ & 0\\
+11 & $p_5$ & $[0, 255]$ & $\mathrm{Bag}([0,255])$ & 0\\
+12 & $p_6$ & $[0, 10]$ & $\mathrm{Bag}([0,10])$ & 0\\
+13 & $m_{\mathrm{diff}}$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 2\\
+14 & $m_{\mathrm{impl}}$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 2\\
+15 & $m_{\mathrm{lith}}$ & --- & $\mathrm{Bag}(\mathbf{1})$ & 1\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.57\textwidth}
+\begin{center}
+\begin{tabular}{@{}lrl@{}}
+\multicolumn{3}{@{}l@{}}{\textbf{The arc-type census, classified}}\\
+\toprule
+SDCPN element & \# & pattern instance\\
+\midrule
+ordinary arc, input face & 25 & Bag destroy edge (rendezvous)\\
+ordinary arc, output face & 24 & Bag create edge$^{\dagger}$ (spawn)\\
+enabledness count & 19 & monotone scope rows\\
+colour guard slab & 12 & guard content on the edge\\
+enabling arc & 0 & per-tuple parameter-setting\\
+inhibitor arc & 0 & excluded by formation\\
+delay (rate-raced) transition & 0 & race clock, finite majorant\\
+forced (deterministic delay) & 6 & forced clock, dwell $1$\\
+immediate transition & 0 & race clock, infinite majorant\\
+demonic scheduling & 13 & carved clock $[1,1]$; choice stays demonic\\
+firing measure & 19 & Dirac reset legs\\
+initial marking & 1 & root init rows\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{minipage}
+
+\smallskip
+
+\begin{center}
+\begin{tabular}{@{}rlllll@{}}
+\multicolumn{6}{@{}l@{}}{\textbf{Petri transitions} (species
+\texttt{Transition}: grain, clock, attachment)}\\
+\toprule
+\# & transition & consumes [guard slab] & produces [colour law] & clock &
+reset rows\\
+\midrule
+0 & $\mathrm{release}$ & $q_0$ & $q_1$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+1 & $\mathrm{start}_1$ & $q_1,\; m_{\mathrm{diff}}$ & $p_1\,[w := 225]$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+2 & $\mathrm{start}_2$ & $q_2,\; m_{\mathrm{impl}}$ & $p_2\,[w := 30]$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+3 & $\mathrm{start}_3$ & $q_3,\; m_{\mathrm{lith}}$ & $p_3\,[w := 55]$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+4 & $\mathrm{start}_4$ & $q_4,\; m_{\mathrm{impl}}$ & $p_4\,[w := 50]$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+5 & $\mathrm{start}_5$ & $q_5,\; m_{\mathrm{diff}}$ & $p_5\,[w := 255]$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+6 & $\mathrm{start}_6$ & $q_6,\; m_{\mathrm{lith}}$ & $p_6\,[w := 10]$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+7 & $\mathrm{tick}_1$ & $p_1\,[1 \le w \le 225]$ & $p_1\,[w := w-1]$ &
+  forced & \texttt{tr.scale}\\
+8 & $\mathrm{tick}_2$ & $p_2\,[1 \le w \le 30]$ & $p_2\,[w := w-1]$ &
+  forced & \texttt{tr.scale}\\
+9 & $\mathrm{tick}_3$ & $p_3\,[1 \le w \le 55]$ & $p_3\,[w := w-1]$ &
+  forced & \texttt{tr.scale}\\
+10 & $\mathrm{tick}_4$ & $p_4\,[1 \le w \le 50]$ & $p_4\,[w := w-1]$ &
+  forced & \texttt{tr.scale}\\
+11 & $\mathrm{tick}_5$ & $p_5\,[1 \le w \le 255]$ & $p_5\,[w := w-1]$ &
+  forced & \texttt{tr.scale}\\
+12 & $\mathrm{tick}_6$ & $p_6\,[1 \le w \le 10]$ & $p_6\,[w := w-1]$ &
+  forced & \texttt{tr.scale}\\
+13 & $\mathrm{finish}_1$ & $p_1\,[w = 0]$ & $q_2,\; m_{\mathrm{diff}}$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+14 & $\mathrm{finish}_2$ & $p_2\,[w = 0]$ & $q_3,\; m_{\mathrm{impl}}$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+15 & $\mathrm{finish}_3$ & $p_3\,[w = 0]$ & $q_4,\; m_{\mathrm{lith}}$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+16 & $\mathrm{finish}_4$ & $p_4\,[w = 0]$ & $q_5,\; m_{\mathrm{impl}}$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+17 & $\mathrm{finish}_5$ & $p_5\,[w = 0]$ & $q_6,\; m_{\mathrm{diff}}$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+18 & $\mathrm{ship}$ & $p_6\,[w = 0]$ & $m_{\mathrm{lith}}$ &
+  carved $[1,1]$ & exact tier$^{\dagger}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+
+\begin{center}
+\begin{tabular}{@{}lllll@{}}
+\multicolumn{5}{@{}l@{}}{\textbf{Certificates} (species
+\texttt{HCert}; $150$ footprint rows, species
+\texttt{HFootprintRow})}\\
+\toprule
+certificate & claim family & fold & features & footprint rows\\
+\midrule
+work-potential & hard progress (ranking) & sum & $v = F$ &
+  $19 \times \text{gap } 1$\\
+lot-count & census upper bound & sum & $1$ on lot plates &
+  $18$ safety $+$ gap at ship\\
+machines-diff-ub & place invariant, $\le$ & sum &
+  $+1$ on $m_{\mathrm{diff}}, p_1, p_5$ & $6$ safety\\
+machines-diff-lb & place invariant, $\ge$ & sum &
+  $-1$ on $m_{\mathrm{diff}}, p_1, p_5$ & $6$ safety\\
+machines-impl-ub & place invariant, $\le$ & sum &
+  $+1$ on $m_{\mathrm{impl}}, p_2, p_4$ & $6$ safety\\
+machines-impl-lb & place invariant, $\ge$ & sum &
+  $-1$ on $m_{\mathrm{impl}}, p_2, p_4$ & $6$ safety\\
+machines-lith-ub & place invariant, $\le$ & sum &
+  $+1$ on $m_{\mathrm{lith}}, p_3, p_6$ & $6$ safety\\
+machines-lith-lb & place invariant, $\ge$ & sum &
+  $-1$ on $m_{\mathrm{lith}}, p_3, p_6$ & $6$ safety\\
+congestion-$\ell_2$ & congestion non-increase & conj.\ pow.\ $p{=}2$ &
+  $v = R$ & $6 \times \varphi$-gap $1$ $+$ $13$ safety\\
+work-ceiling-max & ceiling safety & max & $v = R$ &
+  $19$ safety (gap refused)\\
+arrival-potential & deadline ranking (reach $q_6$) & sum & $v = D$ &
+  $16 \times \text{gap } 1$ $+$ $3$ safety\\
+step6-budget & post-arrival budget & sum & $v = F - D$ &
+  $3 \times \text{gap } 1$ $+$ $16$ safety\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{Places.} A place is a Bag of coloured tokens ---
+remaining work $w$ in its declared box for the in-process places,
+unit tokens (so: a counter) everywhere else. The
+machine plates are the resource-pool pattern in SDCPN dress: take
+and give are ordinary arcs, and the pool's conservation law is
+certified (the machine pairs above), not assumed.
+
+\smallskip
+\noindent\textbf{Transitions.} Every arc is an \emph{ordinary} arc:
+each consumed entry is one input-face arc, each produced entry one
+output-face arc, every firing law Dirac --- a deterministic colour
+polynomial in the consumed colours. There are no enabling arcs
+(every emitted selection row carries $\text{read} = 0$, a fact a
+reader can grep the container for) and no inhibitor arcs:
+enabledness everywhere is a monotone count-and-slab condition, so
+adding tokens never disables a step. Guard slabs are the footprint
+sequents' hypothesis slabs; every dwell is $1$.
+$^{\dagger}$The six same-place ticks carry their reset as a declared
+scale row (\texttt{tr.scale}: image and reset polynomial in the
+container). The thirteen place-crossing transitions discharge their
+produced side directly in the exact-rational tier; the declared
+reset-row home arrives with the Bag reset-row presentation, staged
+for the next theory revision.
+
+\smallskip
+\noindent\textbf{The census.} Counts are arcs, transitions, or slabs.
+The zero rows read two ways: enabling arcs and both stochastic
+transition species are \emph{available and unexercised} --- this
+exhibit is the demonic-choice, carved-unit-dwell, Dirac corner of
+the frame (every clock carved to the window $[1,1]$: timing owned
+by the clocks, choice by the seat), the discrete-time embedding of
+an untimed net, faithful for ordering and counting --- while the
+inhibitor row is
+\emph{unavailable by design}, warranted by the upward-closure
+theorem. Since every certificate quantifies over the demonic
+scheduler, its claims dominate every rate-raced refinement of the
+same scheduling freedom: the stochastic species, when they arrive,
+only resolve freedom the certificates have already priced. The
+founding taxonomy's conflict-resolution element is likewise priced
+rather than modelled: no priority or randomization rows exist, and
+every consequence holds by dominance over all of them at once.
+
+\smallskip
+\noindent\textbf{Certificates.} $F$ is the remaining-firings
+dictionary ($F_k = \sum_{j \ge k} (T_j + 2)$;
+$v(q_0) = F_1 + 1 = 638$, $v(q_k) = F_k$,
+$v(p_k, w) = w + 1 + F_{k+1}$, machines uncited) and $R$ the
+remaining-work dictionary ($R_k = \sum_{j \ge k} T_j$;
+$v(q_0) = R_1 = 625$, $v(q_k) = R_k$,
+$v(p_k, w) = w + R_{k+1}$). Transfer polarity reads off the row
+profile: an all-gap sum certificate is a ranking (every firing pays,
+so runs are budgeted --- $638$ firings per lot, tight); a
+safety-rowed pair in both signs is a conserved place invariant
+($\#m_s + \#p_i + \#p_j = C_s$); the conjugated-power gap rows
+budget the ticks in $\varphi$-space; and the max fold carries safety
+only --- a gap row on an idempotent fold is a formation error the
+vocabulary load-rejects, exercised by the mutant battery.
+
+\smallskip
+\noindent\textbf{Deadline.} $D$ is the arrival dictionary: $F$ with
+the step-6 remainder $F_6 = T_6 + 2 = 12$ subtracted on every
+position before $q_6$, and $0$ from $q_6$ on --- $v_D$ vanishes
+exactly where a lot has entered $q_6$, so the fold's zero-set
+\emph{is} the reach goal. The pointwise split $D + (F - D) = F$
+retells the ranking as a deadline argument: pre-arrival firings pay
+$D$ (at most $626N$ from $N$ pending lots), post-arrival firings pay
+$F - D$ (at most $12$ per arrived lot), so along every maximal run
+every lot has entered $q_6$ within $T(N) = 638N - 12$ steps ---
+counting time, the discrete-time unfolding's step index (the
+metric-time note below prices the same bound on the tick meter).
+Read as a Spec this is
+the deadline lower bound
+$\mathrm{P}_{\ge 1}\!\left[\mathrm{F}_{\le T(N)}\,
+(\text{all $N$ lots have entered } q_6)\right]$ with demonic timing:
+in the Dirac corner every scheduler resolution is a point mass, the
+dictionaries quantify over the whole demonic seat, and the bound is
+tight --- the schedule that defers the last $\mathrm{finish}_5$
+behind all other work attains it exactly (and typically-scheduled
+runs sit at it too: the step-6 tail is $12$ firings against step
+5's $255$-tick pole). Three honesty lines the arithmetic enforces:
+the goal is \emph{cumulative} arrival, never simultaneous occupancy
+($\#q_6 = N$ at once is demonically avoidable --- start step 6 as
+lots arrive and $q_6$ stays drained); the claim reads at the
+deadline wall (a record that stops existing is not late; the
+completion conjunct that upgrades the wall to full worst-case reach
+is the liveness face, priced separately); and the counting-time
+reading is primary but no longer alone --- every clock in this
+encoding is carved to a finite must-fire window, and the
+metric-time note below prices the same bound with steps replaced by
+window widths. The judgment row binding this Spec to the container
+is the completion face's declared row home --- not smoothed over:
+the deadline content shipped here is the two certificates' $38$
+footprint rows.
+
+\smallskip
+\noindent\textbf{Deadline, metric time.} With every clock carved to
+a positive finite must-fire window (dwell exactly one at these
+declarations), the counting deadline becomes a wall-clock statement:
+all $N$ lots enter the finishing queue within $638N - 12$ time units
+along every maximal schedule ($626N$ under the latest-safe unlock)
+--- probability $1$, uniformly over the scheduler's remaining
+freedom. The certificate content is exactly the dictionary pair
+already presented; the transfer multiplies by the largest window
+ceiling (here $1$), read off the model bytes by a must-fire census
+that refuses any idling member. Three clauses carry the reading,
+each at its stated tier: the dictionary rows are geolog-checked
+in-loop; the window-top law (a finite ceiling is a deadline) is the
+specification's declared clock semantics, its meter arithmetic owed
+at the proof tier; and maximality with deadlock-freedom-below-goal
+remain the same two argued clauses the counting statement already
+carries --- the checkable species for the latter exists (the
+angelic-selection witness family) and awaits its active-region
+staging. The bound is firing-tight but not time-tight:
+simultaneously due windows fire in batches, and the round replay
+brackets the attained wall well below the certified one ---
+structure, not slack in the rows.
+
+\smallskip
+\noindent\textbf{Open system and synthesis.} The plant opens into a
+comb: one supervisor seat whose declared interface reads the
+cumulative-arrival observable and drives the $\mathrm{start}_6$
+gate wire. A supervision-pattern filler closes it inside the model
+class --- per gate, a gate place $g$, a one-shot key $k$ (initial
+$1$), and an unlock jump consuming $k$, reading $q_6$ at weight $N$
+(returning what it reads) and minting $g$; the gated Petri
+transition gains a read-and-return enabling arc, the census row the
+plant alone leaves at zero. Closed roster: $18$ places, $20$ Petri
+transitions, $14$ certificates, $160$ footprint rows --- the
+plant's twelve certificates extend (the ranking pays the unlock's
+single firing through the key: total completing-run firings
+$= 638N + 1$), and the Boolean gate discipline is \emph{certified},
+not declared, by the conservation pair $k + g = 1$. Joint
+policy+certificate synthesis runs lexicographically: certified
+completion first (the gate that never opens ties the arrival
+optimum, then deadlocks with every lot in $q_6$ shipping nothing
+--- refused, starved plate named; so is the over-gated policy whose
+claimed horizon $370N$ beats the optimum by starving arrival work
+out of its own constraint set), then minimize the certified
+horizon, where the least dictionary-certifiable $T$ is an
+exact-rational linear program over dictionary space (gap rows on
+the admitted pre-goal roster, boxwise nonnegativity, goal pins,
+goal dominance) whose deterministic optimal vertex \emph{is} the
+arrival dictionary $D$ restricted to the closed roster. The winner
+is the latest-safe unlock (reopen exactly at the $N$th arrival):
+under it no pre-goal firing exists but the $626N$ arrival-paying
+ones, so every schedule of the closed composite reaches
+all-arrivals at exactly step $626N$ --- against the open plant's
+$638N - 12$, a certified throughput-floor gain of $12(N-1)$ steps
+($+1.6\%$ at $N = 7$; $+1.9\%$ at the weekly $N = 84$: $52584$ vs
+$53580$). Honesty lines: the geolog-checked rows carry the
+\emph{within}-$626N$ direction (gap rows in the loop); the
+\emph{not-before} direction is the producer tier's exact-drop
+identities (each gap row's displacement equals its gap identically,
+both directions by Bernstein) plus the replay bracket, its in-loop
+row species a named absence; the $626N$ floor over \emph{all}
+fillers is plant arithmetic ($626$ lot-specific firings per
+arrival, one firing per composite step, policy firings only add);
+completion in every encoding is two-tier (ranking geolog-checked;
+enabledness below the ship goal argued); the seat's weight-$N$
+observation read arc is the one arc-separation clause the flattened
+encoding cannot pass --- carried as the staged observation
+stratum's named debt, never smoothed; and this armed-plate encoding
+has a native-read sibling ($17$ places, $20$ Petri transitions, no
+key) whose completion carries one clause more --- its unlock
+consumes nothing, so no ranking row can gap it, and
+unlock-fires-finitely-often rides as a stated convention --- each
+variant citing its own roster and tier, neither borrowing the
+other's numbers.
+
+}%

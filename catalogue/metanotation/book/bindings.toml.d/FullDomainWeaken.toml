@@ -1,0 +1,19 @@
+# bindings.toml.d/FullDomainWeaken.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'FullDomainWeaken'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "fullDomainWeaken_offScope"
+sha256 = "6c10893b588a82a82ff43f1293e4b623675f6b0b7bda1d1981cbbabc5d236841"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "fullDomainWeaken_sound"
+sha256 = "97612a7754ea6d68128cefb741dbf173f22b8406803265405592b04a51b271b1"
+
+[[correspondence]]
+entry = "FullDomainWeaken"
+steele_sha256 = "773187524144359c60fa7a8b66c223fb40ccea72d5c11f6f2d86ec3222fb33f5"
+statements_sha256 = "bbce92440cad132636864712c53866ac21c929e421fbe1bf6cf9e9dca11e510b"
+prose_sha256 = "84d045960b418fe962d52a7f786100f8c474fc911a1140172fb983ad19f67175"
+

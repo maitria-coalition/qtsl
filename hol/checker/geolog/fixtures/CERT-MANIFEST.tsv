@@ -1,0 +1,10 @@
+# name	pins	rust_read	rust_bind	rust_cert	rust_check	expect_hol
+cert-demo	demo	ok	ok:9506b1712d82b846ce152052f8a83cabc50258b8ffc034fac4e5b689f371fc32	unresolvable-fake-chids	n/a:demo-pins-family	REJECT joins
+cert-valid	demo	ok	ok:c15b94b16ff86153f24354bf14ba886c2c0ecac51ff3318bda8c7a0bc61eb67f	unresolvable-fake-chids	n/a:demo-pins-family	VERIFIED
+cert-mut-truncate-skel	demo	refused:truncated_at_byte_94	refused:reader-refused	refused:reader-refused	n/a:unreadable	UNREADABLE
+cert-mut-truncate-body	demo	refused:truncated_at_byte_318	refused:reader-refused	refused:reader-refused	n/a:unreadable	UNREADABLE
+cert-mut-bodyhash	demo	ok	refused:body_hash_mismatch_0	unresolvable-fake-chids	n/a:demo-pins-family	UNREADABLE:body_hash_mismatch
+cert-mut-flag0-prereq	demo	ok	ok:c15b94b16ff86153f24354bf14ba886c2c0ecac51ff3318bda8c7a0bc61eb67f	unresolvable-fake-chids	n/a:demo-pins-family	UNSUPPORTED:prereq_content_assumed_held
+cert-mut-unpinned	demo	ok	ok:951337b91a5824e13cb2284ffb8e732c1bf0cf76cc412135bbca846cd29f4b07	unresolvable-fake-chids	n/a:demo-pins-family	UNSUPPORTED:prereq_content_roster_unresolved
+cert-real-mini	staged	ok	ok:6a06bc5ea8d2cc46278c9696c9876732550e79bf5dacea7dd9f551ddf42e8743	ok	accept	VERIFIED
+cert-real-mini-bad	staged	ok	ok:3a94854ec5875364af2e0fa82d668c82596c27a5d5bf087f3e03cdd3432a71e8	ok	reject	REJECT joins

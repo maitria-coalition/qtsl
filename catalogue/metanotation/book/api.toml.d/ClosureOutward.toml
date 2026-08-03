@@ -1,0 +1,22 @@
+# api.toml.d/ClosureOutward.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "ClosureOutward"
+note = '''One parameterized builder serves the three closure moves; the \texttt{ClosureMove} variant argument selects this rule's move.'''
+
+[api.ts]
+handle = "rules.qtslCore.closureMove"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn closureMove", "interface ClosureMoveArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_closure_outward.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::closure_move"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/discharge.rs"
+sig = ["fn closure_move"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_closure_outward"

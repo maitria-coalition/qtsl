@@ -1,0 +1,1951 @@
+\chapter{Reference Manual}
+\label{ch:geolog-reference}
+
+\noindent\draftmark\medskip
+
+This chapter is the systematic account of geolog as shipped in the
+\path{geolog-alpha} repository: the source language and its grammar,
+the normalization pipeline and its registry, the elaboration fragment
+the \texttt{geolog} verb carries, the chase and its judgments, the
+meta-schema, and the substrate contracts — commits, storage, sync,
+the ground seam, and capabilities. The Quick Start
+(chapter~\ref{ch:geolog-quickstart}) and the Tutorial
+(chapter~\ref{ch:geolog-tutorial}) teach by example; this chapter
+specifies. It restates none of their walkthroughs and cites them
+where an example earns more than a rule would.
+
+Three reading conventions govern everything below.
+
+\paragraph{Claim discipline.} Normative present tense describes
+behaviour shipped and tested in the repository as of this edition's
+receipt passes (2026-07-21 through 2026-07-31, recorded at this
+chapter's source tail). Designed-but-not-shipped behaviour appears only in
+clauses explicitly marked \emph{design tense}, each naming where the
+design lives today. Every quoted error message and every transcript
+fragment in this chapter is the verbatim output of a real run against
+the committed tree (receipts in this chapter's source tail).
+
+\paragraph{Authority order.} The \texttt{geolog} binary is
+ergonomics and composition over constituent crates, and its own crate
+documentation states the rule this manual inherits: where a behaviour
+differs between the facade and a constituent, the constituent is
+right and the facade has a bug. Accordingly, each section below names
+its authority — the crate (or committed theory file) whose documented,
+tested behaviour it restates. Where this manual and that source
+disagree, the source wins and the disagreement is a defect in this
+manual.
+
+\paragraph{Scope.} This manual covers the public
+\path{geolog-alpha} tree. The engine library supports strictly more
+than the command-line fragment (\S\ref{sec:gr-engine}); the manual
+covers both, and says which surface each statement binds.
+
+\section{Lexical structure}
+\label{sec:gr-lexical}
+
+\emph{Authority: \path{crates/geolog-normalize/src/lex.rs}.}
+
+Theory text and instance blocks share one tokenizer. Input is
+processed line by line; a \texttt{//} begins a comment (outside a
+string literal) that extends to the end of the line and is
+discarded. Tokens, longest match first:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+two-char    ::= "->" | "|-" | "<=" | ">=" | "!="
+single-char ::= "<" | ">" | "=" | "+" | "*" | "[" | "]" | "(" | ")"
+              | "," | ":" | "." | "{" | "}" | ";"
+integer     ::= digit+
+string-lit  ::= '"' (any scalar except '"' or newline)* '"'
+identifier  ::= starter continuer*
+\end{Verbatim}
+
+\noindent The identifier alphabet is Unicode-open, and the operator
+characters are a closed ASCII set, so the two are disjoint by
+alphabet rather than by any gating rule. A \emph{starter} is an
+ASCII letter, \texttt{\_}, a non-ASCII alphabetic scalar (Greek
+letters, $\ell$, \ldots), or one of the math-letterlike symbols
+$\partial$ and $\nabla$; a \emph{continuer} is any starter, an ASCII
+digit, \texttt{\_}, \texttt{/} (so \texttt{ax/path/edge} and
+\texttt{Marking/count} are single tokens), or a script extender ---
+the superscript and subscript digits and signs, and the primes.
+Script extenders continue tokens and never start them: $\partial^{+}$
+is one token, and a detached superscript at token start is a
+tokenization refusal, so $\partial$~$^{+}$ (with a space between)
+cannot silently mean anything. String literals are single-line and carry no escapes; the
+grammar admits them in exactly one position --- contraction specs in
+\texttt{law} bodies (\S\ref{sec:gr-editions}) --- and every other
+position refuses them downstream. There are no negative-number
+literals and no block comments in the theory grammar. Anything else
+stops the tokenizer with a hard error naming the offending text.
+
+The reserved words of the theory grammar are:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+forall  exists  not  iff  or  false  theory  extends
+Set  Prop  Index  Fin  DynTensor  List
+\end{Verbatim}
+
+\noindent \texttt{Fin} and \texttt{Index} name the same bounded-index
+type (\texttt{Fin} is the ratified spelling, \texttt{Index} the
+legacy alias --- \S\ref{sec:gr-decls}). \texttt{Tensor} is not
+reserved, and no longer names a surface type at all: the
+shape-in-type tensor former lives in the meta-schema tier
+(\S\ref{sec:gr-meta-tier}), and the surface tensor type is the
+keyword \texttt{DynTensor} (\S\ref{sec:gr-decls}). \texttt{instance}
+is likewise not a keyword of the theory grammar: an
+\texttt{instance} \emph{block} is recognized by the file splitter
+(\S\ref{sec:gr-files}), one layer up, and the same word doubles as
+an optional postfix marker on model-of types
+(\S\ref{sec:gr-decls}), recognized contextually. The mode marks
+\texttt{chase}, \texttt{report}, and \texttt{refuse}
+(\S\ref{sec:gr-chase-modes}) are contextual in the same way ---
+recognized only as a statement's leading token: \texttt{chase : …;}
+is still an ordinary declaration named \texttt{chase}.
+
+\section{Source files}
+\label{sec:gr-files}
+
+\emph{Authority: \path{crates/geolog/src/input.rs}.}
+
+A \path{.geolog} file carries two strata: \emph{theory text} and
+\emph{instance blocks}. Before parsing, the file is split by a
+deliberately minimal scanner that tracks \texttt{//} comments and
+brace depth, and recognizes the word \texttt{instance} only at brace
+depth zero, at an identifier boundary on both sides. Each
+\texttt{instance … \{ … \}} span is extracted whole (an unclosed
+block is a hard error); the remaining text — with each extracted span
+replaced by whitespace of identical line structure, so diagnostics
+keep their line numbers — is handed to the normalization pipeline
+verbatim. Consequences worth stating: the word \texttt{instance}
+inside a comment or inside any braced body is ordinary text; theory
+declarations and instance blocks may interleave freely at top level;
+and the theory grammar remains entirely the normalizer's business —
+the splitter never interprets theory text.
+
+\section{Theories and declarations}
+\label{sec:gr-decls}
+
+\emph{Authority: \path{crates/geolog-normalize/src/parse.rs} (grammar)
+and \path{crates/geolog-normalize/src/ast.rs} (abstract syntax).}
+
+Theory text is a sequence of theory declarations:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+theory-decl ::= "theory" NAME param* ["extends" NAME] "{" statement* "}"
+param       ::= "(" NAME ":" ("Set" | NAME) ")"
+statement   ::= [mode] NAME ("," NAME)* ":" statement-body ";"
+mode        ::= "chase" | "report" | "refuse"
+\end{Verbatim}
+
+\noindent A theory header may bind parameters, name first: a
+\texttt{(X : Set)} group binds a sort parameter, and a
+\texttt{(N : PetriNet)} group --- whose second name must be a theory
+declared earlier in the file --- binds a \emph{model-of} parameter,
+a model of that theory. (An earlier binders-before-name header order
+parses as a deprecated spelling; see \texttt{--strict},
+\S\ref{sec:gr-cli}.) Every statement is an optional mode mark, one
+or more comma-separated names sharing one signature, a colon, a
+body, and a semicolon. The statement's \emph{kind} is dispatched on
+its name: \textbf{a statement whose name begins with \texttt{ax/} is
+an axiom} (\S\ref{sec:gr-axioms}); a statement opened by the
+contextual keyword \texttt{law} is a law member of the aggregation
+surface, whose grammar this edition defers
+(\S\ref{sec:gr-editions}); every other statement is a declaration.
+The prefix does grammatical work rather than expressing
+a naming convention: a sequent-shaped body under a name without the
+\texttt{ax/} prefix is parsed as a declaration and fails (verified:
+\texttt{my/rule : forall …} stops with \texttt{syntax error:
+unparseable type at line 4: forall …}, the cited line being the
+statement's own). The Quick Start's remark that
+slash-names are ordinary identifiers remains true — the slash is an
+identifier character (\S\ref{sec:gr-lexical}) — but the two-character
+prefix \texttt{ax/} is what makes a statement an axiom. The mode
+mark decides whether an axiom fires or judges
+(\S\ref{sec:gr-chase-modes}); the AST carries the \emph{authored}
+mark, so rendering preserves the source form, and a mode mark on a
+declaration head is a hard error naming both the mark and the head
+(the message names \texttt{ax/} and \texttt{law} as the two homes a
+mode can mark).
+
+Declaration bodies:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+sort-decl   ::= NAME ":" "Set" ";"
+record-decl ::= NAME ":" "{" field ("," field)* "}" "->" codomain ";"
+unary-decl  ::= NAME ":" type "->" codomain ";"
+curried-decl::= NAME ":" ("(" NAME ":" type ")" "->")+ codomain ";"
+const-decl  ::= NAME ":" type ";"
+field       ::= NAME ":" type
+codomain    ::= "Prop" | type
+type        ::= NAME                     -- a sort (or a theory: model-of)
+              | term ("Fin" | "Index")   -- bounded index (n elements)
+              | NAME "DynTensor"         -- dynamic tensor over an element sort
+              | NAME "List"              -- finite sequences over an element sort
+              | arg+ NAME ["instance"]   -- model-of application
+\end{Verbatim}
+
+\noindent Braces name record domains. (The bracket spelling
+\texttt{[f:\,v]} of earlier corpora still parses by default while
+the committed corpus ports to braces; under strict parsing it is a
+deprecation error pointing at the brace form, and \texttt{geolog
+fmt} prints the canonical respelling --- \S\ref{sec:gr-cli}.) A
+curried signature of named binders normalizes to the record form at
+parse, so the two spellings declare the same relation or function;
+an unnamed curried binder is a hard error. A declaration with
+codomain \texttt{Prop} declares a
+\emph{relation}; any other codomain declares an element-valued
+\emph{function} (a \texttt{const-decl} is the nullary case: a
+constant of its sort). Relations come in two domain shapes at the
+surface: \emph{record} (named fields; field order as written is
+preserved for display, but fields are name-keyed, never positional)
+and \emph{unary} (one anonymous argument). There is deliberately no
+surface form for a zero-argument proposition: \texttt{Flag : Prop;}
+parses as a constant declaration of a (nonexistent) sort
+\texttt{Prop} and is refused downstream (\S\ref{sec:gr-elab}). A
+proposition wants at least one argument, or it wants to be a fact.
+
+Two type forms are new with the aggregation surface, and both are
+codomain vocabulary for the loader's stratum rather than the chase
+fragment's. \texttt{DynTensor} is the \emph{dynamic} tensor type
+over an element sort — shape carried in the value, where the
+meta-tier \texttt{Tensor} former carries shape in the type
+(\S\ref{sec:gr-meta-tier}); tensor values are side-condition
+payload, never term-language citizens. A theory name in type
+position means ``a model of that theory'': bare (\texttt{base :
+G;} under a \texttt{(G : Graph)} parameter), or applied to
+arguments (\texttt{initial\_marking : n0 Marking;}), with an
+optional postfix \texttt{instance} keyword as an explicitness
+marker — neither spelling is canonical, and the source printer
+preserves the author's choice. A third form belongs to
+the list former (\S\ref{sec:gr-meta-tier}): \texttt{Str List} is the
+finite-sequence type over an element sort, postfix like
+\texttt{Index} and \texttt{DynTensor} and taking one element sort
+only (\texttt{Str List List} is a syntax error), with list values
+consumed through the \texttt{len}/\texttt{at}/\texttt{concat} ground
+roster as side-condition payload — never term-language citizens. The
+surface element scope is the builtin ground sorts: a list codomain
+at a declared sort is refused by the normalizer (verified:
+\texttt{List element "A" is not a builtin ground sort (v1 surface
+scope)}), and the wire tier's wider element scope, nesting included,
+arrives with its own surface spelling rather than by fall-through.
+The v1 chase bridge refuses all three forms (\S\ref{sec:gr-elab}).
+
+\texttt{extends} names a parent theory. In the single-file pipeline
+the parent must be declared in the same file, and extension is
+realized by elaborating the whole file as one union
+(\S\ref{sec:gr-elab}); in the committed-revision pipeline extension
+is a \texttt{TheoryExtends} row with its own conformance rules
+(\S\ref{sec:gr-meta}).
+
+\paragraph{Builtin ground sorts.} The authoring idiom accepts a
+roster of ground sorts in declarations without a \texttt{Set}
+statement — \texttt{Q}, \texttt{Z}, \texttt{Nat}, \texttt{B},
+\texttt{Str}, \texttt{ENNRat}, \texttt{Shape}, \texttt{Timestamp},
+\texttt{Bytes}, \texttt{PeerId}, \texttt{CommitId}, and the
+aggregation surface's staged registry sort \texttt{Accum}
+(\path{crates/geolog-normalize/src/builtin.rs}) — together with the
+literal-dtype correspondence that types bare integer literals
+(\texttt{q}/\texttt{z}/\texttt{nat}/…), the builtin comparison
+and arithmetic vocabulary the grounding moves compile onto
+(\S\ref{sec:gr-normalize}), and the aggregation tier's staged
+arithmetic (\texttt{nat\_mul}, \texttt{succ}). This roster is,
+\texttt{Accum} aside, the normalizer's \emph{accepted} subset of the
+engine's primordial sort tier (\S\ref{sec:gr-meta-tier}) —
+\texttt{Accum} belongs to the deferred aggregation surface
+(\S\ref{sec:gr-editions}), not the primordial tier; the command-line
+chase fragment is narrower still and refuses ground sorts at
+elaboration (\S\ref{sec:gr-elab}).
+
+\section{Axioms and geometric normal form}
+\label{sec:gr-axioms}
+
+\emph{Authority: \path{crates/geolog-normalize} (\path{parse.rs},
+\path{normalize.rs}, \path{lint.rs}); the normal form is also stated,
+as schema, by the meta-schema (\S\ref{sec:gr-meta}).}
+
+\subsection{The axiom grammar}
+\label{sec:gr-axiom-grammar}
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+axiom      ::= [mode] AXNAME ":" ["forall" binders "."] [premise] "|-" conclusion ";"
+binders    ::= NAME ":" type ("," NAME ":" type)*
+premise    ::= item ("," item)*
+item       ::= atom
+             | "not" atom
+             | "(" item ")"
+             | "exists" binders "." premise          -- premise only
+             | "forall" binders "." iff-group        -- pattern moves
+conclusion ::= "false"
+             | disjunct ("or" disjunct)*
+disjunct   ::= ["exists" binders "."] item ("," item)*
+atom       ::= term [cmpop term]
+cmpop      ::= "=" | "!=" | "<" | "<=" | ">" | ">="
+term       ::= prod ("+" prod)*
+prod       ::= postfix ("*" postfix)*
+postfix    ::= primary NAME*                          -- application chain
+primary    ::= "{" NAME ":" term ("," NAME ":" term)* "}"   -- record
+             | INTEGER                                       -- literal
+             | NAME                                          -- variable
+\end{Verbatim}
+
+\noindent Grammar facts with semantic weight: \texttt{or} binds
+loosest in a conclusion, and an existential's scope never spans an
+\texttt{or} — each disjunct carries its own \texttt{exists} prefix,
+so the surface conclusion is literally the normal form's shape (a
+disjunction \emph{of} existentially quantified conjunctions). An
+\texttt{exists} group in a premise swallows the remaining premise
+items up to the turnstile. Terms are postfix application chains —
+\texttt{m p Marking/count} reads ``\texttt{Marking/count} applied to
+(\texttt{p} applied to \texttt{m})'' — with \texttt{*} binding
+tighter than \texttt{+}, record literals in the same brace idiom
+declarations use (brackets remain the parsed legacy spelling during
+the corpus port, \S\ref{sec:gr-decls}; on the aggregation surface
+square brackets instead delimit contraction index groups in
+\texttt{law} bodies, \S\ref{sec:gr-editions}), and bare integer
+literals (typed later by the
+normalizer). \texttt{|- false} declares a \emph{denial}: a rejection
+rule, the empty disjunction.
+
+\subsection{Geometric normal form}
+\label{sec:gr-gnf}
+
+The engine consumes \emph{geometric} theories, and the normal form is
+the central definition of this chapter:
+
+\begin{definition}[geometric sequent]
+\label{def:gr-geometric}
+A geometric sequent is a universally quantified entailment whose
+premise is a finite conjunction of atoms and whose conclusion is a
+finite disjunction of existentially quantified finite conjunctions of
+atoms; the empty disjunction is $\bot$ (a denial). An atom is an
+equation between terms or a relation applied to a term; the
+quantified variables are typed at declared sorts.
+\end{definition}
+
+\noindent Geometric sequents are the sequent fragment of geometric
+logic \cite[Part~D1]{johnstone2002}; database theory knows the
+single-disjunct case as tuple- and equality-generating dependencies
+\cite{fagin2005data}. The authoring idiom of
+\S\ref{sec:gr-axiom-grammar} is richer than this — \texttt{not}, \texttt{exists} in premises,
+\texttt{forall}-\texttt{iff} groups, comparison operators, arithmetic
+sugar, \texttt{Index} types. The normalizer
+(\S\ref{sec:gr-normalize}) compiles every departure down to
+Definition~\ref{def:gr-geometric} by a registered move or rejects it
+loudly; the geometric linter then mechanically enforces the normal
+form on the normalizer's own output — premise a conjunction of atoms;
+conclusion a disjunction of existentially quantified conjunctions; no
+residual \texttt{Index}; no untyped literal; every relation declared
+\emph{and} classified (\S\ref{sec:gr-registry}); every atom
+well-sorted. Pipeline failures are collected and reported together,
+never truncated to the first.
+
+\subsection{The normalization moves}
+\label{sec:gr-normalize}
+
+Each move is either total on its registered pattern or a loud error;
+nothing passes through half-rewritten. In source order of the
+pipeline:
+
+\begin{itemize}
+\item \textbf{Premise negation}, discharged by atom class. A negated
+\emph{side-condition} atom needs no logic at all: side-conditions
+are decision procedures, and a decision procedure is
+negation-complete, its complement being the same evaluator with the
+verdict flipped. The discharge is therefore exact and in place ---
+$\lnot S \land P \vdash C$ becomes $\mathit{not/S} \land P \vdash C$,
+with the complement relation registered automatically (move census:
+\texttt{negated premise side-condition S discharges in place as
+not/S}). A negated equation at a ground comparison sort has its
+complement in the builtin vocabulary already: $\lnot(a = b)$ at
+\texttt{Q} or \texttt{Nat} becomes \texttt{q\_ne} or \texttt{nat\_ne},
+in place. The one genuinely logical case is a negated \emph{ordinary}
+atom, or an equation at a declared sort. Ordinary vocabulary is
+derivation-defined, so no procedure can decide its complement;
+instead the atom \emph{crosses the turnstile} as a new leading
+conclusion disjunct. $\lnot R \land P \vdash C$ becomes
+$P \vdash R \lor C$: the classical-to-geometric compilation (move
+census: \texttt{negated premise ordinary atom R crosses the
+turnstile}). Read at the fixpoint, the crossed sequent says exactly
+what the classical sentence said: wherever $P$ holds, $R$ holds or
+$C$ does. What it deliberately does not offer is
+negation-as-failure. The crossed head is a disjunction, so the axiom
+is no longer chase-eligible (\S\ref{sec:gr-chase-classify}), and a
+\texttt{chase} mark on it is a load refusal: a rule that fired on the
+\emph{current} absence of a derivable row would be unsound against
+every later derivation, so no move is owed to that reading. Under
+\texttt{report}, the crossed disjunct is judged like any other menu
+(\S\ref{sec:gr-chase-judgments}).
+\item \textbf{Pattern rewrites} (\texttt{forall}-\texttt{iff}
+groups). Extensionality, difference, and intersection shapes over a
+registered membership relation rewrite to auxiliary mask
+side-condition atoms; \texttt{not} on a membership atom in a
+conclusion rewrites to a registered negation-free witness atom. All
+four require registry entries (\S\ref{sec:gr-registry}); an
+unregistered shape is a hard error, because auxiliary vocabulary is
+an obligation on downstream evaluators and is never minted silently.
+\item \textbf{Exists-hoist.} An \texttt{exists} group in a premise
+hoists to universal variables — sequent semantics:
+$(\exists x.\,P) \vdash C \;\equiv\; \forall x.\,(P \vdash C)$.
+\item \textbf{Index erasure.} Every \texttt{n Index} type erases to
+\texttt{Nat} plus a generated range obligation (a binder guard atom,
+or a generated \texttt{ax/range/*} axiom).
+\item \textbf{Grounding.} Comparison and arithmetic sugar compiles
+onto the builtin roster at ground sorts: \texttt{!=} to
+\texttt{q\_ne}/\texttt{nat\_ne}, \texttt{<}/\texttt{<=} to
+\texttt{q\_lt}/\texttt{q\_le}/\texttt{nat\_lt}, \texttt{+}/\texttt{*}
+to \texttt{q\_add}/\texttt{q\_mul}, with \texttt{>}/\texttt{>=}
+flipped by operand swap. There is no grounding at declared sorts:
+\texttt{a != b} over a declared sort \texttt{A} is a hard error
+(verified: \texttt{no ground builtin for != at sort A (the !=@A case
+would need a builtin-roster addition)}). Disequality of declared-sort
+elements is not expressible in the fragment — deliberately: the
+chase's equality discipline is congruence
+(\S\ref{sec:gr-chase-congruence}), and a general disequality atom
+over invented elements is exactly the kind of vocabulary that would
+need an evaluator nobody has priced. (A negated premise
+\emph{equation} at a declared sort is a different matter: it crosses
+the turnstile as an equality conclusion, per the premise-negation
+move above, so the classical constraint remains sayable even though
+a disequality atom does not exist.)
+\item \textbf{Literal typing.} Bare integer literals receive their
+dtype from context (\texttt{q:3/1}, \texttt{nat:2}, …); an
+untypeable literal fails the linter.
+\end{itemize}
+
+\noindent An axiom touched by any move is renamed with an
+\texttt{\_n} suffix, so normalized output re-normalizes to itself
+with an empty move log. The pipeline's guarantees, carried by its
+test suite: two-run determinism (byte-identical listings),
+idempotence (normalize $\fatsemi$ normalize $=$ normalize),
+linter-cleanliness of every output, ground meaning preservation (the
+grounding moves agree with direct evaluation of the source operators
+on random ground instances), and committed fixture goldens per move.
+\texttt{iff} at sequent top level (which would become two sequents)
+is unimplemented and errors loudly if it ever fires.
+
+\subsection{Imports, classification, and roster totality}
+\label{sec:gr-registry}
+
+\emph{Authority: \path{crates/geolog-normalize/src/imports.rs}
+(the import surface), \path{crates/geolog-normalize/src/registry.rs}
+(the registry value both surfaces feed).}
+
+Every declared \texttt{Prop}-valued relation is classified, exactly
+one of:
+
+\begin{itemize}
+\item \texttt{ordinary} — derivation-defined: populated by assertion
+and by the chase, and by nothing else;
+\item \texttt{side-condition} — decided by a bounded external
+procedure (the ground seam, \S\ref{sec:gr-ground}, or a registered
+auxiliary evaluator), never derivation-defined.
+\end{itemize}
+
+\noindent This is \emph{roster totality}: every relation has a
+decided evaluator, and it holds \emph{by construction} — the
+obligation is discharged by syntax instead of by hand. The
+classification lives in the source file itself. \texttt{ordinary} is
+the default, declared by writing nothing; a side-condition is
+declared by an \texttt{import} item naming its provider:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+import std.{Q, q_lt};
+import <provider>.{<relation>, ...};
+\end{Verbatim}
+
+\noindent The two namespaces do different work. An
+\texttt{import std} item authorizes \emph{builtin ground vocabulary}
+used by name — sorts like \texttt{Q} and \texttt{Nat}, comparisons
+like \texttt{q\_lt} — and a name outside the builtin roster refuses
+at once, listing the importable names. Any other namespace declares
+each named relation a side-condition awaiting that provider, bound
+at the ground seam (an unknown provider is not an error at check
+time: binding is deferred, and an unbound side-condition atom simply
+cannot be discharged — refusal over guessing, downstream). Import
+items are position-free top-level items, so multi-file closures
+concatenate; re-importing a name under the same namespace is
+idempotent, and importing one name under two namespaces refuses ---
+one name, one provider. A relation or function declaration that
+reuses a builtin \emph{vocabulary} name is legal only as an
+exact-signature shim of that builtin: same-named, byte-equivalent to
+what the engine itself would say. A builtin \emph{sort's} name admits
+no shim at all — it is fully reserved, and a local sort takes another
+name (verified: \texttt{sort Q (declared in T): builtin ground sort
+names are reserved — the builtin Q is ambient (import std.\{Q\};
+declares the usage), so a local sort must take another name}). Both
+reservations are kind-local (the sort and vocabulary namespaces never
+meet), so a relation may take a builtin sort's name, and a declared
+sort may take a builtin relation's. Builtin
+comparison relations and the normalizer's own minted auxiliaries are
+side-conditions without import lines. Under \texttt{--strict},
+builtin ground vocabulary used by name demands its \texttt{import
+std} header even in files that otherwise import nothing.
+
+The \emph{pattern registry} is the second classification surface,
+today a library-level one: it names, per rewritten relation, its
+\emph{membership} reading (which field is subject, which is index),
+and the auxiliary relation each registered move targets
+(\texttt{extensionality}: 2 fields; \texttt{difference} and
+\texttt{intersection}: 3; \texttt{negation-witness}: the relation's
+own arity). Registry construction validates all of this — missing
+membership entries, unregistered auxiliaries, arity mismatches, and
+duplicate auxiliaries are errors before any theory text is touched.
+Pattern registrations have no source-level surface yet; the
+library's registry value carries them (the normalizer's
+\path{fixtures/} include pattern-bearing specimens).
+
+A line-oriented registry \emph{file} (\texttt{--registry}) was the
+classification's original carrier; it is deprecated, retained for
+the migration era only. The one-authority law binds at the
+registry's content, and classification is the content it guards: a
+registry whose lines classify relations refuses to combine with a
+source that declares imports (verified: \texttt{this source
+declares imports AND an external registry carries relation
+classification — classification has one home; …}), while a
+pattern-only registry file composes with an importing source — its
+aux names kept clear of the imported ones (verified: \texttt{aux
+relation … collides with an imported name — aux mask vocabulary is
+the normalizer's, never imported}), a collision being
+classification smuggled back in aux costume. The
+line format also carries the pattern registrations of the paragraph
+above (their one textual carrier while patterns have no in-source
+spelling), and a pattern registration is no second classification
+authority.
+
+\section{Instance blocks}
+\label{sec:gr-instances}
+
+\emph{Authority: \path{crates/geolog/src/facts.rs} (grammar),
+\path{crates/geolog/src/seed.rs} (semantics).}
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+instance-block ::= "instance" NAME ":" NAME "{" item* "}"
+item           ::= elem-decl | record-fact | bare-fact
+elem-decl      ::= NAME ("," NAME)* ":" NAME ";"
+record-fact    ::= "{" NAME ":" NAME ("," NAME ":" NAME)* "}" NAME ";"
+bare-fact      ::= NAME NAME ";"
+\end{Verbatim}
+
+\noindent Tokenization is the theory lexer's, so comments and
+identifiers mean the same thing in both strata. The header names the
+block and the theory it instantiates; the named theory must be
+declared in the same file. Items are element declarations and facts;
+a record fact's brace lists \texttt{field: element} pairs and then
+the relation; a bare fact (\texttt{a Marked;}) applies a unary-kind
+relation. Facts must be written in the relation's own shape — a
+record fact on a unary relation, or vice versa, is an error naming
+the mismatch. Braces are canonical here as in declarations: this
+grammar is what \texttt{geolog fmt} prints, and the formatter's
+output re-parses (verified: the respelled Quick Start file chases
+end-to-end, its report byte-identical to the bracket original's),
+while the bracket spelling \texttt{[f:\,a]\,Rel;} remains the
+accepted legacy form until the committed corpus ports to braces.
+
+Semantics, in seeding order (source order — element numbering in
+transcripts is deterministic):
+
+\begin{itemize}
+\item \textbf{Elements are declared before use.} A fact referencing
+an undeclared name is an error, never a silently minted element
+(verified: \texttt{`P` fact references `ghost`, which is not a
+declared element — declare it first (`ghost : A;`); elements are
+never minted silently}).
+\item \textbf{Fields are exact.} A record fact must supply every
+declared field, no extras, no repeats, no defaults; each element's
+sort must equal the field's declared sort.
+\item \textbf{Union semantics across blocks.} An element name
+declared in two blocks at the same sort denotes one element;
+duplicate facts are idempotent. A name redeclared at a
+\emph{different} sort is an error (verified: \texttt{element `a`
+redeclared at sort `C` but already declared at sort `A`}). This is
+the merge story — set union of commits, then re-derivation
+(\S\ref{sec:gr-sync-merge}) — at authoring scale; the Tutorial's
+two-writer example is built on it.
+\end{itemize}
+
+\noindent Surface syntax is a view: this block form is the command
+line's authoring view of an instance, and the durable form is signed
+commits with content-addressed element identity
+(\S\ref{sec:gr-commits}).
+
+\section{Elaboration: the v1 command-line fragment}
+\label{sec:gr-elab}
+
+\emph{Authority: \path{crates/geolog/src/elab.rs}; the crate-level
+docs of \path{crates/geolog/src/lib.rs} state the fragment.}
+
+The bridge from the normalized authoring idiom to the engine IR
+covers, in v1: \textbf{sorts}, \textbf{\texttt{Prop}-valued
+relations} (record or unary domains), and \textbf{geometric axioms
+whose atoms apply relations to variables}, equality conclusions
+included. Everything else the idiom can express is refused with an
+error naming the construct and, where one exists, the supported
+spelling of the same intent. The engine library supports more than
+this bridge; the bridge grows by deliberate widening, never by silent
+acceptance.
+
+Elaboration takes the file's theory declarations as \emph{one
+single-file closure}: the union of every declaration in the file,
+with \texttt{extends} between in-file theories honoured by that same
+union. Consequences: an instance block may reference any declaration
+in the file's closure regardless of which theory block carries it;
+duplicate sort or relation names anywhere in the closure are errors;
+and \texttt{extends} naming an out-of-file parent is refused
+(verified: \texttt{theory `Child` extends `Ghost`, which is not
+declared in this file — cross-revision extension rides the
+committed-revision pipeline (geolog-meta-rows / geolog-revision), not
+the v1 CLI bridge}).
+
+The operative refusals, each verified against the committed binary:
+
+\begin{itemize}
+\item \textbf{Element-valued functions} (any declaration with a
+non-\texttt{Prop} codomain, constants included):
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+function symbol `f` (codomain `C`): element-valued functions are engine
+IR the v1 bridge does not carry — spell the function as a relation plus
+a functionality axiom (two rows in the premise, an equality in the
+conclusion), the idiom the committed theories use (e.g. `Marking/count`
++ `ax/count/functional` in theories/PetriNet.geolog)
+\end{Verbatim}
+The named idiom is normative: a function $f : A \to B$ is spelled as
+a relation $F[a{:}\,A, b{:}\,B]$ plus
+$\forall a, b_1, b_2.\; F[a, b_1], F[a, b_2] \vdash b_1 = b_2$, and
+the chase's congruence closure does the rest
+(\S\ref{sec:gr-chase-congruence}). \texttt{Flag : Prop;} lands in
+this refusal too (its ``codomain'' parses as the sort
+\texttt{Prop}); see \S\ref{sec:gr-decls} for why no zero-argument
+proposition form exists.
+\item \textbf{Ground sorts in declarations} — any field, argument, or
+binder sort not declared \texttt{Set} in the file, the builtin roster
+included:
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+relation `R` field `n` names sort `Nat`, which this file does not
+declare — the v1 bridge elaborates single-file closures over declared
+`Set` sorts only (ground sorts such as `Nat` arrive with the ground
+seam; see crates/geolog-ground)
+\end{Verbatim}
+This is also where \texttt{Index} types land operationally: the
+normalizer erases \texttt{n Index} to \texttt{Nat}
+(\S\ref{sec:gr-normalize}), and the bridge then refuses \texttt{Nat}
+as above. The worked discipline for doing real arithmetic
+\emph{without} the seam — counts as explicit elements on a ladder,
+chase-derived — is \path{theories/PetriNet.geolog}.
+\item \textbf{Tensor, list, and model-of types} — the codomain
+forms of \S\ref{sec:gr-decls} beyond plain sorts are loader
+vocabulary, and the bridge carries a dedicated refusal for each. A
+\texttt{DynTensor} anywhere in a declaration:
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+relation `P` field `x` uses a `Tensor` type — tensor payloads are
+side-condition territory, not v1 bridge vocabulary
+\end{Verbatim}
+A model-of member, on today's routes, is caught upstream by the
+element-valued-function refusal instead (its codomain is not
+\texttt{Prop}); the bridge's own instance-valued arm — refusing
+instance members as loader territory — stands behind it as
+defensive depth, per the posture above. A \texttt{List} codomain is
+caught upstream the same way; a \texttt{List} in a \emph{field}
+position reaches the bridge's own list arm (verified:
+\texttt{relation `P` field `x` uses a `List` type — list payloads
+are side-condition territory (the \{len, at, concat\} roster), not
+v1 bridge vocabulary}).
+\item \textbf{Ground literals and term-level application in axiom
+atoms}, and nested records in argument positions: refused naming the
+axiom. Under the current pipeline these arms are defensive depth —
+declaration-level refusals and normalizer typing catch the practical
+routes first — and they stay, per the bridge's stated posture: a
+bridge that assumes its input is well-formed fails silently the day
+the assumption breaks.
+\end{itemize}
+
+\noindent Axiom-side checks (variables bound by \texttt{forall} or an
+enclosing \texttt{exists}; sorts agreeing with declarations; fields
+exact; no variable bound twice; no existential shadowing an outer
+variable) are belt-and-braces re-verification of what the normalizer
+already established, kept for the same reason.
+
+\section{The chase}
+\label{sec:gr-chase}
+
+\emph{Authority: \path{crates/geolog-chase} — \path{classify.rs},
+\path{chase.rs}, \path{instance.rs}, \path{judgment.rs}. The engine
+has no silent path: every outcome below is either a derived row, a
+typed refusal, or a reported judgment.}
+
+\subsection{Sequent classification}
+\label{sec:gr-chase-classify}
+
+Repair arity is computed from syntax alone, by one total function,
+and every engine consults it — no runtime data participates. The
+conclusion is normalized to disjunctive head form ($\mathrm{Conj}$
+distributes over $\mathrm{Disj}$; a $\bot$ conjunct annihilates its
+branch), and:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+head disjuncts & class & chase posture \\
+\midrule
+$0$ & denial & never fires; violations are judgments \\
+$1$ & canonical & fires (invents witnesses) — the regular fragment \\
+$\geq 2$ & repair menu & never auto-fired; surfaced as a branch point \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent One carve-out is permanent: a head that reaches an
+existential over an \emph{immutable} sort (an infinitary disjunction
+— the engine IR's \texttt{InfDisj}) is never chase-eligible
+regardless of arity, because an infinitary disjunction is in no way a
+unary disjunction; no witness-invention strategy for it can ever be
+sound. The refusal is loud and names the axiom.
+
+\subsection{Modes: the author's word on firing}
+\label{sec:gr-chase-modes}
+
+Whether an axiom fires is not inferred from its shape: it is
+\emph{authored}, per axiom, by the mode mark of
+\S\ref{sec:gr-decls}. The three marks:
+
+\begin{itemize}
+\item \texttt{chase} — a derivation rule: the axiom fires, inventing
+witnesses and asserting conclusions. Only a chase-eligible axiom
+(\S\ref{sec:gr-chase-classify}: canonical head, no \texttt{InfDisj})
+may carry the mark; \texttt{chase} on an ineligible axiom is a load
+refusal naming the axiom by its \emph{source} name (verified:
+\texttt{axiom ax/pick/one is marked `chase` but is not chase-eligible
+…; mark it `report` (judge) or `refuse` (gate), or reshape its
+head}).
+\item \texttt{report} — a constraint: the axiom never fires; its
+violations and would-be firings surface as judgments
+(\S\ref{sec:gr-chase-judgments}).
+\item \texttt{refuse} — a constraint that additionally gates local
+authoring: \texttt{report}'s judgment semantics plus the local write
+gate of \S\ref{sec:gr-engine}. On the file path there is no commit to
+gate, so its violations render exactly as \texttt{report}'s.
+\end{itemize}
+
+\noindent \textbf{An unmarked axiom means \texttt{report}} — the
+least-dangerous default (\texttt{chase} creates rows and
+\texttt{refuse} blocks commits; \texttt{report} only judges), so
+derivation is always an explicit authorial act. Denials sit naturally
+under \texttt{report}: a denial never fires in any mode, and its
+violations are phase-2 judgments (\S\ref{sec:gr-chase-run})
+regardless.
+
+The marks map onto the engine's per-axiom trichotomy
+(\S\ref{sec:gr-engine}): \texttt{chase} $\to$ Chased, \texttt{report}
+$\to$ Monitored, \texttt{refuse} $\to$ Enforced. \texttt{geolog
+chase} runs a file under this authored partition by default,
+recovering each axiom's mark from the normalized declarations with
+three alignment checks per axiom (count, name, binder vector) so any
+drift between the normalizer's and the bridge's axiom order is a
+loud refusal, never a silent mode reassignment.
+
+\paragraph{The legacy flattener.} \texttt{--mode chased|monitored}
+(\S\ref{sec:gr-cli}) survives for corpora not yet carrying explicit
+marks, applying one run-level policy to every axiom: under
+\texttt{chased}, every eligible axiom fires and a disjunctive head is
+a theory-load error before the loop ever runs (verified, on an
+unmarked file: \texttt{theory load refused: axiom ax\#0 is not
+Chased-eligible: repair arity is Menu(2); only a single-disjunct
+(canonical) head with no InfDisj binder may run under mode Chased —
+declare it Monitored instead, or split/simplify the axiom}); under
+\texttt{monitored}, eligible axioms fire and disjunctive heads
+surface as branch points. On a file carrying \emph{any} explicit mark
+the flag refuses, naming the marked axioms (verified: \texttt{--mode
+conflicts with this file's explicit surface marks: ax/path/edge
+(chase), … — drop the flag to honor the marks}): a mark is the
+author's word, and a global flag that silently promoted a
+\texttt{report}-marked axiom into the firing set would be the exact
+hazard the marks exist to close — worst case, an equality conclusion
+merging the very elements it was written to police. Where the flag
+does run, the flattening is announced on stderr.
+
+\noindent Engine-level load refusals name axioms positionally
+(\texttt{ax\#i}): engine sequents carry no name field — names are
+metadata, held by the caller (or, in the durable pipeline, by
+meta-schema rows) — and the facade maps indices back to source names
+wherever it holds them (\S\ref{sec:gr-report}); the bare positional
+form above is the legacy flattener's path showing the engine's own
+words.
+
+\subsection{The two-phase run}
+\label{sec:gr-chase-run}
+
+A chase run has exactly two phases, and the separation exists for
+one reason: \emph{a transient judgment can never be persisted as
+if final.}
+
+\textbf{Phase 1} fires only canonical axioms, to a fixpoint or the
+iteration bound. The loop's continuation condition is instance
+mutation only — discovering a violation is never a reason to keep (or
+stop) iterating. \textbf{Phase 2} is one evaluation pass of every
+denial and every menu axiom against the \emph{final} canonical
+instance, bindings resolved through the final congruence. A menu
+whose missing witness is supplied by the very last canonical firing
+is therefore never recorded stale, and every judgment binding is a
+canonical representative of the final fixpoint.
+
+Hitting the bound is not an error: the instance-so-far is returned, a
+non-termination judgment is recorded (with both the iterations run
+and the bound), and phase 2 still reports whatever holds of the
+partial instance — validity is explicitly indeterminate, not omitted
+(verified: \texttt{no fixpoint within budget: 5 iterations (bound 5)
+— raise --budget, or the theory does not saturate on this instance
+(unbounded generation is a real outcome, reported rather than guessed
+at)}).
+
+\subsection{Restricted semantics and invention}
+\label{sec:gr-chase-restricted}
+
+Canonical firing is the \emph{restricted} chase
+\cite{deutschnashremmel2008}: for each binding of
+an axiom's universal context that satisfies the premise, the engine
+first evaluates the conclusion as a query under that binding —
+\textbf{if any witness already exists, it does not fire}. Only a
+witnessless binding invents: one fresh element per existential
+binder, then the conclusion's atoms are asserted (relation rows as
+derived rows; equations via congruence,
+\S\ref{sec:gr-chase-congruence}). The Tutorial's shipment example is
+the behaviour in one line: the order with a recorded manifest got no
+invention; the order without one got exactly one fresh
+\texttt{?Shipment}.
+
+Every element carries an immutable creation-provenance record,
+written once and never rewritten by any merge: seeded (EDB) elements
+carry caller-supplied provenance bytes (at command-line scale, the
+declared name; in the durable pipeline, a commit-addressed leaf), and
+chase-invented elements carry the firing axiom's index, the
+context-bound elements of the firing (in context order), and the
+fresh binder's ordinal within the axiom. Derived rows are
+distinguished from asserted rows throughout
+(\S\ref{sec:gr-report}). One invariant worth its ink: for a premise
+whose own existential (hoisted per \S\ref{sec:gr-normalize}) admits
+several matches over the same context binding, the first firing's
+witness satisfies the rest — so exactly one witness, with a
+context-only provenance term, ever exists per context binding.
+
+\subsection{Equality and congruence}
+\label{sec:gr-chase-congruence}
+
+Equality is computational, not annotational: the instance maintains a
+union-find congruence closure in the style of Nieuwenhuis and
+Oliveras \cite{nieuwenhuisoliveras2007}. An
+equational conclusion firing merges two elements' classes; everything
+known about either — rows, provenance-bearing derivations, later
+firings — holds of the merged class. Tuples are stored raw and
+canonicalized through the current union-find at every read, so a
+merge never rewrites tables. The report renders a merged class by
+joining its seeded names (\texttt{sf\_record=wh\_label};
+\texttt{b=c}) and accounts for it in the carrier arithmetic
+(\texttt{3 seeded, 1 merged by congruence} — verified transcript).
+The functionality idiom of \S\ref{sec:gr-elab} plus this machinery is
+how geolog has functions without function symbols in the v1
+fragment. (Chase steps interleaved with congruence closure are also
+the computational core of datalog-with-equality and
+equality-saturation engines \cite{bidlingmaier23,zhang23}, the
+nearest kin to this engine in the evaluation literature.)
+
+\subsection{Judgments}
+\label{sec:gr-chase-judgments}
+
+A judgment is one thing the chase found that a silent-success engine
+would have swallowed — the authority module's own one-line definition
+of the type. The chase's loud outputs, exhaustively, each carrying
+the axiom's identity and, where applicable, the witnessing binding
+with canonical elements:
+
+\begin{itemize}
+\item \textbf{Denial violation} — a denial's premise is satisfied at
+the fixpoint: $\vdash \bot$ for this binding. Reported, never
+dropped, never repaired.
+\item \textbf{Branch point} — a menu axiom's premise is satisfied
+with no existing witness for \emph{any} disjunct. The payload carries
+the menu (the disjuncts themselves, as data); the engine picks
+nothing. Under the legacy run-level flattener a menu has length
+$\geq 2$; menu-of-one branch points (a forced repair, surfaced rather
+than fired — \texttt{a menu of 1 repair}) arise wherever the
+per-axiom partition holds an \emph{eligible} axiom to \texttt{report}
+(\S\ref{sec:gr-chase-modes}, \S\ref{sec:gr-engine}) — an unmarked
+derivation rule's would-be firings surface this way.
+\item \textbf{Non-termination} — the bound was hit
+(\S\ref{sec:gr-chase-run}).
+\end{itemize}
+
+\noindent Judgments are results, not errors: a run that produces
+them completed, exits with the judgment exit code
+(\S\ref{sec:gr-cli}), and its instance is real — the event-sourcing
+posture (invalid states representable, detected, repaired by further
+ordinary commits) held formally. The Tutorial's merge chapter is the
+worked argument for why this posture, and not write-rejection or
+automatic repair, is the design.
+
+\subsection{The report}
+\label{sec:gr-report}
+
+\emph{Authority: \path{crates/geolog/src/report.rs}.}
+
+The \texttt{chase} verb renders every carrier, every row, and every
+judgment, through the source file's own names; nothing about a
+judgment is summarized away. The normative rendering facts, seven of
+them:
+
+\begin{itemize}
+\item each sort prints its canonical carrier size with the seeded
+count, the count invented by the chase, and the count merged by
+congruence, followed by a \texttt{merged:} line naming merged
+seeded-name groups;
+\item each relation prints in declaration order, rows sorted and
+deduplicated after canonicalization, with seeded/derived tallies;
+\item derived rows — rows not in the canonicalized image of the
+seeded baseline — are marked \texttt{+};
+\item rows print in the relation's own shape (record, bare, or bare
+name for nullary);
+\item chase-invented elements render as \texttt{?Sort.n} in
+first-encounter order;
+\item side-condition relations are tagged \texttt{[side-condition]};
+\item judgments print the axiom's \emph{source} name and the binding
+in context order, a branch point adds its menu size, and a clean run
+ends \texttt{fixpoint: reached, no judgements — the model is %
+saturated.} (with a count of invented elements when there are any).
+\end{itemize}
+
+\section{The engine beneath the command line}
+\label{sec:gr-engine}
+
+\emph{Authority: \path{crates/geolog-chase} (\path{mode.rs},
+\path{weight.rs}, \path{view.rs}, \path{delta.rs},
+\path{plan_ir.rs}, \path{validity/}), \path{crates/geolog-weights}.
+Everything in this section is shipped, tested library surface. The
+per-axiom mode partition is the one piece the \texttt{geolog} verb
+now reaches — through the surface marks of
+\S\ref{sec:gr-chase-modes}; the rest is not reachable from the verb
+yet.}
+
+\paragraph{Per-axiom modes, and Enforced.} The engine's mode system
+is a per-axiom assignment over the trichotomy \textbf{Chased} /
+\textbf{Monitored} / \textbf{Enforced}, with an eligibility-keyed
+ambient default (chase-eligible $\Rightarrow$ Chased, everything else
+Monitored — reproducing the legacy run-level default, so that default
+is semantics-preserving) and validated explicit overrides: a Chased
+override on an ineligible axiom is a typed error; Monitored/Enforced
+overrides on \emph{eligible} axioms are honoured by a firing
+partition — the axiom never fires, and its would-be firings surface
+as menu-of-one branch points (the forced repair, surfaced, never
+auto-fired). The surface marks lower onto this same machinery, as
+a \emph{total} explicit assignment — every axiom's effective mark,
+unmarked resolved to \texttt{report} first — so on the file path the
+author's word, never eligibility, decides firing, and the ambient
+default decides nothing; the ambient default remains the semantics
+for library callers that override selectively. Enforced is Monitored
+plus the \emph{local write gate}:
+an admission verdict over a finished chase result rejects any local
+commit whose resulting fixpoint carries an Enforced violation. The
+commit-vs-sync seam is the caller's, and its asymmetry is doctrine:
+the gate binds \textbf{local commit paths only} — states arriving by
+sync or merge are admitted with their judgments recorded, because
+gating sync admission on validity would cost true merge and
+history-as-authority (\S\ref{sec:gr-sync-merge}). Modes differ in
+\emph{when} validity is enforced, never in what validity is. The
+adjudicator refuses to grade a mode assignment against a run that was
+not partitioned under that same assignment — the silent-vacuity class
+(an axiom fired in phase 1 repairing its violations before any
+judgment could exist) is rejected loudly, never admitted vacuously.
+The meta-schema carries the same trichotomy as rows
+(\texttt{Axiom/monitored}, \texttt{Axiom/enforced}, at most one per
+axiom; absence of both is the ambient default) —
+\S\ref{sec:gr-meta}.
+
+\paragraph{Weights.} The engine is parameterized over an
+ordered-semiring provenance-weight algebra
+(\path{crates/geolog-weights}): a weighted run integrates each derived
+row's weight from its derivation structure, a reweight pass
+recomputes after tombstoning, and death-at-zero holds — the
+weighted-alive set after tombstone + reweight equals a from-scratch
+Boolean chase on the surviving facts (proptested as a differential).
+The Boolean rung \emph{is} the unweighted engine: \texttt{run\_chase}
+stays pinned to $W = \texttt{bool}$ and is byte-identical to the
+weight-blind engine.
+
+\paragraph{Deltas, maintained views, and the plan IR.} The delta bus
+makes the engine's unit of change data (element, row, and function
+deltas in batches). The view engine compiles violation views —
+the failing set of each denial, kept current under row deltas, never
+recomputed from scratch — and verifies itself against from-scratch
+reference evaluation (a divergence is a reportable defect, and the
+rebuild invariant of the repository's battery backs it at replay
+scale). Compiled views lower to a tensor-contraction plan artefact
+with canonical, digest-citable bytes, a dense reference evaluator,
+and an accelerator emission harness; the reference evaluator is the
+verdict authority throughout (the lane law,
+\S\ref{sec:gr-ground}).
+
+\paragraph{Per-commit validity.} The validity layer
+(\path{crates/geolog-chase/validity/}) assembles per-commit validity
+judgments over chase results: which commits does this judgment
+implicate — well-posed exactly because every derived row and every
+invented element carries its firing history
+(\S\ref{sec:gr-chase-restricted}). Wiring it into the storage
+pipeline end-to-end is design tense (the factoring is committed; the
+Tutorial states the same status).
+
+\section{The meta-schema}
+\label{sec:gr-meta}
+
+\emph{Authority: \path{theories/GeologMeta.geolog} — the meta-schema's
+normative statement, from whose text this section is condensed; where
+they disagree, that file wins. The committed genesis golden
+(\S\ref{sec:gr-goldens}) is its reference instance; the generator
+tool (\path{theories/tools/geologmeta_gen.py}) re-derives and
+byte-compares both directions as a drift alarm in CI.}
+
+geolog is a logical framework, not an expressive logic. GeologMeta is
+the fixed schema \emph{of} geometric theories: one meta-schema,
+frozen at genesis; every theory — including the proof calculi the
+companion repositories ship — is an ordinary instance: delta rows
+against GeologMeta, carried by ordinary signed commits. Schema,
+extension, annotation, and migration therefore live in the same
+substrate they govern (the Tutorial's ``no second database'').
+
+\subsection{Sorts and rows}
+\label{sec:gr-meta-rows}
+
+Nine schema sorts: \texttt{Theory}, \texttt{Sort}, \texttt{Fun}
+(function \emph{or} relation — relationality is a mark, not a second
+sort), \texttt{Field}, \texttt{Axiom}, \texttt{Var},
+\texttt{Disjunct}, \texttt{Atom}, \texttt{Term}.
+Table~\ref{tab:gr-meta-rows} carries the declaration vocabulary over
+them, with partiality as documented there (``partial'' in its notes
+column means the row may be absent, and absence is meaningful —
+Codd's I-mark discipline \cite{codd86}, never ``unknown yet'').
+
+\begin{table}[htbp]
+\centering\footnotesize
+\begin{tabular}{@{}ll>{\raggedright\arraybackslash}p{0.40\textwidth}@{}}
+\toprule
+subject & rows & notes \\
+\midrule
+\texttt{Theory} & \texttt{TheoryExtends[child, parent]} & multi-parent legal; extends graph acyclic \\
+ & \texttt{TheoryRevises[new, old]} & revision intent; acyclic; causal half lives in deps \\
+ & (no \texttt{Theory/name}) & identity is the element; discovery naming lives above \\
+\texttt{Sort} & \texttt{Sort/name}, \texttt{Sort/theory} & \\
+ & \texttt{Sort/immutable} & carrier opaque to the chase (choose, never create) \\
+ & \texttt{Sort/builtin\_code} & partial: builtin tier only (\S\ref{sec:gr-meta-tier}) \\
+\texttt{Fun} & \texttt{Fun/name}, \texttt{Fun/theory} & \\
+ & \texttt{Fun/relational} & the relation mark; \texttt{Prop} is not a sort \\
+ & \texttt{Fun/codomain} & partial: exactly the non-relational Funs \\
+ & \texttt{Fun/arg\_sort} & partial: exactly the unary Funs \\
+ & \texttt{Fun/side\_condition} & bounded-computation discharge; entails relational \\
+\texttt{Field} & \texttt{Field/fun}, \texttt{Field/name}, \texttt{Field/sort} & name-keyed; canonical order is bytewise name order \\
+\texttt{Axiom} & \texttt{Axiom/theory}, \texttt{Axiom/name} & name partial, recommended \\
+ & \texttt{Axiom/monitored}, \texttt{Axiom/enforced} & mode rows (\S\ref{sec:gr-engine}); at most one; surface \texttt{report}/\texttt{refuse} lower here, \texttt{chase} to neither \\
+\texttt{Var} & \texttt{Var/premise\_of} $\to$ \texttt{Axiom} & universal variables, scoped to the whole axiom \\
+ & \texttt{Var/bound\_in} $\to$ \texttt{Disjunct} & existential variables, scoped to one disjunct; exactly one home (partition law) \\
+ & \texttt{Var/sort}, \texttt{Var/name} & name is presentation only, hash-excluded \\
+\texttt{Disjunct} & \texttt{Disjunct/axiom} $\to$ \texttt{Axiom} & one branch of the conclusion; zero disjuncts on an axiom $=$ rejection rule \\
+\texttt{Atom} & \texttt{Atom/premise\_of} $\to$ \texttt{Axiom} & premise atoms hang on the axiom itself \\
+ & \texttt{Atom/concl\_of} $\to$ \texttt{Disjunct} & conclusion atoms hang on a disjunct, never on the axiom; exactly one home \\
+ & \texttt{Atom/eq\_lhs}, \texttt{Atom/eq\_rhs} & equation atoms \\
+ & \texttt{Atom/rel}, \texttt{Atom/rel\_arg} & application atoms; exactly one kind \\
+\texttt{Term} & \texttt{Term/var} & variable \\
+ & \texttt{Term/app\_fun}, \texttt{Term/app\_arg} & application (arg absent iff nullary) \\
+ & \texttt{Term/is\_record}, \texttt{RecordField[rec, field, value]} & records; empty record is the explicit mark \\
+ & \texttt{Term/lit\_q,\,lit\_z,\,lit\_nat,\,lit\_b,\,lit\_str,} & one typed literal row per primordial dtype \\
+ & \texttt{\ \ lit\_shape,\,lit\_ennrat,\,lit\_timestamp} & \\
+\bottomrule
+\end{tabular}
+\caption{The meta-schema's declaration vocabulary, by subject sort
+(\S\ref{sec:gr-meta-rows}).}
+\label{tab:gr-meta-rows}
+\end{table}
+
+Domain shapes are discriminated by which rows exist —
+nullary: neither \texttt{Fun/arg\_sort} nor \texttt{Field} rows;
+unary: \texttt{Fun/arg\_sort}; record: \texttt{Field} rows.
+
+The axiom encoding deserves a picture, because it has one level the
+sequent notation hides (Figure~\ref{fig:gr-axiom-rows}). The premise
+hangs directly on the \texttt{Axiom} element: premise atoms by
+\texttt{Atom/premise\_of}, universal variables by
+\texttt{Var/premise\_of}. The conclusion sits one level deeper. A
+conclusion is a disjunction of existentially quantified conjunctions
+(Definition~\ref{def:gr-geometric}), so each branch is its own
+\texttt{Disjunct} element, tied to the axiom by
+\texttt{Disjunct/axiom}; a conclusion atom names its
+\emph{disjunct} as home (\texttt{Atom/concl\_of}), never the axiom,
+and an existentially bound variable does the same
+(\texttt{Var/bound\_in}). An axiom's premise is therefore the
+\emph{set} of atoms homed on it, its conclusion the \emph{set} of its
+disjuncts, and its repair arity (\S\ref{sec:gr-chase-classify}) is
+its \texttt{Disjunct} count: zero is the empty disjunction, a
+rejection rule; one is the canonical, chase-eligible shape; two or
+more is a repair menu.
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[
+  elem/.style={draw, rounded corners=1.5pt, inner sep=4pt,
+               font=\small\ttfamily},
+  rowlab/.style={font=\scriptsize\ttfamily, text=accentmid!75!black,
+                 inner sep=1.5pt, fill=white},
+  arr/.style={-{Stealth[length=1.8mm]}, semithick, draw=black!70,
+              shorten >=2pt, shorten <=2pt}
+]
+\node[elem] (ax) at (-0.4,0) {ax/ship/manifest : Axiom};
+\node[elem] (po) at (-4.7,-1.8) {o : Var};
+\node[elem] (pa) at (-1.7,-1.8) {[o:\,o]\,Shippable : Atom};
+\node[elem] (d)  at (2.9,-1.8) {d : Disjunct};
+\node[elem] (cs) at (0.6,-3.4) {s : Var};
+\node[elem] (ca) at (4.4,-3.4) {[o:\,o,\,s:\,s]\,ShippedVia : Atom};
+\draw[arr] (po) -- (ax.south west) node[rowlab, pos=0.5, left=4pt] {Var/premise\_of};
+\draw[arr] (pa) -- (ax.south) node[rowlab, pos=0.25, right=4pt] {Atom/premise\_of};
+\draw[arr] (d)  -- (ax.south east) node[rowlab, pos=0.42, right=4pt] {Disjunct/axiom};
+\draw[arr] (cs) -- (d.south west)  node[rowlab, pos=0.5, left=4pt] {Var/bound\_in};
+\draw[arr] (ca) -- (d.south east)  node[rowlab, pos=0.5, right=4pt] {Atom/concl\_of};
+\end{tikzpicture}
+\caption{The Tutorial's \texttt{ax/ship/manifest} ($\forall o.\;
+\mathit{Shippable}(o) \vdash \exists s.\; \mathit{ShippedVia}(o,s)$)
+as meta-schema rows. Premise structure homes on the \texttt{Axiom}
+element; conclusion structure homes on a \texttt{Disjunct}, one
+element per branch of the disjunction. Which side of the turnstile
+an atom or variable lives on is read off the function row it
+carries, and the axiom's repair arity is its \texttt{Disjunct}
+count — here one, the canonical shape.}
+\label{fig:gr-axiom-rows}
+\end{figure}
+
+Field-name uniqueness per
+Fun and \texttt{RecordField} uniqueness per (record, field) are load
+rejections, deliberately not unification axioms: in a store whose
+rows are signed declarations, silently merging independently minted
+declarations would erase provenance — collisions are loud.
+
+The meta-axioms, exhaustively (all fifteen; three shapes recur —
+entailment, rejection pair, and the $\langle$disjoint,
+exhaustive$\rangle$ \emph{partition law} pair stating ``exactly
+one''):
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+axiom & shape & states \\
+\midrule
+\texttt{ax/meta/builtin\_immutable} & entailment & coded sorts are immutable \\
+\texttt{ax/meta/side\_condition\_relational} & entailment & side-condition $\Rightarrow$ relational \\
+\texttt{ax/meta/relational\_no\_codomain} & rejection & a relation never has a codomain \\
+\texttt{ax/meta/codomain\_exhaustive} & disjunctive & every Fun is relational or has a codomain \\
+\texttt{ax/meta/arg\_sort\_fields\_disjoint} & rejection & unary and record domains exclude each other \\
+\texttt{ax/meta/mode\_marks\_exclusive} & rejection & at most one explicit mode per axiom \\
+\texttt{ax/meta/var\_home\_\{disjoint, exhaustive\}} & partition & every Var has exactly one home \\
+\texttt{ax/meta/atom\_home\_\{disjoint, exhaustive\}} & partition & every Atom sits on one side of $\vdash$ \\
+\texttt{ax/meta/atom\_kind\_\{disjoint, exhaustive\}} & partition & equation or application, never both/neither \\
+\texttt{ax/meta/term\_\{var\_app, var\_record, app\_record\}\_disjoint} & rejection & representative term-kind disjointness \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent (\texttt{ax/meta/codomain\_exhaustive} is also the schema's
+own fixture for a disjunctive conclusion with an existential; the
+three term-kind rejections are representatives — the full mechanical
+pairwise family, the 28 literal pairs included, is elaboration-time
+conformance rather than schema text.)
+
+\paragraph{The testable negative.} What is deliberately absent is
+structural, not policed: no Formula sort and no
+Conj/Disj/Exists/Not/Iff nodes (nesting beyond geometric normal form
+is unrepresentable); no negation node and no iff node (both are
+authoring-side moves, \S\ref{sec:gr-normalize}); no
+\texttt{Index}/dependent-type node (erased upstream); no
+\texttt{InfDisj} node (\texttt{Sort/immutable} on the binder's sort
+carries the distinction); no proof or derivation sorts (proofs of
+object logics are rows of object theories — the logical-framework
+doctrine); no weight or provenance slot (engine configuration, not
+schema); no annotation vocabulary (annotations are ordinary relations
+in ordinary extension theories — metadata needs rows, never a schema
+revision).
+
+\subsection{The primordial sort tier}
+\label{sec:gr-meta-tier}
+
+Thirteen builtin ground sorts are declared as ordinary Sort rows in
+the genesis instance, marked immutable, and fixed forever:
+\texttt{Q}, \texttt{Z}, \texttt{Nat}, \texttt{B}, \texttt{Str},
+\texttt{ENNRat}, \texttt{Shape}, \texttt{Timestamp}, \texttt{Bytes},
+\texttt{PeerId}, \texttt{CommitId}, and the genesis-pinned
+extension-band straddle pair \texttt{Date} and \texttt{Interval}.
+Beside the thirteen sorts stand three sort \emph{formers}, structural
+rather than declared — no \texttt{Sort} row, no declaring element;
+like the naturals themselves, they are simply available:
+
+\begin{itemize}
+\item \textbf{\texttt{Fin}} — the bounded-index former, an indexed
+family $\texttt{Nat} \to \textsf{Sort}$: for each natural $n$,
+$\texttt{Fin}(n)$ is the $n$-element index sort. These are the sorts
+that index tensor axes (an axis of extent $n$ is indexed by
+$\texttt{Fin}(n)$); the surface grammar's bounded-index type
+(\texttt{$n$ Index}, \S\ref{sec:gr-decls}) expresses the same idea
+at authoring scale, though today the normalizer erases it to
+\texttt{Nat} plus range obligations (\S\ref{sec:gr-normalize}).
+Cell code \texttt{0x09} (\S\ref{sec:gr-cells}).
+\item \textbf{\texttt{Tensor}} — the tensor former,
+$\texttt{Shape} \times \textsf{Sort} \to \textsf{Sort}$: given a
+shape (a \texttt{Shape} value, the list of axis extents) and an
+element sort, the sort of tensors of that shape with entries at that
+sort. The element sort may be \emph{any} sort, declared or builtin,
+not only a numeric one. Canonical form is flattened, and a rank-zero
+tensor collapses to its single entry. Cell code \texttt{0x0A}.
+\item \textbf{\texttt{List}} — the finite-sequence former,
+$\textsf{Sort} \to \textsf{Sort}$, length carried per value:
+$[\![\, x\ \texttt{List} \,]\!] = \sum_{n:\mathbb{N}}
+\bigl(\texttt{Fin}(n) \to [\![\, x \,]\!]\bigr)$ — each value brings
+its own $n$, the \texttt{DynTensor} mechanism with rank pinned at
+one. Positional order is the value (no sorting, no deduplication),
+and there is no flatness or unit law: \texttt{(x List) List} is a
+distinct, ragged two-level sort, never collapsed. Element scope at
+this tier is any sort, nesting included; the one adjudicated
+exclusion runs the other way — a list instance is not admissible as
+a \texttt{Tensor}/\texttt{DynTensor} \emph{element} in v1, while
+\texttt{(x Tensor) List} is legal. Former code \texttt{0x10}; the
+surface spelling (\S\ref{sec:gr-decls}) narrows the element scope to
+builtin ground sorts; value cells ride dtype code \texttt{0x50}
+(\S\ref{sec:gr-cells}).
+\end{itemize}
+
+\noindent A fourth structural former stands beside these three at the
+wire tier, under its own sort-reference tag rather than a former
+code: \textbf{\texttt{DynTensor}} — $\textsf{Sort} \to
+\textsf{Sort}$, the \emph{dynamic} tensor former, shape carried in
+the value rather than the type (the $\Sigma$-over-shapes reading of
+\texttt{Tensor}; tag \texttt{0x36},
+\path{crates/geolog-envelope/src/former.rs}). \texttt{Tensor} is the
+static reading — shape in the type — and the two are distinct sorts
+on purpose, never silently interconverted. Of the tensor pair, only
+\texttt{DynTensor} has a surface spelling
+(\S\ref{sec:gr-decls}); tensor values are side-condition payload
+throughout (\S\ref{sec:gr-ground}).
+
+The tier is ambient: every theory may use it — formers
+included — in field and codomain positions without an extends edge.
+Minting an element of a builtin sort is a load rejection; builtin
+values enter as literals in value cells (\S\ref{sec:gr-cells}).
+
+Genesis-tier ground \emph{vocabulary} equips the primordial carriers
+with algebraic structure as ordinary declarations (never as
+type-former firmware), each family's evaluation semantics pinned in
+\path{theories/GeologMeta.geolog} to the corner case:
+
+\begin{itemize}
+\item \textbf{$\mathbb{Q}$ field operations} — \texttt{q\_add}, \texttt{q\_neg},
+\texttt{q\_sub}, \texttt{q\_mul}, \texttt{q\_inv}, \texttt{q\_div}:
+exact arithmetic on canonical rationals, no rounding anywhere;
+partiality is refusal (\texttt{q\_inv(0)} and division by zero refuse
+— a field has no answer there, and inventing one is what the exact
+tier exists to refuse).
+\item \textbf{ENNRat quantale operations} — on the Lawvere rationals
+$\mathbb{Q}_{\geq 0} \cup \{\infty\}$: \texttt{ennrat\_add},
+\texttt{\_min}, \texttt{\_max}, truncated minus (\texttt{\_monus},
+the residual of addition), \emph{both} multiplications
+(\texttt{\_mul\_conj} with $0 \cdot \infty = 0$ and
+\texttt{\_mul\_disj} with $0 \cdot \infty = \infty$ — the two
+conventions declared under distinct names, never silently
+harmonized), inversion, residuation, harmonic sum, the two
+qualitative-mode side-conditions, and exact comparisons.
+\item \textbf{Timestamp} — instants, i64 epoch-microseconds on the
+POSIX/UTC scale (timezone is presentation, never value); the numeric
+order as side-conditions; checked displacement arithmetic
+(\texttt{ts\_add\_us}; overflow refuses, never wraps).
+\item \textbf{Date and Interval} — PostgreSQL semantics, as a tested
+claim: a corpus of goldens captured from a live PostgreSQL 17
+instance is the conformance battery for the calendar family
+(\S\ref{sec:gr-ground}); intervals are the three-field
+months/days/micros value verbatim, never flattened (comparison uses
+the justified collapse, values do not); refusal wherever PostgreSQL
+refuses, finite-only.
+\item \textbf{Str, CommitId} — disequality only
+(\texttt{str\_ne}, \texttt{cid\_ne}): string ordering would smuggle a
+collation choice (presentation, like timezone), and ordering commit
+hashes would invite misreading bytes as causal order.
+\end{itemize}
+
+\noindent Every \emph{other} value format — the floating-point ladder
+included — is an extension ground format: declared by an ordinary
+signed revision (never genesis, never a schema revision), carrying a
+parametric spec over ordinary roster rows (byte width, exponent and
+mantissa bits, bias, NaN discipline), with wire codes from the
+extension band and operation dispatch bound to the declaring
+revision. \texttt{ax/meta/builtin\_immutable} quantifies over every
+coded sort, so extension formats are immutable by the same axiom that
+binds the genesis roster.
+
+\subsection{Theories as rows; revisions}
+\label{sec:gr-meta-revisions}
+
+A theory arrives as a \emph{revision}: a sealed batch of meta-schema
+rows in one commit body, signed and content-addressed like every
+other commit (\S\ref{sec:gr-commits}), dependencies named. Revisions
+publish whole — an axiom and all its structure land within one
+revision's commit set, which is what makes zero-disjuncts-as-rejection
+well-defined. Identity is structural: a revision hash covers the
+declaration content (with presentation-only rows, such as
+\texttt{Var/name}, excluded), and a function's signature hash covers
+its field names, sorts, and codomain — the identity the ground
+seam's dispatch pins (\S\ref{sec:gr-ground}).
+
+Shipped machinery (\path{crates/geolog-meta-rows},
+\path{crates/geolog-revision}, \path{crates/geolog-theories}): the
+theory$\to$rows compiler (byte-identical round-trips on the committed
+corpora); the sealed-revision conformance loader, whose rejections
+are loud, named, and collected (one committed negative fixture per
+live rule); the structural revision and signature hashes with an
+adversarial vector battery; declaration indexes and cross-revision
+name resolution; the verified ground-format registry loader; and the
+programmatic revision-body builder, whose canonical-form invariants
+(backward local references, bytewise field order, exactly-once name
+rows) are unrepresentable or checked at build time. The
+\texttt{geolog rows} verb (\S\ref{sec:gr-cli}) prints the declaration
+slice of this encoding for any theory file; the committed listings
+under \path{theories/generated/} carry complete worked theories
+(the Petri-net theory is 1{,}239 ops); and \texttt{geolog seal}
+(\S\ref{sec:gr-cli}) seals a source file through this machinery —
+one revision commit carrying the theories as meta-schema rows (its
+dependency table names the genesis and the ground-comparisons
+golden, \S\ref{sec:gr-goldens}, uniformly — present whether or not
+the source uses the comparison roster, so the table is never
+input-dependent), plus a seal companion carrying the source and
+registry text — deterministically, so re-sealing an unchanged file
+is a no-op (verified: the second \texttt{seal} reports
+\texttt{store: genesis already present, comparisons already present,
+revision already present, seal already present}).
+
+\section{Commits: envelopes, bodies, cells, storage}
+\label{sec:gr-commits}
+
+\emph{Authority: \path{crates/geolog-envelope} (the wire),
+\path{crates/geolog-store} (the log),
+\path{crates/geolog-ceremony} (the goldens). This section states the
+shipped encoding — \emph{encoding v1} — at the grain a consumer
+needs; the crate module docs carry the byte-exact layouts, and a
+committed cross-language reference implementation backs the golden
+vectors.}
+
+\subsection{The skeleton: hash and signature surface}
+\label{sec:gr-skeleton}
+
+A commit is a two-layer envelope. The \textbf{skeleton} is the
+hash/sign surface: a fixed-layout structure carrying
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+\toprule
+field & content \\
+\midrule
+\texttt{version} & the encoding version byte (1) \\
+\texttt{author} & ed25519 public key, 32 bytes \\
+\texttt{deps} & the commit-reference list: 32-byte commit hashes \\
+\texttt{parent\_count} & how many leading deps are parents \\
+\texttt{ts\_claim\_us} & claimed timestamp, epoch-µs (a claim, not a truth) \\
+\texttt{message} & optional UTF-8 bytes \\
+\texttt{body\_hash} & blake3 of the body bytes \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \texttt{deps} is one list in two segments — parents first,
+then non-parent content dependencies, each segment sorted strictly
+bytewise-ascending, duplicates rejected. \emph{Commit identity is
+content:} $\texttt{commit\_hash} = \mathrm{blake3}(\text{skeleton
+bytes})$, and the ed25519 signature covers exactly those bytes under
+a fixed versioned context prefix
+(\texttt{geolog-s4-skeleton-sig-v1}), so no future encoding change
+can collide signing domains. Canonicality is definitional, in both
+directions: the writer canonicalizes; the reader, after structural
+validation, re-encodes the decoded value and requires byte equality
+with the input (the fixed-point gate) — one value, one byte string,
+independent of any serializer freedom. A signed skeleton can only be
+constructed against a body receipt obtainable by durably storing the
+body, so the format's sharpest failure mode — a signed skeleton whose
+body is absent, a permanently unverifiable dangling commit — cannot
+arise from the safe API's normal use.
+
+\subsection{The body: ops}
+\label{sec:gr-body}
+
+The \textbf{body} is the ops payload. Wire shape:
+$\texttt{u16le body\_format} \parallel \text{frame bytes}$; the
+format registry has exactly one live entry, and the numbering below
+is the public truth for this repository:
+
+\begin{itemize}
+\item \texttt{0} — retired before any production bytes existed (a
+migration lane for a legacy dialect; no wire ever carried it).
+\item \texttt{1} — \texttt{BODY\_FORMAT\_HEXANE\_TEMPLATES\_V1}:
+\textbf{the only format, and the default.} The canonical op sequence
+is factored into a template dictionary (one row per cluster of alike
+ops) plus columnar hole carriers; everything the dictionary hoists is
+spelled once per cluster, and each op row pays only for its hole
+values. The factoring is fully \emph{derived} from the content —
+clustering, per-position carrier modes, and traversal order are laws,
+not producer choices — and a frame spelling the same rows any other
+way is refused at decode. The frame ends with the same fixed-point
+gate the skeleton uses: decode re-encodes and requires byte equality.
+$\texttt{body\_hash} = \mathrm{blake3}(\text{body bytes})$.
+\end{itemize}
+
+\noindent The op vocabulary:
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+op & payload & meaning \\
+\midrule
+\texttt{elta} & sort reference & mint an element of a (mutable) sort \\
+\texttt{rela} & relation ref, argument cells & assert a relation row \\
+\texttt{funa} & function ref, argument cells, value cell & assert a function value \\
+\texttt{eltd} & target reference & delete an element (never a meta-row target) \\
+\texttt{blob} & format tag, opaque bytes & content-addressed bulk (\S\ref{sec:gr-cells}) \\
+\texttt{unknown} & kind tag, opaque bytes & forward-verifiability carry \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent References are either \emph{local} (an earlier op of the
+same body, backward only) or \emph{external} (content-addressed,
+through the deps); names are data (\texttt{Sort/name} rows), never
+identity. An unknown op kind is preserved byte-for-byte and carried,
+never dropped and never an error — a reader that predates a kind
+still parses correctly, because no decode path may silently drop
+data. Decode enforces hostile-input hygiene throughout: claimed
+counts are bounded (the op-count ceiling is $2^{20}$ per body) and
+bounds-checked before any allocation.
+
+\subsection{Cells and the dtype registry}
+\label{sec:gr-cells}
+
+Argument and value positions carry \emph{cells}: element references,
+or literals of the primordial dtypes. The primordial band is complete
+— \texttt{0x00}–\texttt{0x0F}, no holes:
+
+\begin{center}
+\small
+\begin{tabular}{llll}
+\toprule
+code & dtype & code & dtype \\
+\midrule
+0x00 & \texttt{Q} & 0x08 & \texttt{Shape} \\
+0x01 & \texttt{Z} & 0x09 & \texttt{Fin} (former) \\
+0x02 & \texttt{Nat} & 0x0A & \texttt{Tensor} (former) \\
+0x03 & \texttt{B} & 0x0B & \texttt{Timestamp} \\
+0x04 & \texttt{Str} & 0x0C & \texttt{Bytes} \\
+0x05 & \texttt{ENNRat} & 0x0D & \texttt{BlobRef} \\
+0x06 & \texttt{ZBig} & 0x0E & \texttt{PeerId} \\
+0x07 & \texttt{NatBig} & 0x0F & \texttt{CommitId} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent \texttt{ZBig}/\texttt{NatBig} are multiprecision
+realizations of $\mathbb{Z}$/$\mathbb{N}$ (distinct codes because
+widening a code's grammar would be reinterpretation, which the
+registry's general law forbids); \texttt{BlobRef} is the out-of-line
+spelling of \texttt{Bytes}/\texttt{Str} above the inline threshold (a
+35-byte content-address cell); \texttt{CommitId} is a reference — a
+tiny index into the enclosing skeleton's deps list — and never a
+context-free literal. The extension band \texttt{0x10}–\texttt{0x3F}
+carries ground formats (the float ladder \texttt{0x10}–\texttt{0x16};
+the genesis-pinned \texttt{Date} \texttt{0x17} and \texttt{Interval}
+\texttt{0x18}), decoded opaquely and validated at closure tier; the
+absence band \texttt{0x40}–\texttt{0x4F} carries typed absence.
+Values of the list former ride dtype code \texttt{0x50} — the first
+assignment past the reserved bands, sitting out of numeric order
+because the primordial band was already complete and the former
+registry's \texttt{0x10} (\S\ref{sec:gr-meta-tier}) falls inside the
+extension band — validated at decode like the primordials, in two
+first-byte-discriminated arms: an \emph{inline} arm (element dtype,
+count, then length-framed canonical element payloads — scalar
+elements only: the primordial literal codes minus \texttt{Tensor},
+\texttt{BlobRef}, and \texttt{CommitId}) and an \emph{envelope} arm
+(a 34-byte multihash content address under a dedicated derive-key
+context), partitioned at 64\,KiB in the tensor family's style;
+nested lists and non-scalar elements ride the envelope arm, and any
+cell code $\geq$ \texttt{0x51} is a decode error.
+Over-threshold bulk travels as \texttt{blob} ops (format 0 =
+\texttt{blob-raw-v1}) on the same signed-envelope machinery —
+signing, deps, sync, and equivocation detection inherited, interior
+deliberately opaque.
+
+\subsection{The store log}
+\label{sec:gr-store}
+
+The persistent store (\path{crates/geolog-store}) appends envelopes
+and bodies to a log file with a fixed grammar:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+file    := header record*
+header  := b"glog2607" | u32-LE format_version (1) | u32-LE reserved (0)
+record  := u32-LE payload_len | u8 kind | payload
+kind 1  := ENVELOPE: sig[64] | skeleton bytes
+kind 2  := BODY:     raw body bytes (identity = blake3(bytes))
+\end{Verbatim}
+
+\noindent There is no per-record checksum, by adjudicated design:
+every envelope is signature-verifiable and every body
+content-hash-verifiable — stronger than any CRC — and a checksum
+cannot repair length-prefix desynchronization anyway. A record length
+above the 64\,MiB ceiling is treated as torn or garbage bytes misread
+as a length, not as a record. The grammar layer never classifies a
+failure as crash artefact versus corruption — that is recovery
+policy, one layer up, which consults a committed hint the grammar
+deliberately knows nothing about. Header deviations (magic, version,
+nonzero reserved field) refuse loudly; a future format is a new
+version behind that gate, never a silent reinterpretation.
+
+\subsection{The committed goldens and the ceremony}
+\label{sec:gr-goldens}
+
+Four signed golden envelopes ship under \path{theories/}: the
+\textbf{genesis} (GeologMeta's own declaration rows as a signed
+commit, the root of the graph, $\texttt{deps} = []$, message
+\texttt{geolog-meta-genesis-v1}); the \textbf{ground-formats}
+revision (the float-format vocabulary, $\texttt{deps} =
+[\text{genesis}]$); the \textbf{zones} vocabulary
+($\texttt{deps} = [\text{genesis}]$); and the
+\textbf{ground-comparisons} roster ($\texttt{deps} =
+[\text{genesis}]$, message \texttt{geolog-ground-comparisons-v1}) —
+the builtin ground-comparison vocabulary (\texttt{q\_lt},
+\texttt{q\_le}, \texttt{q\_ne}, \texttt{nat\_lt}, \texttt{nat\_ne})
+as a sealed revision, the second dependency of every revision commit
+\texttt{geolog seal} mints (\S\ref{sec:gr-meta-revisions}). Each is a deterministic
+function of its committed structure-normative listing and a
+\emph{public} seed committed in source: anyone can derive the signing
+key and reproduce every byte, and
+\texttt{cargo run -q -p geolog-ceremony -- verify --root theories}
+does exactly that in every CI pass. The key certifies nothing about
+who signed; what makes these goldens canonical is that they are
+byte-reproducible from the committed listings by the committed tool.
+A real deployment mints its own genesis under its own key; the
+ceremony crate is the complete worked example of how. The genesis is
+also the meta-schema's homoiconic fixed point — GeologMeta described
+as GeologMeta rows — and the generator's \texttt{check} mode
+re-derives it from \path{theories/GeologMeta.geolog} both ways as a
+drift alarm.
+
+\section{Sync, merge, and equivocation}
+\label{sec:gr-sync}
+
+\emph{Authority: \path{crates/geolog-sync} (whose README freezes the
+contract: objects, invariants, the frontier exchange, the convergence
+theorem, and a ledger of what is and is not yet claimed) and
+\path{crates/geolog-envelope/src/equivocation.rs}.}
+
+\subsection{Merge}
+\label{sec:gr-sync-merge}
+
+\begin{definition}[merge]
+\label{def:gr-merge}
+The state of a replica is a set of signed commits (a deps-closed
+commit bag). Merging replicas is set union on commits followed by
+re-derivation of all derived state. Merge is therefore total,
+commutative, associative, and idempotent; it never conflicts
+structurally, and admission order does not affect derived state.
+\end{definition}
+
+\noindent A merged state may satisfy some axiom's violation premise —
+that is a judgment (\S\ref{sec:gr-chase-judgments}), repaired by
+further ordinary commits, never by a conflict-resolution protocol.
+The Enforced gate binds local commit paths only
+(\S\ref{sec:gr-engine}); gating sync admission on validity is the
+classic failure this architecture refuses, because it would cost true
+merge and history-as-authority. Identity questions inside the merged
+state (two writers' records denoting one thing) are the theory's
+business, decided by its equality axioms and computed by congruence
+(\S\ref{sec:gr-chase-congruence}). The rebuild invariant backs the
+order-independence claim mechanically: the repository's battery diffs
+incrementally maintained state against from-scratch replay, and a
+divergence is a release-blocking defect.
+
+\subsection{Replication}
+\label{sec:gr-sync-replication}
+
+Two shipped strata. \textbf{Sync v0 — the file mesh}: whole-file,
+N-device mesh sync of per-device, single-writer, append-only envelope
+logs plus content-addressed body directories; per-source mirrors and
+per-run receipts (``silence means broken''); a torn trailing frame is
+classified by comparing against the prior round's observation
+(growing source: benign; stable source with a persisting tear: a
+problem) — a distinction a single snapshot cannot make.
+\textbf{Replay-through-ingestion} is the only path synced envelopes
+enter a local view: re-verification through the envelope crate's own
+verify path (no new trust surface), idempotent by commit hash,
+order-free via a deps-frontier worklist fixpoint.
+
+\textbf{Sync v1 — the connected protocol}, layered strictly above v0:
+a deterministic integer-keyed message codec (strict known-kind
+decode, unknown-kind skip), frontier-exchange pulls, subscribe push,
+acknowledged head updates, credit-based flow control, bounded
+staging, and one door: admission through the same replay path.
+Equivocation detection runs incrementally during sync and is loud,
+never a gate.
+
+\paragraph{Realms and partitions.} Sync is scoped by \emph{realm} —
+the wire's opaque slice key, today a plain partition name: sessions
+pull and subscribe per realm, and a realm's head set is an exact
+summary of its deps-closed store (the crate's \textsc{inv-closure},
+which is store-global). A materialized partition must be
+dependency-closed and revision-closed (no partition splits a semantic
+revision unit); the reference builder and its checker are separate
+artefacts, and the checker re-verifies against the store rather than
+trusting the builder. Dependencies that cross a realm boundary are
+governed by a per-realm \texttt{TransportMode} dial:
+\texttt{refused} (the default), \texttt{reported} (the crossing
+becomes a declared boundary reference), or \texttt{repaired} (a
+locally held foreign dependency's pinned closure joins; a repair that
+would need a network fetch is a typed refusal). The \texttt{repaired}
+dial also binds at admission: a realm registered \texttt{repaired}
+admits entries whose dependencies are admitted under \emph{other}
+realms — the dependencies must still be admitted locally, so closure
+remains store-global — and the dial is local policy, taken at store
+open and never negotiated on the wire; an undialed peer stages the
+same entries, a liveness asymmetry rather than a safety one.
+
+\subsection{Equivocation}
+\label{sec:gr-sync-equivocation}
+
+\begin{definition}[equivocation-suspicious pair]
+\label{def:gr-equivocation}
+Two distinct envelopes from one author, neither of which causally
+references the other (through \texttt{deps}), form an
+equivocation-suspicious pair.
+\end{definition}
+
+\noindent Detection is structural — from the bytes alone, no
+consensus protocol, no quorum — and local to whatever envelope set is
+supplied: a dep pointing outside the set is ``unknown, not
+reachable,'' never an error. Two different-bytes envelopes claiming
+one commit hash refuse loudly (a genuine hash collision or a hostile
+input; never silently resolved by picking a winner). The envelope
+crate ships the demonstration as a test — two signed commits claiming
+the same chain position, exhibited and caught — and the Tutorial
+locates this in the systems landscape: the offence a broker cannot
+even state is detected here from the data model. The mechanism,
+signed hash-linked histories making forks structurally visible, is
+the same one that makes CRDTs Byzantine fault tolerant
+\cite{kleppmann22}.
+
+\section{The ground seam}
+\label{sec:gr-ground}
+
+\emph{Authority: \path{crates/geolog-ground-api} (the contract) and
+\path{crates/geolog-ground} (the reference floor, its first
+provider).}
+
+Ground vocabulary — relations and functions over immutable carriers,
+decided by procedures rather than stored rows — crosses one seam.
+\textbf{Declaration is data}: ground vocabulary is declared where all
+vocabulary is declared, as committed theory rows, and resolves to a
+pinned identity (declaring commit + row index) with a verified
+signature and, where one exists, the commit hash of the committed
+evaluation-semantics row. \textbf{Implementation is code}: a
+\emph{provider} is one value carrying curated claims plus the
+evaluator over its own entries. \textbf{The binder is where they
+meet}, and it is engine-owned law no provider can bypass or see:
+every resolved declaration is adjudicated against every provider's
+claims, with three outcomes per entry —
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+\toprule
+status & meaning \\
+\midrule
+Implemented & exactly one claim verified, committed semantics covered — a dense engine id is allocated \\
+Deferred & declared-but-unbound, safe-fail: no claimant, no semantics row, or a stale provider \\
+Refused & code and theory disagree (signature mismatch) — the drift alarm, distinct from Deferred \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Two verified claims on one identity are always an error;
+provider order is never semantics. Dispatch binds to pinned
+identities, never names: a same-named impostor declaration gets no
+oracle and its atoms defer forever. An unbound entry never obtains a
+dense id, so a compiled plan citing it cannot even be expressed —
+\emph{compile refusal by construction}, the seam's realization of
+refusal-over-guessing.
+
+The laws, stated once here and cited by everything that consumes the
+seam: \textbf{purity} (every evaluator is stateless and deterministic
+per its declared scope — same cells, same outcome, every process,
+every architecture; a family whose reference uses floating point must
+pin bit-exact step semantics or cannot be admitted);
+\textbf{the lane law} (an accelerated lane may change cost, never
+verdicts, and ships with a conformance battery against the always-on
+scalar reference — a lane that cannot pass its battery does not
+dispatch); \textbf{refusal} (refusal is data, and conservative: under
+an Enforced axiom, a gate that cannot evaluate must not admit; no
+seam method panics on validated cells); \textbf{no enumeration} (a
+ground relation filters, never generates; a ground function inverts
+only where the algebra genuinely determines the missing argument —
+underdetermined means the engine must not enumerate); and
+\textbf{scope} (pure is the norm; the one typed exception is
+snapshot-scoped structural relations reading instance rows through an
+engine-supplied view, with the routing engine-enforced in both
+directions). Cells cross the seam in their canonical encodings,
+opaque to the contract; there is no intermediate certificate file
+format anywhere — a checker is a ground relation evaluating over rows
+the engine already speaks.
+
+The \textbf{reference floor} ships as the seam's first provider:
+exact arbitrary-precision rational arithmetic, the
+extended-nonnegative-rational quantale operations, calendar
+arithmetic with documented, PostgreSQL-conformant semantics (the
+golden corpus of \S\ref{sec:gr-meta-tier}), and the curated
+ground-comparison family. The floor's reference path is
+unconditional; the calendar \emph{functions} sit behind a feature
+flag whose absence makes their claims absent — declared entries then
+defer at bind, so \textbf{verdicts never change with a feature flag}.
+Application side-condition families (the proof-calculus checkers of
+the companion repositories) are application content: they ship as a
+provider crate owned by the application, composed at build time
+through this same binder — the only sanctioned coupling between this
+repository and its first big application. Reaching the seam from the
+\texttt{geolog} command line is design tense; the engine-level seam,
+the floor, and their batteries are shipped and tested today (the
+Tutorial's ground chapter walks the same line).
+
+\section{Capabilities}
+\label{sec:gr-caps}
+
+\emph{Authority: \path{crates/geolog-caps}.}
+
+Authorization arrives as an algebra over commits, not an access
+list beside them. Shipped today, as data and replay semantics:
+capability operations (delegations and revocations) travel as
+ordinary signed revisions; a normative replay computes which revocations are
+effective; authorization judgments are query-time and
+position-relative. The committed design decisions, decision by decision (the authority
+crate's own phrase):
+
+\begin{itemize}
+\item a grade lattice
+$\text{Define} < \text{Retract} < \text{Admin}$ per sort — element
+deletion is the non-monotone direction, so it is strictly higher
+privilege than minting: the add/delete split of the op vocabulary,
+lifted;
+\item a per-relation \texttt{Assert} chain sharing no element with
+the sort chain above bottom, so sort authority and row authority can
+never satisfy one another;
+\item dual Admins per theory and per instance, with theory-Read as
+the base prerequisite to holding anything effective on a theory's
+instances;
+\item a conservative cross-tier stance: no implication in either
+direction; dormant grants are first-class, queryable, and surfaced by
+an authoring lint that replay never reads;
+\item revocations executed in earliest-add seniority (ascending
+authority-provenance depth, digest-tiebroken), with the auth-order
+projection carried as data so seniority cannot be padded by
+packaging;
+\item edge identity as (revision, index), so identical re-grants in
+distinct revisions are distinct edges.
+\end{itemize}
+
+\noindent \emph{Design
+tense:} enforcement at the store boundary — wiring these judgments
+into admission of local commits — is the committed direction; today
+the algebra, replay, and judgments ship as a library with their
+property tests, and no store consults them yet.
+
+\section{The \texttt{geolog} command line}
+\label{sec:gr-cli}
+
+\emph{Authority: \path{crates/geolog} — \path{main.rs} for the
+surface, the modules cited throughout this chapter for each verb's
+semantics. The end-to-end tests in \path{crates/geolog/tests/cli.rs}
+run the book's own transcripts against the committed examples.}
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+geolog check     <file.geolog> [--strict]
+geolog check     --store DIR [<commit>] [--strict]
+geolog chase     <file.geolog> [--instance A[,B...]]
+                               [--budget N] [--mode chased|monitored]
+geolog chase     --store DIR [<commit>] [--instance A[,B...]] [--budget N]
+geolog seal      <file.geolog> --store DIR [--strict] [--repro]
+geolog extract   <commit> --store DIR [--referencing] [-o FILE.glc]
+geolog restrict  <file.glc> --store DIR --theory SEL [--revision HEX]
+                               [-o FILE.glc]
+geolog load      <file.geolog> [--strict] [--dry-run] [-d]
+geolog load      <file.glc> [--store DIR]
+geolog fmt       <file>
+geolog rows      <file.geolog>
+geolog normalize <file.geolog> [--strict]
+geolog census    <file.geolog>... [--rows LISTING]...
+                               [--budget N] [--tsv FILE]
+\end{Verbatim}
+
+\paragraph{The specified verbs.}
+\textbf{check} runs parse $\to$ normalize $\to$ lint on the theory
+text and validates every instance block against the elaborated
+closure by actually seeding it — exactly the checks \texttt{chase}
+would run, without the chase — reporting each stage and then three
+summaries: a \emph{mode census}, what the file's axioms will do when
+chased (\texttt{modes: 2 chase · 1 report (0 by the unmarked default)
+· 0 refuse} for the Quick Start theory — so an all-\texttt{report}
+file, deriving nothing by design or awaiting its
+explicit-\texttt{chase} port, is legible at a glance); the move
+census (\S\ref{sec:gr-normalize}); and, where the chase bridge
+carries the fragment, a chase-termination advisory (weak acyclicity)
+computed under the file's own surface modes — only the
+\texttt{chase}-marked fragment generates, so a theory of
+\texttt{report}-marked constraints is termination-trivial by
+construction, however generative its axioms would be if fired. With
+\texttt{--store}, the same strata run over a sealed source instead
+of a file, after signature verification and a coherence gate: the
+sealed source must re-derive the sealed revision rows
+byte-identically.
+\textbf{chase} seeds the selected instance blocks and runs the chase
+to a fixpoint, then renders the report of \S\ref{sec:gr-report}.
+\textbf{rows} prints the theory's declaration slice as meta-schema
+rows in the committed listings' notation (local refs \texttt{L$n$},
+genesis identities \texttt{G<…>}), with a closing note counting the
+axioms that continue as rows beyond the slice; it requires the
+one-field record spelling for unary relations, because fields are
+rows with names in the meta-schema (verified: \texttt{relation
+`Marked` has a unary (anonymous) domain — … rows emission needs the
+one-field record spelling: `Marked : \{x: A\} -> …`}).
+
+\paragraph{The remaining verbs, at citation grain.} Each is shipped
+and tested; this manual states its role and leaves its full
+semantics to the named authority. \textbf{seal} runs parse $\to$
+normalize $\to$ canonical revision rows $\to$ a signed envelope pair
+in the store: a revision commit and a seal companion
+(\S\ref{sec:gr-meta-revisions}); re-sealing an unchanged file is a
+no-op. With \texttt{--repro} the signature uses the public
+reproduction seed, making the commit hashes store-independent (pin
+reproducibility); such commits carry no authorship and must never
+anchor authority. \textbf{extract} writes a commit and its transitive deps from
+the store to a \path{.glc} container (magic \texttt{geologfl},
+self-contained, verified on read rather than trusted);
+\texttt{--referencing} additionally sweeps every store commit whose
+deps reach the target, so all commits referencing an instance travel
+together. \textbf{restrict} is theory-fragment restriction of a
+certificate container — the get side of the delta lens a
+\texttt{theory B extends A} induces: it keeps exactly the rows whose
+species live in the target theory's extends-closure (derived from
+the sealed revision's own declaration rows), projects the
+prerequisite table onto the surviving boundary, copies unchanged
+commits byte-verbatim, re-seals changed ones deterministically with
+the public reproduction key, and refuses — with a named locus — any
+container whose kept rows reference stripped content; a
+pure-fragment container round-trips byte-identical. \textbf{load}
+with a \path{.glc} argument decodes and
+verifies the whole container — signatures, body hashes, topological
+order — then admits it into \texttt{--store}; with a
+\path{.geolog} argument it stages the theory's aggregation surface
+into a live engine (\S\ref{sec:gr-editions}). \textbf{fmt} parses a
+file, legacy spellings included, and prints the canonical source
+respelling — the corpus-port instrument (\S\ref{sec:gr-decls}).
+\textbf{normalize} prints the geometric normal form the engine
+consumes (\S\ref{sec:gr-gnf}) — the committed-golden regeneration
+verb. \textbf{census} is the merge-reliance census over authored
+equality heads; its method and honesty ledger live in
+\path{crates/geolog/src/census.rs}. Authority for all of these:
+\path{crates/geolog/src/main.rs} and the modules it names.
+
+\paragraph{Options.} Classification travels in the source file
+(\S\ref{sec:gr-registry}), so the file-mode verbs take the file and
+nothing else; \texttt{--registry FILE}, the deprecated migration-era
+carrier, refuses beside import lines when its registry carries
+classification (a pattern-only registry composes, its aux names
+kept clear of imported ones — \S\ref{sec:gr-registry}), and in
+store mode the flag is refused outright: the registry text travels
+sealed.
+\texttt{--strict} rejects the deprecated spellings — bracket
+records, binders-before-name theory headers, \texttt{=~\{} instance
+bodies, \texttt{:~Sort} declarations — each with a pointer at the
+ratified form (\S\ref{sec:gr-decls}) — and demands the
+\texttt{import std} header for builtin ground vocabulary used by
+name (\S\ref{sec:gr-registry}). \texttt{--instance A[,B…]}
+selects blocks by name — the default is every block in the file, as
+their union (\S\ref{sec:gr-instances}); naming a missing block is a
+usage error that lists the blocks present. \texttt{--budget N} bounds
+chase iterations (default 1000); exhaustion is a reported judgment,
+not an error. By default \texttt{chase} runs each axiom under its
+authored surface mode (\S\ref{sec:gr-chase-modes});
+\texttt{--mode chased|monitored} is the legacy run-level flattener
+for files whose axioms carry no marks, and refuses — naming the
+marked axioms — on any file that does. \texttt{chase} on a file with
+no instance block is a usage error that says what to add and points
+at \texttt{check} for theory-only validation.
+
+\paragraph{Exit codes.} \texttt{0} — clean: the verb completed and,
+for \texttt{chase}, the fixpoint carries no judgments. \texttt{1} —
+judgments at fixpoint: the run completed and reported violated
+denials, pending branch choices, or an exhausted budget. \texttt{2} —
+the input never ran: usage errors, unreadable files, pipeline
+rejections, bridge refusals, seeding contradictions, and engine load
+refusals. The 1/2 boundary is the error type's own doctrine:
+judgments from a completed chase are results, not errors.
+
+\paragraph{Constituent binaries.} The workspace also ships
+development CLIs for constituent crates — \texttt{glnorm} (the
+normalizer pipeline standalone), \texttt{glstore} (the store log),
+\texttt{glsync} (the file-mesh sync) — documented in their crates;
+\texttt{geolog} is the carryable verb and the only surface this
+chapter specifies.
+
+\section{Editions: what this manual does not yet state}
+\label{sec:gr-editions}
+
+Open seams, each named with where its truth lives today; a future
+edition of this chapter absorbs them in this order.
+
+\begin{itemize}
+\item \textbf{The aggregation surface.} The ratified authoring
+grammar beyond the fragment this manual states — \texttt{law}
+members (named or anonymous) whose bodies carry contraction index
+groups and string-literal contraction specs, the arity-typed
+contraction resolver with its refusal roster
+(\texttt{E-RANGE}, \texttt{E-SPEC-*}, \texttt{E-RPN-*},
+\texttt{E-LAW-*}), and the free-construction instance declarations
+(parameters, \texttt{extends} targets, and body rows as three seed
+sources) — is shipped in \path{crates/geolog-normalize} (the parser
+module's documentation is the compact normative summary) and staged
+into a live engine by \texttt{geolog load}, whose emission header
+marks the engine realization design-tier pending the
+aggregation-schema promotion. This edition states the surface's
+lexical floor and type-grammar hooks (\S\ref{sec:gr-lexical},
+\S\ref{sec:gr-decls}) and defers the rest to the next.
+\item \textbf{The store-backed surface at this manual's grain.}
+\texttt{seal}, \texttt{extract}, \texttt{load} of a \path{.glc}
+container, the store modes of \texttt{check} and \texttt{chase}, and
+\texttt{census} all ship today (\S\ref{sec:gr-cli}); the container
+grammar, the store-mode conformance rules, and the census method are
+normative in the facade's modules. A future edition states them at
+the grain \S\ref{sec:gr-commits} gives the envelope.
+\item \textbf{The byte-exact wire grammar.} \S\ref{sec:gr-commits}
+states the encoding at consumer grain; the op-payload grammar, the
+template-frame channel layout, and the conformance-rule table
+(load-rejection classes and their fixtures) are normative today in
+\path{crates/geolog-envelope}'s module documentation and
+\path{crates/geolog-meta-rows}' loader and negative fixtures.
+\item \textbf{Per-commit validity, end to end.} The judgment
+assembly ships (\S\ref{sec:gr-engine}); the storage-pipeline wiring
+and its report vocabulary are design tense.
+\item \textbf{Capability enforcement} at the store boundary
+(\S\ref{sec:gr-caps}).
+\item \textbf{The ground seam from the command line}
+(\S\ref{sec:gr-ground}): the chase-path elaboration of ground sorts
+remains refused (\S\ref{sec:gr-elab}), and the \texttt{load} path
+stages its ground-vocabulary dependencies as roster rows while its
+engine realization stays design-tier (previous bullet).
+\item \textbf{Cross-revision \texttt{extends} in the facade}, native
+bounded-index types, and the full evaluation-semantics tables of the
+genesis ground families (today: pinned, with their corner cases and
+golden corpora, in \path{theories/GeologMeta.geolog} and the ground
+crates' tests).
+\end{itemize}
+
+%   !=@A; ghost element; List field arm; Str List List; List element

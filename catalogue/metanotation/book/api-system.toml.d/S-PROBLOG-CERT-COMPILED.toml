@@ -1,0 +1,26 @@
+# api-system.toml.d/S-PROBLOG-CERT-COMPILED.toml — the compiled
+# stratum over the S-PROBLOG-CERT claims (fan seam: one fragment per
+# entry, stem = id). Everything rendered is extracted from the toolkit
+# sources at emission; specs here are pointers, never quoted text.
+# Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-PROBLOG-CERT-COMPILED"
+entity = "certificate stratum"
+note = '''The exact-beyond-enumeration stratum of the \texttt{problog-v0} certificate: past the world-enumeration cap, the producer commits its search as a leaf-cited decision tree --- explanation and cut rows compiled so that every path through the coin axes closes at the first row that decides it, an undecidable cube refusing with the world as witness --- and the exact probability is re-derived by the same verify-and-fold walk the checker runs, so the claim never rests on the producer's arithmetic. Both extensions of the wire (the compiled section and the even-depth Bonferroni truncation obligation) are optional and skip-if-absent: every earlier certificate's bytes decode unchanged.'''
+
+[api.ts]
+handle = "problog.CertBuilder.compiledFromRows"
+sig_file = "ts/src/problog.ts"
+sig = ["marker:ts_sig_problog_compiled"]
+snippet_file = "ts/tests/problog-native.test.ts"
+snippet = "marker:ts_problog_cert_compiled"
+note = '''\texttt{dieBuilder} and the row fixtures are defined beside the quoted lines; the byte-identity assertion against the committed compiled golden sits directly under the marked construction.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::problog::ProblogCertBuilder::compiled_from_rows"
+sig_file = "crates/mtk-catalogue/src/system/problog.rs"
+sig = ["fn compiled_from_rows"]
+snippet_file = "crates/mtk-catalogue/tests/problog_compiled.rs"
+snippet = "marker:problog_cert_compiled"
+note = '''the shared fixtures (\texttt{problog\_common}) are the same corpus the claims-stratum block quotes; the hand-built switch-first tree beside the quoted test verifies the same certificate rows against an independent tree layout.'''

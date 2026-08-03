@@ -1,0 +1,84 @@
+[[rule]]
+id = "Cut"
+source = "../BL-rules.toml"
+row = "Cut"
+proof = "book/proofs/Cut.tex"
+commentary = '''
+\rulename{Cut} is the lemma-staging rule: prove $\Phi \vdash \chi$
+once, prove $\Phi \wedge \chi \vdash \Psi$ under the enlarged context,
+conclude $\Phi \vdash \Psi$. A producer uses it to factor a
+certificate the way a paper factors a proof --- a bound or region fact
+is established once and then consumed as an assumption downstream;
+iterated cuts stage a chain of such lemmas.
+
+The checker recomputes four tree identities: the
+conclusion\textquotesingle s premise and conclusion are inherited from
+the left and right sub-derivations respectively; the left
+sub-derivation concludes exactly the named cut formula $\chi$; and the
+right sub-derivation\textquotesingle s premise is exactly the left
+one\textquotesingle s premise conjoined with $\chi$ --- the same
+context tree, verbatim. The payload must name $\chi$ explicitly
+because the conclusion mentions it nowhere: \rulename{Cut} is the one
+structural rule whose certified content is invisible in its
+conclusion, so there is nothing to reconstruct it from.
+
+The two interesting hypotheses fail independently, with near-twin
+counterexamples walked in the proof section: unshare the context and a
+fact proven under foreign assumptions leaks into the conclusion
+($\top \vdash w \leq 0$ from two individually valid premises); unmoor
+$\chi$ from the left conclusion and the right premise consumes an
+assumption nobody earned (same false conclusion, different route). The
+proof also records why no cut-elimination enters anywhere: soundness of
+the rule is direct, and the checker never normalizes a proof.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premises as at
+\rulename{Weaken}.
+\begin{itemize}
+\item the two premise judgements $\Phi \vdash \chi$ and $\Phi \wedge
+  \chi \vdash \Psi$ $\mapsto$ \texttt{ihl} $:$
+  \texttt{leftPremise.semanticallyValid H} and \texttt{ihr} $:$
+  \texttt{rightPremise.semanticallyValid H}.
+\item $\Phi \mapsto$ \texttt{leftPremise.pre}; $\Psi \mapsto$
+  \texttt{rightPremise.post}; $\chi \mapsto$ the binder
+  \texttt{cutFormula}, tied to the left conclusion by \texttt{hcutL}
+  $:$ \texttt{leftPremise.post = cutFormula} --- the explicit naming
+  the commentary explains (the conclusion mentions $\chi$ nowhere).
+\item the second premise\textquotesingle s displayed context $\Phi
+  \wedge \chi$ $\mapsto$ \texttt{hcutR} $:$ \texttt{rightPremise.pre =
+  .and leftPremise.pre cutFormula} --- the same context tree verbatim,
+  cut formula conjoined on the right.
+\item conclusion $\Phi \vdash \Psi$ $\mapsto$ the goal under
+  \texttt{hpre} $:$ \texttt{seq.pre = leftPremise.pre} and
+  \texttt{hpost} $:$ \texttt{seq.post = rightPremise.post}.
+\end{itemize}
+No width difference in either direction: the six hypotheses are
+exactly the display\textquotesingle s two premises and four structural
+identities, each consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_cut"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["PCutData"]
+intro = '''
+Payload, read as in the \rulename{Ax} section: sub-derivations plus
+structural equalities, with the cut formula as explicit data.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_cut_def",
+  "Theorem famEq_cut",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

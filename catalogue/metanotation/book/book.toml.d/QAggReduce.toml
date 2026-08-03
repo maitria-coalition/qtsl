@@ -1,0 +1,137 @@
+[[rule]]
+id = "QAggReduce"
+source = "../QTSL-rules.toml"
+row = "QAggReduce"
+proof = "book/proofs/QAggReduce.tex"
+conditional = true
+commentary = '''
+\rulename{QAggReduce} is the aggregation rule for nets whose state is a
+\emph{marking} --- a multiset of coloured tokens distributed over places,
+with variable dimension and a mandatory exchangeability quotient
+(tokens within a place are interchangeable, so any legitimate
+observable is a symmetric function of each place\textquotesingle s
+colour multiset). It replaces an obligation quantified over all
+in-scope markings by a single polynomial obligation over finitely many
+\emph{aggregate} coordinates: token counts $k_P$ and pooled features
+$s^P_j = \sum_{t:P} \phi_j(c_t)$ for a finite feature dictionary. A
+producer reaches for it because the alternative --- flattening marking
+shapes into modes --- explodes combinatorially in the token bound and
+breaks the symmetry; here obligation count and dimension are
+independent of the marking bound, which enters only as a constant in
+count rows.
+
+What the checker recomputes: one hypothesis-carrying polynomial sequent
+$G \le 0$ over the aggregate box, whose hypothesis rows assemble the
+containment certificate for a polytope $K$ covering every in-scope
+marking\textquotesingle s aggregate image --- coupling rows
+$l_j k_P \le s^P_j \le u_j k_P$ from enclosures of each feature on its
+place\textquotesingle s colour box, count rows $0 \le k_P \le M_P$ plus
+linear conservation laws (place invariants \cite{murata1989}), and
+optional moment rows $(s^P_\alpha)^2 \le k_P\, s^P_{2\alpha}$
+(Cauchy--Schwarz over the bag). Soundness of the reduction is
+evaluation: if the aggregate image lands in $K$ and $G \le 0$ on $K$,
+the marking-quantified obligation holds pointwise. The whole content is
+the containment certificate, and each row family is proven valid for
+\emph{every} bag --- adding a row shrinks $K$ without ever cutting a
+reachable aggregate point.
+
+What would break: a row NOT valid for every reachable marking makes $K$
+fail containment and the conclusion simply false --- the central
+instance being the coupling rows\textquotesingle{} scope premise, since
+an enclosure of $\phi_j$ on the colour box says nothing about tokens
+outside it; the box must be \emph{discharged} (exit-guard transitions,
+an invariance proof, or stopped-process semantics), never assumed. The
+converse failure is honest: not every polytope point is a realizable
+marking, so $K$ over-approximates --- a completeness cost, refusal-shaped
+and never soundness-shaped, with the row menu as its dial.
+'''
+note = '''
+The operative aggregate is the measurable-query observable
+$\langle \mathrm{marking}, f \rangle$ over bags of colours; counts and
+pools are the $f \equiv 1$ and $f = \mathrm{id}$ degenerate queries,
+and a query is a semiring contraction of the count tensor against $f$
+along the colour axis. Semantically the pools are commutative-monoid
+folds along the tokens-to-places classifying map, with the multiset as
+the universal aggregate \cite{spivak2021agg}; the dictionary\textquotesingle s
+expressive ceiling per shape is the classical generation of
+multisymmetric invariants by polarized power sums \cite{weyl1939}. The
+coupling rows here are deterministic pool--count arithmetic within one
+marking --- \emph{not} probabilistic couplings; the identically-named
+rows of \rulename{QCoupleDrift} are joint-kernel marginal data over a
+product of chains. Same word, disjoint mathematics, neither cites the
+other.
+'''
+correspondence = '''
+The displayed conclusion $\forall x$ in scope: $G(\vec{s}(x),
+\vec{k}(x)) \le 0$ $\mapsto$ \texttt{aggReduce}\textquotesingle s goal
+\texttt{∀ x ∈ scope, G (agg x) ≤ 0}, with the displayed premise
+$\vdash G \le 0$ on $K$ $\mapsto$ \texttt{hG} and the entire row
+apparatus $\mapsto$ \texttt{hin : ∀ x ∈ scope, agg x ∈ K} --- the
+containment certificate, which the coupling/count/moment/conservation
+rows exist to assemble. The binder row is the biggest width fact on
+this page: \texttt{aggReduce} is stated for \emph{any} types \texttt{X
+A}, any \texttt{agg : X → A}, any \texttt{K : Set A}, any \texttt{G :
+A → ℝ} --- no polynomiality of $G$, no polytopality of $K$, no
+aggregate box --- so the certified semantic core is strictly wider
+than the displayed polynomial instance, safe direction (proof by
+evaluation needs none of the structure the checker needs).
+\begin{itemize}
+\item coupling rows $l_j k_P \le s^P_j \le u_j k_P$ $\mapsto$
+  \texttt{coupling\_row}: hypotheses \texttt{∀ c ∈ m, l ≤ f c} and
+  \texttt{f c ≤ u} --- the enclosure quantified over tokens
+  \emph{in the bag}, which is precisely where the box-discharge side
+  condition [D10] lands in the certified statement (an enclosure on
+  the colour box reaches the hypothesis only for markings confined to
+  the box; the display keeps the mathematical rows, and the statement
+  carries the side condition as the membership guard).
+\item count rows $0 \le k_P \le M_P$ $\mapsto$
+  \texttt{count\_row\_nonneg} (unconditional) +
+  \texttt{count\_row\_le}, whose bound \texttt{m.card ≤ M} is a
+  \emph{hypothesis} --- the $M_P$ bound is a reachability/P-invariant
+  fact, consumed, never proven. The displayed conservation rows
+  (P-invariants) have no bound Lean counterpart at all: they are
+  reachability facts of the net, outside this module\textquotesingle s
+  every-bag warrants.
+\item moment rows $(s^P_\alpha)^2 \le k_P\, s^P_{2\alpha}$ $\mapsto$
+  \texttt{moment\_row}, unconditional for every bag (Cauchy--Schwarz
+  by induction), instantiated at \texttt{f = x\^{}α}.
+\item the feature dictionary $\Phi$ (E2) $\mapsto$ per-query functions
+  \texttt{f : C → ℝ}, arbitrary --- polynomiality of the $\phi_j$ is
+  producer-side; \texttt{query\_count} certifies the
+  contraction-row form $\langle m, f\rangle = \sum_c
+  \mathrm{count}(c) \cdot f(c)$ (the $\gamma$-trace) under
+  \texttt{[DecidableEq C]}, and \texttt{query\_const\_one} pins counts
+  as the $f \equiv 1$ degenerate query.
+\end{itemize}
+Width note: every bound row warrant is per-bag arithmetic --- the
+multiset quotient is already taken (\texttt{Multiset C} IS the
+exchangeability-quotiented object), so the display\textquotesingle s
+``the checker never sees a marking'' has as its Lean face that no
+statement here mentions places, nets, or reachability; scope
+containment \texttt{hin} is where all of that enters, as one
+hypothesis.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslCompose.AggReduce"
+src = "../../lean/qtsl-aux/QtslAux/QtslCompose/AggReduce.lean"
+decls = [
+  "aggReduce",
+  "coupling_row",
+  "moment_row",
+  "query_count",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development checks the base calculus\textquotesingle s wire
+format (theory \texttt{qtsl\_catalogue}). \rulename{QAggReduce} is an
+extension-edge semantic rule whose aggregation node is a dispatched
+design, not a staged sort; what reaches the base checker after the
+compile is ordinary hypothesis-carrying \rulename{BernCone} sequents,
+which the HOL side already covers as sequents without knowing their
+aggregation provenance. A HOL statement \emph{about the rule} becomes
+writable when the aggregation node stages into the wire format.
+'''

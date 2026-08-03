@@ -1,0 +1,33 @@
+# Tool-tree registry for the transcript generator (tools/transcripts.py).
+#
+# Paths are relative to this repository's root and default to the
+# documented side-by-side clone layout (clone the coalition repositories
+# as siblings). From a git worktree the generator also looks beside the
+# primary checkout. Override any location with BOOK_TOOL_<NAME>=<path>
+# (dashes become underscores, uppercase).
+#
+# `ensure` commands run in the tool tree, only when a spec that uses the
+# tool actually needs regeneration (the content-addressed stamp missed).
+
+[geolog-alpha]
+path = "../geolog-alpha"
+ensure = ["cargo build --release -p geolog"]
+
+[mtk]
+path = "../mtk"
+ensure = [
+  "cargo build --release --bin gymdp",
+  "cd ts && npm install --no-audit --no-fund --loglevel=error && npm run build:native",
+]
+
+# The @maitria/mtk-session package (the Tutorial's workspace/strategy
+# sections), resident in the mtk repository beside the producer
+# package. BOOK_TOOL_MTK_SESSION overrides for out-of-tree checkouts.
+[mtk-session]
+path = "../mtk/session"
+
+[qtsl]
+path = "."
+
+[qtsl-experiments]
+path = "../qtsl-experiments"

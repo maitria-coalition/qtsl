@@ -1,0 +1,21 @@
+\apilang{TypeScript}{judgment.sat}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function sat(args: { sys: SysRef; spec: SpecRef }): Result<
+  Artifact,
+  JudgmentRefusal
+>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(j.sat({ sys: j.sysRef("sys-a"), spec: j.specRef("spec-a") })),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QSat::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(sys: SysRef, spec: SpecRef) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let sat = QSat::new(SysRef("sys-a".into()), SpecRef("spec-a".into()));
+\end{rustsrc}

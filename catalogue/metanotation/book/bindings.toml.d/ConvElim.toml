@@ -1,0 +1,54 @@
+# bindings.toml.d/ConvElim.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ConvElim'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PConvElimData"
+sha256 = "ab8094e6b7a85140c6d5bb03eff5ebda1da2a17fb2ba3860bafe44f27c5384ab"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "baryCoeffs1D"
+sha256 = "086de41affd288389cd4fe4ea56222be7c7b7fdc7d791acc0d5cfa979de509fd"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "barycentricHalfspaceBuild"
+sha256 = "8eeb18bae8ebe53ba603dd21293cc854b1416eba233df89e03d2de666c58f3b0"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "barycentricHalfspaceForm"
+sha256 = "bd87d44becb1fe361396deee5bafb4041db332bbf78004199d6787db615dc9d6"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "f4Lhs"
+sha256 = "9e64ab52c2c16e4f2932f740188c390579635cc3bb080221fd6c72f3afb3649a"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "f4VertexAtom"
+sha256 = "a49697d0c7105a0520298e70f2adfdb29b636762a8ea47420dfc47380faff1ad"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "primAffine"
+sha256 = "fc1b64d34f97d6b06b7e431b74c3393e17f7233b6d0c5fc193c2357d096daeed"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "barycentricHalfspaceBuild_spec"
+sha256 = "c3c5ea4d80179cc730d0ef53318a55c76128864403ed140a0d5e76326075fc2c"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_convElim"
+sha256 = "1f57e9656120be1d3b71e2ef19b9310b9e934b5674f04b523b03f2f7512552a4"
+
+[[correspondence]]
+entry = "ConvElim"
+steele_sha256 = "a0acadcee9a7091257268f46f77c5dcdc35ba540fe205639b2ea665b734886ca"
+statements_sha256 = "a4150854219284adb6e3814df6c9386cb79fdc7667a0a1747ec543dbeaa71591"
+prose_sha256 = "4403454e7930232a61c0d42865ce8fadad2782dc78c519d5ae1bf4121209d1cb"
+

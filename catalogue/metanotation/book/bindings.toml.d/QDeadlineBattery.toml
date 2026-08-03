@@ -1,0 +1,24 @@
+# bindings.toml.d/QDeadlineBattery.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QDeadlineBattery'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Battery"
+decl = "sound_QDeadline"
+sha256 = "16e6e7f9e221d20a8e965ea43f1342249afe26f5f28a35db84162a772ce4f551"
+
+[[statement]]
+module = "QtslAux.Battery"
+decl = "sound_QDeadline_hit"
+sha256 = "9b85fdbbee9d737127fbbe300ade79ce5a327e58c41f54c85b814af141894520"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "sound_QDeadlineBattery"
+sha256 = "615d72b14654a2865a1da617f4aba7639914df2a9dd359139f5b793654a94172"
+
+[[correspondence]]
+entry = "QDeadlineBattery"
+steele_sha256 = "2b58812ed414c5bf1677ebc6d3113a824a292a3e2aba0f1e6d86c2c43c2a4c5c"
+statements_sha256 = "785d3d54fdaa580e51a3ae96dbe550bf6ef877798d5f9880e6afd175a4efb920"
+prose_sha256 = "9e3550b067ae12e289619e37c88e268dc6d79fb694d5f4fc4574f072a80cac81"
+

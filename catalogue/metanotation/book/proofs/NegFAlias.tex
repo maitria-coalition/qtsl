@@ -1,0 +1,108 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template; the
+batch's shared template is Recipe 1 of the \rulename{StreettDegenerate}
+section. The soundness content is two lines, recorded as such in the
+source catalogue, and both are now mechanized and bound in the entry:
+the inclusion (\texttt{negF\_denot\_subset}, axiom-free) and its
+measure transport (\texttt{sound\_NegFAlias}, profile-generic).}
+
+\begin{brecipe}[the filled-in application]\label{rec:nf-filled}
+\begin{mathpar}
+\inferrule*[Right=\rulename{NegFAlias}]{
+  \mathrm{child} : \mathcal{M} \vDash_{R}
+  \mathsf{P}_{\ge p}\bigl[\mathsf{G}\,\neg\varphi\bigr]
+  \ \text{(one \rulename{QSafetyBattery} conclusion)}
+}{
+  \mathcal{M} \vDash_{R}
+  \mathsf{P}_{\ge p}\bigl[\neg\mathsf{F}_{\le T}\,\varphi\bigr]
+}
+\end{mathpar}
+One node to one node: the child is the safety battery's conclusion at
+avoid set $[\![\varphi]\!]$, the concluded judgement re-reads the same
+certified region against the negated deadline, horizon $T$ taken from
+the goal. In the staged spec vocabulary the conclusion's formula is the
+negated-path reading of a deadline node whose met-flag is false; the
+child's is the always of the negation --- the rewrite touches the
+formula only.
+\end{brecipe}
+
+\begin{brecipe}[payload transport]\label{rec:nf-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{\rulename{NegFAlias} node} & \textbf{\rulename{QSafetyBattery} node}\\
+\midrule
+certified region $R$, probability $p$ & verbatim\\
+goal formula $\neg\mathsf{F}_{\le T}\,\varphi$ & child formula $\mathsf{G}\,\neg\varphi$ (horizon dropped)\\
+horizon $T$ & not consumed (Remark~\ref{rem:nf-lossy})\\
+\end{tabular}
+\end{center}
+Unpack-function slot: no verified payload function in this edition (batch template); the
+semantic witness is bound in the entry (\texttt{negF\_denot\_subset} +
+\texttt{sound\_NegFAlias}).
+\end{brecipe}
+
+\begin{bprop}[the exactness inclusion --- two lines]\label{prop:nf-exact}
+$[\![\mathsf{G}\,\neg\varphi]\!] \subseteq
+[\![\mathsf{G}_{\le T}\,\neg\varphi]\!] =
+[\![\neg\mathsf{F}_{\le T}\,\varphi]\!]$.
+\end{bprop}
+\begin{proof}
+A path that never satisfies $\varphi$ in particular does not satisfy
+$\varphi$ at any time $\le T$ --- the inclusion, by restriction of a
+universal quantifier. And not satisfying $\varphi$ at any time $\le T$
+is the definition of not reaching $\varphi$ within $T$ --- the equality,
+definitional. Hence every path in the child's path set lies in the
+conclusion's, and the probability bound transports monotonically.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:nf-sound}
+If the child judgement holds --- from every state of $R$, with
+probability $\ge p$ the path always avoids $[\![\varphi]\!]$ --- then
+from every state of $R$, with probability $\ge p$ the path does not
+reach $[\![\varphi]\!]$ within $T$.
+\end{bprop}
+\begin{proof}
+Proposition~\ref{prop:nf-exact} plus monotonicity of measures, applied
+under the safety battery's theorem. There is no other content --- and
+this two-step corollary is precisely what the bound statements are:
+the inclusion and the transport, one decl each.
+\end{proof}
+
+\begin{bremark}[the deliberate lossiness]\label{rem:nf-lossy}
+The alias proves the bounded claim from the unbounded one, discarding
+$T$. When $\varphi$ genuinely occurs eventually --- only after the
+horizon --- the child judgement is unprovable and this alias is the wrong
+tool; the deadline machinery (the deadline battery, with its geometric
+decay certificates) proves the sharp bounded claim instead. The alias
+exists because permanent avoidance is the common case, and for it the
+safety kernel is both cheaper and already ported.
+\end{bremark}
+
+\begin{bremark}[the mirror that is not a rule]\label{rem:nf-mirror}
+There is deliberately no dual entry discharging a negated
+\emph{always}: its conclusion would need unbounded eventuality
+($\mathsf{F}\varphi$), and the spec grammar has no unbounded-eventually
+constructor --- an exclusion by testable-negative design, unbounded
+eventuality surviving only as a provenance flag recording that a
+deadline's horizon was producer-chosen. What replaces the missing rule
+is three separate pieces: a negation-normal-form duality
+(\rulename{NNFDuality}), a horizon instantiation (a producer choice,
+flagged), and a weakening line \emph{inside} the deadline battery's
+lemma where the flag is discharged. The asymmetry is worth this remark
+because a port that treated the pair as one duality entry would smuggle
+a choice and a metatheory line into what looks like a definitional
+rewrite.
+\end{bremark}
+
+\begin{bremark}[tier flag]
+Alias as sorted; if the folded inclusion of
+Proposition~\ref{prop:nf-exact} must itself be a rule application
+rather than a lemma of the unpack, the tier moves to admissible ---
+flagged in the source catalogue, machinery unchanged either way.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:nf-filled} target & the \rulename{QSafetyBattery} section\\
+Proposition \ref{prop:nf-exact} + corollary & \texttt{negF\_denot\_subset} + \texttt{sound\_NegFAlias} (two lines, as priced; bound in the entry)\\
+Remark \ref{rem:nf-mirror} & the spec grammar\textquotesingle s constructor census (no unbounded-eventually node)\\
+\end{anchors}

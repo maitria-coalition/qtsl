@@ -1,0 +1,117 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The rule is sequent-side machinery: premises and conclusion are
+all $\vdash$ rows, and what the extension theory contributes is the
+\emph{scope} vocabulary --- the child atom $\{g_q \ge 0\}$ names a
+region concluded by a nested certificate, a shape no base cell can
+express. The rule closes a named trust boundary: before its
+mechanization, the move was performed producer-side and asserted.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:hm-template}
+An admissible rule $R$ with premises $P_1, \dots, P_n$ and conclusion
+$C$ is warranted by a \emph{rewrite}: any proof-tree node applying $R$
+is replaced by a derivation fragment over core (and
+previously-justified) rules with the same conclusion, consuming the
+premise subtrees at its leaves --- or, where no catalogue derivation of
+$C$ can exist, by a discharge against a named verified theorem (the
+degenerate rewrite, the tier\textquotesingle s recorded boundary case).
+Leaf-first application eliminates every $R$-node from a finite tree in
+finitely many steps, so soundness is conserved with no new kernel
+semantic content.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{HypMultiplier} instance]\label{rec:hm-instance}
+\[
+\inferrule*[Right=\rulename{HypMultiplier}]{
+  \mathcal{T}_\lambda \rhd\ \vdash \lambda \ge 0 \ \text{on } \mathrm{cell} \\
+  \mathcal{T}_c \rhd\ \vdash N + \lambda\, g_q \le 0 \ \text{on } \mathrm{cell}
+}{
+  \vdash N \le 0 \ \text{on } \mathrm{cell} \cap \{g_q \ge 0\}
+}
+\qquad\rightsquigarrow\qquad
+\begin{array}{l}
+\text{\upshape the premise subtrees stand unchanged;}\\
+\text{\texttt{hypMultiplier\_sound} discharges the scoped row.}
+\end{array}
+\]
+The rewrite is degenerate in the same honest sense as the base
+catalogue\textquotesingle s ground-fact rule: the conclusion is not
+derivable from catalogue nodes, because the base grammar has no row
+form scoped to a cell-with-polynomial-atom intersection --- that scope
+exists one layer up, where the child certificate that concluded
+$\{g_q \ge 0\}$ lives. The two premise subtrees are ordinary
+cone-family derivations, checked by the base kernel unchanged; the
+node itself discharges against the verified pointwise warrant below,
+which consumes exactly the two premises and nothing else.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:hm-sound}
+If $\lambda \ge 0$ everywhere on the cell and $N + \lambda g_q \le 0$
+everywhere on the cell, then $N \le 0$ everywhere on
+$\mathrm{cell} \cap \{g_q \ge 0\}$.
+\end{bprop}
+\begin{proof}
+Fix $x$ in the intersection. Then $g_q(x) \ge 0$ (membership in the
+child atom) and $\lambda(x) \ge 0$ (the sign row), so
+$\lambda(x)\, g_q(x) \ge 0$, and
+\[
+N(x) \;\le\; N(x) + \lambda(x)\, g_q(x) \;\le\; 0,
+\]
+the first inequality by nonnegativity of the added term, the second by
+the combined row at $x$. That is the whole proof ---
+\texttt{hypMultiplier\_sound} is the two displayed inequalities.
+\end{proof}
+
+\begin{bremark}[the sign row is half the rule]
+Drop $\vdash \lambda \ge 0$ and the rule is unsound. Counterexample:
+$N \equiv 1$, $\lambda \equiv -1$, $g_q \equiv 1$ on the cell. The
+combined row holds identically ($1 - 1 = 0 \le 0$), yet $N \equiv 1$
+fails everywhere on $\mathrm{cell} \cap \{g_q \ge 0\} = \mathrm{cell}$.
+A free-signed multiplier converts the tax the child atom levies into a
+subsidy: the combination can cancel exactly the positivity the
+conclusion denies.
+\end{bremark}
+
+\begin{bremark}[the scope restriction is the other half]
+The conclusion cannot claim the whole cell. With $N \equiv 1$,
+$\lambda \equiv 1$, $g_q \equiv -1$, both premises hold
+($\lambda \ge 0$; $1 - 1 = 0 \le 0$) while $N > 0$ everywhere --- and
+the rule is nonetheless sound, because
+$\mathrm{cell} \cap \{g_q \ge 0\} = \varnothing$ and the scoped claim
+is vacuous. Where $g_q(x) < 0$ the term $\lambda(x) g_q(x)$ subsidizes
+$N$ instead of taxing it, and the combined row bounds nothing: the
+scoped conclusion is exactly as strong as the premises pay for, no
+stronger.
+\end{bremark}
+
+\begin{bremark}[degree-one positivstellensatz, and where the search lives]
+The move is the degree-one corner of certifying positivity over a
+constrained set by nonnegative combinations: Farkas\textquotesingle{}
+multiplier discipline \cite{farkas1902} (see \cite{schrijver1986} for
+the sign conventions) in the affine case, sitting at the bottom of the
+polynomial cone hierarchy of Krivine \cite{krivine1964} and Handelman
+\cite{handelman1988} that the calculus\textquotesingle s cone rule
+draws on. Nothing beyond degree one is consumed here: one multiplier,
+one product, no certificate machinery beyond the two posted rows. The
+\emph{search} for $\lambda$ (typically a linear program over the
+cone-membership witnesses) is producer-side; only its result ships,
+and the checker replays the two rows without ever seeing the search.
+\end{bremark}
+
+\begin{bremark}[the bridge hypothesis]
+In the verified statement the child atom is an abstract set with one
+bridge hypothesis naming its compiled sublevel reading
+($\{x \mid 0 \le g_q(x)\}$). When the presentation layer of the
+extension theory ships, the hypothesis discharges definitionally from
+the compile; no statement changes shape. Until then it is the honest
+record of exactly what the warrant assumes about the child
+certificate\textquotesingle s conclusion --- its region is the
+sublevel set it claims to be, and nothing more.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:hm-instance} warrant & \texttt{hypMultiplier\_sound} (QtslAux/Structural.lean)\\
+premise rows & cone-family sequent machinery of the base calculus (the \rulename{BernCone} and \rulename{Farkas} sections)\\
+child-atom reading & the \texttt{hbridge} hypothesis of \texttt{hypMultiplier\_sound}\\
+trust boundary closed & the producer-side discharge step this lemma now warrants\\
+\end{anchors}

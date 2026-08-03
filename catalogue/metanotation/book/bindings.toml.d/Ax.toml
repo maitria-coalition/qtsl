@@ -1,0 +1,19 @@
+# bindings.toml.d/Ax.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Ax'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PAxData"
+sha256 = "5933a75e123568f09a9377ae20c44ca57d281590b38272a78bcd4e8b5732078d"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_ax"
+sha256 = "d1aa910b893f90ca07d39434cd73bb24c913f27a6fd47cea7d2da381b97e4302"
+
+[[correspondence]]
+entry = "Ax"
+steele_sha256 = "b9d6e30134c474441ecb1c5594f6ae9e5b3a87c3a574f6b4d20e8acaa0b48898"
+statements_sha256 = "33bc3e2da8cc3a3052357433af5ac61b39625fab4a63986791a7ac1e79543fa1"
+prose_sha256 = "a7520b1ae3cb7d350d41a6c4fabee01801b30a8a0738197188b02bb612f04818"
+

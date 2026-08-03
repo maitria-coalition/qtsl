@@ -1,0 +1,24 @@
+# bindings.toml.d/QFlatten.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QFlatten'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslCompose.Flatten"
+decl = "law_prodKernel"
+sha256 = "c2a594cc71a881799ec89daa26f2e303e3f42725e86002da7a9ae481cf3151c1"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Flatten"
+decl = "pushKernel_fst"
+sha256 = "3e0ad2ddc72bfb2abdd41c83d7bb3d9309d62ef8c80e7348369babd7d696f182"
+
+[[statement]]
+module = "QtslAux.QtslCompose.Flatten"
+decl = "pushKernel_snd"
+sha256 = "4b4e05aa7cadf7bad3f214efe636a04bb46ff7e1a003bb16c2525c4321364d34"
+
+[[correspondence]]
+entry = "QFlatten"
+steele_sha256 = "2625d621a484e88c621acb7c5f0301e0cbd351f9537710c54c055784f68cdc3e"
+statements_sha256 = "08f77e3884e9bea6994828dbc6893405ee78dd8e12ceb66c257747a6ae373de3"
+prose_sha256 = "e357eb45e4e2b9f2d7eda98286f1517fab7fd0ec1dc865a116a40b1631166eff"
+

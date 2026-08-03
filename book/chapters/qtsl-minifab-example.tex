@@ -1,0 +1,2287 @@
+\chapter{Tutorial: A Re-entrant Semiconductor Fab}
+\label{ch:qtsl-minifab}
+
+\definecolor{wkA}{HTML}{332288} %
+\definecolor{wkB}{HTML}{CC6677} %
+\definecolor{wkC}{HTML}{117733} %
+\definecolor{wkD}{HTML}{882255} %
+\definecolor{wkE}{HTML}{44AA99} %
+\definecolor{wkF}{HTML}{AA4499} %
+\definecolor{czero}{RGB}{108,108,108}
+\colorlet{hnaccent}{accent}
+\colorlet{hnmid}{accentmid}
+\colorlet{hndeep}{accentdeep}
+\definecolor{hngray}{RGB}{92,92,92}
+\pgfdeclarelayer{holebg}
+\pgfdeclarelayer{boxbg}
+\pgfdeclarelayer{plates}
+\pgfsetlayers{holebg,boxbg,plates,main}
+
+\noindent\draftmark\medskip
+
+The preceding chapters introduced the stack one layer at a time:
+mechanisms and their composition (chapter~\ref{ch:qtsl-mathematical-models}),
+the pattern inventory that composition ships as
+(chapter~\ref{ch:qtsl-composition-patterns}), the semantics that
+specifications are stated in
+(chapter~\ref{ch:qtsl-semantic-universe}), the plated-certificate
+discipline for token-population systems (section~\ref{sec:hyp-plates}
+and section~\ref{sec:mt-sdcpn}), and the producer stack that finds
+certificates for a checker to replay (chapter~\ref{ch:mtk-cookbook}).
+This chapter runs the whole stack over a single model, end to end:
+describe a factory line, declare it as database rows --- an SDCPN, a
+stochastically and dynamically coloured Petri net in the modelling
+catalogue's frame (section~\ref{sec:mt-sdcpn}), which is the native
+habitat of everything that follows --- recompose it along its natural
+seams, state what should be certified about it, and read the
+certificates. The certificates come in two families whose
+division of labour is stated rather than smoothed over. The primary family
+(section~\ref{sec:minifab-exact}) certifies the discrete line itself,
+at its full combinatorial state space: exact statements holding along
+every run, at every lot count, under every resolution of the
+scheduling freedom --- the variadic-certificate rows of
+section~\ref{sec:mt-sdcpn} at work on their first industrial
+subject, and then re-read on the wall clock, where the dispatch
+seat is priced end to end: a certified floor over every policy, the
+exact optimum and the supervisor family attaining it, a widened
+full-dispatch seat, an untrusted filler inside a certified
+envelope, and one certificate instantiated across six orders of
+magnitude of lot count.
+The second family (section~\ref{sec:minifab-certs}) certifies the
+\emph{fluid relaxation} of the same line: policy-indexed stability
+under sustained arrivals, at loads within a tenth of a lot per week
+of capacity --- claims the discrete family does not yet price, which
+is why the fluid lane is retained in full as the comparison lane,
+with the contrast stated where the two families meet. A closing
+section then builds the fluid lane's model on the toolkit's
+TypeScript surface and drives its release grid back to checked
+certificates, in a listing that runs.
+
+The model is the \emph{Mini-Fab}: five machines in three stations,
+six route steps, every station visited twice per lot. It was posed by
+Kempf at Intel in 1994 as a deliberately minimal semiconductor-fab
+exercise and has circulated as a community benchmark since; the
+complete quantitative restatement that this chapter's constants are
+witnessed against is van den Berk's 2004 Eindhoven master's thesis \cite{vandenberk04}
+(the systems engineering group of Rooda and Lefeber), whose second
+chapter restates the entire case. The spec digest recording that
+witnessing, decision point by decision point, is committed beside the
+certificates in the experiments repository
+(section~\ref{sec:exp-repro}).
+
+Small as it is, the line exhibits the domain's whole hard structure:
+re-entrant flow, a single-machine bottleneck, batching with mix
+constraints, sequence-dependent setups, personnel shared across
+stations, maintenance calendars, and machine failures that destroy
+work in progress. And its headline claim family has teeth, because it
+is famously falsifiable: re-entrant lines can destabilize strictly
+below nominal capacity under plausible dispatch policies (the
+Kumar--Seidman phenomenon \cite{kumar1990dynamic}), so ``this policy
+keeps the line stable at this load'' is a claim the world is entirely
+capable of refuting.
+
+\section{The line}
+\label{sec:minifab-line}
+
+Three workstations process lots of wafers. \emph{Diffusion} has two
+furnaces, a buffer for 18 lots, and consumes its input in batches of
+exactly three lots. \emph{Implantation} has two machines and a buffer
+for 12. \emph{Lithography} has one machine and a buffer for 12. Every
+lot follows the same six-step route --- diffusion, implantation,
+lithography, implantation, diffusion, lithography --- so each station
+is visited twice, running a ``low'' recipe on a lot's first visit and
+a ``high'' recipe on its second:
+
+\begin{center}\small
+\begin{tabular}{@{}clcrrr@{}}
+\toprule
+step & station & recipe & process (min) & load (min) & unload (min)\\
+\midrule
+1 & diffusion     & low  & 225 & 20 & 40\\
+2 & implantation  & low  &  30 & 15 & 15\\
+3 & lithography   & low  &  55 & 10 & 10\\
+4 & implantation  & high &  50 & 15 & 15\\
+5 & diffusion     & high & 255 & 20 & 40\\
+6 & lithography   & high &  10 & 10 & 10\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Loading and unloading hold the machine; at diffusion they
+are paid per \emph{batch} of three, not per lot. There is no
+preemption and no rework.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=1mm, y=1mm,
+  lot/.style={-{Stealth[length=2.4mm]}, line width=0.6pt, draw=black!70},
+  buf/.style={draw=black!60, fill=black!4, rounded corners=1.2pt,
+              minimum width=16mm, minimum height=10.5mm,
+              align=center, font=\scriptsize, inner sep=1.2pt},
+  bufdiff/.style={buf, fill=accent!55},
+  buflith/.style={buf, fill=accent!22, draw=accentdeep, line width=0.9pt},
+  stn/.style={draw=black!60, fill=white, rounded corners=1.2pt,
+              minimum width=34mm, minimum height=12.5mm,
+              align=center, font=\scriptsize, inner sep=1.5pt},
+  serve/.style={black!45, line width=0.5pt},
+  servelith/.style={accentdeep!75, line width=0.7pt}]
+  \node[bufdiff] (s1) at (8,30)   {step 1\\low\\225\,min};
+  \node[buf]     (s2) at (28,30)  {step 2\\low\\30\,min};
+  \node[buflith] (s3) at (48,30)  {step 3\\low\\55\,min};
+  \node[buf]     (s4) at (68,30)  {step 4\\high\\50\,min};
+  \node[bufdiff] (s5) at (88,30)  {step 5\\high\\255\,min};
+  \node[buflith] (s6) at (108,30) {step 6\\high\\10\,min};
+  \draw[lot] (-7,30) -- (s1.west);
+  \node[align=center, font=\scriptsize, anchor=south] at (-7,33)
+    {release\\84 lots/wk};
+  \draw[lot] (s1.east) -- (s2.west);
+  \draw[lot] (s2.east) -- (s3.west);
+  \draw[lot] (s3.east) -- (s4.west);
+  \draw[lot] (s4.east) -- (s5.west);
+  \draw[lot] (s5.east) -- (s6.west);
+  \draw[lot] (s6.east) -- (123,30);
+  \node[align=center, font=\scriptsize, anchor=south] at (123,33)
+    {finished\\lots};
+  \node[stn, fill=accent!55] (diff) at (20,2)
+    {\textbf{diffusion}\\2 machines $\cdot$ buffer 18 $\cdot$ batches of 3\\
+     83.3\% busy at 84 lots/wk};
+  \node[stn] (impl) at (64,2)
+    {\textbf{implantation}\\2 machines $\cdot$ buffer 12\\
+     58.3\% busy at 84 lots/wk};
+  \node[stn, fill=accent!22, draw=accentdeep, line width=1pt] (lith) at (108,2)
+    {\textbf{lithography}\\\textcolor{accentdeep}{\textbf{1 machine}}
+     $\cdot$ buffer 12\\
+     \textcolor{accentdeep}{\textbf{87.5\% busy --- the bottleneck}}};
+  \draw[serve] (diff.north) -- (s1.south);
+  \draw[serve] (diff.north) -- (s5.south);
+  \draw[serve] (impl.north) -- (s2.south);
+  \draw[serve] (impl.north) -- (s4.south);
+  \draw[servelith] (lith.north) -- (s3.south);
+  \draw[servelith] (lith.north) -- (s6.south);
+\end{tikzpicture}
+\caption{The Mini-Fab's re-entrant route. Buffers are drawn in route
+order (top); the three stations (bottom) each serve two
+non-consecutive steps, which is what \emph{re-entrant} means --- the
+crossing connectors are the route folding back on itself. Lithography
+runs both of its steps on a single machine and is the line's
+bottleneck. Utilizations are the deterministic machine-occupancy
+figures at the nominal release of 84 lots/week.}
+\label{fig:minifab-route}
+\end{figure}
+
+Three product types are released on constant per-type intervals:
+3 test lots, 51 of type A, and 30 of type B per week of $7 \times
+1440 = 10080$ minutes --- 84 lots/week in all. One release interval
+is worth pausing on: type A arrives every $10080/51 = 3360/17$
+minutes. The parameters are all integers, and still the event times
+of the system are not, so exact rational time arithmetic is a
+necessity rather than a nicety, and the declared model keeps
+every duration in $\Q$. Arrivals are deterministic; the only
+stochastic elements anywhere in the specification are implantation
+failures and repairs (below).
+
+Around the route sit the resources that make the model interesting.
+One \emph{transporter} (capacity one lot, 4 minutes per move between
+adjacent areas, 1 minute to load or unload) carries every lot between
+stations. Two \emph{operators} perform all machine loading and
+unloading, non-preemptively: operator~0 serves diffusion and
+implantation, operator~1 serves lithography and implantation, so
+implantation is contested and every station's handling competes with
+another station's. Lithography additionally pays a sequence-dependent
+\emph{setup}, performed by an operator with the machine empty,
+whenever its input changes against the previous job: 5 minutes for a
+product-type change, 10 for a step change, 12 for both. At the
+two-machine stations, a \emph{test} lot's second visit must use the
+machine it did not use on its first (so both machines stay
+monitored); a diffusion batch contains at most one test lot, and a
+high-step batch must not mix the two commercial types. Each operator
+takes three 60-minute off-blocks per 720-minute shift, placed freely.
+One \emph{technician} performs scheduled maintenance (75 minutes per
+diffusion furnace per day; 30 and 120 minutes per shift-window at
+lithography and implantation respectively), and implantation machines
+\emph{fail} during processing --- time between failures uniform on
+$[1440, 4560]$ minutes of processing time, repair uniform on $[360,
+480]$ --- destroying the lot in process.
+
+The capacity arithmetic that organizes everything downstream: per
+lot, lithography is occupied $(10 + 55 + 10) + (10 + 10 + 10) = 105$
+minutes on its single machine; diffusion $95 + 105 = 200$ minutes
+spread over two furnaces (batch handling divided by three); and
+implantation $60 + 80 = 140$ minutes over two machines. At 84
+lots/week the three stations run at $87.5\%$, $83.3\%$, and $58.3\%$
+respectively --- before setups and maintenance, and the margin
+shrinks from there. The single-machine lithography station is the
+bottleneck, and the line's deterministic fluid capacity is
+$10080/105 = 96$ lots/week, lithography-pinned
+(Figure~\ref{fig:minifab-route}).
+
+\section{The model as rows}
+\label{sec:minifab-rows}
+
+The declared model is a set of database rows --- the Geolog substrate
+of chapters~\ref{ch:geolog-quickstart}--\ref{ch:geolog-reference} ---
+over the System vocabulary of chapter~\ref{ch:qtsl-mathematical-models}. The
+ground layer is nothing but the tables of the previous section,
+recorded as entities with attributes, in the entity-per-row idiom:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+Station : Set;
+Station/name     : Station -> Str;
+Station/machines : Station -> Nat;
+Station/bufcap   : Station -> Nat;
+Station/batch    : Station -> Nat;   // machine-input batch size (1 = none)
+
+// st_diff: "diffusion" 2 18 3;   st_impl: "implantation" 2 12 1;
+// st_lith: "lithography" 1 12 1
+
+RouteStep : Set;
+RouteStep/idx     : RouteStep -> Nat;
+RouteStep/station : RouteStep -> Station;
+RouteStep/recipe  : RouteStep -> Str;   // "low" | "high"
+RouteStep/proc    : RouteStep -> Q;     // minutes
+RouteStep/load    : RouteStep -> Q;     // handling; the machine is held
+RouteStep/unload  : RouteStep -> Q;
+
+// (1, diff, low, 225, 20, 40)   (2, impl, low,   30, 15, 15)
+// (3, lith, low,  55, 10, 10)   (4, impl, high,  50, 15, 15)
+// (5, diff, high, 255, 20, 40)  (6, lith, high,  10, 10, 10)
+
+SetupRule : Set;                     // lithography, sequence-dependent
+SetupRule/typeChange : SetupRule -> B;
+SetupRule/stepChange : SetupRule -> B;
+SetupRule/minutes    : SetupRule -> Q;
+// (t,f,5)  (f,t,10)  (t,t,12)  (f,f,0)
+
+FailRule : Set;                      // implantation only
+FailRule/tbfLo : FailRule -> Q;   FailRule/tbfHi : FailRule -> Q;
+FailRule/repLo : FailRule -> Q;   FailRule/repHi : FailRule -> Q;
+// time between failures 1440..4560 (processing time); repair 360..480
+\end{Verbatim}
+
+\noindent Rows are data rather than code: nothing about these
+declarations commits to a decomposition, and both of the readings
+below compile their dynamics from the same ground tables.
+
+The \emph{monolithic reading} renders the whole fab as one mechanism
+--- an SDCPN, and the class name is a parts list for exactly this
+specification, worth unpacking on first contact. \emph{Places} hold
+coloured tokens: waiting lots (coloured by product type, release
+time, and first-visit machine), machine phases (setup, loading, busy,
+awaiting unload, unloading, maintenance, down), personnel and
+transporter phases, and a sink of finished lots. \emph{Dynamically
+coloured}: every duration in the tables is a token colour in motion
+--- a timer drifting at $\dot\tau = 1$ inside its phase and forcing a
+jump at its threshold --- so time lives in the colours, never in a
+side-calendar. \emph{Stochastically}: implantation's failure and
+repair durations are random firing measures on the reset, drawn from
+the declared uniform family --- and nothing else in this
+specification is random. The transitions carry the guards and firing
+laws, and the thesis's own release idiom --- per-type signal
+generators firing at constant intervals --- \emph{is} the
+timer-mechanism idiom, so the model's front door needs no vocabulary
+at all beyond what chapter~\ref{ch:qtsl-mathematical-models} already
+provides. The net's interface exposes \emph{aggregate} coordinates
+only: counts and pools --- work in progress, per-step queue lengths,
+busy-machine counts per station, a completed-lot count, and a pool
+summing realized flow times.
+
+Three features of the specification look, at first sight, like they
+should resist an aggregate-count rendering. None of them does, and
+each dissolution is informative.
+
+\paragraph{Batching survives count coordinates.} A diffusion load
+consumes three same-step lots subject to joint colour constraints (at
+most one test lot; high-step batches commercially pure). At the
+aggregate stratum, ``a feasible batch exists'' is a finite
+disjunction of count inequalities --- for the high step, with
+$k_A, k_B, k_{\mathrm{test}}$ the per-type queue counts,
+\[
+  k_A \ge 3 \;\vee\; k_B \ge 3 \;\vee\;
+  (k_{\mathrm{test}} \ge 1 \wedge k_A \ge 2) \;\vee\;
+  (k_{\mathrm{test}} \ge 1 \wedge k_B \ge 2),
+\]
+and the reset decrements the counts by the chosen composition.
+\emph{Which} three lots form the batch is invisible to every
+aggregate observable, by exchangeability. What the guard does add is
+a \emph{choice} among feasible compositions --- which belongs to
+dispatch, below, not to a new row species. Machine dedication for
+test lots is likewise just a colour coordinate (the first-visit
+machine), with a mismatch guard on the second visit.
+
+\paragraph{FIFO dissolves into class-level dispatch.} The count
+grammar deliberately has no expression for ``the $i$-th token,'' so
+first-in-first-out order within a colour class is structurally
+invisible --- and for this model the invisibility is semantically
+exact, not a compromise: service law depends only on a lot's type and
+step, so permuting same-colour lots moves no count trajectory, no
+utilization or throughput observable, and (by Little's law, which
+relates only means) not even mean flow time. What FIFO \emph{does}
+determine that matters is which colour class a freed machine serves
+next --- and that residue is a dispatch policy: the index of every
+certificate in the fluid lane (section~\ref{sec:minifab-certs}), and
+a freedom the combinatorial certificates of
+section~\ref{sec:minifab-exact} instead quantify over ---
+adversarially, every policy at once. The
+dissolution does have a boundary: per-lot flow-time
+\emph{distribution tails} do depend on within-class order, so a
+specification demanding per-lot quantile bounds would reopen the
+question (an age coordinate --- still a colour --- is the natural
+extension).
+
+\paragraph{Simultaneity is the norm, not a corner case.} Every
+duration in the tables is an integer number of minutes measured from
+a common origin, so distinct timers reach their thresholds at the
+same instant constantly --- every shift boundary fires off-block
+guards on three resources at once. The declared model therefore
+carries explicit serialization data for simultaneous forced jumps
+(a priority order on transition families, with commutation as the
+alternative discharge), and the reference simulator's deterministic
+tie-break --- time, then declared family order, then entity identity
+--- is that serialization made executable. Two correct simulators
+that disagree under tie-reordering are answering the commutation
+question the serialization row exists to settle.
+
+\section{The compositional reading}
+\label{sec:minifab-composite}
+
+The monolithic reading is complete and faithful, and it deliberately
+gives up the one thing the composition axis exists to buy:
+decomposition. A per-station argument, a per-resource invariant, a
+certificate that transports across a boundary --- all of these want
+the fab as a \emph{composite}: release generators, three station
+mechanisms, two operators, a technician, a transporter, and a sink,
+wired together. The seams come in four kinds --- directed lot
+handoffs, resource-pool memberships, fused event ports, and the
+dispatch freedom the fusions create --- and the pattern inventory
+they draw on is chapter~\ref{ch:qtsl-composition-patterns}'s.
+
+What the seams are, mathematically, pattern by pattern:
+
+\paragraph{Directed lot flow.} A station's completions, as a counted
+output, wired into the next station's arrival input --- token flow
+carried as signal flow, with the lot's colours riding as a tuple. This
+is ordinary directed wiring. It has one limitation worth naming:
+conservation (a lot leaves diffusion if and only if it arrives at
+implantation) is a semantic property the wire itself does not state;
+in the compositional reading it is recovered where it matters, as the
+pool pattern's invariant.
+
+\paragraph{Resource pools.} Operator~1 must be exclusively held by
+either a lithography task or an implantation task, never both; so
+must the technician, across three stations, and the transporter,
+across every handoff. Continuous signal-sharing carries none of this
+--- there is no signal, only a conserved unit. The resource-pool
+pattern of chapter~\ref{ch:qtsl-composition-patterns} renders each
+resource as a pool with \emph{take}/\emph{give} ports and a crossing
+discipline (each user declares which of its modes count as holding
+the unit), and its payoff is a theorem rather than a convention: for
+a well-formed pool share, every jump of the composite preserves
+\[
+  k_{\mathrm{pool}} \;+\; \sum_{u \,\in\, \mathrm{users}} \#H_u \;=\; C,
+\]
+the count-row conservation invariant --- free to the checker, since
+it is a linear invariant of the count coordinates. For this model,
+$C = 1$ four times over: each of the four pools is a single human or
+vehicle.
+
+\paragraph{Event fusion.} ``Load starts'' is one event touching three
+parties: the machine (empty, set up), the buffer (a feasible batch
+present), and the operator (idle, at the station). The fusion pattern
+makes it one \emph{joint jump}: enabling is the conjunction of the
+parties' local guards evaluated on the pre-jump snapshot, each party
+writes only its own state (so reset commutation within the fusion is
+a theorem), and one party --- here the station's timer --- owns the
+timing. Without fusion, every synchronized cluster collapses into a
+single mechanism, which is the monolithic reading by forced march;
+fusion is what lets the composite reading exist at all.
+
+\paragraph{Dispatch.} Fusion creates contention: a freed lithography
+machine with both step-3 and step-6 lots waiting; an idle operator
+with two stations bidding; a feasible-batch guard satisfiable by
+several compositions. Undispatched, the composite is
+nondeterministic, and the semantics resolves the freedom
+\emph{demonically} --- which is the correct default precisely because
+of Kumar--Seidman: ``stable at this load, whatever resolves the
+contention'' is typically false below capacity, and should be
+unprovable when it is false. A dispatch row installs a named policy
+--- a chooser over the enabled-conflict set, reading aggregate
+observables. The two certificate families divide over exactly this
+freedom: each fluid certificate of section~\ref{sec:minifab-certs}
+is indexed by the $(\text{system}, \text{policy})$ pair, while the
+combinatorial certificates of section~\ref{sec:minifab-exact} leave
+the freedom demonic and hold under every resolution of it. The off-block
+placement freedom (operators schedule their own breaks) sits in the
+same slot: it is control data, not plant data.
+
+\paragraph{Distribution-valued resets.} Implantation's failure and
+repair durations are uniform on rational intervals --- noisy timer
+thresholds, neither deterministic resets nor exponential clocks. The
+declared form is a reset kernel from a named family
+($\mathrm{uniform}[a,b]$ here), consumed by the certification
+interface only through its exact rational moments. Fixed and
+uniformly-distributed durations make the count process semi-Markov;
+the timer-as-state discipline (the supplementary-variable
+construction) is what keeps the presentation Markovian in the
+extended state, so this is vocabulary, not new metatheory.
+
+Here is where the two readings stand. The monolithic reading uses
+mechanism vocabulary alone --- timers, coloured counts, guarded
+jumps; the combinatorial certificates of
+section~\ref{sec:minifab-exact} are stated against its
+token-population refinement (places as plates, lots as tokens), and
+the fluid certificates of section~\ref{sec:minifab-certs} against
+its aggregate projection. The compositional
+reading exercises the fusion, pool, dispatch, and reset-kernel
+patterns exactly as chapter~\ref{ch:qtsl-composition-patterns}
+catalogues them; the fusion and pool patterns had been reserved as a
+future axis until this model arrived as their first customer and
+ended the deferral, and the composite row set is mid-flip from
+design to artefact --- the fusion stratum's producer surface has
+landed, the pool packaging has not, and
+section~\ref{sec:minifab-ts} draws that boundary where the code
+makes it concrete. Equally informative is what the model does
+\emph{not} demand: no nesting, no mode-switched macro-locations
+(shifts are timer guards inside mechanisms), no credal wire content,
+and no delayed trace --- until some future dispatch chooser reads
+\emph{lagged} observables (yesterday's throughput, smoothed work in
+progress), at which point the loop becomes observation-delayed
+feedback and lands in the delayed-trace pattern. A discrete-event
+benchmark exercises a largely disjoint slice of the vocabulary from
+the robotics and hybrid-dynamics exemplars the patterns were designed
+against, and it still lands on the catalogued inventory; that is
+evidence the inventory's shape is holding.
+
+One number quantifies what the composite seams own. The reference
+discrete-event simulation committed beside the model tables
+(\path{semicon/minifab/sim} in the experiments repository) implements
+the deterministic layers only --- machines, batching, setups,
+dedication, first-in-first-out within colour --- on an exact
+$\tfrac{1}{17}$-minute integer tick, and measures a
+deterministic-core throughput ceiling of 87 lots/week. The thesis's
+full model --- adding the personnel, transport, maintenance, and
+failure layers --- measures a maximal FIFO throughput of $57.5$
+lots/week. The roughly thirty lots per week between those two numbers
+is carried by \emph{exactly} the layers that live on the pool, fusion,
+and reset-kernel seams: a quantitative reading of how much of this
+line's behaviour the composition patterns are responsible for.
+
+\section{The specification}
+\label{sec:minifab-spec}
+
+What should be certified about a fab divides into two claim
+families, and the division is structural rather than stylistic: the
+two families quantify differently, are checked by different
+machinery, and fail differently.
+
+The first family is \emph{exact and pathwise}: claims about the
+discrete line itself, holding along every run, at every lot count,
+under every resolution of the scheduling freedom. Conservation ---
+machines neither minted nor lost; a lot census that nothing but a
+completed lot can decrease; a congestion measure that no firing
+increases; and hard progress --- from any work-in-progress profile,
+a stated budget of transition firings that no scheduler can exceed.
+These are the apparent infinity ``one claim per marking, one row per
+transition instance'' collapsed to finitely many symbolic rows by
+the plate discipline (section~\ref{sec:hyp-plates}), and
+section~\ref{sec:minifab-exact} certifies them. In the released
+specification vocabulary
+(chapter~\ref{ch:qtsl-specification-language}) every member of this
+family now renders. The safety members render as $\mathsf{PAlways}$
+atoms over the model's aggregate wires, and a worked render appears
+beside its certificate below. The hard firing-count member renders
+through the count-ceiling spelling,
+$\mathsf{SReturnLE}(B, \mathsf{retFireCount}(R))$: a sure bound on
+an event count was a catalogued deliberate absence of the language
+until the transition-count functional landed
+(section~\ref{sec:spec-lang-devcount}), and the witness class that
+entry names for the demand --- structurally bounded
+resource-sharing net families --- is instantiated by this model.
+The judgment stratum arrived in the same motion: the Rule Catalogue
+(chapter~\ref{ch:qtsl-manual}) now carries one plated-transfer rule
+per face, each concluding a formed $S \models \varphi$ row --- a
+surely-held invariant from one certificate citation per direction,
+and a roster firing-count ceiling from one gap-rowed certificate.
+What still separates this chapter's rows from formed judgments is
+narrower than a missing former, and it is stated with the
+certificates (section~\ref{sec:minifab-exact-status}).
+
+The second family is \emph{long-run}, and the claim class matters
+(section~\ref{sec:exp-claims}: these are the infinite-horizon-average
+rows of the taxonomy, and the class label travels with every result). Over
+the monolithic reading's aggregate interface, with $\mathrm{wip}(t)$
+the total work in progress and $N(T)$ the completed-lot count, the
+specification atoms are:
+\begin{itemize}
+\item \textbf{stability}: there is a finite $W$ with
+  $\limsup_{T \to \infty} \frac{1}{T}\int_0^T \mathrm{wip}(t)\,dt
+  \le W$ --- the line does not drown;
+\item \textbf{throughput}: $\liminf_{T \to \infty} N(T)/T \ge
+  \delta$ --- the release rate is actually sustained;
+\item \textbf{cycle time}: mean flow time at most $\varphi$ ---
+  which Little's law, $\bar\varphi = \bar{W}/\lambda$, derives from
+  the other two rather than asking anyone to certify it separately.
+  Certify two, derive the third.
+\end{itemize}
+In the released vocabulary this family now splits down its middle,
+and the split is a fact about the language worth stating precisely.
+The stability atom \emph{renders}: the long-run average is an
+accumulator of the specification vocabulary --- $\mathsf{poAvg}$,
+the Ces\`aro average of a state observable
+(section~\ref{sec:spec-lang-returnstratum}) --- and the atom is its
+expectation cap,
+\[
+  \mathsf{SReturnLE}\bigl(W,\ \mathsf{poAvg}(\mathrm{wip})\bigr),
+\]
+the upper prevision of the averaged work in progress over every law
+the dispatched composite admits, with the residual freedoms (setup
+sequencing, allocation slack, tie-breaks) resolved adversarially
+--- exactly the quantifier this family wants; the level faces
+(section~\ref{sec:spec-lang-level}) put threshold probes on the
+same functional, and the occupancy siblings render the same way:
+the long-run occupied fraction of a station is the average of an
+indicator observable, so ``lithography is busy at least
+seven-eighths of the time, in the long run'' is
+$\mathsf{SReturnGE}(7/8,\ \mathsf{poAvg}(\cdot))$ over the
+busy-count indicator --- the vocabulary's own compositional
+spelling of occupation fractions. These renders form and build
+today (section~\ref{sec:minifab-ts} carries the live witness), and
+what stands behind a formed long-run claim is stated with the same
+care as everything else in this chapter: the average former's
+certificate species --- the gain/bias pair, a Poisson-equation
+drift row --- is named by the rule catalogue and not yet claimed,
+so these are formed claims awaiting their battery, where the
+safety renders of the first family already sit on discharged
+certificates.
+
+The throughput atom is the other half, and it now renders --- as an
+envelope, which is the only honest shape for it.
+$\liminf_{T \to \infty} N(T)/T$ as a bare long-run limit is
+deliberately not the vocabulary's object --- a limit claim carries
+zero finite-window content, so a consumer sized against it can be
+overwhelmed on any finite horizon --- and the event-rate family's
+primitive is instead the affine envelope from start
+(section~\ref{sec:spec-lang-rate}). The throughput claim the list
+above records is the envelope's lower face over the
+completion-transition roster, at the release rate $\delta$ and a
+certified burst budget $\sigma$,
+\[
+  \mathsf{SRateGE}\bigl(\delta,\ \sigma,\ R_{\mathrm{sink}}\bigr):
+\]
+along every admitted law, the expected completed-lot count
+dominates $\delta t - \sigma$ at \emph{every} horizon --- which
+yields the displayed limit reading as a corollary
+($\underline{E}[N(T)]/T \ge \delta - \sigma/T$), never the other
+way around. What stands behind the formed claim is stated with the
+same care as the stability half's: its certificate species --- the
+lower-envelope drift rows, the Foster--Lyapunov shape whose
+potential's forced descent pays out completions --- is named by
+the rule catalogue and not yet claimed for this exhibit, so the
+throughput render joins the long-run family's formed claims
+awaiting their battery. The argument the earlier edition recorded
+beside the vocabulary --- census certified
+(section~\ref{sec:minifab-conservation}), drain rates bounded by
+the machine roster, a finite average-work-in-progress bound
+forcing $\mathrm{wip}(T)/T \to 0$, the census pinning completion
+rate to release rate --- is now the recipe for that certificate's
+potential rather than a measurement of an absence. And the
+cycle-time atom never wanted a former at all: Little's law derives
+it, as the list above already said.
+
+Every claim of this second family is about a $(\text{system},
+\text{policy})$ pair, never about the system alone. The undispatched
+claim --- stable under \emph{every} resolution of contention --- is
+demonic, and for re-entrant lines it is typically \emph{false} below
+capacity; the specification's refusal to let per-component stability
+compose across an undispatched boundary is correctness rather than
+caution. The first family, by contrast, needs no policy index at all
+--- its claims are demonic by construction --- and that is precisely
+why it can say nothing yet about sustained arrivals: a released lot
+\emph{raises} every potential of
+section~\ref{sec:minifab-exact}, and pricing arrivals is a different
+certificate species (the crossing budgets of the hybrid-process
+correspondence, section~\ref{sec:mt-gshs}), deliberately not
+interchangeable with ranking rows. Today the arrivals story is the
+fluid lane's, the exactness story is the combinatorial lane's, and
+the frontier itself is the seam between them.
+
+\section{The combinatorial certificates}
+\label{sec:minifab-exact}
+
+What has been certified about the discrete line, with no fluid
+scaling and no aggregate projection anywhere in the statement: the
+lot-flow core of the Mini-Fab --- the exact Kempf process times, the
+machines at their true capacities ($2$, $2$, $1$), the full
+re-entrant route --- as an SDCPN of the modelling catalogue's frame,
+a token-population System at its full
+combinatorial state space, carrying twelve plated certificates whose
+$150$ footprint sequents are discharged in exact rational
+arithmetic, one row set covering \emph{every} lot count,
+\emph{every} scheduler, \emph{every} run. The model is small enough
+to print whole, and this section does --- the net on its own page in
+Petri notation (Figure~\ref{fig:minifab-sdcpn-petri}), the
+classification tables beside it, and the certificate hypernets in
+plate notation (Figure~\ref{fig:minifab-cert-hypernets}); every
+constant below
+re-derives from the campaign committed beside the toolkit's
+semiconductor strategy, whose test battery replays the entire
+verification (chapter~\ref{ch:mtk-cookbook} for the producer stack;
+the strategy source and its battery ship in the toolkit repository).
+
+\subsection{The Mini-Fab as an SDCPN}
+\label{sec:minifab-sdcpn}
+\label{sec:minifab-plated}
+
+The exhibit is declared in the SDCPN frame's own compositional
+reading --- \emph{places are Bags, arcs are patterns}
+(section~\ref{sec:mt-sdcpn}) --- and this subsection presents it the
+way the container carries it. Sixteen places, each a Bag of coloured
+tokens; as certificate subjects they are sixteen \emph{plates} ---
+symbolic token populations in the sense of
+section~\ref{sec:hyp-plates}:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+places (as plates) & count & tokens are & colour\\
+\midrule
+$q_0$ & 1 & lots not yet released & none\\
+$q_1, \dots, q_6$ & 6 & lots waiting at step $k$ & none\\
+$p_1, \dots, p_6$ & 6 & lots in process at step $k$ &
+  remaining work $w \in [0, T_k]$\\
+$m_{\mathrm{diff}}, m_{\mathrm{impl}}, m_{\mathrm{lith}}$ & 3 &
+  idle machines & none\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent with $T = (225, 30, 55, 50, 255, 10)$ the process times of
+section~\ref{sec:minifab-line}, read as unit-work quanta: a lot in
+process at step $k$ carries the integer minutes of work it has left,
+in the declared colour box $[0, T_k]$. Nineteen Petri transitions,
+in five families, each declaring its clock species from the frame's
+own transition vocabulary:
+
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+transition & count & firing & clock\\
+\midrule
+$\mathrm{release}$ & 1 & $q_0 \to q_1$ & carved $[1,1]$, demonic seat\\
+$\mathrm{start}_k$ & 6 & $q_k + m_{\mathrm{st}(k)} \to p_k$ at
+  $w = T_k$ & carved $[1,1]$, demonic seat\\
+$\mathrm{tick}_k$ & 6 & $p_k$ at $w \ge 1 \to p_k$ at $w - 1$ &
+  forced, dwell $1$\\
+$\mathrm{finish}_k$ ($k < 6$) & 5 & $p_k$ at $w = 0 \to q_{k+1} +
+  m_{\mathrm{st}(k)}$ & carved $[1,1]$, demonic seat\\
+$\mathrm{ship}$ & 1 & $p_6$ at $w = 0 \to m_{\mathrm{lith}}$ &
+  carved $[1,1]$, demonic seat\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The clock declarations are the SDCPN's own. Processing
+quanta ride the \emph{forced} species at unit dwell (deterministic
+unit work); every scheduling choice --- when to release, which
+waiting lot a free machine starts, when a finished lot moves on ---
+rides a clock carved to the must-fire window $[1, 1]$, with the
+choice itself left to the demonic scheduler seat: timing owned by
+the clocks, choice by the seat. Nothing else is pinned --- no
+dispatch policy, no tie-break, no priority; both stochastic
+transition species stand available and unexercised, every firing
+law is Dirac, and no arc reads without consuming: the all-demonic,
+unit-dwell, Dirac corner of the frame, whose unfolding is the
+faithful ordering-and-counting embedding of an untimed net. Two
+derived time coordinates run through everything that follows, both
+read off these same clock rows: \emph{counting time} --- the
+unfolding's step index, makespans in firings --- carries every
+certificate statement from here to the carved clock, and
+\emph{metric time} --- the tick meter the carved windows define ---
+re-prices the same rows on the wall clock
+(section~\ref{sec:minifab-carved}). Whatever a certificate asserts
+below, it asserts against every scheduler at once.
+
+Figure~\ref{fig:minifab-sdcpn-petri} draws the net whole, in Petri
+notation, initial marking and supervisor seat included; the tables
+that follow it print the classification: sixteen places as Bag
+populations, nineteen Petri transitions with every arc typed against
+the founding taxonomy of Everdij and Blom \cite{everdij-blom-2010},
+the arc-type census with the pattern each element flows through, and
+the twelve certificates with their folds and transfer polarities.
+The rows of these tables are the rows of the emitted container ---
+one table line per declared row, in the container's own species
+vocabulary --- so the isomorphism is checkable by diffing the page
+against the bytes, and the places where a declared row home is
+still a named successor are marked on the page rather than smoothed
+over. The pattern inventory the classification lands on is
+chapter~\ref{ch:qtsl-composition-patterns}'s: the destroy and
+create edges are the mode-switching machinery of
+section~\ref{sec:cp-switch} in rendezvous with the transition's
+timing seat (section~\ref{sec:cp-eventport}), and the enabling-arc
+row --- unexercised by the plant, exercised by the supervisor
+seat's read-and-return wires
+(section~\ref{sec:minifab-synthesis}) --- is the per-tuple
+parameter-setting wire of section~\ref{sec:cp-set}. The statics
+square behind the ``mechanized'' status entries is
+Problem~\ref{prob:mt-sdcpn}, closed in the semantic-universe
+development.
+
+\input{chapters/minifab-sdcpn-petri}
+
+\input{chapters/minifab-sdcpn-tables}
+
+Two structural findings the classification surfaces, both
+informative rather than embarrassing. First, the deliberate corner
+the clock table pins --- all freedom demonic, all processing
+deterministic unit work, every firing law Dirac --- is load-bearing
+for transport: the certificates are stated against that corner's
+adversary, which is the \emph{largest} one, so every rate-raced or
+policy-refined elaboration of the same line --- the stochastic
+species the frame holds ready, the failure and repair kernels of
+the fluid lane's fuller model --- only resolves freedom these rows
+have already priced, and the classification doubles as a transport
+argument. Second, the machine plates exhibit the resource-pool
+pattern and the inhibitor exclusion in one stroke: mutual exclusion
+of a conserved unit needs only ordinary arcs plus the certified
+invariant (the machine-conservation pairs of
+section~\ref{sec:minifab-conservation}), and nowhere in a
+re-entrant line with true capacities does an absence test arise ---
+the model never misses the excluded primitive, which is the
+exclusion argument of section~\ref{sec:mt-sdcpn} read off a working
+industrial subject.
+
+\subsection{One row per Petri transition}
+\label{sec:minifab-footprint}
+
+A certificate here is a plated certificate exactly as
+section~\ref{sec:mt-sdcpn} catalogues the species: a per-token
+\emph{feature} --- a polynomial in the representative token's colour
+block --- on each cited plate; a commutative-monoid \emph{fold}
+(sum, max, or the conjugated sums between them); and one
+\emph{footprint sequent} per (certificate, Petri transition) pair,
+asserting that the firing's produced contribution is bounded by its
+consumed contribution --- minus a pinned rational gap, on the rows
+that claim progress. Grammar equivariance is what makes the row
+finite: no expression names ``the $i$-th token,'' so the
+transition-level row \emph{is} the family, at every marking, at
+every lot count. The
+twelve certificates below carry $150$ footprint sequents in all ---
+$19$ each for the six whole-net certificates, $6$ for each of the
+six machine-conservation certificates --- and every sequent is a
+polynomial inequality of degree at most two over the declared colour
+boxes, discharged in the producer's exact tier by
+Bernstein-coefficient nonnegativity, in exact $\Q$, with no
+floating-point number representable in the pipeline. Coverage (every
+transition that may touch a cited plate carries a row), floor rows
+(gap-carrying folds bounded below), gap positivity, and
+scale-parameter conformance are checked in the same pass. The
+certificates themselves are finite drawn objects --- plated feature
+cells, folds, four shapes carrying the whole roster --- and
+Figure~\ref{fig:minifab-cert-hypernets} draws them in plate
+notation.
+
+\subsection{The work potential, and the run-length budget}
+\label{sec:minifab-ranking}
+
+The flagship certificate is a shaped potential over the sum fold.
+Its feature dictionary is ``remaining firings'': with
+$F_k = \sum_{j \ge k} (T_j + 2)$ the firings a lot still owes from
+queue $k$ onward (one start, $T_j$ ticks, one finish per remaining
+step), assign
+\[
+  v(q_0) = F_1 + 1, \qquad
+  v(q_k) = F_k, \qquad
+  v(p_k, w) = w + 1 + F_{k+1}, \qquad
+  v(m) = 0 .
+\]
+Every one of the nineteen transitions carries a gap row with gap $1$,
+and each is one line of arithmetic: a release moves a token from
+$F_1 + 1$ to $F_1$; a start consumes $F_k = T_k + 2 + F_{k+1}$ and
+produces $T_k + 1 + F_{k+1}$; a tick pays one unit of $w$; a finish
+consumes $1 + F_{k+1}$ and produces $F_{k+1}$; the final shipment
+consumes $1$ and produces nothing the dictionary counts. Coverage is
+total, the floor is nonnegativity of the features, and the transfer
+consequence (section~\ref{sec:mt-sdcpn}) is the specification's hard
+progress claim: \textbf{along every run from any marking $m_0$, the
+total number of transition firings is at most the fold
+$V(m_0) = \sum v$} --- uniformly in the lot count and in the
+scheduler. At the Kempf constants the per-lot budget is
+\[
+  1 + \sum_{k=1}^{6} (T_k + 2) \;=\; 1 + 625 + 12 \;=\; 638
+\]
+firings, so $N$ pending lots drain in at most $638N$ firings ---
+$53{,}592$ at the nominal weekly release of $84$ lots. And because
+this particular dictionary telescopes \emph{exactly} --- every
+transition drops the fold by exactly one --- the bound is tight: every
+complete drain attains it, which the independent replay below
+measures at every tested lot count. This is the claim the fluid
+relaxation structurally cannot state (a continuous level supports no
+firing count), just as the arrivals-and-load claims of
+section~\ref{sec:minifab-certs} are the ones this certificate
+deliberately does not make.
+
+The budget now has its render in the released vocabulary: for a run
+from marking $m_0$, the claim is the count ceiling
+$\mathsf{SReturnLE}\bigl(V(m_0),\, \mathsf{retFireCount}(R)\bigr)$
+with $R$ the full nineteen-transition roster
+(section~\ref{sec:spec-lang-devcount}), and the catalogue's
+ranking-face plated-transfer rule concludes exactly that judgment
+from one gap-rowed certificate --- this one. What stands between
+this render and a formed row is recorded in
+section~\ref{sec:minifab-exact-status}.
+
+\subsection{Conservation}
+\label{sec:minifab-conservation}
+
+Three certificate groups carry the bookkeeping claims, each over the
+sum fold with constant features.
+
+\emph{Lot census.} Feature $1$ on every lot population (pending,
+queues, in-process; machines uncited): eighteen safety rows assert
+that no transition mints a lot, and the shipment transition carries
+a gap row --- the census strictly drops exactly there. The transfer
+consequence: shipments along any run number at most the initial lot
+count. The dual lower bound is deliberately \emph{not} certified,
+because it is false --- lots genuinely leave at shipment --- and the
+refusal is the honest content: this vocabulary cannot be talked into
+asserting conservation of a quantity the model does not conserve.
+
+\emph{Machine populations.} For each station, a pair of sum
+certificates --- features $+1$ and $-1$ on the idle plate and the
+station's two in-process plates, safety rows on the six incident
+transitions --- pins both directions of
+\[
+  \#m_s \;+\; \#p_i \;+\; \#p_j \;=\; C_s ,
+  \qquad (C_{\mathrm{diff}}, C_{\mathrm{impl}}, C_{\mathrm{lith}})
+  = (2, 2, 1) :
+\]
+the classical place invariant, as certificate rows: a start takes an
+idle machine and opens an in-process slot, a finish does the
+reverse, a tick touches neither, and no other transition can touch the
+three plates at all --- machines are neither minted nor lost, under
+any scheduler, at any lot count. In the specification vocabulary
+this pair renders as
+$\mathsf{PAlways}(\mathsf{SAnd}(\mathsf{SAtomLE}(C_s, \kappa_s),
+\mathsf{SAtomGE}(C_s, \kappa_s)))$ for the station's population
+observable $\kappa_s$ --- a const-$1$ aggregate wire over the three
+cited plates, the same row species as the queue-length wires below;
+the judgment row that consumes the render is the catalogue's
+safety-face plated-transfer rule, whose conclusion is this
+conjunction under the sure cap $\mathsf{SProbGE}(1, \cdot)$ and
+whose premise shape --- one certificate citation per direction ---
+is this pair's own (section~\ref{sec:minifab-spec}).
+
+\subsection{The bottleneck pair: two folds, one dictionary}
+\label{sec:minifab-bottleneck}
+
+The next two certificates share one feature dictionary ---
+\emph{remaining total work}: with $R_k = \sum_{j \ge k} T_j$ (so
+$R_1 = 625$), assign $v(q_0) = R_1$, $v(q_k) = R_k$,
+$v(p_k, w) = w + R_{k+1}$ --- and differ only in the fold, which is
+exactly the point.
+
+\emph{Congestion, $\ell_2$.} The conjugated-sum fold at $p = 2$
+(the scale-parametric family of section~\ref{sec:mt-sdcpn},
+strictly monotone at every finite $p$, interpolating from sum
+toward max). Read in $\varphi$-space, per that section's normative
+discipline --- the rows constrain $\sum_t v_t^2$, and the checker
+never computes a root: every tick transition carries a gap row with
+$\varphi$-space gap $1$ (from $w \ge 1$, the drop
+$(w + R)^2 - (w - 1 + R)^2 = 2(w + R) - 1 \ge 1$), and every other
+transition carries a safety row, because the dictionary is arranged so
+that moves preserve remaining work exactly: a start converts
+$R_k = T_k + R_{k+1}$ into $w + R_{k+1}$ at $w = T_k$, a finish
+converts $0 + R_{k+1}$ into $R_{k+1}$, and the shipment retires
+$R_7 = 0$. The even-power order-preservation side condition is the
+nonnegativity of the feature range on the declared boxes ---
+discharged, not assumed. Consequences: the $\ell_2$ work-congestion
+measure never increases along any run, and processing quanta number
+at most the initial $\varphi$-mass $\sum v(m_0)^2$. Stated with the
+modulus honesty the modelling chapter demands: the $\varphi$-space
+budget is loose in aggregate units (at the weekly release the
+$52{,}500$ ticks of the drain sit far below the initial
+$\varphi$-mass of $84 \times 625^2 = 32{,}812{,}500$), which is
+exactly why the $\varphi$-space statement --- not a root of it ---
+is the certified one; the sharp tick count is the work potential's
+job, one certificate over.
+
+In the released specification vocabulary the non-increase claim has
+a worked render today. The emitted aggregate wires include the
+$\varphi$-space work masses of the six in-process populations and
+the six queue lengths, so the congestion observable is the linear
+read-out
+\[
+  s_2 \;=\; \sum_{k} \mathrm{l2work}_{p_k}
+       \;+\; \sum_{k} R_k^2 \cdot \mathrm{len}_{q_k}
+       \;+\; R_1^2 \cdot \mathrm{len}_{q_0} ,
+\]
+and for a run from a marking with congestion value $S_0$ the render
+is $\mathsf{PAlways}(\mathsf{SAtomLE}(S_0, s_2))$ --- formation per
+chapter~\ref{ch:qtsl-specification-language}, the atom's polynomial
+canonical over the wire coordinates.
+
+\emph{Ceiling, max.} The same dictionary under the max fold: every
+transition a safety row, no gap row anywhere --- the maximum remaining
+total work over lots never increases. The asymmetry with the
+congestion certificate is enforced, not stylistic:
+section~\ref{sec:mt-sdcpn} establishes that idempotent folds are
+progress-incapable in every scale (an untouched dominating token
+absorbs any local drop), so a gap row on a max certificate is a
+\emph{formation error}, and the vocabulary load-rejects it --- the
+constructor refuses the row, and the mutant battery below exercises
+the refusal. Safety is what a max fold can carry, and safety is what
+this certificate claims.
+
+\input{chapters/minifab-certs-hypernets}
+
+\subsection{The deadline pair: the flagship dictionary, split
+pointwise}
+\label{sec:minifab-deadline}
+
+The last two certificates price a deadline, and they cost no new
+dictionary: they split the work potential's $F$ pointwise. Let $D$
+be the \emph{arrival dictionary} --- $F$ with the step-6 remainder
+$F_6 = T_6 + 2 = 12$ subtracted on every position before $q_6$, and
+$0$ from $q_6$ on --- so $v_D$ vanishes exactly where a lot has
+entered $q_6$: the fold's zero-set \emph{is} the reach goal.
+\emph{Arrival-potential} carries $D$ over the sum fold: sixteen gap
+rows with gap $1$, and safety rows on the three transitions at or
+past arrival, which pay nothing. \emph{Step6-budget} carries the
+complement $F - D$: three gap rows on the post-arrival transitions,
+sixteen safety. The pointwise identity $D + (F - D) = F$ retells the
+run-length budget as a deadline argument --- pre-arrival firings pay
+$D$ (at most $626N$ from $N$ pending lots), post-arrival firings pay
+$F - D$ (at most $12$ per arrived lot) --- so along every maximal
+run, every lot has entered $q_6$ within
+\[
+  T(N) \;=\; 638N - 12
+\]
+steps: counting time, the discrete-time unfolding's step index. As a
+specification this is the deadline lower bound
+$\mathrm{P}_{\ge 1}\!\left[\mathrm{F}_{\le T(N)}\,
+(\text{all $N$ lots have entered } q_6)\right]$ with demonic timing
+--- in the Dirac corner every scheduler resolution is a point mass,
+and the dictionaries quantify over the whole demonic seat. The
+bound is tight: the schedule that defers the last
+$\mathrm{finish}_5$ behind all other work attains it exactly, and
+typically-scheduled runs sit at it too, the step-6 tail being $12$
+firings against step 5's $255$-tick pole --- the independent replay
+below witnesses both dynamically.
+
+Three honesty lines the arithmetic enforces, stated rather than
+smoothed over. The goal is \emph{cumulative} arrival, never
+simultaneous occupancy: $\#q_6 = N$ at once is demonically avoidable
+(start step 6 as lots arrive and $q_6$ stays drained), so no
+certificate of this pair claims it. The claim reads at the deadline
+wall --- a record that stops existing is not late; the completion
+conjunct that upgrades the wall to full worst-case reach is the
+liveness face, priced separately. And the deadline above is
+stated in counting time; its metric-time twin rides the carved
+windows the clock rows already declare --- a dwell floor with a
+finite must-fire ceiling --- under which these same two
+dictionaries price the same bound with steps replaced by ticks
+(section~\ref{sec:minifab-carved}). The
+judgment row binding the deadline specification to the container is
+the completion face's declared row home --- a named successor; the
+deadline content shipped today is the pair's $38$ footprint
+sequents.
+
+\subsection{The open system: the policy synthesized jointly with
+its certificate}
+\label{sec:minifab-synthesis}
+
+The deadline pair prices the line against every dispatch at once,
+and that universality is also the bound's ceiling: $638N - 12$ is
+what no scheduler can exceed, not what a good one achieves. The
+specification section already named the shape of the next claim
+family --- everything long-run is about a $(\text{system},
+\text{policy})$ pair, never the system alone
+(section~\ref{sec:minifab-spec}) --- and here the exact pathwise
+family acquires the same index, as \emph{syntax}: the plant opens
+into a comb. Same sixteen places, same nineteen Petri transitions,
+plus one \emph{hole} --- the dashed box at the foot of
+Figure~\ref{fig:minifab-sdcpn-petri}, a first-class term of the
+System grammar carrying nothing but a declared interface: read the
+cumulative-arrival observable, drive the $\mathrm{start}_6$ gate
+wire. The hole is not a figure of speech; the emitted container
+carries the comb's own constructor rows, and the claim that exactly
+one hole occurs is decided in the production loop by an occurrence
+walk over those rows. What fills it is the supervision pattern of
+section~\ref{sec:cp-supervise}, arriving exactly as that entry
+promised: the filler is an ordinary jump-only System owning a gate
+place, the gated transition carries a weight-1 read-no-consume
+enabling arc --- the census row the plant alone leaves at zero ---
+and the closed composite is again a coloured net of the same class.
+Supervision is composition inside the model class, so filling the
+hole is no semantic ceremony: it is one relation between three
+System terms, and the closed composite re-enters the same
+certificate machinery as the plant itself.
+
+The synthesis is joint: policy and certificate are searched for
+together, the certificate machinery serving as the search
+instrument rather than a post-hoc audit. The objective is
+lexicographic, completion first. A candidate policy must first
+carry a certified completion claim --- a ranking over the closed
+composite whose rows the checker re-derives --- and only then
+competes on the certified arrival horizon, where the least
+dictionary-certifiable $T$ is an exact-rational linear program over
+dictionary space: gap rows on the transitions the policy admits
+pre-goal, boxwise nonnegativity, zero pinned on the goal region,
+dominance everywhere a pending lot sits. Refutation is the
+improvement signal: exact replay of the closed composite under
+adversarial schedules either attains the certified horizon ---
+closing the bracket pointwise --- or returns a trajectory whose
+step ledger shows where the adversary spends its firings, which is
+precisely the gate the next candidate should own. On this model the
+search terminates at a theorem rather than a timeout. The winner is
+the \emph{latest-safe unlock} --- hold $\mathrm{start}_6$ closed
+until the $N$th lot enters $q_6$, then open --- and under it no
+pre-goal firing exists except the $626N$ that pay the arrival
+dictionary, so every schedule of the closed composite reaches
+all-arrivals at exactly step $626N$. The linear program agrees from
+the other side: its deterministic optimal vertex \emph{is} the
+arrival dictionary $D$ of the deadline pair, restricted to the
+closed roster. Against the open plant's $638N - 12$ the synthesized
+policy saves $12(N-1)$ steps --- a certified throughput-floor gain
+of $+1.6\%$ at $N = 7$ and $+1.9\%$ at the weekly $N = 84$ ($52584$
+against $53580$) --- and $626N$ is the floor over \emph{all}
+fillers: each arrival needs $626$ lot-specific plant firings,
+firings interleave one per composite step, and policy firings only
+add, so no filler of this comb does better in counting time. The
+synthesized policy is not merely better; it is optimal, with both
+endpoints of the bracket certified objects.
+
+The lexicographic order is not pedantry, and the mutant battery
+proves it the vivid way. Drop the completion clause and the
+``best'' policy is the gate that never opens: it ties the arrival
+optimum --- with the post-arrival work locked out, every firing
+pays the arrival dictionary, and all $N$ lots reach $q_6$ at
+exactly step $626N$ --- and then deadlocks with every lot in
+$q_6$, shipping nothing, a policy the deadline alone would score
+perfect. Its sharper sibling gates $\mathrm{start}_5$ instead and
+claims a horizon of $370N$, ``beating'' the true optimum by
+starving the arrival work out of its own constraint set: gap rows
+are demanded only on transitions the policy admits, so a policy
+that forbids the work escapes the rows that would price it. Both
+ride the battery with expectations committed in advance, and both
+are refused at the completion certificate, the starved queue named
+in the refusal. That is the completion-first discipline earning its
+place in the objective, and it is the synthesis story in miniature:
+the certificate engine does not merely bless the winner --- it is
+what catches the degenerate candidates a deadline-only score would
+crown.
+
+The campaign ships the closed composite in two encodings, and the
+difference between them is a certificate-tier fact, stated rather
+than smoothed. The \emph{native-read} encoding adds one gate place
+and one unlock jump that reads $q_6$ at weight $N$ and returns what
+it reads --- seventeen places, twenty Petri transitions, the roster
+the comb container carries --- but its unlock consumes nothing, so
+no ranking row can gap it: a maximal run may spin the unlock
+forever instead of shipping, and ``the unlock fires finitely
+often'' rides as a stated convention, argued rather than checked,
+one clause more than the completion claim otherwise needs. The \emph{armed-plate} encoding
+spends one more place to delete the clause: a one-shot key $k$ with
+initial marking $1$, consumed by the unlock --- eighteen places,
+twenty Petri transitions --- makes the extended ranking all-gap
+including the unlock (the completing run pays $638N + 1$ firings,
+the key buying the single unlock) and turns the Boolean gate
+discipline from a declaration into a certified conservation pair
+$k + g = 1$, the machine-pair idiom aimed at the policy's own
+state. Each variant cites its own roster and its own tier; neither
+borrows the other's numbers. In both, the completion claim itself
+is two-tier --- the ranking is geolog-checked; enabledness below the
+ship goal (some transition stays live while lots remain: in-process
+lots always tick or finish, machine conservation supplies an
+in-process lot whenever a station's idle plate is empty, queues are
+unbounded) is argued, the liveness face the deadline subsection
+already priced separately. The remaining honesty lines are the
+deadline pair's, inherited and extended. The geolog-checked rows
+carry the
+within-$626N$ direction; the not-before direction is the producer
+tier's exact-drop identities --- each gap row's displacement equals
+its gap identically, both directions by Bernstein --- together with
+the replay bracket, pointwise $626N$ at every schedule tested, its
+in-loop row species a named absence (the lower-drift polarity the
+row vocabulary does not yet carry). The supervisor's weight-$N$
+observation read arc fails exactly one clause of the supervision
+census --- a policy arc reading a plant place; the packaged
+observation legs are the staged stratum that owns it --- carried as
+a named debt in the container's own notes. And the
+filler-interface tie on a wired comb is refused producer-side, the
+substitution binding behind it argued until the checker-side
+evaluator lands. The two successors earlier editions of this
+chapter named here have both since landed against this comb, and
+the closing subsections of this section walk them: the metric rung ---
+the carved clock, under which these same dictionaries price
+wall-clock deadlines and the dispatch seat is priced end to end
+(sections~\ref{sec:minifab-carved}--\ref{sec:minifab-fulldispatch})
+--- and the envelope arm, an uncertified dispatcher run inside a
+certified switching envelope whose downside the same family-level
+safety rows bound (section~\ref{sec:minifab-envelope}). That both
+were designed against this comb is the architectural point: the
+open system is one comb, and everything after it is fillers.
+
+\subsection{What checks these rows --- today, and next}
+\label{sec:minifab-exact-status}
+
+The trust story is staged, and each stage is named rather than
+blurred.
+
+\begin{itemize}
+\item \textbf{Discharged today, re-runnable from the public tree:}
+  all $150$ footprint sequents, coverage, floors, gap positivity,
+  and scale-parameter conformance, in the producer's exact tier
+  (Bernstein-coefficient nonnegativity over the declared colour
+  boxes, exact $\Q$). The campaign --- model, dictionaries, rows ---
+  is committed beside the toolkit's semiconductor strategy, and its
+  test battery replays the whole verification, so these numbers are
+  a \texttt{cargo test} away rather than a transcript's word.
+\item \textbf{Discharged today, in the production loop:} emitted
+  certificate containers are sealed deterministically (double
+  emission is byte-identical), and the engine-side theory provider
+  discharges the canonicity claims --- one per distinct feature
+  polynomial, forty at this model --- while refusing
+  containers that claim nothing (a vacuous accept is structurally
+  unavailable, and the battery below includes the probe). Since the
+  evaluator family reached the coloured tier, the same in-loop walk
+  also discharges the plated side-condition claims the container
+  now carries: footprint on the thirty-six tick rows --- the
+  flagship's six, whose colour-typed feature dictionaries are read
+  and decided from the container's own bytes, the lot count's six,
+  the machine conservations' twelve, and the deadline pair's twelve
+  --- flow on all twelve
+  certificates, and the five floor claims the sign analysis reaches,
+  with zero refusals and zero failures on the real emission; a
+  standalone checker binary consuming the same sealed bytes reports
+  identical tallies.
+\item \textbf{Landed at a named fragment, refused loudly beyond it:}
+  the theory demands its own side-condition families for every
+  plated certificate --- footprint, coverage, floor, flow, and
+  parameter conformance --- and the engine-side evaluator family
+  that discharges them in-loop is now decided at the coloured
+  place/transition fragment: same-place colour dictionaries, sum
+  folds, displacement settled where it is constant or of
+  single-signed even shape over the colour space, exact $\Q$. What
+  still lies beyond is named per row rather than blurred: coverage
+  and the thirteen place-crossing transitions' footprint rows await the
+  produced-side reset-row presentation; the congestion ticks, the
+  flagship's floor, and the conjugated power's parameter conformance
+  await the declared colour-box rows (the Bernstein-over-box core
+  that will decide them is written and exercised against exactly
+  these shapes); the machine lower bounds' floors await a coupling
+  route for negative features; and the max fold is an idempotent
+  kind, outside the polynomial walk by design. A claim placed on
+  any of these is refused with the unrealized case named --- the
+  battery below exercises two such refusals --- so their discharge
+  remains the exact tier's, replayed independently below, and the
+  demand rows travel with the container either way: nothing is
+  silently waived.
+\item \textbf{The warrant, and the judgment:} the run-length
+  consequence rests on the transfer argument of
+  section~\ref{sec:mt-sdcpn} --- elementary telescoping, each
+  dropped hypothesis refuted there by a finite countermodel. The
+  judgment stratum has landed since this campaign first ran: the
+  catalogue's plated-transfer pair concludes formed
+  $S \models \varphi$ rows for the safety and ranking faces, with
+  the verification content normative in the evaluators' walks
+  (section~\ref{sec:minifab-spec}). The catalogue states what
+  remains open, loudly: no Lean statement binds either rule node
+  yet, so the formal lemma pack is still the named successor. The
+  gap is not hidden in the artefact: the certificate carries rows
+  and demands, and states its consequence as a consequence.
+\item \textbf{Jurisdiction, measured:} extraction toward the
+  certified-binary checker reports this family's containers as
+  carrying no content in that checker's fragment --- correctly, and
+  by design: plated rows are certificate-stratum vocabulary outside
+  the fragment the machine-code soundness theorem binds, and their
+  discharge route is the evaluator family and the lemma pack above,
+  not the certified binary. The measured refusal is the correct
+  answer, and it is the division of labour the stack's consumers
+  were built to make explicit: one set of bytes, checkers that fail
+  differently, none asked to vouch beyond its fragment.
+\item \textbf{The reproduction spine:} this campaign's committed
+  home in the experiments repository, with a make target per number,
+  arrives with the spine's uniform regeneration --- the motion that
+  has already reached the fluid lane next door
+  (section~\ref{sec:minifab-certs}) --- and the chapter's numbers
+  move in lock-step with it.
+\end{itemize}
+
+\subsection{The mutant battery and the independent replay}
+\label{sec:minifab-exact-mutants}
+
+Twelve deliberately corrupted campaigns, expectations committed
+before any run, each aimed at a specific gate and each in fact
+refused there: a broken gap (a tick that returns its token
+unchanged --- the exact tier's footprint discharge fails); a gap row
+on the max fold (refused at construction --- the formation error
+above, exercised); a dropped footprint row (the coverage gate); a
+nonpositive gap (the gap-positivity gate); a conjugated power at
+$p = 0$ (the parameter floor); a non-canonical feature polynomial
+(killed in the production loop by the engine provider's canonicity
+check --- a real in-loop kill, not a producer-side courtesy); a
+container claiming nothing (refused in-loop as a vacuous accept);
+now that the claims themselves ride in-loop, three aimed at
+the coloured walk: a broken gap in the emitted bytes (its footprint
+claim \emph{fails} in the loop --- lying bytes under a live claim);
+a footprint claim placed on a row the walk cannot yet decide
+(refused, the missing colour-domain stratum named); and a floor
+claim on a negative-feature certificate (refused, the unbuilt
+coupling route named); and, with the deadline pair landed, two
+aimed at its rows: a corrupted arrival dictionary (the exact tier's
+footprint discharge fails at the mutated transition, the locus
+named), and a deadline gap inflated in the sealed bytes under a
+live claim (the in-loop footprint claim fails on the corrupted row
+--- the checker refuses a lying deadline).
+
+Beside the battery, an independent replay closes the artefact pair:
+an exact-rational drain simulation --- written against the model
+tables, not the certificate code, with its expectations committed
+before the run --- executes seeded demonic schedules at lot counts
+$1$, $2$, $5$, and $84$, and confirms: every drain terminates
+cleanly with all lots shipped and machine populations restored to
+$(2,2,1)$; total firings equal $638N$ \emph{exactly} at every lot
+count and every schedule tested (the budget is tight, as the
+telescoping predicts); every firing satisfies every touched
+certificate row in its reading scale; the place invariants pin;
+the congestion fold is monotone with ticks inside the
+$\varphi$-space budget; every seeded schedule meets the deadline,
+with the arrival fold reaching zero exactly at the $N$th arrival;
+the adversarial schedule that defers the last $\mathrm{finish}_5$
+attains $638N - 12$ \emph{exactly} at every tested lot count (the
+deadline bound is tight dynamically, as the split predicts); and
+the broken-gap mutant violates its row
+at the \emph{first} mutated firing --- the dynamic kill agreeing
+with the static refusal. The replay rides the toolkit's workshop
+today and lands in the reproduction spine with the vendoring motion
+above.
+
+\subsection{The carved clock: the same rows in real time}
+\label{sec:minifab-carved}
+
+The clock rows of section~\ref{sec:minifab-sdcpn} support two
+readings, and everything so far in this section has used the first:
+\emph{counting time} --- makespans measured in firings, the
+discrete-time unfolding's step index --- where total work is
+scheduler-invariant ($638N$ firings, always: the work potential's
+telescoping) and \emph{when} the work happens is the only
+nontrivial question. This subsection and the four that follow read
+the same declared clocks the other way --- \emph{metric time}, the
+tick meter --- and push the open-seat story to its natural end: what the
+wall clock rewards, exactly how much, a policy that attains the
+optimum, a machine-checked sense in which ``optimal'' is the
+decision-theoretically right word, a deliberately untrusted policy
+run inside a certified envelope, and one certificate that spans lot
+counts from $7$ to $10^{7}$. The subject is unchanged --- the
+lot-flow core, with the model boundary stated at this section's end
+inherited whole.
+
+The metric-time semantics is already in the declarations: every
+transition's clock is carved to the window $[1,1]$, so each row
+dwells exactly one tick and fires at most once per tick --- the
+per-row meter law; simultaneous instances resolve through the demonic scheduler
+seat, so the only freedom left is genuinely dispatch freedom. Both
+closed-composite encodings of section~\ref{sec:minifab-synthesis}
+reseal under this reading with row tallies identical to the
+counting-time containers --- the certificates themselves never
+change.
+
+Two transfers move the counting-time results onto the wall clock.
+First, upper bounds transfer by a \emph{no-idle} argument: before
+the goal, a tick with an empty due set --- no enabled transition
+instance whose one-tick dwell has elapsed --- would freeze the
+state forever, so along every goal-reaching schedule each tick
+fires at least one row, and ticks-to-all-arrivals is bounded by
+pre-goal firings: at most $626N$ ticks under the synthesized gate
+and $638N - 12$ open, carried by the \emph{same} geolog-checked
+rows plus two named glue clauses, argued --- the meter/no-idle
+lemma and
+enabledness below the goal. Second, there is a wall-clock
+\emph{floor} over all dispatch policies of any kind, supervisory or
+never-idle:
+\[
+\text{ticks to all arrivals} \;\ge\; 255N + 371
+\qquad (21{,}791 \text{ at the weekly } N = 84),
+\]
+because step~5's service tick is one row --- at most one firing per
+tick, $255$ firings per lot --- behind an uncompressible
+$370$-event first-lot pipeline fill, plus the final transfer into
+the arrival queue. The bound is Z3-verified below $N = 8$, and
+its machines-deleted variant is refused too (checked at $N \le 2$):
+machine capacity is not the binding constraint; the clock law and
+per-lot precedence are. (Tight at $N = 1$: the singleton trajectory
+takes exactly $626$ ticks.)
+
+Measured against that floor at $N = 84$, the dispatch levers
+separate cleanly. The synthesized arrival gate, whose counting-time
+value is certified (section~\ref{sec:minifab-synthesis}), moves
+wall-clock arrivals $0.0\%$: greedy dispatch reaches all-arrivals
+in $22{,}019$ ticks with the gate on or off --- the gate's value
+was always the certified worst-case floor, a guarantee over every
+schedule, not a typical-case speedup. Pull order is a $1.83\times$
+lever (an adversarial pull priority needs $40{,}406$ ticks,
+$+83.5\%$); and greedy itself sits $228$ ticks above the floor.
+Real-time value lives almost entirely in the dispatch seat ---
+which is why the optimum is a policy story, next, and why the seat
+then widens (section~\ref{sec:minifab-fulldispatch}).
+
+\subsection{Optimal throughput, exactly}
+\label{sec:minifab-optimum}
+
+The exact optimum is known in closed form at small $N$ and attained
+at every tested $N$:
+\[
+T_{\mathrm{opt}}(N) \;=\; 255N + 371 + d(N),
+\qquad d = 0\ (N \le 2),\quad 2\ (N = 3),\quad 4\ (N \ge 4),
+\]
+certified two-sided for $N \le 7$ by exhaustive Z3 search ---
+satisfiability with an independently re-validated witness schedule
+at $T_{\mathrm{opt}}$, unsatisfiability at $T_{\mathrm{opt}} - 1$
+--- and the $+4$ plateau is attained by an explicit supervisor
+family $\pi^{\ast}$, drawn seated in its interface as
+Figure~\ref{fig:minifab-pistar} (hold the first few diffusion
+starts on one
+machine with two-tick handovers, then alternate pre-positioned; run
+the step-1 services back to back) at every tested lot count
+($N \le 8$, $12$, $30$, $84$): $21{,}795$ ticks at the weekly
+count, within $4$ ticks ($0.018\%$) of the machine-free floor
+above, and \emph{exactly}
+optimal in per-lot throughput at all $N$ --- $255$ ticks per lot,
+matched from both sides. The attainment side is \emph{container
+replay}, geolog-checked: $\pi^{\ast}$'s explicit firing table replays
+against the sealed exhibit bytes to arrival at exactly $21{,}795$,
+under the meter law, every hold accounted. The floor side now meets
+it exactly. The machine-free floor is \emph{not} attainable for
+$N \ge 3$ (Z3 refuses it outright), and the reason is mechanized ---
+Lean-checked: a five-case machine-contiguity analysis of the first
+four diffusion entrants, showing any schedule faster than
+$255N + 375$ leaves the third or fourth lot's service without a
+contiguous machine window --- and it \emph{collapsed} under
+mechanization: the tick-meter forces two pigeonhole machine
+handovers, three of the five cases dying inside the first forcing.
+That lifts the certified floor to $255N + 375$ for $N \ge 4$
+($255N + 373$ at $N \ge 3$; the mechanized anchors match the Z3
+optima exactly at $N \le 7$, and the $N = 3$ value $d = 2$ is
+Z3-certified two-sided), which the replayed attainment meets
+exactly --- the four-tick daylight between floor and attainment is
+closed, $N$-uniformly, and the mechanization explains why the
+plateau is $+4$: it is the double diffusion handover $\pi^{\ast}$
+saturates. In the same pass the counter/meter bookkeeping behind
+the machine-free floor landed as geolog-checked rows --- this
+container family's first checker-side clock-law rows.
+
+Two consequences deserve their own sentences. \emph{Deliberate
+idling is necessary for optimality}: for $N \ge 3$ the best
+never-idle (work-conserving) policy needs $255N + 455$ ticks --- at
+the weekly count, $80$ ticks behind $\pi^{\ast}$, with its
+never-idle law verified at every pre-goal tick of the container
+replay --- and a measured greedy baseline runs $224$ ticks behind;
+gating the \emph{last} step moves arrivals $0.0\%$, while holding
+the \emph{diffusion starts} recovers the full gap. The necessity is
+also mechanical: replaying $\pi^{\ast}$ with holds disallowed is
+\emph{refused} by the engine at its first delayed diffusion start.
+Where the supervisor holds is what the last $80$ ticks are made of.
+And \emph{the decision-theoretic reading is discharged, not
+gestured at}: with deterministic closed dynamics the belief state
+is a point mass, and imprecise-decision-theoretic selection at the
+widest-uncertainty locus provably collapses to makespan
+minimization --- the reduction Lean-checked against the
+mechanized imprecise-decision-theory development, with a concrete
+refutation cell showing the collapse fails without determinism.
+``The synthesized policy is decision-theoretically correct''
+therefore means optimal throughput --- the optimality receipts
+above discharge it, each at its stated grade, and the seat-regret
+face of the specification vocabulary
+(section~\ref{sec:spec-lang-regret}) is where the language states
+exactly this shape: the regret of a filler against its own seat,
+here $0$ at every tested lot count --- two-sided by Z3 at
+$N \le 7$, the Lean-checked floor met exactly beyond.
+
+Figure~\ref{fig:minifab-pistar} closes the subsection by drawing
+$\pi^{\ast}$ as what it is: a filler for the supervisor seat, the
+Petri page's dashed box grown to nearly the whole page, one
+enormous Petri transition inside --- the policy's firing kernel,
+its interior a plate-notation hypernet over the seat's four
+observables. The page and its caption carry the policy's entire
+content: no code, no lookup table, no appeal to the replay --- two
+threshold cells and two piecewise-constant schedule decoders,
+readable in one look.
+
+\input{chapters/minifab-pistar-policy}
+
+\subsection{Widening the seat: full dispatch as a filler}
+\label{sec:minifab-fulldispatch}
+
+The supervisor seat of section~\ref{sec:minifab-synthesis} reads
+one observable and drives one gate wire. That narrowness was an
+encoding shim, not a formalism limit: an interface always was a
+pair of port lists, and the same comb construction re-seals the
+same single seat with a \emph{full-dispatch} interface --- fifteen
+observables (six queue lengths, three machine-idle flags, six
+in-process work counts) and four act ports (three per-station pull
+decisions plus token selection) --- around the unchanged plant. The
+closed net is the plant net, so the exhibit's twelve-certificate
+family binds every filler \emph{a fortiori}, geolog-checked: the
+sealed full-dispatch container re-verifies with the full row
+roster, and the certificate never mentions the policy.
+
+Two findings from exercising it. Token selection is a \emph{second}
+dispatch freedom that determinism requires: a pull priority alone
+does not close the system; fixing both yields one trajectory per
+policy, verified by replaying residual-order permutations to
+identical traces. And across the $16$-policy deterministic grid
+($8$ pull priorities $\times$ $2$ selection rules, $N \in
+\{1, 7, 84\}$; Table~\ref{tab:minifab-dispatchgrid}), only the
+diffusion-station pull preference binds the outcome --- the
+implantation and lithography columns of the table never move a
+number --- while token selection swings roughly $7{,}000$ ticks and
+\emph{crosses} with pull preference; the best cell lands on
+$255N + 455$ exactly at $N \in \{7, 84\}$ --- the work-conserving
+optimum of the previous subsection, consistent with the separation
+proved there, since grid policies never deliberately idle. Threshold-style gate supervisors provably
+cannot express per-station pull preference --- argued: a gate place
+maintained by fixed-weight fused arcs is an affine functional of
+the marking, read through upward-closed thresholds, and a pull
+preference's acceptance region is a union no affine threshold
+carves. Dispatch is a genuine seat species, not sugar over gates
+--- enablement carving and seat selection are different composition
+operations.
+
+\begin{table}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.2pt}%
+\newcommand{\bestcell}[1]{\cellcolor{accent!30}\textbf{#1}}%
+\begin{tabular}{@{}cccl rrrr rr@{}}
+\toprule
+\multicolumn{4}{@{}c}{dispatch policy} &
+\multicolumn{4}{c}{ticks per arrival} &
+\multicolumn{2}{c@{}}{certified optimality (\%)} \\
+\cmidrule(r){1-4}\cmidrule(lr){5-8}\cmidrule(l){9-10}
+$m_{\mathrm{diff}}$ pulls & $m_{\mathrm{impl}}$ pulls &
+$m_{\mathrm{lith}}$ pulls & selection &
+$N{=}1$ & $N{=}7$ & $N{=}84$ & $N{=}10^{6}$ & $N{=}84$ & $N{=}10^{6}$ \\
+\midrule
+\multicolumn{4}{@{}l}{\textbf{ours: $\pi^{\ast}$} (synthesized holds --- not never-idle)} &
+626.0 & \bestcell{308.6} & \bestcell{259.5} & \bestcell{255.000375} &
+\bestcell{100.00} & \bestcell{100.00} \\
+\midrule
+$q_5$ & $q_2$ & $q_3$ & most-advanced  & 626.0 & 320.0 & 260.4 & --- & 99.63 & --- \\
+$q_5$ & $q_2$ & $q_6$ & most-advanced  & 626.0 & 320.0 & 260.4 & --- & 99.63 & --- \\
+$q_5$ & $q_4$ & $q_3$ & most-advanced  & 626.0 & 320.0 & 260.4 & --- & 99.63 & --- \\
+$q_5$ & $q_4$ & $q_6$ & most-advanced  & 626.0 & 320.0 & 260.4 & --- & 99.63 & --- \\
+$q_5$ & $q_2$ & $q_3$ & least-advanced & 626.0 & 384.7 & 343.2 & --- & 75.61 & --- \\
+$q_5$ & $q_2$ & $q_6$ & least-advanced & 626.0 & 384.7 & 343.2 & --- & 75.61 & --- \\
+$q_5$ & $q_4$ & $q_3$ & least-advanced & 626.0 & 384.7 & 343.2 & --- & 75.61 & --- \\
+$q_5$ & $q_4$ & $q_6$ & least-advanced & 626.0 & 384.7 & 343.2 & --- & 75.61 & --- \\
+$q_1$ & $q_2$ & $q_3$ & least-advanced & 626.0 & 445.0 & 397.1 & --- & 65.34 & --- \\
+$q_1$ & $q_2$ & $q_6$ & least-advanced & 626.0 & 445.0 & 397.1 & --- & 65.34 & --- \\
+$q_1$ & $q_4$ & $q_3$ & least-advanced & 626.0 & 445.0 & 397.1 & --- & 65.34 & --- \\
+$q_1$ & $q_4$ & $q_6$ & least-advanced & 626.0 & 445.0 & 397.1 & --- & 65.34 & --- \\
+$q_1$ & $q_2$ & $q_3$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & --- \\
+$q_1$ & $q_2$ & $q_6$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & --- \\
+$q_1$ & $q_4$ & $q_3$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & --- \\
+$q_1$ & $q_4$ & $q_6$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & --- \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{certified floor, all policies ($255N{+}375$, $N \ge 4$, met by $\pi^{\ast}$)}} &
+\emph{626.0} & \emph{308.6} & \emph{259.5} & \emph{255.000375} &
+\emph{100} & \emph{100} \\
+\bottomrule
+\end{tabular}
+\caption{All seventeen policies of these subsections, benchmark-style
+(the synthesized policy itself is drawn as the seated filler in
+Figure~\ref{fig:minifab-pistar}): the sixteen never-idle full-dispatch
+cells (three binary pull preferences $\times$ token selection;
+deterministic replay, verified by residual-order permutations) and the
+synthesized $\pi^{\ast}$, which is not a row of the grid because it
+deliberately idles --- the one capability the never-idle class lacks,
+worth exactly the last $80$ ticks. Read the parameter columns: only
+the diffusion column ever moves a number; the implantation and
+lithography preferences are provably irrelevant at this roster. Token
+selection crosses with pull preference (most-advanced wins under
+$q_5$, loses under $q_1$). Units: ticks per arrival ($T/N$, the
+throughput cost of one lot; the asymptotic ideal is $255$); at
+$N = 1$ every policy ties the floor at $626.0$ (the floor is
+$255N + 371$ there, and tight: no contention). ``Certified optimality'' is the certified floor
+divided by the policy's attained ticks: the fraction of
+certifiably-unbeatable performance the policy \emph{provably}
+delivers. $\pi^{\ast}$'s column reads $100.00$ at the weekly count ---
+earned, not rounded: the four-tick daylight between the machine-free
+floor and the attainment closed when the machine-contiguity tree was
+Lean-checked (section~\ref{sec:minifab-optimum}), and the certified
+floor now meets the replayed attainment at $255N + 375$ exactly. The
+closure is $N$-uniform, so the $N = 10^{6}$ column reads $100.00$ as
+well. The sixteen never-idle cells are deterministic replays and do
+not extend to $10^{6}$ (simulation is the bottleneck there by design,
+Table~\ref{tab:minifab-nscaling}); only rows whose attainment has a
+certified closed form carry those columns --- which is itself the
+point. The single-supervisor lanes of section~\ref{sec:minifab-carved}
+show the same pull-order lever at the same magnitude ($40{,}406$ ticks
+under an adversarial greedy pull there).}
+\label{tab:minifab-dispatchgrid}
+\end{table}
+
+\subsection{An untrusted policy in a certified envelope}
+\label{sec:minifab-envelope}
+
+The envelope certificates --- safety, floors, the deadline ---
+never read the policy: they quantify over every filler of the seat,
+which is why the policy may be \emph{anything}, including a black
+box nobody should trust. (The per-policy rows of
+Table~\ref{tab:minifab-dispatchgrid} do read the policy --- but
+only as a replayed \emph{trace}, re-checked row by row against the
+sealed container, so even the performance claims ask for no trust
+in the box, only in the replay.) A third closure of the same seat
+demonstrates exactly that:
+the open comb filled by an uncertified lookahead heuristic (a
+stand-in for a learned or LLM dispatcher) composed with a certified
+switching envelope --- a decision-budget bench with a certified
+recovery region. In replay: the heuristic ran free, was never
+benched, completed, and attained the envelope's arrival bound
+$638N - 11$ \emph{exactly} at the tested $N = 84$ --- one tick
+above the open plant's $638N - 12$, the closed composite's own
+unlock firing --- so the bound is witnessed tight, not merely
+sound; a deliberate idler hit the budget boundary and was benched,
+with recovery at exactly $1{,}009$ firings; a rogue policy was
+benched after eight named in-loop refusals with the plant
+untouched; and disabling the bench stalls the line --- the switch
+is load-bearing, not decorative. After all runs the sealed
+container re-verified \emph{byte-identical}: the certificate is
+carried entirely by the envelope, geolog-checked, and no behaviour
+of
+the filler --- competent, idle, or hostile --- can touch it.
+
+\subsection{One certificate, every lot count}
+\label{sec:minifab-nscaling}
+
+The deadline certificates of this section are stated once and
+instantiated at any lot count~$N$: the sealed container's row
+obligations (footprint, flow, floor, canonicity) never mention $N$
+--- they quantify over \emph{all} markings --- and $N$ enters only
+as three integers in the container's own data (the initial lot
+count, the unlock guard's threshold multiplicity, and hence the
+instantiated horizon, which the reader recovers from the marking
+row by one dot product with the arrival dictionary).
+Table~\ref{tab:minifab-nscaling} instantiates, reseals, and
+re-verifies the pair of exhibits at lot counts spanning six orders
+of magnitude. The certificate's byte size moves only with the
+decimal width of those integers (six bytes across the whole sweep);
+the checker's wall time is flat at $\sim$2\,ms; and the objects the
+claims quantify over grow combinatorially --- at $N = 10^{6}$ the
+model has at least $2\times10^{38}$ reachable markings and at least
+$10^{2\times10^{7}}$ distinct maximal schedules, and the checker
+never visits any of them.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{@{}rrrrrll@{}}
+\toprule
+$N$ & $T^{*}=626N$ & $638N-12$ & cert.\ (B) & check (ms) &
+markings $\geq$ & schedules $\geq$ \\
+\midrule
+$7$      & $4{,}382$         & $4{,}454$         & $3{,}105$ & $1.9$ & $3.4\times10^{3}$  & $10^{123}$ \\
+$84$     & $52{,}584$        & $53{,}580$        & $3{,}105$ & $1.9$ & $8.1\times10^{9}$  & $10^{1{,}719}$ \\
+$10^{3}$ & $626{,}000$       & $637{,}988$       & $3{,}107$ & $1.9$ & $2.0\times10^{17}$ & $10^{20{,}469}$ \\
+$10^{6}$ & $626{,}000{,}000$ & $637{,}999{,}988$ & $3{,}109$ & $1.8$ & $2.0\times10^{38}$ & $10^{2.0\times10^{7}}$ \\
+$10^{7}$ & $6{,}260{,}000{,}000$ & $6{,}379{,}999{,}988$ & $3{,}111$ & $1.9$ & $2.0\times10^{45}$ & $10^{2.0\times10^{8}}$ \\
+\bottomrule
+\end{tabular}
+\caption{The synthesized-policy deadline certificate instantiated
+at lot count $N$. Columns: the certified all-arrivals horizon under
+the synthesized gate ($T^{*} = 626N$ steps, exact on every
+completing run); the no-policy worst case ($638N-12$); the sealed
+container's size in bytes (supervised exhibit; the no-policy
+container runs $2{,}963$--$2{,}966$\,B over the same sweep); the
+checker's wall time (median of 7 re-discharges of the sealed bytes
+by the production engine's in-loop evaluator walk, single core of
+an NVIDIA GB10 (Grace, aarch64) under concurrent load; all samples
+across all rows fell in 1.7--2.0\,ms); a reachable-marking lower
+bound; and a lower bound on distinct maximal schedules the claims
+quantify over. Intermediate lot counts $10^{4}$ and $10^{5}$ were
+measured identically (containers $3{,}107$ and $3{,}109$\,B;
+medians $1.9$\,ms).}
+\label{tab:minifab-nscaling}
+\end{table}
+
+\paragraph{What is $N$-parametric and what is not --- the honest
+split.} The \emph{certificate} and the \emph{checker} are
+$N$-parametric in the strong sense: the same $36$ footprint rows
+(this container's share of the exhibit family's $150$ footprint sequents),
+the same dictionaries, the same claim roster discharge at every $N$
+(identical tally vectors across the sweep), and at the landed weekly
+count the resealed container reproduces the landed exhibit exactly.
+Re-instantiation at a new $N$ does re-run the \emph{producer}: it
+reseals the container ($0.002$\,s at $N=84$, $106$\,s at $N=10^{7}$
+--- the producer's in-memory form expands the weight-$N$ guard
+unarily, a linear-cost implementation artifact of the untrusted
+side that never touches the sealed bytes or the checker), and
+re-derives the exact-rational producer receipts (the
+$=$-direction's drop identities; $0.002$\,s at $N=84$, $9.8$\,s at
+$N=10^{6}$). Dynamic attainment witnesses (replays arriving at
+exactly $626N$) were re-run through $N=10^{4}$, i.e.\
+$6{,}260{,}000$-step runs; beyond that the replay grinder's
+quadratic cost makes simulation the bottleneck --- which is the
+point of certifying.
+
+\paragraph{Claim grades at every $N$.} The within-$T^{*}$ direction
+rides geolog-checked rows at every $N$ (the row obligations are
+$N$-free; the horizon instantiates from the container's marking
+row). The not-before direction and exact attainment remain
+producer-tier receipts, and completion keeps its graded split
+(ranking geolog-checked, enabledness glue argued), exactly as stated with the
+certificates above --- instantiation at large $N$ upgrades nothing
+and degrades nothing.
+
+\paragraph{The contrast columns, derived not simulated.} Both
+bounds are conservative combinatorics on the net. \emph{Markings:}
+lots distribute over pending, the six queues, and shipped; with
+machines idle every such distribution is reachable (advance one lot
+at a time) and distinct, giving $\binom{N+7}{7}$ reachable markings
+before counting any in-process or machine state. \emph{Schedules:}
+two lots processing concurrently on distinct stations (one in step
+1, one in step 2) admit $\binom{259}{32} \approx 10^{40.9}$
+interleavings of their firing chains, all distinct as transition
+words; scheduling $\lfloor N/2\rfloor$ such pairs in blocks gives
+$\binom{259}{32}^{\lfloor N/2\rfloor}$ distinct maximal runs. Every
+one of them is covered by the same $\sim$3\,kB of certificate.
+
+\paragraph{Reproduction.} Every certificate in these subsections is
+available as a sealed container, together with a one-command
+reproduction kit that rebuilds the independent checker at a pinned
+revision, re-verifies each container from its bytes alone --- with
+per-relation claim counts as a load-bearing gate and committed
+integrity mutants that must refuse --- and re-runs the
+producer-tier mutant batteries. The dispatch grids, the Z3
+optima (each satisfiability/unsatisfiability pair re-derives in one
+command), and the $N$-scaling sweep ship the same way
+(section~\ref{sec:exp-repro}).
+
+\paragraph{The model boundary, honestly.} Everything in this
+section --- counting time and carved clock alike --- certifies
+the lot-flow core, and each exclusion is a named refinement rather
+than fine print: diffusion's batching-of-three and its mix rules,
+product types and test-lot dedication, the declared buffer
+capacities, the transporter, the operators and technician, the
+maintenance calendars and failures, and the timed weekly release
+schedule. The certificates are arranged to survive the refinements
+that only restrict runs --- a conservation or safety row over all
+schedulers holds \emph{a fortiori} over fewer --- while refinements
+that add Petri transitions re-run the same discharge over the
+extended roster; and arrivals-as-births are, as stated in
+section~\ref{sec:minifab-spec}, a different certificate species
+with its own budget vocabulary, not a missing row here. Nothing in
+this section claims throughput under sustained release; that claim
+lives, for now, one section over --- about the relaxation.
+
+\section{The fluid certificates: the comparison lane}
+\label{sec:minifab-certs}
+
+The second certificate family predates the first and certifies a
+different object: the \emph{fluid model} of the Mini-Fab's
+deterministic core skeleton, under two named dispatch policies, with
+every residual freedom resolved adversarially. It is retained in
+full --- as the comparison lane --- because it answers exactly the
+question the combinatorial family does not yet price: sustained
+arrivals, at stated loads, policy by policy. The contrast, stated
+once: a fluid certificate asserts stability of the
+\emph{relaxation} --- continuous levels, aggregate drain rates,
+indexed by a dispatch policy --- at releases within a tenth of a lot
+per week of capacity; a combinatorial certificate
+(section~\ref{sec:minifab-exact}) asserts exact statements about the
+\emph{discrete system} --- every run, every lot count, scheduler-%
+uniform --- with no continuum limit anywhere. Neither family
+subsumes the other today, and the seam between them is measured
+rather than smoothed over: the granularity conversion still open on
+the fluid side is named at this section's end, and the arrivals
+species still open on the combinatorial side is named at
+section~\ref{sec:minifab-exact}'s. All numbers in this section
+re-derive from the committed artefacts in the experiments repository
+--- the certificates and their mutant battery under
+\path{semicon/out/minifab}, replayed by the independent checker
+through the repository's semiconductor make target --- and are
+displayed under the conventions of
+section~\ref{sec:exp-conventions}. The campaign summary lives in
+section~\ref{sec:exp-semicon}; this section walks the same artefact
+at reading depth.
+
+\subsection{The fluid model, with its decisions priced}
+
+Fluid scaling replaces lot counts by continuous levels $q \in
+\R_{\ge 0}^6$, one per route step, drained at the stations'
+machine-occupancy rates. From the tables of
+section~\ref{sec:minifab-line}, with handling folded into occupancy
+(the machine is held during load and unload, per-batch at
+diffusion):
+
+\begin{center}\small
+\begin{tabular}{@{}clrr@{}}
+\toprule
+step & station (machines) & occupied min/lot & per-machine rate (lots/min)\\
+\midrule
+1 & diffusion (2)    & $285/3 = 95$  & $1/95$\\
+2 & implantation (2) & $60$          & $1/60$\\
+3 & lithography (1)  & $75$          & $1/75$\\
+4 & implantation (2) & $80$          & $1/80$\\
+5 & diffusion (2)    & $315/3 = 105$ & $1/105$\\
+6 & lithography (1)  & $30$          & $1/30$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The declared-model ledger is explicit, in the spirit of the
+cookbook's declared-prior pattern
+(chapter~\ref{ch:mtk-cookbook}): operators are folded into machine
+occupancy rather than modelled as a contended resource (that layer is
+the pool seam of section~\ref{sec:minifab-composite}); products share
+a single class per step (the mix enters only through total release;
+dedication and batch-mix rules are granularity effects that vanish in
+fluid scaling); batching becomes a rate ($3$ lots per $285$ or $315$
+machine-minutes); arrivals are deterministic at exact rate $\lambda$;
+and failures and maintenance are excluded from the core skeleton ---
+their sound entry point is capacity intervals from availability
+moments, named successor work, not fine print smuggled into these
+certificates. Setups get two sound variants: a \texttt{core} variant
+with no setups (matching the capacity arithmetic), and a
+\texttt{setup-adversarial} variant in which every lithography job may
+pay up to the full worst-case 12-minute setup, encoded as service-rate
+\emph{intervals} $\mu_3 \in [1/87, 1/75]$ and $\mu_6 \in [1/42,
+1/30]$ resolved adversarially at every instant --- so the certificate
+quantifies over every setup sequencing with no monotonicity
+assumption anywhere (queueing networks are not monotone in service
+rates; intervals sidestep the issue rather than arguing it).
+Worst-case-inline setups put lithography's per-lot occupancy at $129$
+minutes, an adversarial ceiling of $10080/129 \approx 78.1$
+lots/week.
+
+The two named policies are the classical static priorities for
+re-entrant lines: \emph{last-buffer-first-served} (LBFS --- later
+steps preempt earlier ones for their station's capacity: step 5 over
+step 1, 4 over 2, 6 over 3) and \emph{first-buffer-first-served}
+(FBFS, the reverse). These are the disciplines the Kumar--Seidman
+destabilization literature is about, which is what gives ``stable at
+$\rho$'' its falsifiable content. FIFO is not directly certified --- its
+fluid content is class-level dispatch, per
+section~\ref{sec:minifab-rows} --- but the setup-adversarial rows
+soundly cover FIFO's setup burden for \emph{any} within-class order
+at loads up to 78 lots/week. Everything the policy does not pin ---
+allocation slack on empty classes, idling below the top positive
+priority, rate realization inside the declared intervals --- is
+inside the adversary.
+
+\subsection{The certified statement and its checker}
+
+Each certificate exhibits a linear Lyapunov function $V(q) = \langle
+w, q \rangle$ with $w \in \Q_{>0}^6$ and an exact rational
+$\varepsilon > 0$ such that along \emph{every} admissible fluid
+trajectory under the named policy, $\frac{d}{dt} V(q(t)) \le
+-\varepsilon$ for almost every $t$ with $q(t) \ne 0$. Consequently
+any work-in-progress profile $q_0$ drains to the empty line within
+$V(q_0)/\varepsilon$ minutes, stays drained, and the line sustains
+its release --- the stability and throughput atoms of
+section~\ref{sec:minifab-spec} at once, with a quantitative drain
+rate as the bonus.
+
+The checker (\texttt{fluidcheck}, a small Rust program) trusts nothing about how the certificate
+was found. It rebuilds every polytope itself from the declared
+network data --- routes, rates, capacities, policy --- and replays
+one exact-rational Farkas dual per \emph{sign mode}: for each of the
+$2^6 - 1 = 63$ nonempty patterns of which queues are positive, the
+admissible drift vectors form a polytope, and the certificate's dual
+for that mode is a nonnegative combination of the polytope's
+constraints witnessing $\langle w, \dot q \rangle \le -\varepsilon$
+over all of it. Soundness rests on weak linear-programming duality
+and one measure-theory lemma --- the next subsection --- and on
+nothing else; in particular, no solver, no floating-point arithmetic,
+and no completeness claim about the producer participates in the
+trust story. Each certificate carries $819$ obligations and
+re-verifies in $1.5$--$3.0$ milliseconds on one CPU core. The
+producer that found the certificates (floating-point proposal,
+exact-rational certification, self-replay before emission) took
+about $0.2$ seconds per certificate --- and is, per the conventions,
+freely sloppy: being wrong costs retries, never soundness.
+
+The bespoke container is, since this campaign first shipped, no
+longer the only committed form. Ten of the twelve certificates below
+are re-emitted as sealed geolog-commit containers on the unified
+certificate schema, in two committed lanes --- one against the
+reproduction vocabulary, one pinned to the baked theory pair ---
+each lane carrying its own mutant battery and re-verified, sign mode
+by sign mode, through the engine's exact-rational ground seam;
+section~\ref{sec:exp-repro} records the transition's terms, and the
+two tree-cover certificates await their species' re-emission. The
+original containers remain the record of the campaign that produced
+this section's numbers, and the checker above still replays them ---
+a committed lane never dies.
+
+\subsection{The boundary-equality lemma, the hinge}
+
+One semantic decision carries the entire result. What does the fluid
+model say about an \emph{empty} buffer? The lazy encoding says only
+$\dot q_k \ge 0$ when $q_k = 0$ (levels stay nonnegative). The right
+encoding says more:
+
+\begin{lemma}[boundary equality]
+\label{lem:minifab-boundary}
+Let $q_k : [0,\infty) \to \R_{\ge 0}$ be absolutely continuous. Then
+at almost every $t$ with $q_k(t) = 0$, the derivative exists and
+$\dot q_k(t) = 0$.
+\end{lemma}
+
+\noindent (At almost every point of the level set $\{q_k = 0\}$ ---
+discard the null set where $q_k$ is not differentiable --- the point
+is a Lebesgue density point of the set, hence an accumulation point
+of other zeros, and a derivative along a sequence of zeros is zero.)
+
+The measured difference between the two encodings is not a
+refinement at the margin. Under the inequality-only semantics, the
+adversary may pour phantom flow into empty buffers whose station
+idles, and \emph{no linear Lyapunov function exists at any tested
+load} --- the certificate family is empty. Under the equality, linear
+certificates exist to within a tenth of a lot per week of fluid
+capacity. The
+equality also makes many sign modes vacuous: at the flagship
+configuration, $41$ of the $63$ mode polytopes are empty (a pattern
+like ``only $q_5$ positive'' forces full diffusion output through an
+empty downstream line that lithography cannot pass). Vacuity needs no
+case split and no emptiness branch in the checker: an infeasible
+polytope has an unbounded dual, so the same Farkas row shape that
+certifies a drift bound on a nonempty mode certifies \emph{any} bound
+on an empty one. The checker has one code path, on purpose.
+
+\subsection{The ladder}
+
+Twelve certificates and two deliberate failures, all replayed by the
+checker from the committed artefacts:
+
+\begin{center}\small
+\begin{tabular}{@{}llccrl@{}}
+\toprule
+certificate & policy & variant & lots/week & $\rho_{\mathrm{lith}}$ &
+$\varepsilon$ ($V$-units/min)\\
+\midrule
+\texttt{lbfs\_core\_84wk} & LBFS & core & 84 & $0.875$ & $1/3600$\\
+\texttt{lbfs\_core\_90wk} & LBFS & core & 90 & $0.938$ & $1/7200$\\
+\texttt{lbfs\_core\_94wk} & LBFS & core & 94 & $0.979$ & $1/21600$\\
+\texttt{lbfs\_core\_95wk} & LBFS & core & 95 & $0.990$ & $1/43200$\\
+\texttt{lbfs\_core\_191\_2wk}\,\textsuperscript{t} & LBFS & core &
+  95.5 & $0.995$ & $1157/10^{8}$\\
+\texttt{lbfs\_core\_959\_10wk}\,\textsuperscript{t} & LBFS & core &
+  95.9 & $0.999$ & $231/10^{8}$\\
+--- probe & LBFS & core & $96$ = capacity & $1.0$ & none (correctly)\\
+\texttt{fbfs\_core\_84wk} & FBFS & core & 84 & $0.875$ &
+  $\approx 2.8 \times 10^{-4}$\,\textsuperscript{a}\\
+\texttt{fbfs\_core\_95wk} & FBFS & core & 95 & $0.990$ & $1/38880$\\
+\texttt{lbfs\_setupadv\_72wk} & LBFS & setup-adv & 72 & $0.921^{*}$ &
+  $11/74760$\\
+\texttt{lbfs\_setupadv\_76wk} & LBFS & setup-adv & 76 & $0.973^{*}$ &
+  $23/448560$\\
+\texttt{lbfs\_setupadv\_78wk} & LBFS & setup-adv & 78 & $0.998^{*}$ &
+  $1/299040$\\
+--- probe & LBFS & setup-adv & $79 >$ ceiling & $>1^{*}$ & none (correctly)\\
+\texttt{fbfs\_setupadv\_78wk} & FBFS & setup-adv & 78 & $0.998^{*}$ &
+  $1/287280$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent {\small ($*$) setup-adversarial utilization is measured
+against worst-case-inline lithography occupancy, $129$ min/lot.
+(a)~exact value $6923209477/24747380706600$; the display is rounded
+in the claim-weakening direction. (t)~emitted as fully-refined
+sign-split \emph{tree covers} --- the certificate format's refinement
+species, adjudicated by the checker's tree walk rather than the mode-mask
+walk --- with the weight search and all cell duals solved as one
+sparse linear program.} \medskip
+
+$V$-units are normalized so $\sum_k w_k = 1$: $V$ is a weighted lot
+count. At the flagship configuration the optimizer's own weights came
+out as $w = (7, 7, 7, 3.5, 3.5, 2)/30$ --- remaining-lithography-work
+flavoured, found by the linear program, not designed. A worked
+reading: a ten-lot backlog at step 1, at the nominal 84 lots/week
+release, has $V = 7/3$ and is certified to clear within $8400$
+minutes --- under six days --- against every adversarial resolution
+of the residual freedoms.
+
+The table carries three findings. First, the certified load meets
+capacity: certificates exist at $95.9$ of $96$ lots/week ($99.90\%$
+of fluid capacity) and at $78$ of the $78.1$-lot adversarial ceiling
+($99.8\%$); producer-side bisection brackets the last certifiable
+release within $6 \times 10^{-5}$ lots/week of the fluid capacity
+(the one-lot gap in the original release grid was grid granularity,
+not lost capacity); and the probes at $96$ and $79$ fail
+\emph{because the load is genuinely at or over capacity} --- so the
+demonic generosity (everything unpinned handed to the adversary) is
+measurably free here, costing less than a tenth of a lot per week of
+certified capacity. Second, the exact drain rates
+separate the policies: FBFS edges LBFS near capacity ($1/38880$
+versus $1/43200$ at 95 lots/week; $1/287280$ versus $1/299040$ at
+the adversarial 78) --- both stable everywhere tested, consistent
+with the classical fluid-limit picture for re-entrant lines, and the
+kind of exact policy comparison the claim class was chosen to
+produce. Third, the certificates and the reference simulation
+triangulate: certified setup-adversarial stability up to $78$
+lots/week $<$ simulated FIFO stability at $84$ $<$ the simulated
+deterministic-core ceiling at $87$ $<$ certified zero-setup capacity
+at $96$. The gap between $78$ and $87$ is the certificate's
+conservatism against worst-case setups ($24$ minutes of setup per
+lot charged by the adversary, against $9.4$ measured for FIFO in
+simulation) --- and closing most of it is a policy question
+(run-length policies amortize setups), not a checker limitation.
+
+The mutant battery, per the standing convention
+(section~\ref{sec:exp-conventions}): seven deliberately corrupted
+certificates --- inflated $\varepsilon$, zeroed weight vector,
+negated dual, broken policy identity, dropped mode, swapped modes,
+over-capacity release --- each designed to be refused at a specific
+check, and each in fact refused.
+
+\paragraph{What this section does not claim.} These are claims about
+the declared fluid model of the deterministic core, not about the
+discrete line --- whose own certificates are
+section~\ref{sec:minifab-exact}'s, and are of a deliberately
+different species: exact run-length budgets and invariants, not rate
+stability under arrivals. Of the granularity work that converts a
+fluid drain rate into discrete-line guarantees for the count chain,
+the Little's-law (exact-moments) half has since been discharged: a
+discrete-lot certificate species replays lot-level cycles
+deterministically, certifying rate stability at the fluid capacity
+itself --- a statement no fluid certificate can make --- together
+with exact steady work-in-progress and cycle-time moments from
+declared initial families, with its own designed-locus mutant
+battery. The Foster--Lyapunov half --- universal coverage over all
+mixed work-in-progress states --- remains open, as does the sound
+entry of failures and maintenance via availability intervals, and
+the personnel, transport, and batching-granularity layers live on
+the composite seams of section~\ref{sec:minifab-composite} until
+those patterns carry certificates of their own. Nothing here claims either policy is
+\emph{optimal} --- only that its stability region is certified, to
+within a tenth of a lot per week of the model's capacity, by an
+artefact a reader can re-refuse and re-accept on their own machine in
+milliseconds.
+
+\section{The construction in TypeScript}
+\label{sec:minifab-ts}
+
+One orientation before the listing: the construction below is the
+fluid lane's (section~\ref{sec:minifab-certs}) --- the model it
+assembles is the aggregate reading, and the certificates it drives
+are the release-grid drain certificates of that section's ladder.
+The combinatorial campaign of section~\ref{sec:minifab-exact} is
+produced today on the toolkit's Rust strategy surface; its
+TypeScript twin awaits the production-strategy surface on the
+toolkit's TypeScript side (the specification surface's revision has
+since landed, and this section's listings ride it), and this
+section will grow that second listing when the surface lands,
+rather than simulate one now.
+
+This section was staged until the toolkit's TypeScript construction
+surface shipped, with its acceptance test fixed in advance: a single
+executable listing entering the ground tables of
+section~\ref{sec:minifab-rows} as rows, declaring the mechanisms as
+manifests, assembling the composite, forming specification content
+against the aggregate interface, handing the obligation set to the
+session workspace of chapter~\ref{ch:qtsl-tutorial}, and --- driven
+over the same release grid --- producing certificates the
+independent checker accepts at every load certified in
+section~\ref{sec:minifab-certs} and none at the two probe loads that
+correctly failed there. The surface shipped; the listing runs; the
+test passed, on the terms recorded at the end of this section. The
+complete file is committed as \path{qtsl/book/listings/minifab.ts}
+(with its emission seam \path{fluidseam.ts} beside it), against the
+\texttt{@maitria/mtk} and \texttt{@maitria/mtk-session} packages of
+section~\ref{sec:qs-typescript} and
+section~\ref{sec:tut-session}; the excerpts below are verbatim
+slices of it, and the transcripts are the run's own output.
+
+The ground tables enter exactly as
+section~\ref{sec:minifab-rows} declared them --- stations, route
+steps, release generators, the lithography setup rules, the
+implantation failure brackets --- as data the rest of the file
+compiles from, so they are not reprinted here. The mechanisms are:
+each station at the aggregate stratum (per-visit queue levels, a
+busy-machine count, and the one device the platform renders every
+duration with --- a timer drifting at rate one), with the declared
+buffer and machine capacities carried as domain constraints:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+function station(st: number): system.System {
+  const visits = ROUTE_STEP.filter((r) => r.st === st); // two per station
+  const n = visits.length;
+  const width = n + 2; // queues, busy, timer
+  return system.buildSystem({
+    name: STATION[st].name,
+    state: [
+      ...visits.map((r, v) => ({ id: v, name: `q${r.idx}`, sort: "Nat" })),
+      { id: n, name: "busy", sort: "Nat" },
+      { id: n + 1, name: "tau" },
+    ],
+    interface: {
+      inputs: visits.map((r, v) => ({ id: v, name: `arrive${r.idx}` })),
+      outputs: visits.map((r, v) => ({ id: v, name: `complete${r.idx}` })),
+    },
+    modes: [
+      {
+        id: 0,
+        name: "serving",
+        domain: [
+          ...visits.map((_, v) => ({ poly: mono(width, v), op: "ge", rhs: 0 })),
+          ...visits.map((_, v) => ({
+            poly: mono(width, v),
+            op: "le",
+            rhs: STATION[st].bufcap,
+          })),
+          { poly: mono(width, n), op: "ge", rhs: 0 },
+          { poly: mono(width, n), op: "le", rhs: STATION[st].machines },
+        ],
+      },
+    ],
+    drift: [{ mode: 0, var: n + 1, poly: constant(width, "1") }], // tau' = 1
+    init: { kind: "point", coords: Array.from({ length: width }, () => 0) },
+  });
+}
+\end{Verbatim}
+
+\noindent The release mechanism is three timers (the thesis's
+signal-generator idiom is the timer-mechanism idiom, as
+section~\ref{sec:minifab-rows} observed), the sink counts finished
+lots and pools their flow times, and each conserved unit ---
+operators, technician, transporter --- is a unit-capacity pool
+mechanism whose conservation range is likewise a domain constraint.
+None of these manifests matches a catalogued profile, and none needs
+to: the free constructor never refuses, and the preflight's
+\texttt{noKnownProfile} notes in the transcript below are
+classification, not complaint --- a mechanism whose populated family
+set matches no preset is a first-class citizen of
+chapter~\ref{ch:qtsl-mathematical-models}.
+
+The composite wires the re-entrant lot flow, completion wire into
+arrival wire along the route:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+const fab = system.composite({
+  name: "minifab",
+  components: [release, diff, impl, lith, sink, ...pools],
+  wiring: [
+    flow([0, 0], [1, 0]), // release      -> diffusion    (step 1)
+    flow([1, 0], [2, 0]), // diffusion    -> implantation (step 2)
+    flow([2, 0], [3, 0]), // implantation -> lithography  (step 3)
+    flow([3, 0], [2, 1]), // lithography  -> implantation (step 4)
+    flow([2, 1], [1, 1]), // implantation -> diffusion    (step 5)
+    flow([1, 1], [3, 1]), // diffusion    -> lithography  (step 6)
+    flow([3, 1], [4, 0]), // lithography  -> finished lots
+  ],
+});
+\end{Verbatim}
+
+\noindent One boundary deserves stating here, where the code makes it
+concrete rather than abstract: the directed lot-flow seams of
+section~\ref{sec:minifab-composite} are constructible today, as the
+wiring rows above; the \emph{pool-membership} and
+\emph{event-fusion} seams are
+the event-port stratum, whose fusion primitive now carries a
+producer surface (typed fusion rows over the stations' population
+edges; section~\ref{sec:cp-eventport}) while the pool-membership
+packaging is still design-tense, which is why the pools stand here
+as constructed mechanisms whose seize and release bindings await
+the packaged rows. And the dispatch freedom enters precisely where
+section~\ref{sec:minifab-certs} put it: as the policy index of each
+certificate, carried below by the release-grid driver, not as a row
+on this composite.
+
+The specification content formable in the released vocabulary is the
+certificates' own quantitative consequence --- the worked reading of
+section~\ref{sec:minifab-certs}, as a typed record over the
+six-level aggregate interface:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+const drainSpec = spec.build({
+  name: "minifab drain: LBFS core 84/wk, ten lots at step 1",
+  forall: [spec.probGe(1, spec.deadline(8400, spec.polyLe(0, wip)))],
+  iface: {
+    invars: [],
+    outvars: ROUTE_STEP.map((r) => ({ name: `q${r.idx}`, shape: [] })),
+  },
+});
+\end{Verbatim}
+
+\noindent with \texttt{wip} the sum of the six coordinate
+polynomials. The long-run family of
+section~\ref{sec:minifab-spec} enters the same file at its formable
+half: the stability atom, through the average former. For the fluid
+skeleton under this policy at this release the honest cap is zero
+--- the line drains and stays drained, so the transient washes out
+of the time average:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+const longRunStable = spec.build({
+  name: "minifab long-run: LBFS core 84/wk, average wip",
+  forall: [spec.returnLe(0, spec.poAvg(spec.oPoly(wip)))],
+  iface: {
+    invars: [],
+    outvars: ROUTE_STEP.map((r) => ({ name: `q${r.idx}`, shape: [] })),
+  },
+});
+\end{Verbatim}
+
+\noindent The record preflights, builds, encodes, and round-trips
+on the released surface (the receipt below carries the run); its
+resting state is the one section~\ref{sec:minifab-spec} assigns it:
+a formed claim whose certificate species is named and not yet
+claimed, so in the workspace's books the obligation would stand
+open --- which is where a claim without its battery belongs. The
+throughput atom stays out of this listing for a narrower reason
+than it once had: its former is staged in the theory
+(section~\ref{sec:spec-lang-rate}), but the producer surface
+quoted here does not construct it yet, and this listing does not
+simulate constructions the toolkit does not have.
+
+The producer core is the Cookbook's propose-then-dispose discipline
+(chapter~\ref{ch:mtk-cookbook}) on the checker's own vocabulary: the
+listing rebuilds the same constraint rows the checker rebuilds, asks
+one floating-point robust linear program for candidate weights
+(purely a proposal), then certifies one exact dual per sign mode and
+replays every obligation in exact arithmetic before emitting a byte.
+The equality rows are where two of this chapter's decisions become
+five lines of algebra --- the boundary-equality lemma
+(Lemma~\ref{lem:minifab-boundary}) as flow conservation on each
+empty buffer, and the policy's entire fluid content as saturation
+above each nonempty priority level:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+function eqRows(net: Net, mask: number): Row[] {
+  const k = net.k;
+  const rows: Row[] = [];
+  for (let i = 0; i < k; i++) {
+    if (!((mask >> i) & 1)) {
+      // buffer i empty: inflow = outflow (a.e. zero derivative)
+      const r = zeros(2 * k);
+      r[i] = Q.from(-1);
+      net.route.forEach((succ, j) => {
+        if (succ === i + 1) r[j] = r[j].add(Q.from(1));
+      });
+      rows.push({ r, rhs: net.arrivals[i].neg() });
+    }
+  }
+  net.prio.forEach((order, s) => {
+    for (let pos = 0; pos < order.length; pos++) {
+      if ((mask >> (order[pos] - 1)) & 1) {
+        // a nonempty buffer at priority: everything at or above it
+        // saturates the station
+        const r = zeros(2 * k);
+        for (const j of order.slice(0, pos + 1)) r[k + j - 1] = Q.from(1);
+        rows.push({ r, rhs: net.caps[s] });
+      }
+    }
+  });
+  return rows;
+}
+\end{Verbatim}
+
+Finally the obligation set, handed to the session workspace: one
+obligation per grid point, probes included, under a statement kind
+whose single move runs the producer, emits through the canonical
+encoder, and lets the checker adjudicate. The kind's failure mode is
+part of its design: at an infeasible load it returns
+\emph{inconclusive} --- ``the load is at or over the variant's
+capacity; absence of a certificate is not a refutation'' --- because
+no certificate is not a disproof, and the workspace's books are only
+as good as the outcomes recorded in them.
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+const GRID: [string, string, number][] = [
+  ["LBFS", "core", 84],
+  ["LBFS", "core", 90],
+  ["LBFS", "core", 94],
+  ["LBFS", "core", 95],
+  ["LBFS", "core", 96], // probe: fluid capacity
+  ["FBFS", "core", 84],
+  ["FBFS", "core", 95],
+  ["LBFS", "setup-adversarial", 72],
+  ["LBFS", "setup-adversarial", 76],
+  ["LBFS", "setup-adversarial", 78],
+  ["LBFS", "setup-adversarial", 79], // probe: over the adversarial ceiling
+  ["FBFS", "setup-adversarial", 78],
+];
+
+const ws = new Workspace([fluidStable]);
+for (const [policy, variant, lotsPerWeek] of GRID) {
+  const ob = ws.pose({ kind: "minifab.fluidStable", policy, variant, lotsPerWeek });
+  const r = ws.apply(ob.id, "farkas");
+  const w = r.attempt.witness as { eps?: string; checker?: string } | undefined;
+  console.log(
+    `${ob.id} ${ws.describe(ob.id)}\n  -> ${r.attempt.outcome}` +
+      (w ? ` eps=${w.eps} (${w.checker})` : ` (${r.attempt.note})`),
+  );
+}
+\end{Verbatim}
+
+The run, whole --- construction, specification, and the twelve
+obligations --- takes under four seconds:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ npx tsx minifab.ts
+composite: minifab (composite), schema maitria.system.manifest.v0;
+    9 preflight notes, kinds: noKnownProfile
+spec: built ("minifab drain: LBFS core 84/wk, ten lots at step 1")
+ob1 fluid skeleton drains under LBFS (core) at 84 lots/week
+  -> discharged eps=1/3600 (ACCEPT modes=63 obligations=819 eps=1/3600)
+ob2 fluid skeleton drains under LBFS (core) at 90 lots/week
+  -> discharged eps=1/7200 (ACCEPT modes=63 obligations=819 eps=1/7200)
+ob3 fluid skeleton drains under LBFS (core) at 94 lots/week
+  -> discharged eps=1/21600 (ACCEPT modes=63 obligations=819 eps=1/21600)
+ob4 fluid skeleton drains under LBFS (core) at 95 lots/week
+  -> discharged eps=1/43200 (ACCEPT modes=63 obligations=819 eps=1/43200)
+ob5 fluid skeleton drains under LBFS (core) at 96 lots/week
+  -> inconclusive (the load is at or over the variant's capacity;
+     absence of a certificate is not a refutation)
+ob6 fluid skeleton drains under FBFS (core) at 84 lots/week
+  -> discharged eps=6923209477/24747380706600 (ACCEPT modes=63
+     obligations=819 eps=6923209477/24747380706600)
+ob7 fluid skeleton drains under FBFS (core) at 95 lots/week
+  -> discharged eps=1/38880 (ACCEPT modes=63 obligations=819 eps=1/38880)
+ob8 fluid skeleton drains under LBFS (setup-adversarial) at 72 lots/week
+  -> discharged eps=11/74760 (ACCEPT modes=63 obligations=819 eps=11/74760)
+ob9 fluid skeleton drains under LBFS (setup-adversarial) at 76 lots/week
+  -> discharged eps=23/448560 (ACCEPT modes=63 obligations=819 eps=23/448560)
+ob10 fluid skeleton drains under LBFS (setup-adversarial) at 78 lots/week
+  -> discharged eps=1/299040 (ACCEPT modes=63 obligations=819 eps=1/299040)
+ob11 fluid skeleton drains under LBFS (setup-adversarial) at 79 lots/week
+  -> inconclusive (the load is at or over the variant's capacity;
+     absence of a certificate is not a refutation)
+ob12 fluid skeleton drains under FBFS (setup-adversarial) at 78 lots/week
+  -> discharged eps=1/287280 (ACCEPT modes=63 obligations=819 eps=1/287280)
+
+12 obligations: 10 discharged, 2 open (96wk, 79wk)
+flagship V weights: (7/30, 7/30, 7/30, 7/60, 7/60, 1/15)
+\end{Verbatim}
+
+\noindent And the acceptance test's other half, against the
+standalone checker binary over the emitted files:
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ for f in out/*.cbor; do fluidcheck $f > /dev/null && pass=$((pass+1)); done
+$ echo "standalone fluidcheck: $pass/10 ACCEPT"
+standalone fluidcheck: 10/10 ACCEPT
+\end{Verbatim}
+
+Read the transcript against the ladder of
+section~\ref{sec:minifab-certs}. The acceptance criterion was
+checker-acceptance, deliberately --- a reimplemented producer may
+find different valid certificates --- and what happened is a report,
+not a promise: this producer landed the \emph{same} certificates.
+Every drain rate matches the table's, down to the FBFS
+exact value whose display there is rounded; both probes fail for the
+right reason; and the weight vector $w = (7, 7, 7, 3.5, 3.5, 2)/30$
+--- which that section reported as found by the linear program, not
+designed --- has now been found twice, by two implementations
+proposing over the same polytopes. The independence boundary is
+drawn where it always is in this book: the \emph{producer} above is
+a fresh implementation on the TypeScript surface, while the emission
+seam links the checker crate itself, so that the bytes written and
+the bytes judged pass through one canonical encoder (at this preview
+the seam is a thin binding around the checker crate the reproduction
+spine imports; its migration is tracked in section~\ref{sec:exp-repro}) --- and the standalone
+binary replays every certificate from the bytes alone, trusting
+nothing about how they were made.
+

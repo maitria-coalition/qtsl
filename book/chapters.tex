@@ -1,0 +1,415 @@
+% MAITRIA: The Book — https://maitria.org/book.pdf (+ book.tex sibling)
+% Build: ./build.sh — assembles chapters.tex (the template; chapters ride
+%   \input) into the committed artefacts book/book.pdf and book/book.tex
+%   (the flattened single-file source), so both resolve at
+%   https://raw.githubusercontent.com/maitria-coalition/qtsl/refs/heads/main/book/book.pdf
+%   and .../book/book.tex on the public repository. For agent
+%   consumption, book.pdf also carries its own source: pdftotext on it
+%   returns this file (byte-exact page-range recipe on the PDF's
+%   source-appendix page; the same bytes ride as a PDF attachment,
+%   pdfdetach -saveall book.pdf).
+%
+% License: CC BY 4.0 (Creative Commons Attribution 4.0 International).
+%   https://creativecommons.org/licenses/by/4.0/
+%   Attribution: David "davidad" Dalrymple and the maitria coalition contributors.
+%   Full legal code: https://creativecommons.org/licenses/by/4.0/legalcode.txt
+%   (also the LICENSE file beside this source, in the book repository).
+%   (The MAITRIA code repositories are separately licensed: Apache-2.0/MIT.)
+%
+% Preview scaffold: every chapter in the assembly is drafted. The
+% table of contents is normative; the Executive Summary is a first
+% draft; the Experiments chapter is a working draft (tables re-derive
+% from qtsl-experiments receipts at each preview); the Markov-kernels
+% chapter is a working draft (a design-precision lede plus the
+% distribution-generator coverage dashboard, whose section source lives
+% in the qtsl-experiments repository); the QTSL rule catalogue is
+% generated in full from the mechanized rule sources (see
+% chapters/qtsl-rule-catalogue* — regenerate with the emitting tool, do
+% not hand-edit); the Lean-cone appendix is regenerated from the lean/
+% trees at each build (chapters/lean-cone.tex wrapper +
+% tools/lean-cone.py, strict mode); every other chapter is a full
+% draft. The QTSL Quick Start, the MTK tutorial, and the Geolog quick
+% start carry listings and transcripts from real runs the build itself
+% regenerates (specs in transcripts/, fragments in
+% generated/transcripts/ — hand-edit neither; receipts in each
+% chapter's tail comment).
+% (Chapter numbers are the build's to assign; this comment names
+% chapters, not numbers, so insertions don't stale it.)
+%
+% Tagged PDF + ToUnicode (the searchability repair): \DocumentMetadata
+% before \documentclass activates the latex-lab tagging test phase —
+% a structure tree (StructTreeRoot + paragraph-level tags), which is the
+% layer accessibility-based viewer search reads, AND (via
+% latex-lab-kernel-changes) ToUnicode CMaps for the Type 1 math fonts
+% (gentounicode=1 + glyphtounicode + cmex extras), which is what makes
+% math notation extractable/searchable in every viewer. Keep this line
+% FIRST (the declaration must precede \documentclass).
+% The module list is phase-III MINUS the toc module, enumerated
+% (phase-II = tagging core: new-or-1/2 + tagpdf activate, which is what
+% yields StructTreeRoot/MarkInfo). The toc testphase module must NOT be
+% loaded here: it defines \hyper@nopatch@toc (so hyperref skips its own
+% \contentsline link patch) and hangs replacement link support on its
+% own \l@part/\l@chapter/... — which titletoc's \titlecontents
+% declarations (maitria-style.tex) then overwrite, leaving NO ToC link
+% machinery at all: every ToC hyperlink annotation vanished from the
+% built PDF. With toc omitted, hyperref patches \contentsline exactly
+% as before tagging was introduced, composing with titletoc, and the
+% structure tree + ToUnicode gains are untouched. (Measured on this
+% TeX Live 2023 vintage; minimal-doc bisection, three variants.)
+% BOOK_UNTAGGED escape (health builds): tagging multiplies lualatex pass
+% cost ~10x (measured 2026-07-29: 423s vs 44s per pass, same content, same
+% box), so build.sh offers BOOK_UNTAGGED=1, delivered here as
+% \BOOKUNTAGGED via latexmk -usepretex. The committed/public artefacts
+% must stay tagged — build.sh refuses BOOK_UNTAGGED without
+% BOOK_SKIP_COMMIT=1. Default path is token-identical to the bare
+% declaration (the \ifdefined wrapper is inert when the macro is unset).
+\ifdefined\BOOKUNTAGGED\else
+\DocumentMetadata{pdfversion=1.7,lang=en-GB,testphase={phase-II,block,sec,minipage,graphic,float,bib,text,firstaid}}
+\fi
+\documentclass[10pt,a4paper,oneside]{book}
+\usepackage[margin=1.1in,headheight=14pt]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{dsfont} %
+\usepackage{xcolor}
+\usepackage{colortbl} %
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{parskip}   %
+\usepackage{pdflscape} %
+\newcommand{\platecaption}[2]{%
+  \refstepcounter{figure}%
+  {\footnotesize Figure~\thefigure: #1\label{#2}\par}}
+\input{chapters/qtsl-rule-catalogue-preamble}
+\input{maitria-style}
+\usepackage[colorlinks=true,linkcolor=accentdeep,urlcolor=accentdeep,citecolor=accentcite]{hyperref}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=numeric-comp,sortcites=true,natbib=true,
+            maxnames=6,minnames=5,url=true,doi=true,eprint=true]{biblatex}
+\addbibresource{refs.d/catalogue.bib}
+\addbibresource{refs.d/zettels.bib}
+\addbibresource{refs.d/local.bib}
+\usepackage[type={CC}, modifier={by}, version={4.0}]{doclicense}
+% License-line break placed by hand between "Creative Commons" and
+% "Attribution" — the default layout hyphenated "Interna-tional".
+\makeatletter
+\renewcommand{\doclicenseLongText}{%
+  \doclicense@lang@thisDoc\space
+  \href{\doclicenseURL}{\doclicenseLongType\\\enquote{\doclicense@longName}}%
+  \doclicense@lang@word@license.\xspace%
+}
+\makeatother
+\hypersetup{pdftitle={MAITRIA: The Book (preview scaffold)},
+            pdfauthor={The maitria coalition}}
+\emergencystretch=1.5em
+
+\input{srclayer}
+
+
+\newcommand{\bookref}[2]{chapter~\ref{#1}}
+\newcommand{\Bookref}[2]{Chapter~\ref{#1}}
+\newcommand{\bookcite}[2]{\cite{#1}}
+
+\usepackage{aliascnt}
+\newcommand{\newaliasedtheorem}[2]{%
+  \newaliascnt{#1}{definition}%
+  \newtheorem{#1}[#1]{#2}%
+  \aliascntresetthe{#1}%
+  \expandafter\def\csname #1autorefname\endcsname{#2}%
+}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newcommand{\definitionautorefname}{Definition}
+\newaliasedtheorem{problem}{Problem}
+\theoremstyle{plain}
+\newaliasedtheorem{theorem}{Theorem}
+\newaliasedtheorem{proposition}{Proposition}
+\newaliasedtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newaliasedtheorem{remark}{Remark}
+\theoremstyle{definition}
+\newaliasedtheorem{example}{Example}
+
+\usepackage{etoolbox}
+\newcommand{\thmbreakpenalties}{%
+  \interlinepenalty=5000\relax
+  \clubpenalty=10000\relax
+  \widowpenalty=10000\relax}
+\AtBeginEnvironment{definition}{\thmbreakpenalties}
+\AtBeginEnvironment{problem}{\thmbreakpenalties}
+\AtBeginEnvironment{theorem}{\thmbreakpenalties}
+\AtBeginEnvironment{proposition}{\thmbreakpenalties}
+\AtBeginEnvironment{lemma}{\thmbreakpenalties}
+\AtBeginEnvironment{remark}{\thmbreakpenalties}
+\AtBeginEnvironment{example}{\thmbreakpenalties}
+
+\ifdefined\pdftrailerid \pdftrailerid{} \fi
+
+\ifdefined\tagstructbegin
+  \ExplSyntaxOn
+  \int_new:N \g_book_tagatom_depth_int
+  \bool_new:N \g_book_saved_mc_bool
+  \bool_new:N \g_book_saved_struct_bool
+  \bool_new:N \g_book_saved_para_bool
+  \bool_new:N \g_book_opened_wrapper_bool
+  \cs_new_protected:Npn \book_tagatom_suspend:
+    {
+      \bool_gset_eq:NN \g_book_saved_mc_bool     \g__tag_active_mc_bool
+      \bool_gset_eq:NN \g_book_saved_struct_bool \g__tag_active_struct_bool
+      \bool_gset_eq:NN \g_book_saved_para_bool   \l__tag_para_bool
+      \bool_gset_false:N \l__tag_para_bool
+      \tagpdfsetup{activate-mc=false,activate-struct=false}
+    }
+  \cs_new_protected:Npn \book_tagatom_restore:
+    {
+      \bool_if:NT \g_book_saved_mc_bool     { \tagpdfsetup{activate-mc=true} }
+      \bool_if:NT \g_book_saved_struct_bool { \tagpdfsetup{activate-struct=true} }
+      \bool_gset_eq:NN \l__tag_para_bool \g_book_saved_para_bool
+    }
+  \ExplSyntaxOff
+  \makeatletter
+  \newcommand{\bookTagAtomBefore}{%
+    \global\advance\bookTagAtomDepth 1
+    \ifnum\bookTagAtomDepth=1
+      \par
+      \bookTagAtomOpenWrapper
+      \bookTagAtomSuspend
+    \fi}
+  \newcommand{\bookTagAtomAfter}{%
+    \ifnum\bookTagAtomDepth=1
+      \par
+      \bookTagAtomRestore
+      \bookTagAtomCloseWrapper
+      \global\@endpefalse
+    \fi
+    \global\advance\bookTagAtomDepth -1 }
+  \makeatother
+  \newcount\bookTagAtomDepth \bookTagAtomDepth=0
+  \ExplSyntaxOn
+  \newcommand{\bookTagAtomSuspend}{\book_tagatom_suspend:}
+  \newcommand{\bookTagAtomRestore}{\book_tagatom_restore:}
+  \newcommand{\bookTagAtomOpenWrapper}
+    {
+      \tag_if_active:TF
+        { \bool_gset_true:N \g_book_opened_wrapper_bool
+          \tagstructbegin{tag=P}\tagmcbegin{tag=P} }
+        { \bool_gset_false:N \g_book_opened_wrapper_bool }
+    }
+  \newcommand{\bookTagAtomCloseWrapper}
+    {
+      \bool_if:NT \g_book_opened_wrapper_bool
+        { \tagmcend\tagstructend }
+    }
+  \ExplSyntaxOff
+  \newcommand{\bookTagAtomEnv}[1]{%
+    \AddToHook{env/#1/before}{\bookTagAtomBefore}%
+    \AddToHook{env/#1/after}{\bookTagAtomAfter}}
+  \bookTagAtomEnv{Verbatim}
+  \bookTagAtomEnv{BVerbatim}
+  \bookTagAtomEnv{leansrc}
+  \bookTagAtomEnv{holsrc}
+  \bookTagAtomEnv{tssrc}
+  \bookTagAtomEnv{rustsrc}
+  \bookTagAtomEnv{mathpar}
+  \bookTagAtomEnv{definition}\bookTagAtomEnv{problem}
+  \bookTagAtomEnv{theorem}\bookTagAtomEnv{proposition}
+  \bookTagAtomEnv{lemma}\bookTagAtomEnv{remark}\bookTagAtomEnv{example}
+  \bookTagAtomEnv{blemma}\bookTagAtomEnv{bprop}\bookTagAtomEnv{bremark}
+  \bookTagAtomEnv{brecipe}\bookTagAtomEnv{bthm}
+  \bookTagAtomEnv{proof}
+  \bookTagAtomEnv{longtable}
+  \newcount\bookTagAtomInlineFlag \bookTagAtomInlineFlag=0
+  \newcommand{\bookTagAtomInlineBefore}{%
+    \global\advance\bookTagAtomDepth 1
+    \ifnum\bookTagAtomDepth=1
+      \ifhmode \global\bookTagAtomInlineFlag=1 \else \global\bookTagAtomInlineFlag=0 \fi
+      \ifnum\bookTagAtomInlineFlag=0
+        \par\bookTagAtomOpenWrapper
+      \fi
+      \bookTagAtomSuspend
+    \fi}
+  \makeatletter
+  \newcommand{\bookTagAtomInlineAfter}{%
+    \ifnum\bookTagAtomDepth=1
+      \bookTagAtomRestore
+      \ifnum\bookTagAtomInlineFlag=0
+        \bookTagAtomCloseWrapper
+        \global\@endpefalse
+      \fi
+    \fi
+    \global\advance\bookTagAtomDepth -1 }
+  \makeatother
+  \newcommand{\bookTagAtomInlineEnv}[1]{%
+    \AddToHook{env/#1/before}{\bookTagAtomInlineBefore}%
+    \AddToHook{env/#1/after}{\bookTagAtomInlineAfter}}
+  \bookTagAtomEnv{tabular}
+  \bookTagAtomEnv{tabular*}
+  \bookTagAtomEnv{tikzpicture}
+  \bookTagAtomEnv{minipage}
+  \bookTagAtomEnv{align}\bookTagAtomEnv{align*}
+  \bookTagAtomEnv{gather}\bookTagAtomEnv{gather*}
+  \bookTagAtomEnv{alignat}\bookTagAtomEnv{alignat*}
+  \bookTagAtomEnv{multline}\bookTagAtomEnv{multline*}
+  \bookTagAtomEnv{flalign}\bookTagAtomEnv{flalign*}
+  \pdfglyphtounicode{fatsemi}{2A1F}
+  \pdfglyphtounicode{llbracket}{27E6}
+  \pdfglyphtounicode{rrbracket}{27E7}
+  \ExplSyntaxOn
+  \msg_redirect_name:nnn {tag}{para-hook-count-wrong}{warning}
+  \AddToHook{shipout/before}
+    { \typeout{TAGPARA~page~\thepage~
+        b=\int_use:N \g__tag_para_begin_int\space
+        e=\int_use:N \g__tag_para_end_int} }
+  \ExplSyntaxOff
+\fi
+
+\definecolor{stubgray}{gray}{0.92}
+\definecolor{stubrule}{gray}{0.55}
+
+\newcommand{\stubbanner}{%
+  \noindent\colorbox{stubgray}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+    \centering\textsc{scaffold} --- this chapter is a plan and a source-material
+    map, not yet prose}}\par\medskip}
+
+\newcommand{\stubplan}{\paragraph{What will live here.}}
+\newcommand{\stubmaterial}{\paragraph{Source material.}}
+\newcommand{\stubstatus}{\paragraph{Status.}}
+
+\newcommand{\draftmark}{\textsc{\color{stubrule}draft}}
+
+\begin{document}
+
+\frontmatter
+\pdfbookmark[0]{Title Page}{bm:titlepage}
+\maitriatitlepage
+\setcounter{page}{2}
+
+\clearpage
+\thispagestyle{empty}
+\pdfbookmark[0]{Contributions}{bm:contributions}
+\noindent\textbf{\textsc{Contributions.}} Among the results certified in
+the Experiments chapter (chapter~\ref{ch:experiments}), each carried by
+machine-checkable certificates re-derived from committed artefacts: the
+complete NeurIPS~2025 neural-model-checking suite --- all $634$
+hardware-verification tasks across its three claim classes --- where the
+best published single tool completes $554$ and the union of every tool
+in the paper's own comparison completes $617$; the first published exact
+value of the textbook blackjack of Sutton and Barto under optimal play,
+$-3954908734551683826282634489/13^{26} \approx -4.311\%$; exact optima
+for FrozenLake whose registry comments turn out to be truncations of
+rationals with denominators $3^{99}$ and $3^{200}$, and the discovery
+that Gymnasium's registered Taxi ``solved'' threshold is unsatisfiable
+--- the true optimum, $7.93$ exactly, lies below it; a published
+manually-constructed supermartingale bound refuted by exact
+recomputation, localized to a two-sided interval that its ``sound''
+value lies strictly outside; bit-exact closure of Atari titles to
+and-inverter circuits validated frame-for-frame against the reference
+emulator, carrying to our knowledge the first certified episode
+returns for any Atari game --- including, on Montezuma's Revenge, the
+canonical hard-exploration benchmark, a machine-checked score of
+exactly $400$; and end-to-end synthesis of an
+entire certified policy catalogue --- every optimal lookup table and its
+proof --- in $0.69$ seconds of wall clock.\par\medskip
+
+\vfill
+\noindent\colorbox{stubgray}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+\textsc{preview.} This volume is a preview scaffold: every chapter is
+drafted, the drafts differ in maturity, and the generated surfaces
+re-derive from the toolkit's own sources at each preview. The table of
+contents is the book's normative shape. The Executive Summary is a
+first draft; the Experiments chapter (chapter~\ref{ch:experiments}) is
+a working draft whose tables re-derive from receipt files in
+\path{maitria-coalition/qtsl-experiments}, and the Markov-kernels
+chapter (chapter~\ref{ch:qtsl-markov-kernels}) is a working draft
+whose coverage dashboard re-derives from a measured census. The
+hypernet chapter (chapter~\ref{ch:qtsl-hypernets}), the
+semantic-universe chapter (chapter~\ref{ch:qtsl-semantic-universe}),
+the model-type catalogue
+(chapter~\ref{ch:qtsl-mathematical-models}), the composition-pattern
+catalogue (chapter~\ref{ch:qtsl-composition-patterns}), the
+specification-language chapter
+(chapter~\ref{ch:qtsl-specification-language}), whose API sections
+quote the toolkit's conformance corpus verbatim, the
+semiconductor-fab worked example (chapter~\ref{ch:qtsl-minifab}),
+whose construction listing runs as printed, the partial-completeness
+chapter (chapter~\ref{ch:qtsl-partial-completeness}), the agents'
+cookbook (chapter~\ref{ch:mtk-cookbook}), and the implementation
+pearls (chapter~\ref{ch:mtk-pearls}) are full drafts. So is the whole
+Geolog part: its quick start (chapter~\ref{ch:geolog-quickstart}),
+its tutorial (chapter~\ref{ch:geolog-tutorial}), its reference manual
+(chapter~\ref{ch:geolog-reference}), and its diagrams-as-data chapter
+(chapter~\ref{ch:qtsl-scomplexes}). The QTSL quick start
+(chapter~\ref{ch:qtsl-quickstart}) and the MTK production tutorial
+(chapter~\ref{ch:qtsl-tutorial}) are full drafts whose listings run
+as printed; the build regenerates their transcripts, and the Geolog
+quick start's, from real runs. The Rule Catalogue
+(chapter~\ref{ch:qtsl-manual}) is generated in full from the
+mechanized rule sources, and the Lean-cone appendix
+(Appendix~\ref{app:lean-cone}) is regenerated from the \path{lean/}
+trees at each build. Cited material migrates into the public
+repositories (\path{maitria-coalition/geolog-alpha},
+\path{maitria-coalition/qtsl}, \path{maitria-coalition/mtk},
+\path{maitria-coalition/qtsl-experiments}) as it graduates; until a
+cited artefact appears there, treat its mention as a statement of
+what exists, not yet a link.}}\par
+\vspace*{\fill}
+\noindent\copyright{} 2026 David ``davidad'' Dalrymple and the maitria coalition
+contributors.\par\nopagebreak\smallskip
+
+\doclicenseThis\medskip
+
+\noindent The \LaTeX{} source of this book resolves at
+\url{https://maitria.org/book.tex}, under the same license --- and this
+PDF carries it: for agent consumption, the file is constructed so that
+\texttt{pdftotext} on it returns its own \LaTeX{} source (byte-exact
+recipe on the source-appendix page at the end; the same bytes also ride
+as a PDF attachment).\\[1ex]
+The MAITRIA code repositories are licensed separately, under the
+Apache License 2.0 and the MIT license, at your option.
+\clearpage
+
+\pdfbookmark[0]{Contents}{bm:toc}
+\tableofcontents
+
+\input{chapters/relationship-to-aria}
+\markboth{Relationship to ARIA}{}
+\input{chapters/acknowledgments}
+
+\clearpage
+\edef\bookfolioresume{\number\value{page}}
+\mainmatter
+\setcounter{page}{\bookfolioresume}
+
+\input{chapters/exec-summary}
+\input{chapters/experiments}
+
+\part{Geolog}
+\input{chapters/geolog-quickstart}
+\input{chapters/geolog-tutorial}
+\input{chapters/geolog-reference}
+\input{chapters/qtsl-scomplexes}
+
+\part[QTSL: Quantitative Temporal Specification Logic]{QTSL:\\ Quantitative Temporal\\ Specification Logic}
+\input{chapters/qtsl-quickstart}
+\input{chapters/qtsl-tutorial}
+\input{chapters/qtsl-semantic-universe}
+\input{chapters/qtsl-hypernets}
+\input{chapters/qtsl-markov-kernels}
+\input{chapters/qtsl-mathematical-modelling}
+\input{chapters/qtsl-composition-patterns}
+\input{chapters/qtsl-spec-catalogue}
+\input{chapters/qtsl-manual}
+\input{chapters/qtsl-metatheory}
+
+\part{MTK}
+\input{chapters/qtsl-minifab-example}
+\input{chapters/mtk-pearls}
+\input{chapters/mtk-cookbook}
+
+\appendix
+\part{Appendices}
+\input{chapters/lean-cone}
+
+\printbibliography[heading=bibintoc,title={References}]
+
+\end{document}

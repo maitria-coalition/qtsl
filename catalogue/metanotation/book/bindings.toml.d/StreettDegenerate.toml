@@ -1,0 +1,14 @@
+# bindings.toml.d/StreettDegenerate.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'StreettDegenerate'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QStreett"
+decl = "sound_StreettDegenerate"
+sha256 = "5f9d3162c0f9b275d45b4e1d7cb6c5ef672258cece59b05c94d7bad51204032e"
+
+[[correspondence]]
+entry = "StreettDegenerate"
+steele_sha256 = "a8ebe24f7436d11a54a32b224f99f070030f94ad81be35dffa43215a4bc566cc"
+statements_sha256 = "0d61a8f57929007d45fcc0536ee5311f8736ec5dd9a252b825f52b5e0182d832"
+prose_sha256 = "9ec1f587fc03ac99fd8418c5b52e9f1c69a5fed79b876ea4548d45febb191f20"
+

@@ -1,0 +1,21 @@
+# api.toml.d/EqSym.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "EqSym"
+
+[api.ts]
+handle = "bl.Builder.eqSym"
+sig_file = "ts/src/bl.ts"
+sig = ["fn eqSym"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:eqSym"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::eq_sym"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn eq_sym"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:eq_sym"

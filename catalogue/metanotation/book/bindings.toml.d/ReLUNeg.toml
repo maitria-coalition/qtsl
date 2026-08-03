@@ -1,0 +1,14 @@
+# bindings.toml.d/ReLUNeg.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ReLUNeg'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_reluNeg"
+sha256 = "e888aa0864965c3ab485432ea5fa7e2ce8581989e01fb12d026e6af8b40d0bd2"
+
+[[correspondence]]
+entry = "ReLUNeg"
+steele_sha256 = "1b4a26feebc13b57b0d5507c22524257f4eddee070ebdedd1cad7fe9034b6eec"
+statements_sha256 = "c331302dee831e6881277c312064781607c94776e1b6b53a15dc389d0450f7d7"
+prose_sha256 = "eb7689612cd24dc927ba2c914e7cada2d4a9c3d19a122af2ae34f33860e19b3c"
+

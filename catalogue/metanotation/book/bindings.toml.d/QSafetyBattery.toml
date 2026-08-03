@@ -1,0 +1,29 @@
+# bindings.toml.d/QSafetyBattery.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QSafetyBattery'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Battery"
+decl = "sound_QSafetyBattery"
+sha256 = "7df562f05f148fa57a56af67d1976826ed5a375c4e025efc80e1297b4780cd4b"
+
+[[statement]]
+module = "QtslAux.Battery"
+decl = "sound_QSafetyBattery_failClosed"
+sha256 = "7a6408da41301b5db94095d9c787c93972fae28d3d9010436fe7469cc0cfda81"
+
+[[statement]]
+module = "QtslAux.LayerD.Skeleton"
+decl = "sound_GSHS_safety_battery"
+sha256 = "9badaf79fa72013cf98760e0cd875a9d2de56e17dd1145420eefe38d27c05828"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "sound_QSafetyBattery_staged"
+sha256 = "0cd277008dcfa140308da94fceb604cc201b0b4fcf413a5ca8dd5765be9a5ab7"
+
+[[correspondence]]
+entry = "QSafetyBattery"
+steele_sha256 = "b389aaaab79add17e69b782004c0f3f5d64aa195bf38d23ddb276e36cbe7b5e8"
+statements_sha256 = "e4d613edcdf074a5a0ea8ce675aac4ca6e0644ea657c28e98b68860e5c116e7b"
+prose_sha256 = "2b1ea5ea1b874529fcc0bdb5a7488d056eb127dcdaf286dcc173d03ac70481f2"
+

@@ -1,0 +1,34 @@
+\apilang{TypeScript}{judgment.sim}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function sim(args: {
+  sigma: ReadonlyArray<ReadonlyArray<Poly>>;
+  from: SysRef;
+  to: SysRef;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.sim({
+    // one mode, one destination coordinate
+    sigma: [[s.unwrap(s.polyVar(0, 1))]],
+    from: j.sysRef("fine"),
+    to: j.sysRef("coarse"),
+  }),
+),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QSim::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(sigma: Vec<Vec<Poly>>, from: SysRef, to: SysRef) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let sim = QSim::new(
+    vec![vec![Poly::var(0, 1).unwrap()]], // one mode, one coordinate
+    SysRef("fine".into()),
+    SysRef("coarse".into()),
+)
+.unwrap();
+\end{rustsrc}

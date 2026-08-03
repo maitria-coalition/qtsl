@@ -1,0 +1,195 @@
+# B5 fan fragment (see CellInInterior.toml header note for flagged calls).
+# First of the PSDCERT trio in roster order — its proof file carries the
+# family preamble the /DD and /K sections reference.
+
+[[rule]]
+id = "PSDCertT"
+source = "../BL-rules.toml"
+row = "PSDCERT/T"
+proof = "book/proofs/PSDCertT.tex"
+commentary = '''
+\rulename{PSDCERT/T} is the exact tier of the positive-definiteness
+certificate family: a premise-free rule concluding nonnegativity of the
+quadratic form $\sum_{i,j} A_{ij}\,p_i\,p_j$ of a symmetric rational
+matrix $A$ at a payload term vector, warranted by an untrusted witness
+$Z$ passing three decidable syntactic checks --- $A$ symmetric, $Z$
+upper-triangular with positive diagonal, and the product $A \cdot Z$
+(recomputed exactly, one sparse multiply) lower-triangular with
+positive diagonal. Those premises are a theorem-strength certificate of
+$A \succ 0$: the congruence $Z^{\mathsf T}(AZ)$ collapses to a positive
+diagonal, and positivity transports back through the invertible $Z$.
+The check is division-free, $O(\alpha n^2)$ multiplications ($\alpha$
+average nonzeros per row), and runs in $\mathbb{Z}$ on integer inputs.
+
+A producer reaches for it wherever a proof obligation is
+\textquotedblleft this explicit matrix is positive
+(semi)definite\textquotedblright\ --- Lyapunov and storage-function
+certificates, energy quadratic forms, elimination-free replacements for
+exact rational LDL factorization, whose $O(n^3)$
+divisions-with-fill-in it displaces. The witness is produced off-stage
+(a float Cholesky, exact elimination, anything); soundness never
+consults its accuracy --- a forged $Z$ can only refuse. The concluded
+fact enters the logic through the same conclusion-form selector as
+\rulename{Syzygy} (raw zero-form, the flipped $Q \geq 0$ reading, or a
+literal $l \leq r$ split), so it slots directly into
+\rulename{Syzygy}/\rulename{Farkas} combinations as a component
+conclusion; strictness is deliberately dropped at the formula boundary
+(a premise-free atom carries no $p \neq 0$), so the in-logic fact is
+$\succcurlyeq$-shaped even though the matrix-side theorem is strict.
+
+What the checker recomputes: the three matrix checks entrywise over
+exact $\Q$, and --- the recompute pattern --- that the payload
+conclusion term\textquotesingle s canonical polynomial IS the negated
+quadratic form $-\sum_{i,j} A_{ij}\,p_i\,p_j$ built from the payload
+terms (in either the wire-keyed or the wire-coordinate polynomial
+space). What breaks without each hypothesis: without symmetry the
+congruence argument dies and the premises say nothing about the
+quadratic form; without the $Z$ diagonal signs the product argument
+loses invertibility or positivity (the two sign families are
+determinant-linked --- flipping a column to repair one violates the
+other); the $AZ$ pattern and sign checks are the content itself, and
+for an indefinite $A$ no witness whatsoever passes; without the
+conclusion identity the posted atom could be unrelated to $A$; the
+shape/finiteness/positive-size fields on the conclusion are the
+standard evaluability-and-vacuity discipline (a zero-size wire
+satisfies atoms vacuously). The proof section carries the family
+preamble and walks these in order.
+'''
+note = '''
+Provenance: the triangular-inverse method is due to David
+\textquotedblleft davidad\textquotedblright\ Dalrymple; Geoffrey Irving
+derived and published the rounding-tolerant integer analysis and
+formalized that variant at scale (a certified 65536-node spectral
+expander) --- see the proof section\textquotesingle s citations. The
+kernel development here is an independent proof of the exact tier.
+Wire tag: deferred to the payload-window allocation; the emit path
+refuses the rule until allocated.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}. This dictionary is the
+trio\textquotesingle s template; /DD and /K differ in the witness row
+alone.
+\begin{itemize}
+\item $n \mapsto$ \texttt{a : Nat}; $A \mapsto$ \texttt{A}; $Z
+  \mapsto$ \texttt{Z} (both \texttt{Fin a → Fin a → ℚ}); $p_1,
+  \ldots, p_n \mapsto$ \texttt{ts : List Term}; $c \mapsto$
+  \texttt{conclusion : Term}.
+\item premise-freeness $\mapsto$ silence, the \rulename{PConstExact}
+  representation: no hypothesis mentions \texttt{seq.pre}, so $\Phi$
+  is arbitrary --- the \rulename{Norm} convention of the roster note,
+  carried structurally.
+\item the three displayed matrix rows (symmetry; upper-triangular $Z$
+  with positive diagonal; lower-triangular $A \cdot Z$ with positive
+  diagonal, recomputed exactly) $\mapsto$ the single Boolean witness
+  \texttt{hwit} $:$ \texttt{PsdCert.checkT a A Z = true}, whose
+  definition (displayed above) recomputes all three. The mathematics
+  enters through the certified-alongside bridge:
+  \texttt{checkT\_posDef} warrants $A \succ 0$ over $\R$, and
+  \texttt{sound\_psdCertT} consumes only its rational-points
+  quadratic-form corollary \texttt{checkT\_quadForm\_nonneg} --- the
+  displayed strictness drop at the formula boundary, visible in the
+  statement\textquotesingle s type.
+\item the canonical-polynomial row $c \equiv -\sum_{i,j} A_{ij} p_i
+  p_j$ $\mapsto$ \texttt{hconcl} $:$ \texttt{conclCheck a A ts
+  conclusion = true} --- the identity is checked on canonical forms by
+  either of two certified routes (the idx-free \texttt{toPoly} replay
+  of \texttt{conclCheckCore}, or the coordinate-indexed
+  \texttt{conclCheckW}), and \texttt{sound\_psdCertOf} discharges
+  both.
+\item $\Psi \in \{c \leq 0;\ Q \geq 0$ where $c = -Q;\ l \leq r$
+  where $c = l - r\}$ $\mapsto$ \texttt{hform} $:$
+  \texttt{syzygyConclusionForm conclusion seq.post} --- the certified
+  selector is literally that three-membered disjunction, reading the
+  conclusion term\textquotesingle s head syntactically (shared with
+  \rulename{Syzygy} and \rulename{PBound}).
+\item with no displayed row: the evaluability pack ---
+  \texttt{hshape} (the conclusion has a broadcast shape in
+  \texttt{H}), \texttt{hfin} (its wires are finite-typed), and
+  \texttt{hwpos} (every free wire positively sized). The display
+  omits all three; the certified statement demands them, and
+  \texttt{hwpos} is the same vacuous-surface refusal the
+  \rulename{Farkas} display now carries inline and the
+  \rulename{LiRPA} linkage builds in --- a candidate for the same
+  roster-resync treatment.
+\end{itemize}
+Width note: elementwise atom semantics batch the conclusion (the
+roster note), so the display\textquotesingle s scalar reading is the
+singleton case of the certified one; conversely the certified
+statement never uses witness accuracy beyond the Boolean check ---
+a forged $Z$ refuses, never falsely accepts --- and no hypothesis is
+unused.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "sound_psdCertOf",
+  "sound_psdCertT",
+]
+
+[[rule.lean]]
+module = "Qtsl.PsdCert"
+src = "../../lean/qtsl/Qtsl/PsdCert.lean"
+decls = [
+  "congruence_eq_diagonal",
+  "posDef_of_congruence_posDef",
+  "posDef_of_triangular_witness",
+  "checkT_posDef",
+  "quadForm_nonneg_of_posSemidef",
+  "checkT_quadForm_nonneg",
+]
+intro = '''
+\textbf{The matrix theorems (mathlib side).}\enspace The chain from
+witness check to consumable fact: the congruence collapse and transport
+lemmas prove the triangular-witness theorem; \texttt{checkT\_posDef}
+bridges the executable Bool check to positive definiteness of the
+$\R$-cast; and the rational-points corollary is the exact shape the
+rule soundness lemma consumes. Soundness never consults witness
+accuracy --- every hypothesis of every theorem below is a checked
+premise, so a forged witness can only fail a decidable check.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "qlsum",
+  "qabs",
+  "finQSum",
+  "mulEntry",
+  "symB",
+  "upperTriPosDiagB",
+  "checkT",
+  "negQuadFormPoly",
+  "conclCheckCore",
+  "conclCheckW",
+  "conclCheck",
+]
+intro = '''
+\textbf{The executable check (zero-mathlib closure).}\enspace The
+witness checks are List-based exact rational computations on the
+executable checker\textquotesingle s import closure --- displayed in
+full so the reader can confirm by eye that they are sign, zero-pattern,
+and entrywise-equality inspections over recomputed products, with no
+divisions and no trusted certificate data beyond the witness itself;
+and that \texttt{conclCheck} pins the payload conclusion\textquotesingle s
+canonical polynomial to the negated quadratic form (both polynomial
+branches mirror the \rulename{Syzygy} check\textquotesingle s split).
+These definitions are shared by all three family members; the /DD and
+/K sections display only their own additional entries.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The PSDCERT witness checks postdate the HOL4 catalogue port: the ported
+slice mirrors the checker cone as it stood before the certificate
+family shipped, and the script contains no counterpart of
+\texttt{checkT}/\texttt{checkDD}/\texttt{checkK} or the conclusion
+check (verified against the script and its receipts table this
+writing). Porting is mechanical by the established seam discipline
+(List-based exact rational checks are the port\textquotesingle s home
+ground) and belongs to the next catalogue-slice port together with the
+proof-object payload layer.
+'''

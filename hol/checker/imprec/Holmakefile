@@ -1,0 +1,4 @@
+# Imprecise-certificate soundness core. Cone-free: depends only on the
+# HOL4 distribution (realTheory / real_sigmaTheory / src/probability).
+all: qtsl_imprecTheory.uo qtsl_imprec_stagedTheory.uo
+.PHONY: all

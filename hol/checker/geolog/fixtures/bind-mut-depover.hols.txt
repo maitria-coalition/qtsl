@@ -1,0 +1,4 @@
+OK
+container version=1 prereqs=0 commits=1
+commit 0: sig=0x0000000000000000 author=0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f deps=[] parents=0 ts=12 msg=none bodyhash=0xad42d3d561d7570122f811c648a398addb9df07bfefde9410a92d9d87d5e8a8b ops=1 zones=[]
+op 0: elta sort=E(0,0)

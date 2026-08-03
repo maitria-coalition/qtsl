@@ -1,0 +1,97 @@
+[[rule]]
+id = "EqRefl"
+source = "../BL-rules.toml"
+row = "EqRefl"
+proof = "book/proofs/EqRefl.tex"
+commentary = '''
+\rulename{EqRefl} derives $\Phi \vdash t = t$, premise-free, for an
+arbitrary context $\Phi$ (a fact true in the empty context is true under
+any premise; the proof never reads $\Phi$). A producer uses it to seed
+equalities: the starting point of an \rulename{EqElim} rewrite chain
+(transitivity, in particular, derives from these three rules and begins
+here), and the $t = t$ obligations that alias unpacks and worked
+derivations demand.
+
+That the rule has side conditions at all is its content. Equality atoms
+in this calculus are facts about \emph{evaluation}, and evaluation is
+partial --- a wire of an extended dtype can hold $\pm\infty$ and fail
+the rational read; a shape-incompatible sum never evaluates. So
+``$t = t$'' costs something: the checker verifies the two typing
+conditions the semantics actually needs --- the term\textquotesingle s
+broadcast shape is \emph{defined} in the hypernet, and every free wire
+is typed at a \emph{finite} dtype. Under exactly these, evaluation is
+total at every valuation and reflexivity is free; drop either and the
+un-gated rule asserts an unsatisfiable conclusion under the empty
+premise (the proof section gives one concrete refutation per field).
+Nothing else is consulted: no premise, no admissibility, no evaluation
+--- both conditions are static typing checks against the hypernet.
+'''
+note = '''
+Where \rulename{Norm} applies, \rulename{EqRefl} is its diagonal; it is
+kept primitive so the equational kit stands in fragments that omit the
+polynomial engine entirely.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}.
+\begin{itemize}
+\item $t \mapsto$ the binder \texttt{t : Term}; the two displayed
+  typing premises $\mapsto$ \texttt{htyDef}: existence of a shape
+  \texttt{s} with \texttt{t.bshape H = some s} (defined broadcast
+  shape --- the \texttt{some} is the definedness), and \texttt{hfin}
+  $:$ \texttt{t.finWires H} (every free wire typed at a finite dtype,
+  quoted below). Both are static checks against the hypernet; no
+  valuation appears.
+\item conclusion $\Phi \vdash t = t$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .eq t t}; the arbitrary
+  context $\Phi$ is premise-freeness by silence --- no hypothesis
+  mentions \texttt{seq.pre}, so the statement holds under every
+  premise (the same representation the \rulename{PConstExact}
+  dictionary describes).
+\item certified alongside as the semantic engine:
+  \texttt{Term.evalQ\_defined\_of\_bshape\_fin} --- under exactly the
+  two typing conditions, evaluation is total at every valuation, at
+  the synthesized shape --- and \texttt{QTensor.rel2\_refl}, the
+  reflexivity of the elementwise comparison lifting.
+\end{itemize}
+No width difference in either direction: both typing hypotheses are
+consumed, and the proof section refutes the rule with either one
+dropped.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "Term.evalQ_defined_of_bshape_fin",
+  "QTensor.rel2_refl",
+  "sound_eqRefl",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+intro = '''
+\textbf{The two typing predicates, in full.}\enspace Both payload fields
+are static checks against the hypernet\textquotesingle s wire typing ---
+no valuation appears. \texttt{Term.bshape} is the broadcast-tolerant
+shape synthesis (scalars join with any shape; the projection case carries
+its own rank and range gates); \texttt{Term.finWires} demands a finite
+(non-extended) dtype at every free wire.
+'''
+full_decls = [
+  "Term.bshape",
+  "Term.finWires",
+  "PEqReflData",
+]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_eqrefl_def",
+  "Theorem famEq_eqrefl",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

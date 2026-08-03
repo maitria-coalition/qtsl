@@ -1,0 +1,146 @@
+# QBlockInv — graduated from dashboard-only coverage to a full literate
+# section (batch B9). The [[rule.lean]] blocks below preserve the former
+# [[coverage.lean]] blocks verbatim (module/src/decls unchanged) —
+# including HasFacetRows.boundaryDwell and qBlockInv_sound_of_facetRows
+# (bound in the bindings shard since the graduation re-bind).
+# conditional = true: the
+# integrated row form, the wedge/arena grid facts, and arena invariance
+# stand as interface hypotheses, narrated as mathematics in the proof
+# section.
+[[rule]]
+id = "QBlockInv"
+source = "../QTSL-rules.toml"
+row = "QBlockInv"
+proof = "book/proofs/QBlockInv.tex"
+conditional = true
+commentary = '''
+\rulename{QBlockInv} concludes the invariance-scope judgement: the block
+$N$ is forward-invariant and encloses the declared initial region. It
+is the Morse family\textquotesingle s workhorse producer --- the
+judgement it mints is consumed by \rulename{QBasin}\textquotesingle s
+safety factory, by scope-restriction of reach obligations, and as the
+arena warrant of nested certificates --- and its premise kit is
+minimal: per internal facet of the box-union block, one strictly-inward
+sign row with explicit positive rational margin (facets on the arena
+boundary owe nothing), plus one containment row $X_0 \subseteq N$.
+
+What the checker recomputes: the block\textquotesingle s grid geometry
+--- that the bitmap realizes a closed box-union inside its arena, and
+the facet-list well-formedness --- plus the replay of every row through
+the base kernel. What would break without each hypothesis: without the
+sign rows, exit through a facet; without strictness-by-margin, a strict
+field sign could not be certified through the non-strict enclosure
+predicates of exact-$\Q$ arithmetic (and the Morse rules that cite the
+same rows would lose the arguments where strictness is genuinely
+essential); without the containment row, a start outside the block;
+without closedness of the realization, the first-exit
+argument\textquotesingle s sup-time step fails.
+
+The mechanization is conditional at a named interface: the bound
+theorems descend the invariance obligation through a first-exit
+skeleton (closed block, continuous trajectories, boundary dwell) and a
+facet-row bridge (integrated growth of the facet observables through a
+one-directional wedge test), leaving exactly three hypothesis families
+--- the integrated row clause (reachable from the pointwise rows
+through a mean-value bridge whose surviving content is the
+profile-level identification of the certified rate with the
+trajectory-wise derivative), the grid facts of the box-union, and
+arena invariance (nested citation or model-class warrant, terminating
+at the whole space). The proof section states the ledger, and why the
+wedge test must be one-directional (reentrant corners of box-unions).
+'''
+note = '''
+The same facet rows serve three consumers --- this rule, the lattice
+membership of the family object, and the Morse
+discharge\textquotesingle s facet arguments --- which is the design
+reason strict margins are mandatory here even though this
+rule\textquotesingle s own conclusion would survive non-strict signs
+(the proof section\textquotesingle s strictness remark).
+'''
+correspondence = '''
+The displayed judgement $\mathcal{M} \vDash \mathsf{QInvScope}(N, X_0)$
+$\mapsto$ the goal \texttt{InvScopeSat N X0} = \texttt{φ.Invariant N ∧
+X0 ⊆ N} --- the claim record\textquotesingle s denotation verbatim.
+The five bound statements form one discharge chain:
+\texttt{qBlockInv\_sound} (the roster\textquotesingle s ``two lines'':
+invariance + containment $\Rightarrow$ the claim, M(i) as hypothesis),
+\texttt{\_of\_dwell} riding \texttt{invariant\_of\_boundaryDwell} (G1
+mechanized: closed block + trajectory continuity + boundary dwell
+$\Rightarrow$ invariance, the first-exit sup-time argument), and
+\texttt{\_of\_facetRows} riding \texttt{HasFacetRows.boundaryDwell},
+the deepest bound form, whose kit is the honest ledger:
+\begin{itemize}
+\item the block $N : \mathsf{QRegionAtom}$ $\mapsto$ an abstract
+  \texttt{N : Set X} with \texttt{hN : IsClosed N}: the grid stratum
+  (bitmap realizes a closed box-union in its arena; facet-list
+  well-formedness) is checker-side recompute, and closedness is the
+  one grid fact the bound statements consume --- as an explicit
+  hypothesis, not a derived fact.
+\item facet-inward sign rows $\mapsto$ \texttt{hrows :
+  φ.HasFacetRows D N}: finitely many facet observables $\ell_i$ with
+  explicit positive margins (\texttt{∀ i, 0 < ε i} --- the
+  display\textquotesingle s strictness-by-margin, carried exactly),
+  each growing at \emph{integrated} rate $\ge \varepsilon_i$ along
+  confined prefixes --- the pointwise row $\mathcal{A}\ell \ge
+  \varepsilon$ reaches that form through the G2-class mean-value
+  bridge, outside this bound set --- plus the local wedge test,
+  one-directional by design (reentrant corners of box-unions defeat
+  the $\leftrightarrow$ form), with ``$\partial D$-faces owe
+  nothing'' realized as the wedge test\textquotesingle s \texttt{y ∈
+  D} conjunct.
+\item \texttt{init\_containment} $\mapsto$ \texttt{hInit : X0 ⊆ N},
+  one-to-one, unchanged at every link of the chain.
+\item undisplayed hypotheses, named: \texttt{htraj} (trajectory
+  continuity --- model-class), and the arena pair \texttt{hND : N ⊆
+  D} + \texttt{hD : φ.Invariant D} --- the display treats the arena
+  as ambient; the certified statement makes the invariance regress
+  explicit (the roster witness names its termination at
+  \texttt{invariant\_univ}, which is in the module but not this
+  bound set).
+\end{itemize}
+Width note: the conditional flag\textquotesingle s three named
+families are visible verbatim in the deepest bound
+statement\textquotesingle s binders --- the integrated row clause
+(inside \texttt{HasFacetRows}), the grid facts (\texttt{hN}, plus the
+wedge-test geometry carried \emph{inside} \texttt{hrows} rather than
+discharged), and arena invariance (\texttt{hD}) --- so the certified
+reach is exactly ``rows-in-shadow-form to judgement,'' with the
+row-to-shadow and grid-model discharges
+(\texttt{qBlockInv\_sound\_of\_rows},
+\texttt{Grid.qBlockInv\_sound\_of\_grid},
+\texttt{\_of\_pointwiseRows}) cited by the roster witness but not
+bound here --- the same named re-bind candidate class as on
+\rulename{QMorseDischarge}. One deliberate width inversion: the
+display\textquotesingle s conclusion tie is an unconditional judgement
+about the model, while \texttt{qBlockInv\_sound} alone is wider than
+the rule (any invariant set qualifies); the facet-row form narrows
+back to certificate-shaped input. No hypothesis in the bound set
+demands the block be a box-union --- the geometry enters only through
+what the wedge test can actually be discharged for.
+'''
+
+[[rule.lean]]
+module = "Qtsl.QtslSoundness"
+src = "../../lean/qtsl/Qtsl/QtslSoundness.lean"
+decls = ["qBlockInv_sound"]
+
+[[rule.lean]]
+module = "Qtsl.Discharge"
+src = "../../lean/qtsl/Qtsl/Discharge.lean"
+decls = ["qBlockInv_sound_of_dwell", "invariant_of_boundaryDwell", "HasFacetRows.boundaryDwell", "qBlockInv_sound_of_facetRows"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent: the HOL4 development\textquotesingle s object is the
+base-kernel checker cone (dtype factorization, exact rational
+arithmetic, the catalogue check functions), and the
+satisfaction-judgement stratum this rule concludes in has no HOL twin
+--- no invariance-judgement or Morse-family definition exists in the
+ported scripts (verified against the port\textquotesingle s definition
+inventory). The facet-sign and containment rows this rule consumes ARE
+covered by the ported checker; the judgement-stratum soundness
+development (the first-exit skeleton and the facet-row bridge) is
+Lean-only today, and a port would be new assurance surface over the
+semiflow stratum rather than a translation of existing checker code.
+'''

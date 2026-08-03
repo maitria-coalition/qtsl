@@ -1,0 +1,44 @@
+name = "reflection"
+defaultTargets = ["Reflection"]
+
+# The route checks the same certificate calculus the core package
+# formalizes: rule soundness (Qtsl.Soundness), the wire model and its
+# parser (Qtsl.Wire, Qtsl.WireCheck), and the admissible-rule seam.
+[[require]]
+name = "Qtsl"
+path = "../../qtsl"
+
+# The reflection route library: sealed geolog container bytes decoded,
+# reconstructed, elevated, and elaborated into a kernel-accepted
+# validity theorem (`Reflection.Accept`). The per-certificate kernel
+# receipt modules (`Reflection.Receipt*`) are deliberately outside the
+# library root: each one kernel-evaluates a whole acceptance run
+# (`decide`), which costs orders of magnitude more than every other
+# module combined — build them by name, on hardware sized for it.
+[[lean_lib]]
+name = "Reflection"
+
+# Geolog container reader: file-driven structural dumps (plain and
+# sealed readings per input) for the cross-implementation differential
+# harness.
+[[lean_exe]]
+name = "geolog_read"
+root = "Reflection.ReadMain"
+
+# The reflection route end to end: sealed container files in, staged
+# and end-to-end verdicts with timings out.
+[[lean_exe]]
+name = "geolog_reflect"
+root = "Reflection.ReflectMain"
+
+# Row-path harness over the reference implementation's op dumps
+# (test instrument; drives rows -> certificate -> validity).
+[[lean_exe]]
+name = "oracle_accept"
+root = "Reflection.OracleHarness"
+
+# Reflection-route differential demo: the first-order checker and the
+# proof-object elaborator adjudicated over the embedded fixtures.
+[[lean_exe]]
+name = "reflect_demo"
+root = "Reflection.ReflectDemo"

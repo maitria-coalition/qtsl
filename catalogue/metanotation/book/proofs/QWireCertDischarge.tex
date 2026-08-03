@@ -1,0 +1,113 @@
+
+\sourcenote{Genre: core rule (tier 1), core-as-glue --- the rule
+assembles inherited sequent leaves into the wiring-certificate
+judgement, and its own mathematical content is deliberately thin: that
+the checked arithmetic rows genuinely certify slack-class membership,
+and that the class supports the composition algebra the composition
+rule recomputes. The section proves exactly that and marks the
+assembly gap loudly.}
+
+\textbf{Setting and claim.}\enspace A wiring certificate
+$\mathsf{QWireCert}(w, (\mathit{spec}_i) \Rightarrow
+\mathit{spec}_{\mathrm{out}}, \kappa)$ carries two per-region families
+of pointwise implications --- the lens square's assumption leg
+$\alpha_2(w(o_1), a_2) + \kappa(\gamma_1(o_1)) \geq
+\alpha_1(w^{\sharp}(o_1, a_2))$ and guarantee leg
+$\gamma_1(o_1) \geq \gamma_2(w(o_1))$
+\cite{capuccimyers2026} --- which for polynomial data are ordinary
+sequents the base calculus checks, plus a slack
+$\kappa \in \mathcal{K}^0_\infty$: zero at zero, monotone on
+$[0, \infty)$, unbounded at infinity (the \texttt{IsClassK0Inf}
+structure quoted above; the non-strict monotone reading is the
+catalogued one). The rule's own obligations, proven here: the three
+checked rows certify membership for polynomial slacks
+(Lemma~\ref{lem:qwc-poly}), and the class supports ``compose by lens
+composition and by addition of the slacks''
+(Lemma~\ref{lem:qwc-algebra}).
+
+\begin{blemma}[the polynomial discharge]\label{lem:qwc-poly}
+Let $p$ be a real polynomial with \emph{(R1)} constant coefficient
+zero, \emph{(R2)} derivative nonnegative on $[0, \infty)$, and
+\emph{(R3)} positive degree with nonnegative leading coefficient. Then
+$x \mapsto p(x)$ is in $\mathcal{K}^0_\infty$.
+\end{blemma}
+\begin{proof}
+(\texttt{polynomial\_discharge}.) Zero at zero: $p(0)$ \emph{is} the
+constant coefficient, so (R1) is the field it certifies --- and note
+the checker's form of (R1) is one closed exact evaluation, the
+ground-fact pattern. Monotone: $[0, \infty)$ is convex and $p$ is
+everywhere continuous and differentiable, so nonnegativity of $p'$ on
+the interior gives monotonicity on the ray (the mean-value
+inequality); (R2) is a single-variable nonnegativity row of exactly
+the calculus's cone-checkable shape. Unbounded: a polynomial of
+positive degree with nonnegative leading coefficient tends to
+$+\infty$ --- (R3) is one syntactic degree check plus one sign row.
+Each row maps onto exactly one class field; none is spare.
+\end{proof}
+
+\begin{blemma}[the slack algebra]\label{lem:qwc-algebra}
+$\mathcal{K}^0_\infty$ is closed under pointwise sum and under
+composition; two contract inequalities with constant slacks chain to
+one with the summed slack
+($f \leq g + c_1$ and $g \leq h + c_2$ pointwise give
+$f \leq h + (c_1 + c_2)$); and guarantee legs chain along a cascade
+($\gamma_2 \circ w_1 \leq \gamma_1$ and $\gamma_3 \circ w_2 \leq
+\gamma_2$ give $\gamma_3 \circ w_2 \circ w_1 \leq \gamma_1$).
+\end{blemma}
+\begin{proof}
+Sum (\texttt{IsClassK0Inf.add}): zeros add; monotonicity is termwise;
+for unboundedness, eventually the second summand is nonnegative (it
+tends to infinity), so the sum eventually dominates the first, which
+tends to infinity. Composition (\texttt{IsClassK0Inf.comp}):
+$\kappa_1(\kappa_2(0)) = \kappa_1(0) = 0$; monotone-composed-monotone
+is monotone \emph{provided the inner map lands in the outer's domain
+of monotonicity} --- which is where nonnegativity of a class slack on
+the ray (zero at zero plus monotone) is consumed, not decoration;
+unbounded-composed-unbounded is unbounded. The triangle
+(\texttt{slack\_triangle}) and the guarantee chain
+(\texttt{guarantee\_leg\_comp}) are one-line pointwise transitivity,
+stated over an arbitrary interface carrier so the per-region reading
+is instantiation, not generalization.
+\end{proof}
+
+\begin{bremark}[why each membership row is essential]
+\label{rem:qwc-rows}
+Drop (R1) and $\kappa(x) = x + 1$ enters the class candidates: a
+wiring square then certifies with degradation even on \emph{exact}
+upstream delivery ($\kappa(0) = 1$); and the anchor of the algebra ---
+nonnegativity of a class slack on the ray, proved from zero-at-zero
+plus monotonicity --- fails too, witness $\kappa(x) = x - 1$. Drop (R2) and composition
+closure fails at the monotonicity step
+(Lemma~\ref{lem:qwc-algebra}'s proof consumes it twice: once as the
+outer map's field, once through inner-map nonnegativity), and the
+quantitative reading --- a weaker delivered guarantee never
+\emph{shrinks} the licensed degradation --- inverts. Drop (R3) and
+bounded slacks enter ($\kappa \equiv 0$ passes (R1)--(R2) alone); the
+discharge then no longer certifies unboundedness, and $\kappa$ loses
+its comparison-function-style gain reading. The zero polynomial is excluded by (R3) deliberately: a
+slack-free square is a square with the $\kappa$-term \emph{absent},
+never one with $\kappa = 0$, so the additive algebra needs no zero
+element.
+\end{bremark}
+
+\begin{bremark}[the assembly gap, loud]\label{rem:qwc-gap}
+What this section does \emph{not} contain: the square leaves
+themselves (shipped sequent machinery of the base calculus, cited by
+the certificate --- pointwise polynomial implications per region,
+checked by the cone machinery), and the end-to-end assembly of the
+judgement object, which awaits the staging of the judgement sort in the
+certificate schema. The dashboard's conditional mark scopes the
+warrant to exactly Lemmas~\ref{lem:qwc-poly}
+and~\ref{lem:qwc-algebra}: the arithmetic rows mean what they claim,
+and the class composes. The semantic content of what a wiring
+certificate \emph{buys} a composite is deliberately not here --- it is
+the composition rule's semantic reading, one section over.
+\end{bremark}
+
+\begin{anchors}
+class definition (bound by display) & \texttt{IsClassK0Inf} (fields \texttt{zero\_at\_zero}, \texttt{mono}, \texttt{unbounded})\\
+Lemma \ref{lem:qwc-poly} & \texttt{polynomial\_discharge}\\
+Lemma \ref{lem:qwc-algebra}: sum, composition & \texttt{IsClassK0Inf.add}, \texttt{IsClassK0Inf.comp}; nonnegativity anchor \texttt{IsClassK0Inf.nonneg}\\
+Lemma \ref{lem:qwc-algebra}: triangle, guarantee chain & \texttt{slack\_triangle}, \texttt{guarantee\_leg\_comp}\\
+square legs (cited, not re-proved) & inherited \rulename{BernCone}-family sequents (main package)\\
+\end{anchors}

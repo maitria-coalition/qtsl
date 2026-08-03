@@ -1,0 +1,91 @@
+[[rule]]
+id = "AndE"
+source = "../BL-rules.toml"
+row = '$\wedge$E'
+proof = "book/proofs/AndE.tex"
+commentary = '''
+$\wedge$E projects a conjunction: from
+$\Phi \vdash \Psi_1 \wedge \Psi_2$, conclude $\Phi \vdash \Psi_i$. A
+producer uses it to take composite facts apart --- the demonstration
+certificate applies it right after its axiom leaf, extracting from a
+composite premise the region conjunct that the Bernstein-cone closure
+needs --- and, with $\wedge$I, to reshape conjunction trees for the
+structural comparisons other rules perform.
+
+The rule is realized as two constructors, one per side; the
+paper\textquotesingle s index $i \in \{1, 2\}$ is the constructor
+choice itself, so there is no unchecked side flag. The checker
+recomputes two tree identities: shared context, and that the
+sub-derivation\textquotesingle s conclusion is exactly the
+conclusion\textquotesingle s post conjoined with the \emph{named}
+discarded conjunct --- on the right for the left constructor, on the
+left for the right one. Naming the discarded conjunct in the payload
+makes the side condition a single comparison; the checker never
+searches a conjunction for the target, and a certificate claiming the
+wrong side simply fails the identity.
+
+Dropping the conclusion identity frees the conclusion outright;
+dropping the context identity admits the context-swap counterexamples
+walked at \rulename{Weaken}. The projection itself needs no defence:
+discarding a conjunct only weakens a claim, and the proof section
+notes the pairing with $\wedge$I under which the fragment is exactly
+lossless.
+'''
+comparator = '''
+\badge{BadgeBlue}{comparator: exercised via the demonstration fixture}
+the composite demonstration certificate (an axiom node, a conjunction
+elimination, a Bernstein-cone closure) runs as a fixture through the
+three-implementation comparator harness (compiled / kernel-interpreted /
+reference-interpreted), so this rule\textquotesingle s node rides every
+execution path of that harness.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}.
+\begin{itemize}
+\item the display\textquotesingle s index $i \in \{1, 2\}$ $\mapsto$
+  the \emph{choice of lemma}: \texttt{sound\_andE\_left} is $i = 1$,
+  \texttt{sound\_andE\_right} is $i = 2$, mirroring the
+  payload\textquotesingle s two constructors --- the side is a
+  constructor choice, never an unchecked flag.
+\item premise judgement $\Phi \vdash \Psi_1 \wedge \Psi_2$ $\mapsto$
+  \texttt{ih}, with the conjunction shape carried by \texttt{hpost}:
+  in the left lemma \texttt{premise.post = .and seq.post other} ---
+  the surviving conjunct $\Psi_i$ \emph{is} the
+  conclusion\textquotesingle s own post field, and the discarded
+  conjunct $\Psi_{3-i}$ $\mapsto$ the binder \texttt{other} (right
+  lemma: mirrored, \texttt{.and other seq.post}).
+\item $\Phi \mapsto$ \texttt{premise.pre}, shared via \texttt{hpre}
+  $:$ \texttt{seq.pre = premise.pre}; conclusion $\Phi \vdash \Psi_i$
+  $\mapsto$ the goal \texttt{seq.semanticallyValid H}.
+\end{itemize}
+No width difference in either direction: the lemma pair covers exactly
+the displayed $i$-indexed family, and every hypothesis is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_andE_left", "sound_andE_right"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["PAndEData"]
+intro = '''
+Payload, read as in the \rulename{Ax} section: one constructor per
+projection, each a sub-derivation plus structural equalities with the
+discarded conjunct as explicit data.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_andeScript.sml"
+theory = "qtsl_fam_ande"
+decls = [
+  "Definition checkFam_ande_def",
+  "Theorem famEq_ande",
+]
+receipt = '''
+Documentary citations. Spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

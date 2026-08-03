@@ -1,0 +1,479 @@
+\chapter{Diagrams as Data: S-Complexes}
+\label{ch:qtsl-scomplexes}
+
+\noindent\draftmark\medskip
+
+Several strata of this book traffic in \emph{diagrams}. The
+specification language's global stratum asserts a certified Morse graph
+(\bookref{ch:qtsl-specification-language}{the Specification Language chapter}); the hypernet
+chapter reads every computation as a string diagram
+(\bookref{ch:qtsl-hypernets}{the hypernet chapter}); grid
+certificates decompose state space into cubical cells; and the
+higher-categorical diagram machinery this project consults runs on
+oriented graded posets. Each of these is, concretely, a family of
+cells in graded dimensions plus incidence data saying which cells
+bound which. Each could therefore grow its own bespoke incidence
+schema, its own well-formedness checker, and its own subtly different
+answer to ``is the boundary recorded here the boundary the theorem
+was about?''
+
+The toolkit owns one such object. An \emph{S-complex} is a graded
+family of finite cell sets whose boundary structure is recorded as a
+pair of semiring-valued tensors per dimension (one for each
+orientation sign), satisfying a subtraction-free form of the chain
+condition $\partial^2 = 0$. The semiring parameter $\mathbb{S}$ is where
+the genus gets its reach: with Booleans it is incidence, with natural
+numbers it is multiplicity, with a semiring of \emph{port names} it
+is a string diagram, and with min-plus dwell bounds its labels carry
+quantitative dynamics. Well-formedness in every case amounts to a
+handful of tensor contractions and one semiring comparison per
+dimension, using the same contraction machinery the rest of the
+toolkit already trusts (\bookref{ch:qtsl-hypernets}{the hypernet
+chapter}, relational-kinship section), so the properties are
+checkable in bulk, on accelerators, by the engine that checks
+everything else.
+
+The instinct (diagrams stored as typed incidence data, computed on
+in bulk) is shared with the attributed $\mathcal{C}$-set line of
+applied category theory, where diagrams are categorical data
+structures~\cite{patterson21} with data-parallel composition
+algorithms~\cite{wilson23}, and where a string diagram can be a
+first-class engineering artefact rather than an
+illustration~\cite{master19}. An S-complex trades that line's schema
+generality for one graded shape with a semiring parameter; the trade
+is what makes well-formedness a tensor computation.
+
+This chapter defines the object and its morphisms
+(section~\ref{sec:scx-def}), tours the instances that choice of
+$\mathbb{S}$ buys (section~\ref{sec:scx-instances}), states the
+encoding discipline that decides when a complex is stored versus
+derived (section~\ref{sec:scx-generators}), presents the certified
+Morse graph as the flagship rank-1 instance with its quantitative
+refinement (section~\ref{sec:scx-morse}), works the string-diagram
+instance in full --- including the reading under which a well-formed
+hypernet \emph{is} an S-complex (section~\ref{sec:scx-strings}) ---
+and closes with a ledger separating definitional content from design
+directions (section~\ref{sec:scx-ledger}).
+Sections~\ref{sec:scx-def} and~\ref{sec:scx-morse} carry everything
+the rest of the book consumes; section~\ref{sec:scx-strings} is the
+most likely to surprise, and a reader with no stake in string
+diagrams can skip it without loss of continuity.
+
+\section{The definition}
+\label{sec:scx-def}
+
+Throughout, $\mathbb{S}$ is an \emph{ordered semiring}: a semiring
+$(\mathbb{S}, 0, 1, +, \cdot)$ equipped with a preorder $\le$ such
+that $0 \le 1$ and both operations are monotone in each argument.
+Order-equivalence is derived, not assumed:
+$x \cong y \mathrel{:\Leftrightarrow} x \le y \wedge y \le x$.
+No subtraction is ever required. That restraint is the point: the
+instances worth having --- Booleans, counts, port sets, min-plus
+costs --- live in semirings that have no subtraction to offer.
+
+A \emph{tensor} over $\mathbb{S}$ indexed by finite sets
+$A_0, \dots, A_{k-1}$ is a finite function
+$\prod_{i<k} A_i \to \mathbb{S}$, and juxtaposition of tensors
+denotes contraction over the shared index (sum of products, in
+$\mathbb{S}$), as in the contraction vocabulary of
+\bookref{ch:qtsl-mathematical-models}{the modelling chapter}.
+
+\begin{definition}[S-complex]
+\label{def:scomplex}
+An $\mathbb{S}$-\emph{complex} of rank $r$ consists of finite cell
+sets $C_0, C_1, \dots, C_r$ (cells in dimension $0$ through $r$)
+together with, for each $0 < i \le r$ and each sign
+$e \in \{+,-\}$, a rank-2 boundary tensor
+\[
+\partial_i^{e} \colon C_{i} \times C_{i-1} \longrightarrow \mathbb{S},
+\]
+satisfying, for each $1 \le i \le r-1$, the \emph{sign-split chain
+condition}
+\begin{equation}
+\label{eq:scx-dd}
+\partial_{i}^{+}\, \partial_{i+1}^{+} \;+\; \partial_{i}^{-}\, \partial_{i+1}^{-}
+\;\cong\;
+\partial_{i}^{-}\, \partial_{i+1}^{+} \;+\; \partial_{i}^{+}\, \partial_{i+1}^{-}
+\qquad \colon\; C_{i+1} \times C_{i-1} \to \mathbb{S}.
+\end{equation}
+\end{definition}
+
+Stated as one dependent type, with $[N]$ the finite ordinals and
+$\mathsf{Fin}$ the concretely finite sets, the presented data of the
+genus is
+\[
+\sum_{N \colon \mathbb{N}} \;\; \sum_{C \colon \prod_{n \colon [N]} \mathsf{Fin}} \;\; \prod_{i \colon [N-1]} \; \prod_{e \colon \{+,-\}} \big[\, \partial_{i+1}^{e} \colon C_{i+1} \times C_{i} \to \mathbb{S} \,\big]
+\]
+--- $N$ graded levels and a sign-split boundary pair per consecutive
+pair of levels, nothing else. The type records presentations only;
+condition~\eqref{eq:scx-dd} is a property checked \emph{of} a
+presentation rather than a component packaged \emph{in} it, so one
+schema serves both the complexes that satisfy it and the raw
+presentations a checker has not yet admitted. The rank $r$ of
+Definition~\ref{def:scomplex} is $N - 1$.
+
+Condition~\eqref{eq:scx-dd} is the classical $\partial^2 = 0$ with
+the subtraction moved across the equals sign: over a ring, setting
+$\partial = \partial^{+} - \partial^{-}$ and expanding
+$\partial_i\,\partial_{i+1} = 0$ gives precisely ``matched sign pairs
+equal mismatched sign pairs.'' Stated this way the condition makes
+sense over any ordered semiring, and each side is two contractions
+and a sum, so checking well-formedness of a presented complex is a
+fixed, small pattern of contraction rows per dimension --- the
+bulk-checkable shape the engine is built around. An elementary
+instance to hold while reading: a filled square. Each corner lies on
+two of the four edges, so exactly two routes descend from the
+$2$-cell through an edge to that corner; however the edges are
+oriented, one route carries matched signs and the other mismatched,
+so the two sides of~\eqref{eq:scx-dd} agree entry by entry --- the
+corner-cancellation of $\partial^2 = 0$, surviving with parity where
+its minus signs used to be. For $r \le 1$ the
+condition is vacuous, and a presentation of a rank-1 complex should
+say so plainly rather than imply a check that never ran.
+
+The two signs record \emph{combinatorial orientation}: for a directed
+edge $a$ from $x$ to $y$, the source incidence lives in
+$\partial_1^{-}(a, x)$ and the target incidence in
+$\partial_1^{+}(a, y)$. This sign records a property of the diagram
+itself rather than of any dynamics drawn on it; when a dynamical
+certificate needs a notion of inward and outward flow across a face,
+that is separate label data riding on the cells, never a
+reinterpretation of the boundary signs.
+
+\begin{definition}[morphism of S-complexes]
+\label{def:scx-morphism}
+Let $C$ be an $\mathbb{S}$-complex and $D$ a $\mathbb{T}$-complex
+with $\operatorname{rank}(C) \le \operatorname{rank}(D)$. A
+\emph{morphism} $f \colon C \to D$ consists of a function
+$f_i \colon C_i \to D_i$ for each dimension $i$ of $C$, regarded
+semantically as a tensor
+$f_i \colon C_i \times D_i \to \mathbb{T}$ whose entries are $0$
+and $1$, together with a lax
+morphism of ordered semirings
+$f_S \colon \mathbb{S} \to \mathbb{T}$ (monotone, $f_S(0) \cong 0$,
+$f_S(1) \cong 1$, $f_S(x+y) \le f_S(x) + f_S(y)$, and
+$f_S(x \cdot y) \le f_S(x) \cdot f_S(y)$), such that for every
+dimension $0 < i \le \operatorname{rank}(C)$, every sign $e$, and
+every $(c, d) \in C_i \times D_{i-1}$,
+\begin{equation}
+\label{eq:scx-chainmap}
+\sum_{d' \in D_i} f_i(c, d')\; \partial_i^{D,e}(d', d)
+\;=\;
+\sum_{c' \in C_{i-1}} f_S\!\big(\partial_i^{C,e}(c, c')\big)\; f_{i-1}(c', d).
+\end{equation}
+\end{definition}
+
+Equation~\eqref{eq:scx-chainmap} is the chain-map square, sign by
+sign: mapping a cell forward and taking its boundary in $D$ agrees
+with taking its boundary in $C$, pushing the cells forward, and
+translating the coefficient values through $f_S$. Laxity in $f_S$ is
+deliberate. The useful coefficient translations are
+\emph{forgetful} --- cardinality (from port witnesses to counts),
+support (from counts to incidence), and coarse quantitative summaries
+(from fine margins to dwell bounds) --- and translations of the last
+kind are subadditive rather than exact, so demanding exactness would
+refuse precisely the summaries the tower is for.
+
+\section{Instances by choice of semiring}
+\label{sec:scx-instances}
+
+The definition specializes by choice of coefficient semiring:
+
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+object & $\mathbb{S}$ & rank & boundary reading \\
+\midrule
+directed graph & $\mathbf{2}$ (Booleans) & 1 & $\partial_1^{-}$ source, $\partial_1^{+}$ target \\
+directed hypergraph & $\mathbb{N}$ & 1 & tail/head multiplicities \\
+cubical complex & $\mathbf{2}$ & $d$ & oriented facet incidence \\
+oriented graded poset & $\mathbf{2}$ & any & covering relation, one sign each \\
+Lefschetz complex & a ring's split halves & any & incidence coefficients \\
+string diagram & port names (\S\ref{sec:scx-strings}) & 1 & \emph{which ports}, not just how many \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}[oriented graded posets]
+\label{rem:scx-ogp}
+Oriented graded posets, a combinatorial substrate of
+higher-categorical diagram rewriting \cite{hadzihasanovic24a}, embed
+as Boolean complexes in which each covering pair carries exactly one
+of the two signs. The shape predicates that theory cares about
+(roundness, molecule-hood, regularity) remain predicates on top of
+the complex, as that literature states them, with the complex
+supplying the data they are predicates \emph{of}.
+\end{remark}
+
+\begin{remark}[Lefschetz complexes]
+\label{rem:scx-lefschetz}
+Lefschetz complexes, a combinatorial carrier of Conley-theoretic
+invariants \cite{mischaikowmrozek2002}, carry ring coefficients
+without a ring: a classical incidence coefficient enters as its
+split halves $k = k^{+} - k^{-}$, one sign each, so entries stay in
+$\mathbb{N}$ and subtraction never enters the schema.
+\end{remark}
+
+\begin{remark}[the coefficient tower]
+\label{rem:scx-tower}
+The coefficient levels form a tower. Cardinality maps a string
+diagram's witness sets to a directed hypergraph's multiplicities, and
+Boolean support forgets those to bare incidence. Both maps are lax
+morphisms in the sense of Definition~\ref{def:scx-morphism} with the
+identity on cells, so the port, counting, and incidence readings are
+three resolutions of a single object.
+\end{remark}
+
+\section{Generators or presentations}
+\label{sec:scx-generators}
+
+Not every complex the toolkit reasons about should be stored as one.
+The encoding discipline distinguishes two postures.
+
+\begin{itemize}
+\item \textbf{Generator-encoded} where the complex is canonically
+  derivable: grid certificates store grid lines and cell selections,
+  never cell lists or incidence tensors --- the cubical complex, with
+  its orientation-split boundary, is recomputed from the generators
+  by every consumer. Skew between a stored presentation and its
+  generators is then unrepresentable rather than checked.
+\item \textbf{S-complex-encoded} where the boundary \emph{is} the
+  content: a Morse graph's edges, a reduced complex, a connection
+  matrix. Here there is no generator to fall back on --- the
+  incidence data is precisely what the certificate asserts --- so the
+  presentation of Definition~\ref{def:scomplex} is the wire object,
+  and condition~\eqref{eq:scx-dd} (where non-vacuous) is part of its
+  well-formedness check.
+\end{itemize}
+
+The two postures compose: a quotient from a generator-encoded complex
+onto an S-complex-encoded one is a morphism in the sense of
+Definition~\ref{def:scx-morphism}, with the derived presentation
+appearing only transiently on the checking side.
+
+\section{The Morse graph, quantitatively}
+\label{sec:scx-morse}
+
+The global stratum's payload
+(\bookref{ch:qtsl-specification-language}{the Specification Language chapter}, QMorse row) is
+a certified Morse graph: finitely many blocks, finitely many directed
+connections. As data it ships in adjacency dialect (a vertex count
+and an edge list), and that dialect \emph{is} the rank-1 Boolean
+S-complex: $C_0$ the Morse sets, $C_1$ the connections,
+$\partial_1^{-}$ source, $\partial_1^{+}$ target. Acyclicity is the
+checker's to confirm; the confirmation, in this vocabulary, is an
+order witness on $C_0$ of the same kind
+section~\ref{sec:scx-strings} uses for string diagrams.
+
+The quantitative refinement adds a \emph{labelling} without changing
+the complex: cells carry values in the ordered semiring
+$\mathrm{DWELL} = ([0, \infty], \min, +)$ --- the cost quantale of
+Lawvere's generalized metric spaces~\cite{lawvere73}, whose additive
+unit is $\infty$ and whose multiplicative unit is $0$, ordered by
+the reverse of the numerical order, which is what makes $0 \le 1$
+hold --- with
+connections labelled by certified lower bounds on transit time and
+Morse sets labelled by their sojourn bounds, which for genuine Morse
+sets are $\infty$. The semiring arithmetic then guards the composite
+claims against overstatement: min-plus contraction of a path through
+an intermediate Morse set yields $\infty$, so the algebra itself
+reports that no finite total-time bound through a recurrent set is
+being asserted, while per-leg bounds stay finite and usable. This is
+the intended serialization form for the quantitative Morse tier: the
+graph presented as in Definition~\ref{def:scomplex}, the rates as
+cell labels (extended nonnegative rationals in the machine
+artefact), and the projection from the underlying grid complex
+onto the Morse graph stated as a morphism --- cells to their Morse
+or transit class, fine certified margins translated laxly to dwell
+bounds --- rather than as an unstated convention between two
+schemas.
+
+\section{String diagrams: the port semiring}
+\label{sec:scx-strings}
+
+This instance shows why the coefficients form a \emph{semiring
+parameter} rather than a Boolean convention. Fix a supply
+$\mathcal{P}$ of \emph{port names} --- opaque identifiers, meaningful
+only up to renaming. Let $\mathbb{S}_{\mathrm{port}}$ be the semiring
+of finite \emph{multisets} of finite sequences over $\mathcal{P}$:
+addition is multiset union with zero $\varnothing$, multiplication is
+elementwise concatenation with unit $\{\varepsilon\}$, and the order
+compares cardinalities --- so the derived order-equivalence is blind
+to the names themselves, which is the renaming-invariance the names'
+opacity demands.\footnote{Multisets rather than sets, for a reason
+worth checking: concatenation can merge distinct pairs of sequences
+($\langle 1\rangle \cdot \langle 2,3\rangle$ and
+$\langle 1,2\rangle \cdot \langle 3\rangle$ both concatenate to
+$\langle 1,2,3\rangle$), so two \emph{sets} of equal cardinality can
+have products of different cardinalities, and multiplication would
+fail the monotonicity section~\ref{sec:scx-def} demands of every
+coefficient semiring. Multisets count collisions instead of merging
+them, which makes cardinality exactly additive and multiplicative.
+The witness sets arising in diagrams are unaffected: distinct ports
+give distinct sequences.}
+
+A \emph{string diagram} over a signature is a rank-1
+$\mathbb{S}_{\mathrm{port}}$-complex --- $C_0$ the wires, $C_1$ the
+boxes --- together with a morphism into the complex presenting the
+signature ($C_0$ the sorts, $C_1$ the generators, each generator's
+canonical ports as its boundary values). A boundary value
+$\partial_1^{-}(a, x)$ is a \emph{witness set}: one singleton
+sequence per input port of box $a$ attached to wire $x$, and dually
+for outputs. Over $\mathbf{2}$ an edge could only assert incidence;
+over $\mathbb{S}_{\mathrm{port}}$ the value says \emph{what flows
+where} --- the difference between a reachability structure and a
+diagram whose wires carry content comes down, in this vocabulary, to
+the choice of semiring. The signature morphism does the typing: its
+cell maps send boxes to generators and wires to sorts, and its
+coefficient translation $f_S$ matches each diagram port to the
+generator port it instantiates, so argument order lives in the
+signature once instead of in every diagram. Sequence concatenation
+earns its place under composition, where contracted products
+accumulate port \emph{paths} witnessing composite incidences; at
+rank 1 only singletons occur. Figure~\ref{fig:scx-tower} works a
+two-box example and reads its boundary data at the three coefficient
+resolutions of Remark~\ref{rem:scx-tower}.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.94cm,y=0.82cm,baseline=(current bounding box.center),
+  box/.style={draw=accentdeep, fill=accent!50, rounded corners=1pt,
+    font=\footnotesize\ttfamily, inner sep=2.5pt, minimum height=4.2mm},
+  wire/.style={-, line width=0.5pt, draw=black!75},
+  port/.style={font=\small\itshape, inner sep=1pt},
+  plab/.style={font=\scriptsize, inner sep=1pt, text=black!60}]
+\node[port] (x) at (0, 0.75) {$x$};
+\node[box]  (a) at (1.4, 0.75) {$a$};
+\node[box]  (b) at (4.4, 0.75) {$b$};
+\node[port] (z) at (5.8, 0.75) {$z$};
+\coordinate (split) at (2.5, 0.75);
+\draw[wire] (x) -- (a);
+\draw[wire] (a.east) -- (split);
+\draw[wire] (split) .. controls (3.1,0.75) and (3.5,1.15) ..
+  ([yshift=1.6mm]b.west);
+\draw[wire] (split) .. controls (3.1,0.75) and (3.5,0.35) ..
+  ([yshift=-1.6mm]b.west);
+\draw[wire] (b) -- (z);
+\node[plab, anchor=south] at (2.15, 0.85) {$y$};
+\node[plab, anchor=south] at ([xshift=-2.6mm,yshift=1.5mm]b.west) {1};
+\node[plab, anchor=north] at ([xshift=-2.6mm,yshift=-1.5mm]b.west) {2};
+\end{tikzpicture}
+\hspace{1.2em}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+entry & $\mathbb{S}_{\mathrm{port}}$ & $\mathbb{N}$ & $\mathbf{2}$ \\
+\midrule
+$\partial_1^{-}(a,x)$ & $\{\langle 1\rangle\}$ & $1$ & $1$ \\
+$\partial_1^{+}(a,y)$ & $\{\langle 1\rangle\}$ & $1$ & $1$ \\
+$\partial_1^{-}(b,y)$ & $\{\langle 1\rangle,\langle 2\rangle\}$ & $2$ & $1$ \\
+$\partial_1^{+}(b,z)$ & $\{\langle 1\rangle\}$ & $1$ & $1$ \\
+\bottomrule
+\end{tabular}
+\caption{One diagram, three coefficient resolutions. Wire $y$ feeds
+both input ports of box $b$, so the witness set
+$\partial_1^{-}(b,y)$ holds two singleton port sequences; cardinality
+forgets \emph{which ports} to \emph{how many}, and Boolean support
+forgets that to \emph{whether at all} (Remark~\ref{rem:scx-tower}).
+Entries not shown are $\varnothing$, $0$, $0$.}
+\label{fig:scx-tower}
+\end{figure}
+
+Structural conditions on the diagram are then one clause each, and
+free-structure theorems select which clauses to impose:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+producer/consumer discipline & acyclicity & free structure presented \\
+\midrule
+none & none & hypergraph category \cite{bonchi20} \\
+$\le 1$ producer, $\le 1$ consumer & none & traced symmetric monoidal \cite{kissinger13} \\
+$\le 1$ producer, $\le 1$ consumer & witness & symmetric monoidal \cite{bonchi22} \\
+$\le 1$ producer, consumers free & witness & gs-monoidal \cite{fritzliang22} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Here ``$\le 1$ producer'' is the port-counting condition
+$\sum_{a \in C_1} \lvert \partial_1^{+}(a, x) \rvert \le 1$ for every
+wire $x$, and dually for consumers --- the cardinality order makes
+counting a first-class operation. The acyclicity witness is a
+function $t \colon C_0 \to P$ into a poset with
+$t(\text{input wire}) < t(\text{output wire})$ across every box: a
+one-pass check and a rewrite-friendly certificate.
+
+\subsection{Hypernets read as S-complexes}
+\label{sec:scx-hypernets}
+
+The hypernet of \bookref{ch:qtsl-hypernets}{the hypernet chapter}
+sits in the third row of the table: its linearity condition is
+producer-and-consumer monogamy and its static-single-assignment
+order is an acyclicity witness, as that chapter already observes in
+citing the free-structure correspondence. The reading assembles as
+follows. Wires are the 0-cells; applications are the 1-cells; an
+application's ordered input and output lists are the two boundary
+rows, with list position serving as the port name --- the
+representation takes the renaming quotient so the semiring does not
+have to. The catalogue plays the signature: the morphism sends each
+application to its box, each wire to its tensor type, and its
+coefficient translation records which argument slot each wire fills.
+Two strata of the hypernet deliberately live \emph{beside} the
+complex rather than in it: box payloads (constants, contraction
+patterns, polynomial coefficients) are cell labels, just as rates
+are labels on the Morse graph; and the interface is a cospan of
+morphisms from rank-0 complexes --- an ordered list of graph inputs
+and one of graph outputs, each simply a function into $C_0$, which
+is what the declared interface lists already are.
+
+The vocabulary also makes the design space around the interface
+legible in single clauses. Letting the output leg of the cospan hit
+any wire --- including one an application already consumes ---
+declares a read-out port without touching the inner complex or its
+monogamy, since the legs were never part of either. If consumer-side
+monogamy is retired while the producer side is kept, the diagram
+genus moves one row down the table, to the gs-monoidal discipline
+of every static-single-assignment compiler representation --- def
+once, use many --- with copy and discard absorbed into the wiring.
+Both are stated here as readings the definition supports rather than
+as changes made: the shipped hypernet remains the monogamous, acyclic
+row, and its bytes, digests, and substitution laws are those of
+\bookref{ch:qtsl-hypernets}{the hypernet chapter}, unchanged.
+
+\section{Ledger}
+\label{sec:scx-ledger}
+
+What in this chapter is what:
+
+\begin{itemize}
+\item \textbf{Definitional.} Definitions~\ref{def:scomplex}
+  and~\ref{def:scx-morphism}, the derivation of~\eqref{eq:scx-dd}
+  from $\partial^2 = 0$, the instance table, and the free-structure
+  table (whose correspondences are the cited literature's theorems,
+  not this book's).
+\item \textbf{Machine artefact.} The genus is declared as a
+  standard-library theory of the geolog engine
+  (\path{theories/SComplex.geolog}), which names this chapter as its
+  expository companion, and the chain condition's contraction
+  factoring is generated from a surface statement of the tensor law
+  (\path{theories/SComplexGenus.geolog}). The theory is staged
+  design vocabulary, exercised by the engine's tests rather than by
+  production data.
+\item \textbf{Shipped elsewhere in this book.} The Morse-graph
+  payload shape and its checker obligations
+  (\bookref{ch:qtsl-specification-language}{the Specification Language chapter}); the
+  hypernet IR, whose linearity and ordering conditions this
+  chapter's section~\ref{sec:scx-hypernets} re-reads
+  (\bookref{ch:qtsl-hypernets}{the hypernet chapter}); the
+  contraction machinery that makes
+  condition~\eqref{eq:scx-dd} bulk-checkable
+  (\bookref{ch:qtsl-mathematical-models}{the modelling chapter}).
+\item \textbf{Design tense.} The quantitative Morse serialization in
+  complex-plus-labels form and its quotient-as-morphism statement
+  (section~\ref{sec:scx-morse}); any S-complex-native storage for
+  hypernets (section~\ref{sec:scx-hypernets} is a reading, and the
+  canonical bytes are unchanged by it); mechanized S-complex
+  morphisms, of which the toolkit currently has none --- the Morse
+  quotient is the natural first target. Higher-dimensional
+  rewriting on this substrate (equivalence cells over diagrams) is
+  out of this chapter's scope entirely.
+\end{itemize}

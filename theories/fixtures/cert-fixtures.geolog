@@ -1,0 +1,236 @@
+// Chase fixtures for the certificate stratum, in theory vocabulary
+// (transposed relations keep function names; unary attributes take
+// the synthesized `arg` field; ground fields the retired transcript
+// erased are seeded as abstract elements). Instance blocks in one
+// file chase jointly in one model, so element names are unique per
+// block. The battery greps the chase transcript for named derived
+// rows and judgments — never exit codes alone.
+
+// The region-warranted pairing (event-6 shape): the entity-warrant
+// row mints the membership demand (through the component
+// attribute), the per-claim conformance walk, the pairing row, the
+// initial-membership demand, and the grounded-walk demand for the
+// compiled form; the regret fences are refuse-mode and live at the
+// theory surface.
+instance CertPairing : Qtsl {
+  r1 : QSat;
+  sy1 : System;
+  sp1 : Spec;
+  if1 : Iface;
+  c1 : QForallSat;
+  rg1 : QRegionAtom;
+  ff1 : ForallSpec;
+  v1 : QVerdictForm;
+
+  [arg: r1, out: sy1] QSat/sys;
+  [arg: r1, out: sp1] QSat/spec;
+  [spec: sp1, iface: if1] spec_iface;
+  [sat: r1, warrant: c1] qsat_warrant;
+  [arg: c1, out: rg1] QForallSat/region;
+  [arg: c1, out: ff1] QForallSat/component;
+  [sat: r1, form: v1] qsat_verdict;
+}
+
+instance ArenaTie : Qtsl {
+  rd1 : QMorseDischarge;
+  pp1 : QProof;
+  jm1 : QMorse;
+  kj1 : QJudgment;
+  lt1 : QBlockLattice;
+  gc1 : QGridCx;
+  lts : Shape;
+
+  [arg: rd1, out: pp1] QMorseDischarge/proof;
+  [arg: pp1, out: kj1] QProof/concludes;
+  [arg: jm1, out: kj1] QMorse/judgment;
+  [arg: rd1, out: lt1] QMorseDischarge/lattice;
+  [arg: lt1, out: gc1] QBlockLattice/cx;
+  [arg: lt1, out: lts] QBlockLattice/arena;
+}
+
+instance CertDemands : Qtsl {
+  bg1 : QBagVal;
+  pg1 : QPlogProg;
+  nd1 : QDeadlineTable;
+  wc1 : QWireCompose;
+  fe1 : QFlatEq;
+  sy2 : System;
+  mf1 : Manifest;
+  mc1 : QMarginalCompat;
+  cl1 : QStochContribList;
+  msp : Shape;
+
+  [arg: fe1, out: sy2] QFlatEq/sys;
+  [arg: fe1, out: mf1] QFlatEq/flat;
+  [arg: mc1, out: cl1] QMarginalCompat/contributors;
+  [arg: mc1, out: msp] QMarginalCompat/space;
+}
+
+// The consumes traversal end-to-end (event 4): a disjunction spec
+// whose left arm carries a firing-count ceiling and whose right arm
+// carries probability over a negated path threshold reading a
+// SECOND roster count — so the roster-conformance demand must mint
+// twice at the pairing: once through the plain component route,
+// once through the or-walk + path-projection + PAtom route.
+instance CertConsumes : Qtsl {
+  csq : QSat;
+  csy : System;
+  css, csL, csR : Spec;
+  csf, csf2 : ForallSpec;
+  csr, csr2 : PathObservable;
+  cst, cst2 : TrList;
+  csp, csp2 : PathPred;
+  csh, csc, cspr : Q;
+
+  [arg: csq, out: csy] QSat/sys;
+  [arg: csq, out: css] QSat/spec;
+  [spec: css, left: csL, right: csR] spec_or;
+
+  [trs: cst, out: csr] retFireCount;
+  [hi: csh, ret: csr, out: csf] SReturnLE;
+  [spec: csL, f: csf] spec_forall;
+
+  [trs: cst2, out: csr2] retFireCount;
+  [c: csc, ret: csr2, out: csp2] PAtomLE;
+  [arg: csp2, out: csp] PNotPath;
+  [p: cspr, path: csp, out: csf2] SProbGE;
+  [spec: csR, f: csf2] spec_forall;
+}
+
+// The negative spine for the roster demand + the retPath indicator
+// arrow: a paired spec consuming a retPath run functional derives
+// the ret AND path projections but NO firecount roster demand.
+instance CertRetPath : Qtsl {
+  csq2 : QSat;
+  csy2 : System;
+  css2 : Spec;
+  csf3 : ForallSpec;
+  csr3 : PathObservable;
+  csp3 : PathPred;
+  csh2 : Q;
+
+  [arg: csq2, out: csy2] QSat/sys;
+  [arg: csq2, out: css2] QSat/spec;
+  [arg: csp3, out: csr3] retPath;
+  [hi: csh2, ret: csr3, out: csf3] SReturnLE;
+  [spec: css2, f: csf3] spec_forall;
+}
+
+// The hole + seat-regret pairing (post-fold shape): the hole
+// presents its declared interface (iface_hole), the filler presents
+// its own through its mechanism, and the consumed regret component
+// mints the one-hole demand through the qtsl_pairing surface. The
+// hole-fill interface tie and the filler-fills existential are
+// refuse-/report-mode since the fold (theory-surface teeth,
+// census-fenced).
+instance CertHoleRegret : Qtsl {
+  hfq : QSat;
+  hfc : System;
+  hff : System;
+  hfm : Mech;
+  hfi, hfj : Iface;
+  hfs : Spec;
+  hfr : PathObservable;
+  hfe : ForallSpec;
+  hfx : Q;
+
+  [iface: hfi, out: hfc] SysHole;
+  [mech: hfm, out: hff] SysMech;
+  [arg: hfm, out: hfj] Mech/iface;
+
+  [arg: hfq, out: hfc] QSat/sys;
+  [arg: hfq, out: hfs] QSat/spec;
+  [eps: hfx, pi: hff, ret: hfr, out: hfe] SRegretLE;
+  [spec: hfs, f: hfe] spec_forall;
+}
+
+// The guarded introduction (event 4, post-fold): the guard warrant
+// derives the spec's guard-region row and the membership demand,
+// and — the monotone-discharge negative spine — mints NO
+// initial-membership demand (that premise was discharged INTO the
+// former; the guarded root tie is refuse-mode at the theory
+// surface).
+instance CertGuarded : Qtsl {
+  gwq : QSat;
+  gwy : System;
+  gws : Spec;
+  gwc : QForallSat;
+  gwr : QRegionAtom;
+  gwf : ForallSpec;
+
+  [arg: gwq, out: gwy] QSat/sys;
+  [arg: gwq, out: gws] QSat/spec;
+  [sat: gwq, warrant: gwc] qsat_guard_warrant;
+  [arg: gwc, out: gwr] QForallSat/region;
+  [arg: gwc, out: gwf] QForallSat/component;
+}
+
+// The statistical-tier twin (review F-8): a QSatConf joins the demand
+// surface through its own pairing populator — a conf-paired spec
+// consuming a firing-count ceiling mints the roster demand exactly
+// as the exact tier does.
+instance CertConfRoster : Qtsl {
+  kq : QSatConf;
+  ky : System;
+  ks : Spec;
+  kf : ForallSpec;
+  kr : PathObservable;
+  kt : TrList;
+  kh : Q;
+
+  [arg: kq, out: ky] QSatConf/sys;
+  [arg: kq, out: ks] QSatConf/spec;
+  [trs: kt, out: kr] retFireCount;
+  [hi: kh, ret: kr, out: kf] SReturnLE;
+  [spec: ks, f: kf] spec_forall;
+}
+
+// Guard elimination at consumption (review F-5): a QWireCompose whose
+// two-component list holds one guarded claim and one unguarded
+// claim — the member walk reaches both, and the guard's
+// initial-membership demand mints for the guarded subject ONLY
+// (the absence check is the battery's negative half).
+instance CertGuardElim : Qtsl {
+  wn : QWireCompose;
+  wl, wt, wnil : QSatList;
+  wq, wq2 : QSat;
+  wy, wy2 : System;
+  wsp, wsp2 : Spec;
+  wg : QRegionAtom;
+
+  [arg: wn, out: wl] QWireCompose/components;
+  [head: wq, tail: wt, out: wl] qsatCons;
+  [head: wq2, tail: wnil, out: wt] qsatCons;
+
+  [arg: wq, out: wy] QSat/sys;
+  [arg: wq, out: wsp] QSat/spec;
+  [spec: wsp, region: wg] spec_guard;
+
+  [arg: wq2, out: wy2] QSat/sys;
+  [arg: wq2, out: wsp2] QSat/spec;
+}
+
+// The PD-6 divergence specimen (guard end-to-end battery):
+// a producer STORES a guard region that disagrees with the
+// warrant's — region_tie derives the warrant's image beside it, and
+// saturation RETAINS BOTH rows (no equality, no deduplication hides
+// the disagreement; hash-consing supplies functionality, never
+// no-confusion). The two-row state is what a post-saturation C-SPEC
+// evaluator refuses at admission (qtsl_spec_wf, the store-and-check
+// counting) — the battery pins the two-row saturation itself.
+instance CertGuardDivergent : Qtsl {
+  vq : QSat;
+  vy : System;
+  vsp : Spec;
+  vc : QForallSat;
+  vrg : QRegionAtom;
+  vrg2 : QRegionAtom;
+  vf : ForallSpec;
+
+  [arg: vq, out: vy] QSat/sys;
+  [arg: vq, out: vsp] QSat/spec;
+  [sat: vq, warrant: vc] qsat_guard_warrant;
+  [arg: vc, out: vrg] QForallSat/region;
+  [arg: vc, out: vf] QForallSat/component;
+  [spec: vsp, region: vrg2] spec_guard;
+}

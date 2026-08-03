@@ -1,0 +1,24 @@
+\apilang{TypeScript}{judgment.invScope}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function invScope(args: {
+  region: RegionAtom;
+  init: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(j.invScope({ region: unitBox, init: j.box([[Q.of(1, 4), Q.of(1, 2)]]) })),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QInvScope::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(region: RegionAtom, init: RegionAtom) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let inv = QInvScope::new(
+    unit_box(),
+    RegionAtom::Box(IntervalBox(vec![Interval::new(q(1, 4), q(1, 2)).unwrap()])),
+);
+\end{rustsrc}

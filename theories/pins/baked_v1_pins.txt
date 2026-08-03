@@ -1,0 +1,113 @@
+# baked-pair vocabulary chain — chid pins, version 1
+# (revision event 6: six passenger families in one coordinated event —
+# the event-rate envelope atom half (SRateLE/SRateGE over transition
+# rosters at the ForallSpec cap, both faces floor-claims, the claim
+# direction selecting the envelope; roster projection + pairing demand
+# reusing the firing-count roster conformance; the certificate lane
+# QRateUB/QRateLB in the battery-kit idiom and the duration-free clock
+# node QRateFromClocks — race/dwell/carved-by-floor wings priced from
+# syntax, instant wings priced only through a cited ADDITIVE crossing
+# budget; the lower face's walk carries the a.e.-exhaustion step); the
+# distance judgments (QDistEntry registry with the walk-fenced W1 slot,
+# QDistSubject sum incl. the definite-description subject, QDistBound,
+# and the three concluding species QCoupleDrift/QFixBall/
+# QDistTransport); the timed core (TCForm/TCClass/TCRel/QTimedSeq/
+# TCObligList + the three schema nodes QInvRelativize/QFirstService/
+# QFirstServiceSplit, class-relative by sort); the discharge kit
+# (PHypMultiplier + PVerifiedCover, omnibus-hosted turnstile-side
+# species — the proof tower file stays BYTE-STABLE at this event); the
+# verdict-stratum re-cut (SProper properness twin at the cap;
+# face-typed verdict form qvfMk{forall_face, exists_face} over
+# QForallSat/QExistsEntry; the containment relation and the grounded
+# walk; the warrant seam unified onto forall-face entities — the root
+# ties retired as unrepresentable, the regret admission fences added;
+# the init-bridge node with its conclusion-resolution walk); and the
+# lower-bound renames (qtsl_hplate_lowbound, qtsl_lowbound_boxes, six
+# battery /lowbounds fields — the dead-axis floor homonym now
+# unspellable at the identifier level; prevision-floor prose and the
+# carved clock's floor/ceil pair deliberately kept).
+# The fusion stratum did NOT board this event (its staged authority
+# awaits its own word); the event-rate AG half stays fenced on the
+# event-port stratum.
+# prior-event chids remain resolvable in the append-only store forever —
+# containers minted against them keep checking.
+#
+# The theory pair in theories/ (BernsteinLogic.geolog, the proof tower;
+# Qtsl.geolog, the omnibus) minted as signed geolog commits via the
+# companion engine's seal verb, repro-signed (public seed
+# "geolog-seal-repro-v1" — chids are store-independent; reproducibility,
+# not authority). Two closures, one revision each, matching check.sh's
+# own closure constructions:
+#
+#   qc = BernsteinLogic.geolog + Qtsl.geolog
+#   dc = BernsteinLogic.geolog + Qtsl.geolog + Dtmc.geolog
+#
+# Construction (check.sh's recipe, byte-exact; the import-header era —
+# classification rides the in-file import headers): sources
+# concatenated in the order above, nothing else. Regenerate:
+#   geolog seal <closure>.geolog --store <dir> --repro
+# Determinism: double-mint verified (fresh stores, separate processes,
+# byte-equal chids); extracted .glc containers byte-identical across
+# stores. Engine: geolog-alpha main at mint time (commit 9e22153,
+# the modal-scoping-lint era).
+# BernsteinLogic.geolog is BYTE-STABLE at this event — the certified
+# tower file and the external checker's fragment boundary do not move.
+# Source commit: the qtsl source tree at mint time (component
+# sha256s below re-verify byte drift).
+#
+# Container prereq tables and per-family producer pin tables (kind dep
+# counter name rows) derive from these revision chids; the row-level
+# derivation is the provider-vocabulary surface's, not this file's.
+#
+# DEMAND-MINT MIGRATION (the modal-scoping era): every side-condition
+# demand mint across the pair + species re-moded chase -> judging
+# (report) to satisfy the engine's modal-scoping linter — a
+# mutation-shaped byte edit at the mode-keyword stratum, semantics
+# preserved (demands render as pending judgments instead of derived
+# rows; ordinary derived-row surfaces verified row-conserved).
+# Chids re-minted below on the post-lint engine; the golden
+# genesis/ground-comparisons deps are UNCHANGED (binary dep check
+# on the extracted .glc). Prior chids remain resolvable forever.
+# prior revs: qc=ac5fdd9cd9148cefe6e00ee6551f9b276dcdb57e3db44bd9253d16e348515733 dc=44b8cf8c2aaeae80c801103cb069c5a6075576dbc78c5dedc52f15913a3e7911
+# event-6.1 revs: qc=6419ae4be3de7b250d6e5be472cf8a55d875e21a9509ee1f66e3d00792a8ec53 dc=6d8a418fe5c019e087e1b8625b41a47f6fd90ceaa45c3d54c7de62ea3fd5edd7
+# (demoted from `# revs:` at the event-7 provider swap — one CURRENT
+# revs header per file; the checker-side fixture tie binds to it.)
+#
+# EVENT 7 (the timed-floor mint): the TimedFloor fragment spliced whole
+# into theory Qtsl by the deterministic mint assembler — hrpDropAtMost
+# joins HRowPolarity (the hrp_closed refusal gains its third disjunct:
+# the one mutation-shaped edit, which moves the qc/dc chids), plus the
+# TrMeter premise class, the QPAlwaysTFromLineage / QPAlwaysTFromFold /
+# QRateFromClock node species with their walks and node-keyed mirror
+# demands, the lineage-offsets relation, and KSupportWarrant.
+# BernsteinLogic.geolog remains BYTE-STABLE at this event (source
+# sha256 unchanged below); the tower/external-checker boundary does
+# not move. Published bytes are byte-identical to the assembler's
+# output (candidate battery C-1..C-8 gated these exact bytes).
+# Chids minted on the post-lint engine (geolog-alpha main 331b7ca,
+# the refuse-unrealized era); golden genesis/ground-comparisons deps
+# UNCHANGED (dep check via `geolog load` on the extracted .glc).
+# Double-mint verified (fresh stores, separate processes, byte-equal
+# chids; extracted containers byte-identical across stores). Prior
+# chids remain resolvable forever.
+# prior revs: qc=6419ae4be3de7b250d6e5be472cf8a55d875e21a9509ee1f66e3d00792a8ec53 dc=6d8a418fe5c019e087e1b8625b41a47f6fd90ceaa45c3d54c7de62ea3fd5edd7
+# revs: qc=9952506dd2491e880a6107471a1ca92f66a4a33a64a8cc250833d00402e3b0e6 dc=bc30a5f3b22da487f77080d5aa4186084376552b7ce070ccf44d4c5226c5aa96
+
+closure qc sources BernsteinLogic.geolog,Qtsl.geolog
+closure qc shape theories=10 axioms=732 revision_ops=39283
+closure qc revision 9952506dd2491e880a6107471a1ca92f66a4a33a64a8cc250833d00402e3b0e6
+closure qc c1_revision_hash 7fd58f26febcf237ad08bea6f2be6a6b0f6faffa7de9b69a537f9bd4770746de
+closure qc seal_companion 7122ba5e2798a5897db17d084697096b060b5d6642ad0127bd6d452c3205a453
+
+closure dc sources BernsteinLogic.geolog,Qtsl.geolog,Dtmc.geolog
+closure dc shape theories=11 axioms=741 revision_ops=39788
+closure dc revision bc30a5f3b22da487f77080d5aa4186084376552b7ce070ccf44d4c5226c5aa96
+closure dc c1_revision_hash 010594201cd5a49f144d4280c8928ef07c3ab84baefc60d167005b81b9a837f6
+closure dc seal_companion 938f3b4994840a30380b856938b2c11d6eeca9f3534a8aabe05842ca0642ce2e
+
+golden genesis 6d9691e1d2ee858cd5004d82dd6d6e78d2b02252631c251ad992f805ac169d94
+golden ground_comparisons e91ba7cd511a3db3e9f7bb36eedc3a7318d564d57ff018965f114e2d9dae2509
+
+source_sha256 BernsteinLogic.geolog 935a654be005973b20673214e50f436bd64a16841b977f40bc1292bede5d0385
+source_sha256 Qtsl.geolog 309931c6662c73fd45769593caacec5988359012ce01aa7ab7bbc2d8460f5fa5
+source_sha256 Dtmc.geolog aa9ebd3f5e87a0143f696620210127c43c92efc277ce75cb4b703bbc64a25fec

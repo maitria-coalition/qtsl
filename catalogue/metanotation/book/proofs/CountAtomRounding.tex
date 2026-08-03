@@ -1,0 +1,115 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. One
+variation from the alias norm, stated up front: the unpack's target is
+an \emph{atom-denotation identity} consumed by
+\rulename{QAggReduce}'s count rows (the pattern of the strict-atom
+closure moves), not a separate rule node --- one atom in, one atom out,
+producers rewrite before emission. The five alias artefacts follow in
+that key: the unpack, the filled-in application, the payload transport,
+the exactness identity, and the soundness corollary.}
+
+\begin{brecipe}[the respelling]\label{rec:car-unpack}
+The unpack acts on a complemented count atom in hypothesis position:
+\[
+\mathrm{cmpl}\,\{\, k_P \leq j \,\}
+\qquad\rightsquigarrow\qquad
+\{\, k_P \geq j + 1 \,\},
+\qquad j \in \mathbb{Z},
+\]
+where $k_P$ is a count observable --- integer-valued at every reachable
+marking, because counts are cardinalities (the compile's integrality
+guarantee, entering the mechanization as a named hypothesis until the
+net layer discharges it definitionally). Payload transport, field for
+field:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\textbf{field} & \textbf{before} & \textbf{after}\\
+\midrule
+observable & $k_P$ & $k_P$ (verbatim)\\
+threshold & $j$ & $j + 1$ (integer bump)\\
+orientation & complemented $\leq$ (open $>$) & closed $\geq$\\
+scope & reachable markings & reachable markings (verbatim)\\
+\end{tabular}
+\end{center}
+The filled-in application is a scope row of an aggregation obligation:
+where a compile node scopes a row ``off the target $\{k_P \leq j\}$'',
+the row's hypothesis list carries $k_P \geq j + 1$ in place of the
+real-arithmetic complement.
+\end{brecipe}
+
+\begin{bprop}[exactness over the reachable locus]\label{prop:car-eq}
+On integer-valued points,
+$\mathrm{Reach} \cap \mathrm{cmpl}\{k_P \leq j\}
+= \mathrm{Reach} \cap \{k_P \geq j + 1\}$.
+\end{bprop}
+\begin{proof}
+At a reachable point, $k_P = n$ for some integer $n$; and for integers,
+$n > j \iff n \geq j + 1$. Two lines, which is the point: the
+complement of $\{k_P \leq j\}$ \emph{over reachable markings} is
+$\{k_P \geq j+1\}$, not $\{k_P > j\}$ --- nothing is lost.
+\end{proof}
+
+\begin{bprop}[free tightening, unconditionally]\label{prop:car-tight}
+$\{k_P \geq j + 1\} \subseteq \{k_P > j\}$ on \emph{all} points,
+integer-valued or not.
+\end{bprop}
+\begin{proof}
+$j + 1 \leq k_P$ implies $j < k_P$. So substituting the rounded atom in
+hypothesis position never widens the constraint set, and it strictly
+tightens it by the slab $j < k_P < j + 1$ --- unreachable by any
+marking, but fully visible to a real-arithmetic relaxation, which is
+where the gain falls.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:car-sound}
+Every reachable point of the true complement of $\{k_P \leq j\}$
+satisfies the tightened atom; hence any row valid on
+$\mathrm{Reach} \cap \{k_P \geq j + 1\}$ is valid on the reachable part
+of the true complement --- the direction hypothesis positions consume,
+and by Proposition~\ref{prop:car-eq} nothing more is being assumed than
+the complement itself, reachably.
+\end{bprop}
+\begin{proof}
+Immediate from Proposition~\ref{prop:car-eq}, left-to-right. The
+asymmetry of positions is worth one sentence: in \emph{hypothesis}
+position a tighter scope is free (fewer points to verify, no reachable
+point dropped, by exactness); in \emph{conclusion} position a tightened
+atom would be a stronger claim and is not licensed by this rule ---
+the alias is a hypothesis-position discipline, exactly like its
+continuous sibling.
+\end{proof}
+
+\begin{bremark}[why integrality is not decoration]\label{rem:car-int}
+Drop it and exactness fails: a fractional ``count'' at
+$k_P = j + \tfrac12$ satisfies the true complement but not the rounded
+atom, so a row verified only on the rounded scope would silently skip
+it --- if such points were reachable, that is unsoundness in hypothesis
+position. The integrality hypothesis is precisely the statement that
+they are not: counts are cardinalities of token multisets. Note there is \emph{no} graceful failure mode when the rewrite is
+misapplied to a non-count observable: in hypothesis (scope) position
+the rounded atom \emph{shrinks} the region a row must be verified on,
+so misapplication can silently accept --- the half-integer point above
+is exactly the witness. The integrality warrant is essential, not a
+convenience.
+\end{bremark}
+
+\begin{bremark}[essential on the first worked example]
+The drain net's deadline certificate needs its interior row off the
+target $\{k \leq 0\}$. Over the real-relaxed scope $k > 0$ the row is
+infeasible --- it evaluates to $+\tfrac14$ at $(k, s_2) =
+(\tfrac12, 0)$, a point no marking occupies --- while over the rounded
+scope $k \geq 1$ it discharges with an exact linear-multiplier witness.
+The rounding is the counting analogue of the strict-atom closure
+discipline (polarity-directed rounding of strict literals), with
+integrality playing the role topology plays there: both convert an
+open condition into the closed atom the row machinery wants, at zero
+semantic cost on the states that matter.
+\end{bremark}
+
+\begin{anchors}
+Proposition \ref{prop:car-eq} & \texttt{countAtomRounding\_eq}\\
+Proposition \ref{prop:car-tight} & \texttt{countAtomRounding\_tighter}\\
+Proposition \ref{prop:car-sound} & \texttt{countAtomRounding\_sound}\\
+integrality bridge & the named hypothesis in all three decls (compile-side guarantee)\\
+consumed by & \rulename{QAggReduce} scope rows (count atoms); the drain example's interior row\\
+\end{anchors}

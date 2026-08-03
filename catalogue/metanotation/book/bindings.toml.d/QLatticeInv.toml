@@ -1,0 +1,39 @@
+# bindings.toml.d/QLatticeInv.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QLatticeInv'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.LatticeInv"
+decl = "Behavior.qLatticeInv_sound"
+sha256 = "656a232e23a720fa71ec675e7a2630f5304495d75890a4f40e4c8b2850dd4e63"
+
+[[statement]]
+module = "Qtsl.LatticeInv"
+decl = "Behavior.qLatticeInv_sound_of_blockInv"
+sha256 = "60647e8328a4f964ff42ef6bb7dcfbcb2283fcc4a39d131ccb2bc298e697814d"
+
+[[statement]]
+module = "Qtsl.LatticeInv"
+decl = "Semiflow.qLatticeInv_sound"
+sha256 = "a3a2662b03268e76b06c8b65a72f95a16960513e78061699b2e7b750d42dad45"
+
+[[statement]]
+module = "Qtsl.LatticeInv"
+decl = "Semiflow.qLatticeInv_sound_of_blockInv"
+sha256 = "96ef78f32eea9c08135da78acaed62b77a9dda04976adfdbe66645372d95d696"
+
+[[statement]]
+module = "Qtsl.LatticeInv"
+decl = "member_subset_cells_le"
+sha256 = "f17666e2d2b9750f59a163a1629f76d6b78261d8b30461c0a47435f7e34f48cc"
+
+[[statement]]
+module = "Qtsl.LatticeInv"
+decl = "qLatticeInv_exact"
+sha256 = "61ce55c2aa234b1a1b3dd618535ae56687000bd9dd249240496f3f868bc82c78"
+
+[[correspondence]]
+entry = "QLatticeInv"
+steele_sha256 = "c0d6da81aff36ad5ae96a2b9a960ed175c41f785d33f7669fcc0a014ebe3d42d"
+statements_sha256 = "f85e6ea4f7ac2b6fc598d5da4a9e45a3cfcec648c02501a185e78809bb0ffcd8"
+prose_sha256 = "b28ed4bf6b3c65ab383c6a09484023eca658301fd93f188b994cef71b23f9747"
+

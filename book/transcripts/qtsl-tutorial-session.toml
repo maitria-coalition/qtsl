@@ -1,0 +1,103 @@
+# Transcripts for the MTK tutorial's workspace and strategy sections.
+#
+# Split from qtsl-tutorial.toml because these need the
+# @maitria/mtk-session package (the mtk repository's session/ tree,
+# beside the producer package — see tools.toml).
+#
+# The two demo transcripts are excerpts of the PACKAGE'S COMMITTED
+# RECEIPTS, not fresh runs: the LLM demo needs a live model behind an
+# API key, and the chapter quotes the committed run on purpose ("in the
+# committed run"). Regeneration re-excerpts the receipt files, so a
+# receipts refresh in the package flows into the book mechanically.
+
+timeout = 900
+
+inputs = [
+  "book:listings/session.ts",
+  "mtk-session:src",
+  "mtk-session:package.json",
+  "mtk-session:receipts/demo-scripted.txt",
+  "mtk-session:receipts/demo-llm.txt",
+  "mtk:ts/src",
+  "mtk:ts/package.json",
+]
+
+[session]
+env = { PATH = "{mtk}/ts/node_modules/.bin:{ENV:PATH}" }
+setup = [
+  "npm init -y >/dev/null",
+  "npm install --no-audit --no-fund --loglevel=error {mtk-session} >/dev/null",
+]
+
+[[mount]]
+tool = "book"
+src = "listings/session.ts"
+dest = "session.ts"
+mode = "copy"
+
+# ------------------------------------------------------------ the workspace
+
+[[fragment]]
+name = "session-src"
+kind = "file"
+source = "book:listings/session.ts"
+
+[[fragment]]
+name = "session-run"
+kind = "run"
+prose-assert = [
+  '^ob1: \(-1\)\*x0\^2 \+ \(1\)\*x0 \+ \(-1/4\) <= 0 on \[0, 1\]$',
+  '^menu: range/cheap probe/cheap split/cheap search/expensive$',
+  '^range: inconclusive \{"enclosure":\["-1/4","1/4"\]\}$',
+  '^refused: ob1 has open children; work the leaves',
+  '^ob1: discharged \(via children\) \{"dischargedChildren":\["ob2","ob3"\]\}$',
+  '^replayed 5 events; state identical: true$',
+]
+
+  [[fragment.step]]
+  run = "npx tsx session.ts"
+
+# --------------------------------------------------------- the two proposers
+# Wrapping reproduces the chapter's declared convention: long JSON lines
+# break at commas (the receipts carry them unbroken); the claim line
+# breaks at a space. Both demos clip at "strategy ended" — the receipts'
+# checker coda is summarized in prose (the seam note in the chapter).
+
+[[fragment]]
+name = "demo-scripted"
+kind = "file"
+fontsize = "footnotesize"
+source = "mtk-session:receipts/demo-scripted.txt"
+from = '^mtk-session demo'
+prepend = ["$ node src/main.ts demo"]
+filters = [
+  { kind = "clip", after = '^strategy ended' },
+  { kind = "wrap", match = '^claim ob1:', width = 85, at = " ", indent = "  " },
+  { kind = "wrap", match = '^  \[', width = 94, at = ",", indent = "      " },
+  { kind = "wrap", match = '^witness:', width = 94, at = ",", indent = "  " },
+]
+prose-assert = [
+  '^strategy: scripted$',
+  '"shortfall":"24917/330225942528"',
+  '^strategy ended: solved; moves used: 3$',
+  '"sha256":"66040e596ece30efcb1e500350396477f6e4f56d9af1b8f2896c30bece2fc391"',
+]
+
+[[fragment]]
+name = "demo-llm"
+kind = "file"
+fontsize = "footnotesize"
+source = "mtk-session:receipts/demo-llm.txt"
+from = '^mtk-session demo'
+prepend = ["$ node src/main.ts demo --llm --model google/gemini-3.5-flash"]
+filters = [
+  { kind = "clip", after = '^strategy ended' },
+  { kind = "wrap", match = '^claim ob1:', width = 85, at = " ", indent = "  " },
+  { kind = "wrap", match = '^  \[', width = 94, at = ",", indent = "      " },
+  { kind = "wrap", match = '^witness:', width = 94, at = ",", indent = "  " },
+]
+prose-assert = [
+  '^strategy: llm:google/gemini-3\.5-flash$',
+  '^strategy ended: solved; moves used: 2$',
+  '"sha256":"66040e596ece30efcb1e500350396477f6e4f56d9af1b8f2896c30bece2fc391"',
+]

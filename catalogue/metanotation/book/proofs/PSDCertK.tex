@@ -1,0 +1,103 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- reduction to verified
+machinery. The certificate-family preamble is stated in the
+\rulename{PSDCERT/T} section and applies verbatim. This is the
+\emph{semidefinite} member: it certifies $A \succcurlyeq 0$ together
+with an exactly-checked kernel, for the boundary cases the two strict
+tiers cannot touch.}
+
+\begin{brecipe}[the \rulename{PSDCERT/K} instance]\label{rec:psdk-instance}
+Data: $A \in \Q^{(m+k)\times(m+k)}$ with the $k$ kernel coordinates
+\emph{last} (the producer applies its permutation before emission ---
+conjugation by a permutation is index renaming on matrix and term
+vector alike, so the identity-permutation form loses no generality);
+$N \in \Q^{m \times k}$; the kernel-completion row matrix
+$L := (\,I_m \mid N\,)$; a leading block $B \in \Q^{m\times m}$ with a
+/T-or-/DD inner witness $Z$. Checked premises: the factorization
+$A = L^{\mathsf T} B\, L$ holds \emph{entrywise exactly} (recomputed),
+and $B$ passes the selected strict inner check. Then
+\[
+\inferrule*[Right=\rulename{PSDCERT/K}]
+  {\;\mathrm{checkK}(A, N, B, Z) = \mathsf{true} \\
+    c \equiv -\textstyle\sum_{i,j} A_{ij}\,p_i\,p_j\;}
+  {\Phi \vdash \Psi}
+\qquad\rightsquigarrow\qquad
+\text{\upshape discharged by } \texttt{sound\_psdCertK}.
+\]
+The factorization check is equivalent to the three separate conditions
+($A$ symmetric; $A \cdot K = 0$ exactly for
+$K = \binom{-N}{\,I_k}$; leading block of $A$ equal to $B$): the
+cross and trailing blocks $BN$ and $N^{\mathsf T} B N$ are forced
+either way, so a forged $N$ or $B$ refuses.
+\end{brecipe}
+
+\begin{bprop}[matrix warrant]\label{prop:psdk-matrix}
+If $B \succ 0$ (hence $\succcurlyeq 0$) and
+$A = L^{\mathsf T} B L$ for the rectangular $L = (I \mid N)$, then
+$A \succcurlyeq 0$. Moreover $x^{\mathsf T} A x = 0$ exactly on
+$\operatorname{span} K$, so the certificate fixes
+$\ker A = \operatorname{span} K$ and
+$\operatorname{rank} A = m$.
+\end{bprop}
+\begin{proof}
+Positive semidefiniteness is rectangular congruence, with no
+invertibility anywhere: $x^{\mathsf T} A x = (Lx)^{\mathsf T} B\,(Lx)
+\geq 0$ (the kernel proof is this one line,
+\texttt{posSemidef\_of\_factor}). For the kernel content, write
+$x = (x_1, x_2)$ against the block split and note
+$Lx = x_1 + N x_2$, while $L K = -N + N = 0$; with $B \succ 0$,
+$x^{\mathsf T} A x = 0$ iff $Lx = 0$ iff $x = K x_2$ --- i.e.\ the
+zero set of the form is exactly $\operatorname{span} K$, which has
+dimension $k$, giving the rank statement.
+\end{proof}
+
+\begin{bremark}[exact kernels are forced, not a method limitation]
+A rounding-tolerant witness for kernel \emph{directions} cannot exist
+for a residual-style check --- one attesting the kernel claim only up
+to an $\varepsilon$-residual, with no exact kernel equation:
+$\{A \succcurlyeq 0,\ \det A = 0\}$ is a boundary set with empty
+interior, so a check whose acceptance region contains an
+entrywise-$\varepsilon$ neighbourhood of a true instance also accepts
+some $A - \varepsilon' I \not\succcurlyeq 0$. Exact kernel data plus a
+rounding-tolerant bulk (the /DD inner witness) is therefore the
+information-theoretic optimum --- and it matches the intended
+producers, whose kernels are \emph{semantic} (a conservation law, a
+syzygy relation, the all-ones vector of a graph Laplacian): $N$ comes
+from theorems, and floats only ever touch $Z$.
+\end{bremark}
+
+\begin{bremark}[each hypothesis, and the corners]
+\emph{Entrywise-exact factorization}: the whole kernel claim rides on
+$A K = 0$ holding exactly; an $\varepsilon$-approximate factorization
+certifies nothing (previous remark). \emph{The strict inner witness}:
+$B \succ 0$ is what confines the zero set to
+$\operatorname{span} K$ --- a merely semidefinite $B$ would leave
+undeclared kernel directions inside the leading block. \emph{Kernel
+coordinates last}: bookkeeping only, by the permutation argument in
+the recipe. Corners are structural, not special-cased: $k = 0$ gives
+$L = I$ and the rule degenerates to its inner strict tier ($A = B$);
+$m = 0$ forces $A = 0$ (empty $B$, no inner witness content --- the
+factorization premise \emph{is} the entire content).
+\end{bremark}
+
+\begin{bremark}[what reaches the formula layer today]
+The checker verifies the kernel and rank content (a forged $N$
+refuses), but the formula language currently states only the
+quadratic-form conclusion $\sum_{i,j} A_{ij}\,p_i\,p_j \geq 0$ ---
+which for this rule is honest ($\succcurlyeq$-shaped, per the
+preamble's strictness discipline) and loses only the kernel/rank
+\emph{statement}, not its checking. Making rank and kernel
+formula-expressible needs closed-tensor terms and a tensor-valued
+closed evaluator --- the same named extension the
+\rulename{PConstExact} section records for exact matrix identities;
+until it ships, the kernel content is certificate-level assurance
+surfaced here, deliberately not hand-faked into the formula grammar.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:psdk-instance} warrant & \texttt{sound\_psdCertK} (Soundness); shared transport \texttt{sound\_psdCertOf} (see \rulename{PSDCERT/T})\\
+rectangular congruence (Prop.\ \ref{prop:psdk-matrix}) & \texttt{PsdCert.posSemidef\_of\_factor}\\
+check-to-theorem bridge & \texttt{PsdCert.checkK\_posSemidef} (inner tier via \texttt{checkT\_posDef} / \texttt{checkDD\_posDef}); corollary \texttt{checkK\_quadForm\_nonneg}\\
+the executable check & \texttt{PsdCert.checkK} with the completion rows \texttt{kernelExt}\\
+conclusion identity + readings & \texttt{PsdCert.conclCheck}; the \rulename{Syzygy} section's conclusion-form selector\\
+\end{anchors}

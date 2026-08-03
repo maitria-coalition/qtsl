@@ -1,0 +1,29 @@
+# bindings.toml.d/ClosureExact.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ClosureExact'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureExactGt_sound"
+sha256 = "26bff9c63c903ce32262e91a289b02bc7356c5969c058701d6ad5b1bc7b1fdc2"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureExactLt_sound"
+sha256 = "ee300d8bab6f8c0c3c59f56c64c7bf27c6287e78214dfc9db505ce887c0bf197"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureExact_isClosed_ge"
+sha256 = "89becab898e073129261045b6b628bc36b8fd75cbe3cd33535c30fcdaaee1b12"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "closureExact_isClosed_le"
+sha256 = "90e75b2d3d5bbe8c2195b7459d2a7e581aca52db977b52749af9b501eea2dd01"
+
+[[correspondence]]
+entry = "ClosureExact"
+steele_sha256 = "82a302849dd65ee9f3e02f1f5da24c402dce2f7f72c45b8265af22e6eed7238f"
+statements_sha256 = "3c5d9109b5958c76fb4ec8cc93d7b346759fe5df0638914e6e1d208ca2060c34"
+prose_sha256 = "b6f84648b5c961fdd454d56dcecda9f0cf61256dd1f60b02e28a53970d21ebce"
+

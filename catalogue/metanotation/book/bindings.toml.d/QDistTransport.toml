@@ -1,0 +1,34 @@
+# bindings.toml.d/QDistTransport.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QDistTransport'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QDistTransport"
+decl = "epsPushKernel_comp"
+sha256 = "4e16b6e5a362d39a8a22637239604b4d7dfc9cf47888305efaf9d5d248f07229"
+
+[[statement]]
+module = "QtslAux.QDistTransport"
+decl = "pushKernel_iff_eps_zero"
+sha256 = "6df90e654a92277f2734ac3afc1bf0e8ebb729bcc08c0ed7a4a1e72f558b1f45"
+
+[[statement]]
+module = "QtslAux.QDistTransport"
+decl = "sound_QDistSelfTransport"
+sha256 = "d801bf44bf7aa10d9b589af5cdf53ca98bef5c33a38d58b64e330f59856d019f"
+
+[[statement]]
+module = "QtslAux.QDistTransport"
+decl = "sound_QDistTransport_eps"
+sha256 = "97a9f0a2179fe098fb6a43b103245185820e3f3fe94dd59263997a2e1cb44b56"
+
+[[statement]]
+module = "QtslAux.QDistTransport"
+decl = "strict_cell_exact"
+sha256 = "1bdc2b871619c6df607fdf48f1962d8c77904bbe64b0d7f0278e3fcc305c1657"
+
+[[correspondence]]
+entry = "QDistTransport"
+steele_sha256 = "0988aef49e564c8e33731ff12da549d881bb30e55a26c26eb1982f87ac9699c3"
+statements_sha256 = "4a554a224d3df15836f2dd5a099053a39ad9a6cbbfe65c76f617e93292a620c8"
+prose_sha256 = "0b80ad4674a3d9ca57c2cb75e2593402d1eb0e21b0710403d579839761de0cf5"
+

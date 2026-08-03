@@ -1,0 +1,134 @@
+# B5 fan fragment (see CellInInterior.toml header note for flagged calls).
+
+[[rule]]
+id = "CellOut"
+source = "../BL-rules.toml"
+row = "Cell-Out"
+proof = "book/proofs/CellOut.tex"
+commentary = '''
+\rulename{Cell-Out} is \rulename{Cell-In-Interior}\textquotesingle s
+refutation companion: from a premise strictly separating the input
+point from cell $C_j$, it zeroes that cell\textquotesingle s indicator
+--- $\Phi \vdash b_j = 0$ --- and it does so \emph{even at boundary
+points of other cells}, where the pinning rule cannot fire. The paper
+states the premise as $x \notin \overline{C_j}$, a disjunction of
+strict halfspace violations; the negation-free formula grammar has no
+rendering of that, so the realized rule serializes a witness instead:
+a single strict barycentric atom at a \emph{named witness vertex} $w$
+of $C_j$, with the polarity that contradicts membership ($>$ at an
+extended vertex, $<$ at a core vertex). One atom replaces the
+disjunction --- no loss for producers, who know which halfspace their
+point violates, and a strict gain for the checker, which does no
+disjunctive reasoning. A producer uses the rule to kill off-branches
+of a piecewise definition: once every indicator but one is zero,
+downstream arithmetic (a weighted combination over branches, a
+substitution) simplifies to the live branch.
+
+What the checker recomputes: presence of the cited cell application
+with the same port typing as the companion rule (input at
+$[\mathrm{ambDim}]$, outputs at total size one); that the witness
+vertex lies in cell $j$\textquotesingle s support mask (the build
+refuses otherwise); that the premise is byte-for-byte the recomputed
+separating atom for $(j, w)$; and that the conclusion is the
+recomputed $b_j = 0$ atom.
+
+Each hypothesis is essential. The support-mask guard: an atom at a
+vertex outside $C_j$\textquotesingle s support constrains a weight the
+membership predicate never mentions --- no contradiction, no soundness.
+Strictness of the atom: the model\textquotesingle s membership fact
+delivers weak signs, and only a strict opposite sign contradicts them
+(a weak atom is compatible with a boundary weight of zero, where the
+model may still choose cell $j$). The port typing: same double duty as
+in the companion rule --- the tensor-to-point tie on the input, and
+the entry-to-whole-wire lift on the output. Notably ABSENT here: the
+interior-disjointness well-formedness --- the refutation is by weight
+uniqueness on the two-vertex support against the strict witness atom,
+within cell $j$ alone, so this rule stands even where only the
+companion needs the provisional schema amendment. The proof section
+walks these in order.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}; binders, linkage row, and the undisplayed
+port-typing pack (\texttt{happ}, \texttt{hinshape}, \texttt{houts} ---
+payload fields \texttt{PCellOutData}) exactly as in the
+\rulename{Cell-In-Interior} dictionary, with $j \mapsto$
+\texttt{whichJ} and the witness vertex $w \mapsto$ \texttt{wv : Fin
+schema.nVertices}.
+\begin{itemize}
+\item premise $\Phi \vdash \lambda^{C_j}_w(x) \bowtie^{\circ} 0$
+  $\mapsto$ \texttt{ih} with \texttt{hwit} $:$
+  \texttt{cellOutWitnessForm schema (.var input) whichJ wv
+  premise.post} --- pinned as the witness build\textquotesingle s
+  output: a single strict atom at the flat-order entry of the named
+  vertex, comparator $>$ on an extended witness and $<$ on a core
+  one, exactly the display\textquotesingle s polarity (note the
+  deliberate flip against \rulename{Cell-In-Interior}\textquotesingle
+  s interior comparators); the build\textquotesingle s guard demands
+  the witness vertex lie in $C_j$\textquotesingle s support --- the
+  display\textquotesingle s ``of $C_j$\textquotesingle\textquotesingle{}
+  --- and, as at the companion, succeeds only at
+  \texttt{schema.ambDim = 1}: the certified reach is the
+  1-dimensional fragment, by refusal. $\Phi$ shared via
+  \texttt{hpre}.
+\item conclusion $\Phi \vdash b_j = 0$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{cellOutZeroForm schema outputs whichJ
+  seq.post} --- the single equality atom, indicator wire left,
+  \texttt{.const 0} right.
+\item the disjointness conjunct of the model\textquotesingle s
+  sp-fact is \emph{discarded} by this rule\textquotesingle s proof
+  (the statement chain consumes the one-hot fact only) --- certifying
+  the commentary\textquotesingle s claim that \rulename{Cell-Out}
+  stands independent of the provisional schema amendment its
+  companion needs.
+\end{itemize}
+Width note: ``applies even at boundary points\textquotesingle\textquotesingle{}
+is carried structurally --- the witness atom is strict and nothing
+demands interiority of $x$; within the 1-dimensional fragment neither
+side is wider, every hypothesis consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "sound_cellOut",
+  "cellOutWitnessBuild_spec",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "cellOutWitnessBuild",
+  "cellOutWitnessForm",
+  "cellOutZeroBuild",
+  "cellOutZeroForm",
+  "PCellOutData",
+]
+intro = '''
+\textbf{The recomputed forms and the payload.}\enspace As for the
+companion rule, no formula text is trusted from the certificate: the
+witness atom is rebuilt from the schema\textquotesingle s barycentric
+data at the named vertex (note the \texttt{guard} --- the build refuses
+a witness vertex outside the cell\textquotesingle s support mask), the
+conclusion atom from the output list, and the payload\textquotesingle s
+form fields assert equality with the rebuilt formulas. The same
+two-vertex 1-D fragment gates apply (\texttt{baryLambdas1D}, displayed
+in the \rulename{Cell-In-Interior} section); everything beyond the
+fragment is refused.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+Same island as \rulename{Cell-In-Interior}: the HOL4
+port\textquotesingle s header inventories the cell-rule payload forms
+(witness and zero builds included) as a deliberately dropped island,
+scheduled with the proof-object payload port; the shared barycentric
+ingredient \texttt{baryCoeffs1D} is ported, the cell builders are not.
+The roster\textquotesingle s name-match candidate for this rule
+(\texttt{coverExtendPass}) was checked against the script: it is the
+greedy pass of the \rulename{Subdivide} interval chain cover, unrelated
+to cells.
+'''

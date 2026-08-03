@@ -1,0 +1,14 @@
+# bindings.toml.d/PBound.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'PBound'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_pBound"
+sha256 = "51162891f1b8b319273d3f093c84b2d1150a8e52e2653802737e7a432acbc25b"
+
+[[correspondence]]
+entry = "PBound"
+steele_sha256 = "5a3004adafe97ce4f32528277871e1d3d8608f2fe00cd94bb3f4a76913352a08"
+statements_sha256 = "ed89c4eb5b2feba3109c029992a938286b12bfed70ac258b24d1e14880efc5cc"
+prose_sha256 = "9582cd8cc2b7eaccb45287ebf0b77943649d37c2d284f8f04d63b668b8179cc1"
+

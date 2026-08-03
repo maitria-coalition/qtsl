@@ -1,0 +1,24 @@
+name = "pointfree"
+version = "0.1.0"
+defaultTargets = ["Pointfree"]
+
+[leanOptions]
+autoImplicit = false
+
+# Point-free stochastics: valuations on frames, the subprobability
+# promotion, the narrow topology as pulled-back Scott topology, and the
+# bridge from Borel measures (restriction to opens; τ-additivity).
+# Consumed by the semantic-universe development; depends on mathlib only.
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+[[lean_lib]]
+name = "Pointfree"
+globs = ["Pointfree", "Pointfree.+"]
+
+[[lean_lib]]
+name = "AxiomReceipts"
+globs = ["AxiomReceipts"]

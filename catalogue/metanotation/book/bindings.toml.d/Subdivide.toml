@@ -1,0 +1,44 @@
+# bindings.toml.d/Subdivide.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Subdivide'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "ExtensionSet.interval1D?"
+sha256 = "2d19e67f5827dc3283724eb9beb36eecef8fee369f7e2c2047994124b87eef67"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "coverChainCheck"
+sha256 = "ad8e20c18cd8e3eeaf65f48485e164d23e437d3e555ee2c0e9f5dc1d5500fdb8"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "coverCheck"
+sha256 = "9fbc987094587160cd67269de6bd20644043ffeea9d6e7a2804254cb5401b0e0"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "coverExtendPass"
+sha256 = "d17a9a380a822ba8584fe036b9760a4f158abea76b4d2908496643847c712b0b"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "coverInfeasibilityValid"
+sha256 = "a55f5b5bb2f3cc24fd2cf9fcc15ed2ec793efd7363a524e74a620bc782042aca"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "coverReach"
+sha256 = "95641dbf05069ec84356add7797e7e6b6251d209b51d1a0af136db219c630703"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_subdivide"
+sha256 = "512cb1ffb6b0cdcc70cc797748e606972abfbdf3b549d864d9988ca7fe98cb9f"
+
+[[correspondence]]
+entry = "Subdivide"
+steele_sha256 = "8decf9a09d162396184fb2fe179697bc38fae6603541a15c7b7308e0a741ce36"
+statements_sha256 = "1c3191ec5493da66d3efdeb1306596123ea8e78ca5fb5d78380713ca504177f6"
+prose_sha256 = "5473e2c165053c1d037b566ef7fcf0c4bc030f1781b044ec8b531f7c53453b03"
+

@@ -1,0 +1,84 @@
+// Certificate-shape fixtures (formerly resident in
+// cwa/CertShapeChase.geolog), in theory vocabulary: the CertShape
+// stratum's teeth exercised per-instance at the chase verb against
+// the BL + Qtsl closure. Ground fields the retired transcript erased
+// (axis positions, branch shapes, body indices, enum counts, param
+// domains) ride abstract elements. Each block chases alone
+// (--instance): denials named, demands derived, never exit codes
+// alone.
+
+// Positive: a two-axis presentation (one run-enumerated, one
+// step-bound), a family splitting over the run axis only, bodies
+// and a selection with its properness witness. Saturates with both
+// demands derived and nothing violated.
+instance cs_family : Qtsl {
+  s1 : System;
+  axRun, axStep : NDAxis;
+  bRun, bStep : BindingTime;
+  eEnum : NDExtent;
+  eCount : Nat;
+  p0, p1, body0, body1, sel0 : Nat;
+  br0, br1, brSel : Shape;
+  cf1 : CertFam;
+  h0, h1, hw : HypernetRef;
+  [out: bRun] btRun;
+  [out: bStep] btStep;
+  [count: eCount, out: eEnum] ndEnum;
+  [arg: axRun, out: bRun] nd_binding;
+  [arg: axRun, out: eEnum] nd_extent;
+  [arg: axStep, out: bStep] nd_binding;
+  [sys: s1, pos: p0, axis: axRun] sys_nd_axis;
+  [sys: s1, pos: p1, axis: axStep] sys_nd_axis;
+  [fam: cf1, pos: p0, axis: axRun] cert_axis;
+  [fam: cf1, branch: br0, body: body0, hn: h0] cert_body;
+  [fam: cf1, branch: br1, body: body1, hn: h1] cert_body;
+  [fam: cf1, sel: sel0, branch: brSel, witness: hw] cert_selection;
+}
+
+// Positive: the scalar as the nullary case — no axis roster at all,
+// one body, one selection. The family demand still mints.
+instance cs_scalar : Qtsl {
+  cf0 : CertFam;
+  h0, hw : HypernetRef;
+  body0, sel0 : Nat;
+  br0, brSel : Shape;
+  [fam: cf0, branch: br0, body: body0, hn: h0] cert_body;
+  [fam: cf0, sel: sel0, branch: brSel, witness: hw] cert_selection;
+}
+
+// Negative: a family splitting over a step-bound axis — the branch
+// split asserts commitment the semantics does not grant.
+instance neg_step : Qtsl {
+  cfx : CertFam;
+  axS : NDAxis;
+  bS : BindingTime;
+  pS : Nat;
+  [out: bS] btStep;
+  [arg: axS, out: bS] nd_binding;
+  [fam: cfx, pos: pS, axis: axS] cert_axis;
+}
+
+// Negative: a family enumerating a parametric axis — finitely many
+// sample branches under-cover a continuum.
+instance neg_param : Qtsl {
+  cfy : CertFam;
+  axP : NDAxis;
+  bR : BindingTime;
+  eP : NDExtent;
+  dP : Box;
+  pP : Nat;
+  [out: bR] btRun;
+  [domain: dP, out: eP] ndParam;
+  [arg: axP, out: bR] nd_binding;
+  [arg: axP, out: eP] nd_extent;
+  [fam: cfy, pos: pP, axis: axP] cert_axis;
+}
+
+// Negative: one binding-time element claimed as both constants —
+// the constant images' disjointness catches a producer asserting
+// step and run onto one draw.
+instance neg_bt_confused : Qtsl {
+  bBoth : BindingTime;
+  [out: bBoth] btStep;
+  [out: bBoth] btRun;
+}

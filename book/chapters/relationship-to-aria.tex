@@ -1,0 +1,167 @@
+\chapter*{Relationship to ARIA}
+\addcontentsline{toc}{chapter}{Relationship to ARIA}
+
+\noindent\draftmark\ --- \textit{attributions in this section are
+reviewed by hand before any versioned release.}\medskip
+
+\noindent MAITRIA is easy to confuse with the ARIA Safeguarded AI
+programme, so let us be precise. \textbf{This toolkit is the
+independent work of the maitria coalition. It is not a product,
+deliverable, or official output of ARIA or of the Safeguarded AI
+programme; it is not ARIA-funded; and it speaks for no one but its
+authors.} The connection is real but personal and intellectual:
+David ``davidad'' Dalrymple originated the Safeguarded AI
+programme and served as its Programme Director at ARIA until
+1~April~2026; the programme is now directed by Nora Ammann, with
+davidad continuing in a Technical Advisor role. The
+toolkit takes the programme's published TA1.1 and TA1.2 objectives as
+its rubric --- an independent implementation, built in the hope of
+being useful to the programme's teams --- but it carries no ARIA
+endorsement, and its errors are entirely our own.
+
+As for the coalition itself: it is, at the time of writing, small in
+the way a seed is small --- one human member and one funder, both
+davidad; the rest of its current members are AI. It intends to
+grow.
+
+One boundary has been kept deliberately, and we state it as a claim
+we intend to go on being able to make: \textbf{MAITRIA builds on
+nothing ARIA-funded that its creators have not themselves made
+public.} The credit due to
+that public work is massive, and this page is partly a thank-you note:
+
+\begin{enumerate}
+  \item \textbf{The \emph{Lectures on the Double Operadic Theory of
+    Systems}}, David Jaz Myers, 2025-- (the TA1.1 lecture series), and
+    \href{https://arxiv.org/abs/2505.18329}{\emph{Towards a double
+    operadic theory of systems}}, Sophie Libkind and David Jaz Myers,
+    2025. The systems vocabulary this book speaks --- lenses as
+    generalized Moore machines, behaviours as representables, the
+    coupling theorem --- is theirs; our composition machinery is an
+    implementation of it.
+  \item \href{https://arxiv.org/abs/2604.03017}{\emph{Compositionality
+    of Lyapunov functions via assume-guarantee reasoning}}, Matteo
+    Capucci and David Jaz Myers, 2026. Certified lenses composing by
+    lens composition plus addition of slacks --- QTSL's certificate
+    composition follows this pattern.
+  \item \textbf{The supermartingale-certificate line}:
+    \href{https://arxiv.org/abs/2504.05065}{\emph{Quantitative
+    Supermartingale Certificates}}, Alessandro Abate, Mirco Giacobbe,
+    and Diptarko Roy, 2025;
+    \href{https://arxiv.org/abs/2605.21134}{\emph{Complete
+    $\omega$-Regular Supermartingale Certificates}}, Alessandro Abate,
+    Mirco Giacobbe, Sergey Ichtchenko, and Diptarko Roy, 2026; and
+    \href{https://arxiv.org/abs/2412.17432}{\emph{Neural
+    Continuous-Time Supermartingale Certificates}}, Grigory Neustroev,
+    Mirco Giacobbe, and Anna Lukina, 2024. Their certificate theory,
+    our exact-arithmetic back-end: QTSL's probabilistic,
+    $\omega$-regular, and continuous-time obligations compile into
+    the certificate shapes these papers define and prove
+    sound.
+  \item \textbf{Coln} (\url{https://coln-project.github.io}), the
+    Categorical Core team, led by Martin Kleppmann and Owen Lynch.
+    The fork of the geolog language being built for the
+    programme; geolog-alpha is built to complement it, and to
+    converge with it at the wire format.
+  \item \textbf{Keyhive}, Ink \& Switch: Alex Good, John Mumm, and
+    Brooklyn Zelenka. The capability-and-sync layer for end-to-end
+    encrypted local-first data; the toolkit vendors
+    \texttt{keyhive\_core}, and geolog's capability-based
+    authorization is designed to converge with Keyhive rather than
+    compete with it, and
+    \href{https://arxiv.org/abs/2606.26292}{FinWhale} consensus is
+    optionally available, for applications that need finalized
+    linear orders.
+  \item \textbf{The Safeguarded AI programme thesis and the TA1.1
+    and TA1.2 solicitations}, ARIA. The rubric this toolkit grades itself
+    against --- including the places where we deliberately narrow
+    their picture; where ours differs, this book says where and why.
+\end{enumerate}
+
+Beyond what the stack directly builds on, the programme's funded
+output has shaped how we think, and the debt is wide enough to be
+worth recording. This list came from a systematic sweep of funding
+acknowledgements across the papers this project has actually read;
+each acknowledges ARIA Safeguarded AI funding, in whole or in part.
+
+\begin{enumerate}
+  \item \href{https://arxiv.org/abs/2605.00487}{\emph{Zero-Knowledge
+    Model Checking}}, Pascal Berrang, Mirco Giacobbe, Jacob Swales,
+    and Xiao Yang, 2026. Prove that the model checks out without
+    revealing the model --- orthogonal to our goals, and a natural
+    composition partner: their symbolic protocol hides rational
+    Farkas-style witnesses of the kind our certificates carry in the
+    clear, and arithmetizing the checking of at least the Bernstein
+    Logic fragment --- reducing certificate checking to pure
+    rational-arithmetic relations, the shape whose witnesses such
+    protocols hide --- is work in progress in our workshop.
+  \item \textbf{The partial-Markov and timed-process line} of Elena
+    Di Lavore and Mario Rom\'an with coauthors:
+    \href{https://arxiv.org/abs/2504.12846}{\emph{Timing via Pinwheel
+    Double Categories}}, 2025;
+    \href{https://arxiv.org/abs/2410.10643}{\emph{A Simple Formal
+    Language for Probabilistic Decision Problems}}, with Bart Jacobs,
+    2024; \href{https://arxiv.org/abs/2507.19424}{\emph{Order in
+    Partial Markov Categories}}, with Pawe\l{} Soboci\'nski and
+    M\'ark Sz\'eles, 2025; and
+    \href{https://arxiv.org/abs/2605.06268}{\emph{Graded Monad
+    Coalgebras for Continuous-Time Transition Systems}}, with Jonas
+    Forster, 2026. A running masterclass in doing probabilistic
+    semantics with taste.
+  \item \textbf{The tape-diagram series} of Filippo Bonchi and
+    Cipriano Junior Cioffo:
+    \href{https://arxiv.org/abs/2503.22819}{\emph{Tape Diagrams for
+    Monoidal Monads}}, with Alessandro Di Giorgio and Elena Di
+    Lavore, 2025; \href{https://arxiv.org/abs/2601.01472}{\emph{Tapes
+    as Stochastic Matrices of String Diagrams}}, 2026; and
+    \href{https://arxiv.org/abs/2606.19017}{\emph{Completeness for
+    Probabilistic Boolean Tapes}}, 2026. Complete equational theories
+    for circuits with genuine probability --- geolog's founding
+    benchmark runs on exactly this signature, so we read these
+    twice.
+  \item \href{https://arxiv.org/abs/2405.09391}{\emph{Compositional
+    imprecise probability}}, Jack Liell-Cock and Sam Staton, 2024. A
+    compositional account of the imprecision that our
+    bounded-probability judgments live inside.
+  \item \href{https://arxiv.org/abs/2602.05850}{\emph{An Equational
+    Axiomatization of Dynamic Threads via Algebraic Effects}}, Ohad
+    Kammar, Jack Liell-Cock, Sam Lindley, Cristina Matache, and Sam
+    Staton, 2026.
+    We read it for the method: how to axiomatize a wild language
+    feature without losing the algebra.
+  \item \href{https://doi.org/10.4230/LIPIcs.LICS.2026.4}{\emph{A
+    Convenient Fibration for Dependently-Typed Probability Theory}},
+    Danel Ahman, Ohad Kammar, and Rasmus Ejlers M\o{}gelberg, LICS
+    2026. Dependent types over stochastic state, done right; our own
+    typed staging turns out to rhyme with their dependent pairs,
+    which we take as a good sign.
+  \item \href{https://arxiv.org/abs/2501.18404}{\emph{Graded String
+    Diagrams for Imprecise Probability and Causal Intervention}},
+    Ralph Sarkis and Fabio Zanasi, 2025. Imprecision and intervention
+    in one graphical calculus.
+  \item \href{https://arxiv.org/abs/2512.09908}{\emph{Bayesian
+    Networks, Markov Networks, Moralisation, Triangulation: a
+    Categorical Perspective}}, Antonio Lorenzin and Fabio Zanasi,
+    2025. Where junction trees actually come from, categorically ---
+    it settled an argument we were having with ourselves about
+    aggregation rules.
+  \item \href{https://arxiv.org/abs/2604.27268}{\emph{A Diagrammatic
+    Axiomatisation of Behavioural Distance of Nondeterministic
+    Processes}}, Wojciech R\'o\.zowski, Robin Piedeleu, Alexandra
+    Silva, and Fabio Zanasi, 2026. A quantitative equational take on
+    process distance we expect to want the day our continuous-time
+    objects get a diagrammatic presentation.
+  \item \href{https://arxiv.org/abs/2509.14094}{\emph{Metric
+    Equational Theories}}, Radu Mardare, Neil Ghani, and Eigil
+    Rischel, 2025. Equational logic where equations hold up to
+    $\varepsilon$ --- quietly foundational for any logic, like ours,
+    that lives on quantitative bounds.
+  \item \href{https://arxiv.org/abs/2607.00034}{\emph{Bayesian
+    updates from coalgebraic determinisation}}, Manuel Baltieri and
+    Nathaniel Virgo, 2026. Filtering as determinisation --- the kind
+    of reframing that makes an old thing suddenly composable. Also a
+    datum that the programme's funded orbit reaches Tokyo.
+\end{enumerate}
+
+To all of the above: thank you. The best way we know to say it is to
+ship things you can check.

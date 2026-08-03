@@ -1,0 +1,24 @@
+# api-system.toml.d/S-SDE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-SDE"
+entity = "model type"
+
+[api.ts]
+handle = "system.sde"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_sde", "marker:ts_sig_sdegen"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "fn-body:buildSde"
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Sde::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_sde"]
+snippet_file = "crates/mtk-catalogue/tests/common/mod.rs"
+snippet = "fn-body:sde"
+note = '''The multi-driver presentation (per-driver sigma columns) is the corpus's committed \texttt{correlated-2d} golden vector (fixture \texttt{sde\_noise}, whose derived cross term the generator-kit tests pin in closed form); the generator kit's Rust face is \texttt{mtk\_catalogue::system::sde\_gen\_kit}.'''

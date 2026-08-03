@@ -1,0 +1,175 @@
+[[rule]]
+id = "Farkas"
+source = "../BL-rules.toml"
+row = "Farkas"
+proof = "book/proofs/Farkas.tex"
+commentary = '''
+\rulename{Farkas} is the affine-combination rule over the premise: from
+atoms $\{\ell_j \bowtie_j 0\}$ occurring as sub-conjuncts of $\Phi$ and
+nonnegative multipliers $\lambda_j$ (free-signed on equality atoms), it
+concludes $\Phi \vdash \sum_j \lambda_j \ell_j \leq 0$. It is the
+one-rule form of what \rulename{Syzygy} does with sub-\emph{proofs}:
+here every combined atom must already sit in the premise conjunction, so
+no component derivations enter. A producer finds the multipliers by
+whatever method it likes (an LP feasibility call, typically) and ships
+only the combination term; nothing about the search survives into the
+certificate.
+
+What the checker recomputes, given the payload (combination term,
+conclusion term): decode the combination into weighted entries --- a
+fixed canonical encoding (a right-nested sum of
+$\lambda_j \cdot e_j$ products with a zero terminator), anything else
+rejected; require each weight nonnegative; require each
+entry\textquotesingle s polynomial to occur among the
+$({\cdot} \leq 0)$-normal polynomials of a premise conjunct --- equality
+atoms expose \emph{both} polarities to the matcher, which is exactly how
+a free-sign multiplier on an equality is realized as a nonnegative
+weight on the appropriate polarity; and require the weighted fold of the
+entry polynomials to equal the conclusion\textquotesingle s polynomial
+\emph{identically}, as canonical forms over $\Q$. The check is a
+disjunction of three branches of one replay algorithm, differing only in
+the variable space where polynomials are compared: the legacy idx-free
+canonical-form branch, a wire-aware coordinate branch for
+projection-indexed terms, and a mixed tagged-union branch for
+combinations mentioning both bare wires and projections.
+
+Each hypothesis is essential. Drop the sign condition and a producer
+multiplies a bound by $-1$ and concludes its negation. Drop the
+atom-sourcing check and the combination smuggles in atoms nobody
+assumed. Drop the exact fold identity and the conclusion is unrelated to
+the premise. Drop the positive-size wire condition and the rule is
+unsound at degenerate shapes: comparison atoms over a zero-size
+(empty-tensor) wire hold \emph{vacuously}, and a combination of two
+vacuous contradictory atoms --- $5 \leq w$ and $w \leq 3$ at a wire of
+shape $[0]$ --- derives the false scalar conclusion
+$\vdash 2 \leq 0$ from a satisfiable premise. Drop the
+conclusion\textquotesingle s shape/finiteness fields and a conclusion
+mentioning an untyped wire has a correct canonical polynomial but never
+evaluates, so the concluded atom never holds. The proof section walks
+these in order.
+'''
+note = '''
+The catalogued statement ranges over \emph{linear} $\ell_j$; the replay
+itself is degree-blind, and soundness never consults linearity --- the
+restriction is the rule\textquotesingle s published register (the shape
+producers emit and the wire format prices), not a checked side
+condition. \rulename{Syzygy} lifts the same fold to component
+conclusions with degrees unrestricted; \rulename{PBound} re-spells that
+lift as the compact affine bound-node.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}. Distinctively, there is no
+sub-derivation hypothesis at all: the displayed premise row describes
+the syntactic conjunct structure of $\Phi$ itself, so the statement
+consumes \texttt{seq.pre} directly and no \texttt{ih} exists.
+\begin{itemize}
+\item the combination $\sum_j \lambda_j \ell_j \mapsto$ the binder
+  \texttt{conclusion : Term}; the multipliers $\lambda_j \mapsto$
+  encoded in \texttt{combinationCoeffs : Term} under the pinned
+  canonical encoding the intro describes.
+\item the displayed premise row --- sub-conjunction of $\Phi$, each
+  $\ell_j$ linear, $\bowtie_j \in \{\leq, =\}$, multipliers
+  nonnegative and free exactly on equalities, and the identity of
+  \texttt{conclusion} with the combination --- $\mapsto$ one
+  hypothesis, \texttt{hvalid} $:$ \texttt{farkasCombinationValid
+  combinationCoeffs seq.pre conclusion}, whose meaning this book binds
+  by displaying the decoding chain in full (absorbed hypotheses, the
+  \rulename{PConstExact} pattern: a successful check certifies the
+  structure; the free-sign discipline is realized as both-polarity
+  contribution of equality atoms).
+\item the displayed typing premises $\bshape_H(\sum \lambda_j \ell_j)
+  \neq \bot$ and finite typing $\mapsto$ \texttt{hshape} (existence of
+  a defined broadcast shape --- the \texttt{some}) and \texttt{hfin}
+  $:$ \texttt{conclusion.finWires H}.
+\item conclusion $\Phi \vdash \sum_j \lambda_j \ell_j \leq 0$
+  $\mapsto$ the goal under \texttt{hpost} $:$ \texttt{seq.post = .atom
+  .le conclusion (.const 0)}.
+\end{itemize}
+Width note, narrower than the displayed cell and loud about it: the
+statement carries \texttt{hwpos} --- every free wire of
+\texttt{seq.pre} \emph{and} of the conclusion typed at a shape of
+strictly positive total size --- which the displayed cell does not
+show (it displays only definedness and finite typing). This is the
+realized positive-size payload row, and it is not optional: without
+it, zero-size wires make atoms vacuously true and a combination of
+two vacuous atoms derives a false scalar bound (the roster
+row\textquotesingle s counterexample, reproduced by the review wave).
+The displayed cell is the rule\textquotesingle s intent; the certified
+statement is the display plus exactly this positive-size row.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_farkas"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "Formula.conjunctList",
+  "atomLeZeroPolys",
+  "farkasEntries",
+  "farkasCheckCore",
+  "farkasCheck",
+]
+intro = '''
+\textbf{What the combination check means --- and what it does
+not.}\enspace The side condition appears in the payload as the single
+name \texttt{farkasCombinationValid}, so this book binds its meaning by
+displaying the decoding chain from the checker sources.
+\texttt{farkasEntries} decodes the combination term against a
+\emph{pinned} canonical encoding --- anything else is rejected, so the
+wire format cannot express a malformed combination.
+\texttt{atomLeZeroPolys} is the $({\cdot} \leq 0)$-normalization of one
+premise atom, exact and never rescaled; note that equality atoms
+contribute both polarities, which is the entire realization of the
+classical free-sign multiplier discipline for equality constraints.
+\texttt{farkasCheckCore} strings the gates together in the idx-free
+canonical-form space; \texttt{farkasCheck} is the three-way branch
+disjunction --- the two widened branches replay the same gates
+verbatim in the wire-aware coordinate space (projection terms
+$w[j]$ keyed by an injective pairing of wire and coordinate, so
+distinct wires can never collide) and in the mixed tagged-union space
+(bare wires and projections as disjoint variable classes; the variant
+identifying a bare wire with its zeroth projection admits a false
+sequent and is deliberately unrepresentable).
+
+What a skeptical reader should confirm by eye: the conclusion term
+enters only as the target of the exact fold identity; the
+step\textquotesingle s posted formula appears nowhere in the check; and
+nothing in the chain evaluates or consults the truth of anything ---
+the check manipulates polynomials, never valuations. Semantic truth is
+established only in \texttt{sound\_farkas}, which case-splits on the
+accepted branch.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = [
+  "Definition farkasEntries_def",
+  "Definition atomLeZeroPolys_def",
+  "Definition farkasCheckCore_def",
+  "Definition farkasCheckW_def",
+  "Definition farkasCheck_def",
+]
+receipt = '''
+\texttt{hol-strict} CLEAN over the ported checker chain: theory
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host, scripts
+sha-matched verbatim to the sources cited here (git blob
+\texttt{c6ffee9c\ldots}). The ported receipt table replays the
+$\lambda = 1$ re-canonicalization accept. Downstream, the same chain
+carries the checker to a CakeML binary with the
+\texttt{machine\_code\_sound} tag (theory \texttt{qtslCertProofARM8}).
+Honest divergence, dated: the Lean checker has since grown a
+\emph{third} branch (the mixed tagged-union replay, added 2026-07-19,
+after this port run); the ported \texttt{farkasCheck} is the
+two-branch disjunction. The divergence is refusal-direction only --- a
+certificate accepted solely through the mixed branch is refused, never
+falsely accepted, by the ported checker --- and porting the third
+branch is named residue of the next porting seating.
+'''

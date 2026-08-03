@@ -1,0 +1,1511 @@
+// Engine-decided judgements (oracle = the qtsl certification plugin
+// at the engine's ground seam): bounded computations discharged by
+// evaluation, never derivation-defined. Everything declared and not
+// imported below is ordinary (the default). This header replaces the
+// retired .registry classification sidecar.
+import qtsl.{farkasPairValid, saCellOneHotForm, saCellOutWitnessForm,
+             saCellOutZeroForm, saCellStrictInteriorForm, saEmptyCellForm,
+             tsCellOneHotForm, tsCellOutWitnessForm, tsCellOutZeroForm,
+             tsCellStrictInteriorForm};
+
+// CellFlavorChase.geolog — the flavored cell-schema stratum's chase
+// transcript: fixtures and termination analysis for the flavored
+// vocabulary of the Qtsl omnibus theory (the Layer-11 stratum), in
+// the fragment the v1 single-file chase bridge carries.
+//
+// WHAT THIS FILE IS. The flavored cell schemas live in the omnibus
+// theory (../Qtsl.geolog, the flavored-cell section), spelled with
+// attribute functions and dependent Index types the v1 bridge does
+// not carry. This transcript transports the fragment by the two
+// conservative moves of the sibling QtslChase transcript — functions
+// as functional relations (out-equality chase axioms carry the
+// functionality the Fun sort held implicitly), and constants as
+// unary marks with disjointness refusals (the PetriNet idiom) — plus
+// ONE DOCUMENTED DEVIATION from its ground-erasure convention:
+// index positions (cluster indices, presenter indices, flat
+// dimension positions, cell-roster indices) are kept as OPAQUE
+// PLACEHOLDER SORTS (Dim/ClusterIdx/FunIdx/CellIdx) rather than
+// erased. Erasing them would collapse the key EGDs (two clusters of
+// one schema at DISTINCT indices would merge), destroying exactly
+// the fixture semantics this file exists to exercise; opaque sorts
+// only add positions to the dependency graph, so the deviation is
+// conservative for the termination analysis. Value-plane payloads
+// (the Farkas exact-Q columns, the counters) are carried by the
+// theory's Fun declarations and their mechanized checkers, never by
+// this transcript.
+//
+// Like the CertShapeChase transcript, this file deliberately carries
+// refuse- and report-mode rows AND instance fixtures: the battery
+// needs verdict text. Refuse/report rows generate nothing, so the
+// C-WA conservativity reading is untouched.
+//
+// The host-boundary re-declarations at the top of the theory block
+// are transcript-local re-spellings of tower vocabulary, NOT
+// schema: the theory surface's declarations live in
+// ../BernsteinLogic.geolog and ../Qtsl.geolog.
+//
+// RETIREMENT CLAUSE, AMENDED at the cwa re-point (2026-08-03):
+// the original clause here ("retires when the bridge learns
+// functions, ground dtypes, and extends") was written for a
+// PROJECTION, and this file is not one — it is the executable
+// relational ENACTMENT of the C-CELL conformance family's geometric
+// fragment (the block comment below says so: "enacted as the marked
+// axioms above"). Most of its teeth (the reachability cone walk,
+// the sign-reading dtype discipline, the Farkas off-diagonal
+// refusal, the prim-mark discipline, the tscluster key EGD in
+// opaque-index spelling) have NO chase-able counterpart in the
+// theory files, whose flavored stratum rides the evolved
+// PCellInInteriorTS/PCellOutTS + TSCellSel spelling with
+// Nat-indexed, nat_lt-guarded obligations. This transcript
+// therefore stayed as battery apparatus when its siblings
+// (QtslChase, CertShapeChase — true projections, verified
+// tooth-by-tooth) were retired. It retires when the
+// C-CELL realization lands and carries these teeth itself.
+
+theory CellFlavorChase {
+
+  // ==========================================================
+  // Host boundary — minimal stack vocabulary, relational spelling
+  // (authorities: Dtype, TensorType, Wire/PrimApp/ports, reaches,
+  // and SimpC as declared in ../BernsteinLogic.geolog;
+  // Proof/Judgment: the stack's judgment stratum. transcript-local.)
+  // ==========================================================
+
+  Primitive : Set;
+  isPCell : Primitive -> Prop;   // stack constant PCell
+  isPAdd  : Primitive -> Prop;   // a non-cell primitive, for the
+                                 // negative fixtures
+
+  // constants are distinct: the marks never share an element
+  refuse ax/wf/prim_marks_disjoint : forall p : Primitive.
+    p isPCell, p isPAdd
+    |- false;
+
+  PrimApp : Set;
+  PrimApp/prim : {app: PrimApp, prim: Primitive} -> Prop;
+
+  // stored primitive is single-valued (stack Fun functionality;
+  // trusted elaborated rows — the chase posture the host file's
+  // type-carrying axioms share: functionality over trusted
+  // elaborated rows chases; well-formedness over untrusted rows
+  // reports or refuses, never repairs)
+  chase ax/primapp_prim_functional : forall a : PrimApp,
+      p1 : Primitive, p2 : Primitive.
+    {app: a, prim: p1} PrimApp/prim, {app: a, prim: p2} PrimApp/prim
+    |- p1 = p2;
+
+  Wire : Set;
+
+  Dtype : Set;
+  isDtypeQ : Dtype -> Prop;      // stack constant Q : Dtype
+  isDtypeB : Dtype -> Prop;      // stack constant B : Dtype
+
+  refuse ax/wf/dtype_marks_disjoint : forall d : Dtype.
+    d isDtypeQ, d isDtypeB
+    |- false;
+
+  TensorType : Set;
+  TensorType/dtype : {t: TensorType, d: Dtype} -> Prop;
+
+  chase ax/tensortype_dtype_functional : forall t : TensorType,
+      d1 : Dtype, d2 : Dtype.
+    {t: t, d: d1} TensorType/dtype, {t: t, d: d2} TensorType/dtype
+    |- d1 = d2;
+
+  Wire/type : {w: Wire, t: TensorType} -> Prop;
+
+  chase ax/wire_type_functional : forall w : Wire,
+      t1 : TensorType, t2 : TensorType.
+    {w: w, t: t1} Wire/type, {w: w, t: t2} Wire/type
+    |- t1 = t2;
+
+  InputPort : Set;
+  InputPort/app  : {port: InputPort, app: PrimApp} -> Prop;
+  InputPort/wire : {port: InputPort, wire: Wire} -> Prop;
+  OutputPort : Set;
+  OutputPort/app  : {port: OutputPort, app: PrimApp} -> Prop;
+  OutputPort/wire : {port: OutputPort, wire: Wire} -> Prop;
+
+  // wire reachability (stack vocabulary): an app's input wire
+  // reaches its output wires; transitive
+  reaches : {from: Wire, to: Wire} -> Prop;
+
+  chase ax/reaches/app : forall ip : InputPort, op : OutputPort,
+      a : PrimApp, wi : Wire, wo : Wire.
+    {port: ip, app: a} InputPort/app,
+    {port: op, app: a} OutputPort/app,
+    {port: ip, wire: wi} InputPort/wire,
+    {port: op, wire: wo} OutputPort/wire
+    |- {from: wi, to: wo} reaches;
+
+  chase ax/reaches/trans : forall w1 : Wire, w2 : Wire, w3 : Wire.
+    {from: w1, to: w2} reaches, {from: w2, to: w3} reaches
+    |- {from: w1, to: w3} reaches;
+
+  // acyclicity (stack ax/wf/acyclic)
+  refuse ax/wf/reaches_acyclic : forall w : Wire.
+    {from: w, to: w} reaches
+    |- false;
+
+  // reflexive-transitive closure, for the in-cone membership tie and
+  // the cell-free condition (Layer 11 reachesEq — refl catches the
+  // degenerate presenter whose designated input IS its output wire)
+  reachesEq : {from: Wire, to: Wire} -> Prop;
+
+  chase ax/reachesEq/refl : forall w : Wire.
+    |- {from: w, to: w} reachesEq;
+
+  chase ax/reachesEq/reaches : forall w1 : Wire, w2 : Wire.
+    {from: w1, to: w2} reaches
+    |- {from: w1, to: w2} reachesEq;
+
+  // per-cluster simplicial complexes: the flavor stratum references
+  // SimpC values opaquely (coordinates, simplices, and cell masks
+  // are stack vocabulary; counters are value-plane)
+  SimpC : Set;
+
+  // proofs and judgments, for the emptiness-certificate slot
+  Judgment : Set;
+  Proof : Set;
+  Proof/concludes : {p: Proof, j: Judgment} -> Prop;
+
+  chase ax/proof_concludes_functional : forall p : Proof,
+      j1 : Judgment, j2 : Judgment.
+    {p: p, j: j1} Proof/concludes, {p: p, j: j2} Proof/concludes
+    |- j1 = j2;
+
+  // the legacy (flavor 0) linkage: a cell app carrying a raw SimpC
+  // schema — unchanged, zero row motion ("absent tag = flavor 0"
+  // honored literally)
+  CellSchema : {app: PrimApp, schema: SimpC} -> Prop;
+
+  // placeholder index carriers — the ground seam realizes each as
+  // Nat (transcript-local placeholders; see the header)
+  Dim        : Set;   // flat positions 0..D-1 of the host wire type
+  ClusterIdx : Set;   // cluster indices 0..m-1
+  FunIdx     : Set;   // presenter indices 0..k-1
+  CellIdx    : Set;   // cell-roster indices of a SimpC complex
+
+  // ==========================================================
+  // Flavor 1: tensor-simplicial (Lean CellSchemaTS)
+  // ==========================================================
+  //
+  // A partition of the D flat ambient dimensions of the host wire
+  // type into m clusters — "every entry in a tensor type is a
+  // dimension" — with one SimpC per cluster; cells are Cartesian
+  // products of per-cluster cells, the product roster DERIVED,
+  // never stored (presentation O(D + sum_c |K_c|)). Disjointness
+  // warrant: product_exclusion (CellFlavors.lean) — per-cluster
+  // exclusion lifts to the product, so the certificate burden is
+  // per-cluster only: a Farkas roster (CellFarkas.lean PairCert,
+  // 2*C(m_c,2) ordered pairs) or a content-bound species citation
+  // whose once-proved lemma covers both exclusion and coverage.
+
+  TSSchema : Set;
+
+  // THE PARTITION TENSOR pi: surface form, a shape-s dtype-nat
+  // tensor literal; row form, a total finite function on flat
+  // row-major positions — definitionally the same object (a tensor
+  // IS a total finite function on its flat index positions).
+  // Totality/density/ranges: counting plane (C-CELL
+  // partition). One cluster per position: the key below.
+  TSSchema/cluster_of : {s: TSSchema, pos: Dim, cluster: ClusterIdx}
+    -> Prop;
+
+  // mode chase: EGD — the partition is a function of position
+  // (value-like index identification, the hash-consing reading)
+  chase ax/ts_cluster_of_functional : forall s : TSSchema, p : Dim,
+      i1 : ClusterIdx, i2 : ClusterIdx.
+    {s: s, pos: p, cluster: i1} TSSchema/cluster_of,
+    {s: s, pos: p, cluster: i2} TSSchema/cluster_of
+    |- i1 = i2;
+
+  TSCluster : Set;
+  TSCluster/ts      : {c: TSCluster, ts: TSSchema} -> Prop;
+  TSCluster/idx     : {c: TSCluster, idx: ClusterIdx} -> Prop;
+  TSCluster/complex : {c: TSCluster, complex: SimpC} -> Prop;
+
+  // OPTIONAL library-species citation: a cluster whose complex is a
+  // library species (the interval fan, the box fans) discharges its
+  // exclusion AND coverage obligations by citing the species'
+  // once-proved lemma instead of carrying a Farkas table. The
+  // citation BINDS CONTENT, not just the name:
+  // the registry must validate that the cluster's actual complex IS
+  // the cited species' complex — conformance (C-CELL certificates).
+  Species : Set;
+  TSCluster/species : {c: TSCluster, species: Species} -> Prop;
+
+  // mode chase: EGD — (ts, idx) is a key (Layer 11 ax/TSCluster_key)
+  chase ax/tscluster_key : forall c1 : TSCluster, c2 : TSCluster,
+      s : TSSchema, i : ClusterIdx.
+    {c: c1, ts: s} TSCluster/ts, {c: c2, ts: s} TSCluster/ts,
+    {c: c1, idx: i} TSCluster/idx, {c: c2, idx: i} TSCluster/idx
+    |- c1 = c2;
+
+  // mode report: wf existence — a constraint statement, never a
+  // derivation (chasing would invent cluster rows). Geometric
+  // shadow of Layer 11 ax/wf/TSCluster_total; the per-index
+  // totality over 0..m-1 is the counting plane's.
+  report ax/wf/tscluster_has_idx : forall c : TSCluster,
+      s : TSSchema.
+    {c: c, ts: s} TSCluster/ts
+    |- exists i : ClusterIdx. {c: c, idx: i} TSCluster/idx;
+
+  report ax/wf/tscluster_has_complex : forall c : TSCluster,
+      s : TSSchema.
+    {c: c, ts: s} TSCluster/ts
+    |- exists k : SimpC. {c: c, complex: k} TSCluster/complex;
+
+  // mode report: every declared cluster is INHABITED — some flat
+  // position maps to it (Layer 11 ax/wf/TSSchema/cluster_inhabited;
+  // a RECORDED STRENGTHENING of the Lean structure, whose part need
+  // not be surjective — the rows deliberately admit only the
+  // representable subset with inhabited clusters; reconstruction
+  // loses nothing).
+  report ax/wf/tscluster_inhabited : forall c : TSCluster,
+      s : TSSchema, i : ClusterIdx.
+    {c: c, ts: s} TSCluster/ts, {c: c, idx: i} TSCluster/idx
+    |- exists p : Dim. {s: s, pos: p, cluster: i} TSSchema/cluster_of;
+
+  // a TS-linked schema has a nonempty cluster roster (geometric
+  // shadow of per-index totality; the exact count is C-CELL)
+  report ax/wf/ts_has_cluster : forall app : PrimApp, s : TSSchema.
+    {app: app, schema: s} CellSchemaTS
+    |- exists c : TSCluster. {c: c, ts: s} TSCluster/ts;
+
+  // App linkage, flavor 1 (mirrors the legacy CellSchema linkage).
+  CellSchemaTS : {app: PrimApp, schema: TSSchema} -> Prop;
+
+  // mode report (under chase, a linkage row on an app stored as
+  // another primitive would REPAIR the bundle — deriving the cell
+  // mark onto that primitive — instead of refusing; see mutant M4,
+  // which demonstrates exactly this corruption when the mode is
+  // flipped)
+  report ax/wf/ts_iscell : forall app : PrimApp, schema : TSSchema,
+      p : Primitive.
+    {app: app, schema: schema} CellSchemaTS,
+    {app: app, prim: p} PrimApp/prim
+    |- p isPCell;
+
+  // ==========================================================
+  // Flavor 2: full-semialgebraic (Lean CellSchemaSA)
+  // ==========================================================
+  //
+  // A finite ordered list of k dimension-1-codomain, cell-free
+  // presenting functions with domain the host wire type; cells are
+  // the WEAK-sign combinations {+,-}^k (the chosen convention —
+  // classical {-,0,+} breaks strict-vs-weak exclusion; walls belong weakly to both adjacent cells, the
+  // hemicontinuous convention the core cell box already has). The
+  // full 2^k roster is implicit (binary output order, big-endian —
+  // C-CELL output order); the presentation stays O(k).
+  // Disjointness warrant: sign_exclusion (CellFlavors.lean) — a
+  // THEOREM of the presentation, zero certificate bytes; coverage
+  // warrant: signMem_total (CellFlavorsInterior.lean) — the second
+  // vacuity door closed structurally by sign totality.
+  //
+  // PRESENTERS ARE DESIGNATED, NOT CONTAINED (a recorded
+  // representation deviation): one implicit hypernet per
+  // certificate, so a
+  // presenter is a designated (in_wire, out_wire) pair — the region
+  // between them; the checker reconstructs the Lean Hypernet value
+  // as out_wire's dependency cone, and the in-cone MEMBERSHIP tie
+  // below makes the designation coherent. The wiring condition that
+  // all presenters read the same host VALUE (through Copy fan-out)
+  // is evaluation-plane, owned by the flavored cell rules'
+  // conclusion forms, never by these schema rows (stated precisely:
+  // the no-upstream-cell restriction is a property of
+  // correctly wired flavored forms, not an admission invariant).
+
+  SASchema : Set;
+
+  // The host wire type, stored at SCHEMA level (inference through
+  // presenter ties alone breaks at k = 0 — a
+  // presenter-free schema could link apps of different input types
+  // and no single Lean hostShape reconstructs; CellSchemaSA
+  // .hostShape is a schema field, so the rows mirror it as one).
+  SASchema/host_type : {s: SASchema, t: TensorType} -> Prop;
+
+  chase ax/sa_host_type_functional : forall s : SASchema,
+      t1 : TensorType, t2 : TensorType.
+    {s: s, t: t1} SASchema/host_type, {s: s, t: t2} SASchema/host_type
+    |- t1 = t2;
+
+  // mode report: host dtype is Q (Lean domOk's [hostShape, Q]) — a
+  // constraint statement over untrusted producer rows; chase would
+  // repair-by-derivation (minting the Q mark on a non-Q dtype)
+  report ax/wf/sa_host_dtype : forall s : SASchema, t : TensorType,
+      d : Dtype.
+    {s: s, t: t} SASchema/host_type, {t: t, d: d} TensorType/dtype
+    |- d isDtypeQ;
+
+  SAFun : Set;
+  SAFun/sa       : {f: SAFun, sa: SASchema} -> Prop;
+  SAFun/idx      : {f: SAFun, idx: FunIdx} -> Prop;
+  SAFun/in_wire  : {f: SAFun, wire: Wire} -> Prop;   // designated domain
+  SAFun/out_wire : {f: SAFun, wire: Wire} -> Prop;   // designated scalar
+                                                     // output
+
+  // mode chase: EGD — (sa, idx) is a key (Layer 11 ax/SAFun_key)
+  chase ax/safun_key : forall f1 : SAFun, f2 : SAFun,
+      s : SASchema, i : FunIdx.
+    {f: f1, sa: s} SAFun/sa, {f: f2, sa: s} SAFun/sa,
+    {f: f1, idx: i} SAFun/idx, {f: f2, idx: i} SAFun/idx
+    |- f1 = f2;
+
+  // NOTE deliberately ABSENT: no "SA-linked schema has a presenter"
+  // existence shadow — k = 0 schemas are legal (vacuously
+  // presenter-free, one whole-space cell; the k = 0 inference
+  // failure above is exactly why host_type is schema-level).
+  // Per-index presenter
+  // totality over 0..k-1 is the counting plane's.
+
+  // Presenter codomain: the sign-READING demand — each presenter
+  // contributes exactly one weak sign, so its output must be a
+  // sign-readable exact scalar: dtype Q (the ratified rank-1 [1],Q
+  // codomain, Lean codOk; rank-1 and extent-1 are counting plane).
+  // mode report (type equations over producer rows never chase —
+  // unification would corrupt type rows other wires reference,
+  // instead of refusing)
+  report ax/wf/safun_cod_dtype : forall f : SAFun, w : Wire,
+      t : TensorType, d : Dtype.
+    {f: f, wire: w} SAFun/out_wire, {w: w, t: t} Wire/type,
+    {t: t, d: d} TensorType/dtype
+    |- d isDtypeQ;
+
+  // Presenter domain = the schema's host type.
+  // mode report (same rationale)
+  report ax/wf/safun_dom_is_host : forall f : SAFun, s : SASchema,
+      w : Wire, t : TensorType.
+    {f: f, sa: s} SAFun/sa, {f: f, wire: w} SAFun/in_wire,
+    {w: w, t: t} Wire/type
+    |- {s: s, t: t} SASchema/host_type;
+
+  // The linked app's input carries the host type (the cell box is
+  // 1-in; with dom_is_host this ties presenter domains to the app
+  // input transitively — and it has content even at k = 0).
+  // mode report (same rationale)
+  report ax/wf/sa_dom_ties : forall app : PrimApp, s : SASchema,
+      ip : InputPort, w : Wire, t : TensorType.
+    {app: app, schema: s} CellSchemaSA,
+    {port: ip, app: app} InputPort/app,
+    {port: ip, wire: w} InputPort/wire,
+    {w: w, t: t} Wire/type
+    |- {s: s, t: t} SASchema/host_type;
+
+  // The designated input lies IN the designated output's dependency
+  // cone — in-cone MEMBERSHIP, not a boundary test (required:
+  // without it an unrelated correctly-typed wire could be
+  // designated as in_wire; every type check passes, but the
+  // reconstructed presenter cone does not contain the wire and Lean
+  // domOk cannot be built. A genuine cut/boundary test is deferred
+  // to the planned cone-difference refinement.)
+  // mode report (constraint statement; the finite check is C-CELL
+  // presenters' in-cone clause)
+  report ax/wf/safun_in_reaches_out : forall f : SAFun, wi : Wire,
+      wo : Wire.
+    {f: f, wire: wi} SAFun/in_wire, {f: f, wire: wo} SAFun/out_wire
+    |- {from: wi, to: wo} reachesEq;
+
+  // CELL-FREENESS of presenters (Lean Hypernet.CellFree): no cell
+  // box output in a presenter's dependency cone. Semantic reason: a
+  // cell inside a presenter imports boundary nondeterminism into
+  // the presenting functions, and the sign fibers as REGIONS lose
+  // disjointness-by-construction. Structural reason: one stratum —
+  // the schema-in-hypernet recursion is well-founded on sight.
+  // Stated in the STRONG form (whole dependency cone). HONEST
+  // RESTRICTION: the strong form also rejects an SA schema whose
+  // HOST INPUT is computed downstream of another cell box — nested
+  // case analysis, a composition the design must eventually
+  // support — so the cone-difference refinement is REQUIRED before
+  // SA-after-cell composition ships; v1 trades that completeness
+  // for a one-sequent refusal.
+  // mode refuse (rejection sequent)
+  refuse ax/wf/safun_cell_free : forall f : SAFun, app : PrimApp,
+      op : OutputPort, p : Primitive, wc : Wire, wo : Wire.
+    {app: app, prim: p} PrimApp/prim, p isPCell,
+    {port: op, app: app} OutputPort/app,
+    {port: op, wire: wc} OutputPort/wire,
+    {f: f, wire: wo} SAFun/out_wire,
+    {from: wc, to: wo} reachesEq
+    |- false;
+
+  // App linkage, flavor 2.
+  CellSchemaSA : {app: PrimApp, schema: SASchema} -> Prop;
+
+  // mode report (same rationale and mutant witness as flavor 1's)
+  report ax/wf/sa_iscell : forall app : PrimApp, schema : SASchema,
+      p : Primitive.
+    {app: app, schema: schema} CellSchemaSA,
+    {app: app, prim: p} PrimApp/prim
+    |- p isPCell;
+
+  // ==========================================================
+  // Flavor uniqueness, the geometric fragment: pairwise
+  // exclusivity as refuse-mode denials (the C-CELL flavor-unique
+  // clause's promotion from conformance prose to in-engine
+  // rules). The exactly-one
+  // COUNT direction ("at least one linkage") is absence, not
+  // premisable in the geometric fragment — it stays a C-CELL
+  // counting clause, like the Dtmc bridge's exclusivity precedent.
+  // Flavor tag 0/1/2 remains DERIVED from which family binds
+  // (untagged union): no stored tag exists
+  // to disagree with the payload.
+  // ==========================================================
+
+  refuse ax/wf/flavor_excl_ts_sa : forall app : PrimApp,
+      s1 : TSSchema, s2 : SASchema.
+    {app: app, schema: s1} CellSchemaTS,
+    {app: app, schema: s2} CellSchemaSA
+    |- false;
+
+  refuse ax/wf/flavor_excl_legacy_ts : forall app : PrimApp,
+      s0 : SimpC, s1 : TSSchema.
+    {app: app, schema: s0} CellSchema,
+    {app: app, schema: s1} CellSchemaTS
+    |- false;
+
+  refuse ax/wf/flavor_excl_legacy_sa : forall app : PrimApp,
+      s0 : SimpC, s2 : SASchema.
+    {app: app, schema: s0} CellSchema,
+    {app: app, schema: s2} CellSchemaSA
+    |- false;
+
+  // ==========================================================
+  // Emptiness marks (the witness economy, enacted): the 2^k
+  // roster mints universal per-cell obligations downstream; a
+  // per-cell EMPTINESS certificate prunes them wholesale (ex falso
+  // on the branch; Lean EmptyCellOk, prune_discharge). Emptiness is
+  // THE optional schema-level slot;
+  // nonemptiness is deliberately NOT schema data — existential, it
+  // discharges at each use site (the consumer's own input point
+  // checks the k strict signs; Lean onehot_ne_of_witness: the
+  // Cell-Out witness at SA is ONE strict arithmetic atom). Marks
+  // never change the roster or the box arity — cells stay, their
+  // branches become vacuous (memVia_total_unpruned: certified
+  // pruned rosters still cover).
+  // ==========================================================
+
+  SAPruned : Set;
+  SAPruned/sa : {c: SAPruned, sa: SASchema} -> Prop;
+
+  // The marked sign vector, as a characteristic relation on
+  // presenter positions (the mask idiom): a row at (c, i) reads
+  // "sign i is +"; ABSENCE reads "-". Two-valued BY CONSTRUCTION —
+  // the weak-signs convention enacted at schema level: a third sign
+  // is unrepresentable, not checked (its Lean mutant — three-way
+  // signs falsify sign_exclusion — is red-verified at
+  // CellFlavors.lean M1). No extensionality EGD (a recorded
+  // deviation): duplicate
+  // marks are idempotent; canonical one-mark-per-vector
+  // reconstruction is conformance (C-CELL certificates).
+  SAPruned/plus : {c: SAPruned, i: FunIdx} -> Prop;
+
+  // The backing certificate: a proof object concluding the
+  // emptiness judgment for this sign vector (the weak sign system
+  // rejected — genuinely BernCone-shaped: positivity over a
+  // semialgebraic set, exactly what the Bernstein machinery checks).
+  SAPruned/cert : {c: SAPruned, proof: Proof} -> Prop;
+
+  // mode report: every mark set carries its certificate
+  report ax/wf/sapruned_has_cert : forall c : SAPruned,
+      s : SASchema.
+    {c: c, sa: s} SAPruned/sa
+    |- exists pf : Proof. {c: c, proof: pf} SAPruned/cert;
+
+  // Conclusion-form check for the cited certificate: the proof's
+  // conclusion is the emptiness judgment for c's sign vector over
+  // c's schema's presenter output wires (premise = the weak
+  // sign-membership conjunction, conclusion = falsum). Bounded
+  // computation over sealed finite rows — a SIDE-CONDITION relation
+  // (registry-classified; oracle discharge awaits a ground
+  // provider, the cellOutZeroForm class — until one is realized,
+  // the side-condition defers loudly, surfacing as an explicit
+  // undischarged obligation, never a silent pass).
+  saEmptyCellForm : {c: SAPruned, j: Judgment} -> Prop;
+
+  // mode report (applicability statement; its finite check is the
+  // side-condition's evaluation, never chase derivation)
+  report ax/wf/sapruned_cert_form : forall c : SAPruned, pf : Proof,
+      j : Judgment.
+    {c: c, proof: pf} SAPruned/cert, {p: pf, j: j} Proof/concludes
+    |- {c: c, j: j} saEmptyCellForm;
+
+  // ==========================================================
+  // Farkas exclusion certificates (Lean CellFarkas.PairCert) — the
+  // finite repair for flavor 0, and per-cluster for flavor 1.
+  // Mask-region membership is linear feasibility in the barycentric
+  // weights, so "strict-in-i and weak-in-k" is an LP whose
+  // infeasibility has a finite exact-rational Farkas certificate:
+  // one per ORDERED off-diagonal cell pair (strict-weak exclusion
+  // is not symmetric), 2*C(n,2) rows per complex. The exact-Q
+  // payload columns (alpha, beta; gamma dense on ambient
+  // coordinates; p, q masked-entries-only, absent-decodes-to-zero)
+  // are VALUE PLANE — carried by the theory's Fun declarations, per
+  // the header, never by this transcript; their
+  // checker is checkPair/checkTable (Lean, sound: checkTable_sound
+  // discharges CellIntDisjoint; producer: mtk cellfarkas.rs,
+  // certificates self-checked, never re-solved).
+  // ==========================================================
+
+  FarkasPairCert : Set;
+  FarkasPairCert/complex : {f: FarkasPairCert, complex: SimpC} -> Prop;
+  FarkasPairCert/cell_i  : {f: FarkasPairCert, cell: CellIdx} -> Prop;
+                                              // read strictly
+  FarkasPairCert/cell_k  : {f: FarkasPairCert, cell: CellIdx} -> Prop;
+                                              // read weakly
+
+  chase ax/farkas_complex_functional : forall f : FarkasPairCert,
+      k1 : SimpC, k2 : SimpC.
+    {f: f, complex: k1} FarkasPairCert/complex,
+    {f: f, complex: k2} FarkasPairCert/complex
+    |- k1 = k2;
+
+  chase ax/farkas_cell_i_functional : forall f : FarkasPairCert,
+      i1 : CellIdx, i2 : CellIdx.
+    {f: f, cell: i1} FarkasPairCert/cell_i,
+    {f: f, cell: i2} FarkasPairCert/cell_i
+    |- i1 = i2;
+
+  chase ax/farkas_cell_k_functional : forall f : FarkasPairCert,
+      i1 : CellIdx, i2 : CellIdx.
+    {f: f, cell: i1} FarkasPairCert/cell_k,
+    {f: f, cell: i2} FarkasPairCert/cell_k
+    |- i1 = i2;
+
+  // mode refuse: the diagonal is never certified (the checker skips
+  // i = k; a diagonal row could only be surplus — Layer 11
+  // ax/wf/FarkasPairCert/offdiag)
+  refuse ax/wf/farkas_offdiag : forall f : FarkasPairCert,
+      i : CellIdx.
+    {f: f, cell: i} FarkasPairCert/cell_i,
+    {f: f, cell: i} FarkasPairCert/cell_k
+    |- false;
+
+  // Certificate validity: the Lean checkPair clause for clause —
+  // multiplier signs, per-vertex row identities on each cell's
+  // mask, the gap condition. Bounded computation, exact Q; nothing
+  // solved, nothing approximated. SIDE-CONDITION relation.
+  farkasPairValid : {f: FarkasPairCert} -> Prop;
+
+  // mode report (applicability; refusal semantics live at the
+  // certificate layer, C-CELL certificates)
+  report ax/wf/farkas_applicable : forall f : FarkasPairCert.
+    |- {f: f} farkasPairValid;
+
+  // ==========================================================
+  // Flavored cell citations, flavored cell-rule proof nodes, and
+  // per-cell obligation keys (Lean CellFlavorsInterior.lean;
+  // theory surface: the omnibus's flavored-proof-node section).
+  // The geometric fragment only: Formula ties, output positions,
+  // and witness-vertex membership are value-plane (the Farkas-
+  // payload convention); the conclusion forms appear here as
+  // node-keyed side-condition projections (the qtsl_certfam_wf
+  // compression), their full field records the theory's.
+  // ==========================================================
+
+  // TSCellSel: one product cell of a TS schema, cited by its
+  // per-cluster components — the complex's structure does the
+  // indexing work (O(m) rows per citation; never a flat index
+  // into the derived exponential roster). Component ranges and
+  // per-cluster density are counting plane (C-CELL citations).
+  TSCellSel : Set;
+  TSCellSel/schema : {sel: TSCellSel, schema: TSSchema} -> Prop;
+  TSCellSel/comp   : {sel: TSCellSel, cluster: ClusterIdx,
+                      cell: CellIdx} -> Prop;
+
+  chase ax/tscellsel_schema_functional : forall sel : TSCellSel,
+      s1 : TSSchema, s2 : TSSchema.
+    {sel: sel, schema: s1} TSCellSel/schema,
+    {sel: sel, schema: s2} TSCellSel/schema
+    |- s1 = s2;
+
+  // the citation is a function of the cluster (value-like index
+  // identification, the cluster_of posture)
+  chase ax/tscellsel_comp_functional : forall sel : TSCellSel,
+      c : ClusterIdx, i1 : CellIdx, i2 : CellIdx.
+    {sel: sel, cluster: c, cell: i1} TSCellSel/comp,
+    {sel: sel, cluster: c, cell: i2} TSCellSel/comp
+    |- i1 = i2;
+
+  // SACellSel: one weak-sign cell of an SA schema, the plus-mask
+  // idiom (SAPruned/plus's convention, no-extensionality deviation
+  // shared: duplicate citations idempotent, canonical dedup is
+  // conformance).
+  SACellSel : Set;
+  SACellSel/schema : {sel: SACellSel, schema: SASchema} -> Prop;
+  SACellSel/plus   : {sel: SACellSel, i: FunIdx} -> Prop;
+
+  chase ax/sacellsel_schema_functional : forall sel : SACellSel,
+      s1 : SASchema, s2 : SASchema.
+    {sel: sel, schema: s1} SACellSel/schema,
+    {sel: sel, schema: s2} SACellSel/schema
+    |- s1 = s2;
+
+  // --- The flavored rule pair, flavor 1 ----------------------
+  // Every node derives its OWN flavor's linkage arm (schema_bound,
+  // chase) — the raw pair derives the legacy arm, so the pairwise
+  // denials give BOTH restrictions their teeth: raw node on a
+  // flavored app refuses, flavored node on a legacy app refuses
+  // (fixture neg_tsnode_legacy), TS node on an SA app refuses
+  // cross-flavor (fixture neg_sanode_on_ts, other pair). The
+  // which_schema tie is judged, not chased (chase mode over
+  // untrusted rows would repair a mismatch by unifying the two
+  // schema entities instead of refusing it).
+  PCellInInteriorTS : Set;
+  PCellInInteriorTS/proof   : {p: PCellInInteriorTS, proof: Proof} -> Prop;
+  PCellInInteriorTS/premise : {p: PCellInInteriorTS, premise: Proof} -> Prop;
+  PCellInInteriorTS/cellApp : {p: PCellInInteriorTS, app: PrimApp} -> Prop;
+  PCellInInteriorTS/schema  : {p: PCellInInteriorTS, schema: TSSchema} -> Prop;
+  PCellInInteriorTS/which   : {p: PCellInInteriorTS, which: TSCellSel} -> Prop;
+
+  // orphan check at report strength (the ts_iscell posture, same
+  // mutant class: chased it would repair by deriving the cell mark)
+  report ax/wf/pcell_in_ts_iscell : forall p : PCellInInteriorTS,
+      app : PrimApp, pr : Primitive.
+    {p: p, app: app} PCellInInteriorTS/cellApp,
+    {app: app, prim: pr} PrimApp/prim
+    |- pr isPCell;
+
+  // THE TEETH: the node binds its app to the flavored linkage
+  chase ax/applicable/pcell_in_ts/schema_bound :
+    forall p : PCellInInteriorTS, app : PrimApp, s : TSSchema.
+    {p: p, app: app} PCellInInteriorTS/cellApp,
+    {p: p, schema: s} PCellInInteriorTS/schema
+    |- {app: app, schema: s} CellSchemaTS;
+
+  // the citation cites the node's own schema
+  report ax/wf/pcell_in_ts_which_schema :
+    forall p : PCellInInteriorTS, sel : TSCellSel, s : TSSchema.
+    {p: p, which: sel} PCellInInteriorTS/which,
+    {p: p, schema: s} PCellInInteriorTS/schema
+    |- {sel: sel, schema: s} TSCellSel/schema;
+
+  // conclusion forms, node-keyed projections (side conditions;
+  // the strict-interior premise form and the one-hot conclusion
+  // form — Lean interior_onehot's two formula obligations)
+  tsCellStrictInteriorForm : {p: PCellInInteriorTS} -> Prop;
+  tsCellOneHotForm         : {p: PCellInInteriorTS} -> Prop;
+
+  report ax/applicable/pcell_in_ts/premise_post :
+    forall p : PCellInInteriorTS.
+    |- {p: p} tsCellStrictInteriorForm;
+  report ax/applicable/pcell_in_ts/conclusion :
+    forall p : PCellInInteriorTS.
+    |- {p: p} tsCellOneHotForm;
+
+  PCellOutTS : Set;
+  PCellOutTS/proof   : {p: PCellOutTS, proof: Proof} -> Prop;
+  PCellOutTS/premise : {p: PCellOutTS, premise: Proof} -> Prop;
+  PCellOutTS/cellApp : {p: PCellOutTS, app: PrimApp} -> Prop;
+  PCellOutTS/schema  : {p: PCellOutTS, schema: TSSchema} -> Prop;
+  PCellOutTS/which   : {p: PCellOutTS, which: TSCellSel} -> Prop;
+  // the refuting cluster (Lean notMem_of_cluster: ONE cluster-level
+  // refutation kills product membership); the separating vertex
+  // within that cluster's complex is value-plane
+  PCellOutTS/witnessCluster : {p: PCellOutTS, cluster: ClusterIdx} -> Prop;
+
+  report ax/wf/pcell_out_ts_iscell : forall p : PCellOutTS,
+      app : PrimApp, pr : Primitive.
+    {p: p, app: app} PCellOutTS/cellApp,
+    {app: app, prim: pr} PrimApp/prim
+    |- pr isPCell;
+
+  chase ax/applicable/pcell_out_ts/schema_bound :
+    forall p : PCellOutTS, app : PrimApp, s : TSSchema.
+    {p: p, app: app} PCellOutTS/cellApp,
+    {p: p, schema: s} PCellOutTS/schema
+    |- {app: app, schema: s} CellSchemaTS;
+
+  report ax/wf/pcell_out_ts_which_schema :
+    forall p : PCellOutTS, sel : TSCellSel, s : TSSchema.
+    {p: p, which: sel} PCellOutTS/which,
+    {p: p, schema: s} PCellOutTS/schema
+    |- {sel: sel, schema: s} TSCellSel/schema;
+
+  // the witnessing cluster exists in the schema's roster
+  report ax/wf/pcell_out_ts_witness_cluster :
+    forall p : PCellOutTS, s : TSSchema, wc : ClusterIdx.
+    {p: p, schema: s} PCellOutTS/schema,
+    {p: p, cluster: wc} PCellOutTS/witnessCluster
+    |- exists c : TSCluster.
+         {c: c, ts: s} TSCluster/ts, {c: c, idx: wc} TSCluster/idx;
+
+  tsCellOutWitnessForm : {p: PCellOutTS} -> Prop;
+  tsCellOutZeroForm    : {p: PCellOutTS} -> Prop;
+
+  report ax/applicable/pcell_out_ts/premise_post :
+    forall p : PCellOutTS.
+    |- {p: p} tsCellOutWitnessForm;
+  report ax/applicable/pcell_out_ts/conclusion :
+    forall p : PCellOutTS.
+    |- {p: p} tsCellOutZeroForm;
+
+  // --- The flavored rule pair, flavor 2 ----------------------
+  // Pinning's exclusion side condition discharges FREE
+  // (sign_exclusion is a theorem of the presentation); the
+  // Cell-Out witness is ONE strict opposite-sign atom at the
+  // refuting presenter (signNotMem_of_witness) — zero certificate
+  // bytes at the rule layer, the flavor's payoff.
+  PCellInInteriorSA : Set;
+  PCellInInteriorSA/proof   : {p: PCellInInteriorSA, proof: Proof} -> Prop;
+  PCellInInteriorSA/premise : {p: PCellInInteriorSA, premise: Proof} -> Prop;
+  PCellInInteriorSA/cellApp : {p: PCellInInteriorSA, app: PrimApp} -> Prop;
+  PCellInInteriorSA/schema  : {p: PCellInInteriorSA, schema: SASchema} -> Prop;
+  PCellInInteriorSA/which   : {p: PCellInInteriorSA, which: SACellSel} -> Prop;
+
+  report ax/wf/pcell_in_sa_iscell : forall p : PCellInInteriorSA,
+      app : PrimApp, pr : Primitive.
+    {p: p, app: app} PCellInInteriorSA/cellApp,
+    {app: app, prim: pr} PrimApp/prim
+    |- pr isPCell;
+
+  chase ax/applicable/pcell_in_sa/schema_bound :
+    forall p : PCellInInteriorSA, app : PrimApp, s : SASchema.
+    {p: p, app: app} PCellInInteriorSA/cellApp,
+    {p: p, schema: s} PCellInInteriorSA/schema
+    |- {app: app, schema: s} CellSchemaSA;
+
+  report ax/wf/pcell_in_sa_which_schema :
+    forall p : PCellInInteriorSA, sel : SACellSel, s : SASchema.
+    {p: p, which: sel} PCellInInteriorSA/which,
+    {p: p, schema: s} PCellInInteriorSA/schema
+    |- {sel: sel, schema: s} SACellSel/schema;
+
+  saCellStrictInteriorForm : {p: PCellInInteriorSA} -> Prop;
+  saCellOneHotForm         : {p: PCellInInteriorSA} -> Prop;
+
+  report ax/applicable/pcell_in_sa/premise_post :
+    forall p : PCellInInteriorSA.
+    |- {p: p} saCellStrictInteriorForm;
+  report ax/applicable/pcell_in_sa/conclusion :
+    forall p : PCellInInteriorSA.
+    |- {p: p} saCellOneHotForm;
+
+  PCellOutSA : Set;
+  PCellOutSA/proof   : {p: PCellOutSA, proof: Proof} -> Prop;
+  PCellOutSA/premise : {p: PCellOutSA, premise: Proof} -> Prop;
+  PCellOutSA/cellApp : {p: PCellOutSA, app: PrimApp} -> Prop;
+  PCellOutSA/schema  : {p: PCellOutSA, schema: SASchema} -> Prop;
+  PCellOutSA/which   : {p: PCellOutSA, which: SACellSel} -> Prop;
+  // the refuting presenter (the strict opposite-sign atom's home)
+  PCellOutSA/witnessFun : {p: PCellOutSA, i: FunIdx} -> Prop;
+
+  report ax/wf/pcell_out_sa_iscell : forall p : PCellOutSA,
+      app : PrimApp, pr : Primitive.
+    {p: p, app: app} PCellOutSA/cellApp,
+    {app: app, prim: pr} PrimApp/prim
+    |- pr isPCell;
+
+  chase ax/applicable/pcell_out_sa/schema_bound :
+    forall p : PCellOutSA, app : PrimApp, s : SASchema.
+    {p: p, app: app} PCellOutSA/cellApp,
+    {p: p, schema: s} PCellOutSA/schema
+    |- {app: app, schema: s} CellSchemaSA;
+
+  report ax/wf/pcell_out_sa_which_schema :
+    forall p : PCellOutSA, sel : SACellSel, s : SASchema.
+    {p: p, which: sel} PCellOutSA/which,
+    {p: p, schema: s} PCellOutSA/schema
+    |- {sel: sel, schema: s} SACellSel/schema;
+
+  // the witnessing presenter exists in the schema's roster
+  report ax/wf/pcell_out_sa_witness_fun :
+    forall p : PCellOutSA, s : SASchema, wf : FunIdx.
+    {p: p, schema: s} PCellOutSA/schema,
+    {p: p, i: wf} PCellOutSA/witnessFun
+    |- exists f : SAFun.
+         {f: f, sa: s} SAFun/sa, {f: f, idx: wf} SAFun/idx;
+
+  saCellOutWitnessForm : {p: PCellOutSA} -> Prop;
+  saCellOutZeroForm    : {p: PCellOutSA} -> Prop;
+
+  report ax/applicable/pcell_out_sa/premise_post :
+    forall p : PCellOutSA.
+    |- {p: p} saCellOutWitnessForm;
+  report ax/applicable/pcell_out_sa/conclusion :
+    forall p : PCellOutSA.
+    |- {p: p} saCellOutZeroForm;
+
+  // --- Per-cell obligation keys ------------------------------
+  // A judgment whose subject is one cell of a flavored app's
+  // derived roster cites that cell SCHEMA-EXPLICITLY through the
+  // same citation entities the rule pair consumes — never by
+  // re-carrying the cell description in its own bytes (the
+  // unrolled one-file-per-obligation shape this vocabulary
+  // retires). The tie derives the flavored linkage (the nodes'
+  // teeth, shared: an obligation citing a raw or non-cell app
+  // refuses/reports through the same denials — fixture
+  // neg_obl_orphan), and the cited cell is functional per
+  // (judgment, app). Coverage counting over rosters (unpruned at
+  // flavor 2 — Lean prune_discharge) is counting plane.
+  tsCellObligation : {j: Judgment, app: PrimApp, cell: TSCellSel} -> Prop;
+  saCellObligation : {j: Judgment, app: PrimApp, cell: SACellSel} -> Prop;
+
+  chase ax/obl/ts_schema_bound : forall j : Judgment, app : PrimApp,
+      sel : TSCellSel, s : TSSchema.
+    {j: j, app: app, cell: sel} tsCellObligation,
+    {sel: sel, schema: s} TSCellSel/schema
+    |- {app: app, schema: s} CellSchemaTS;
+
+  chase ax/obl/ts_cell_functional : forall j : Judgment,
+      app : PrimApp, s1 : TSCellSel, s2 : TSCellSel.
+    {j: j, app: app, cell: s1} tsCellObligation,
+    {j: j, app: app, cell: s2} tsCellObligation
+    |- s1 = s2;
+
+  chase ax/obl/sa_schema_bound : forall j : Judgment, app : PrimApp,
+      sel : SACellSel, s : SASchema.
+    {j: j, app: app, cell: sel} saCellObligation,
+    {sel: sel, schema: s} SACellSel/schema
+    |- {app: app, schema: s} CellSchemaSA;
+
+  chase ax/obl/sa_cell_functional : forall j : Judgment,
+      app : PrimApp, s1 : SACellSel, s2 : SACellSel.
+    {j: j, app: app, cell: s1} saCellObligation,
+    {j: j, app: app, cell: s2} saCellObligation
+    |- s1 = s2;
+}
+
+// ============================================================
+// C-CELL conformance family — the counting plane (load-rejection
+// strength; finite scans over sealed rows). The GEOMETRIC fragment
+// of each clause is enacted as the marked axioms above; what
+// remains below is counting/ordering (not geometric) and value-
+// plane payload discipline, deferred to the planned C-CELL
+// realization — nothing below is implemented by
+// this file, and the fixtures' battery does not claim it.
+//
+//   flavor-unique:  every cell app carries EXACTLY ONE linkage row
+//     across {CellSchema, CellSchemaTS, CellSchemaSA}. Pairwise
+//     exclusivity: ENACTED (the three refuse denials). Orphan
+//     linkage (a row on a non-cell app): ENACTED at report strength
+//     (ts_iscell / sa_iscell; load-rejection strength arrives with
+//     the realization, checked against stored primitives PRE-CHASE
+//     and re-counted post-saturation — equality saturation can
+//     merge apps and collide arms). The at-least-one direction is
+//     absence: counting only. Every cell-rule proof node binds its
+//     OWN flavor's apps (schema_bound derives that flavor's arm):
+//     the raw pair legacy-only, the flavored quartet above
+//     (CellFlavorsInterior.lean consumers) TS/SA — wrong-flavor
+//     citation refuses at the pairwise denials, every direction,
+//     obligation keys included.
+//   partition:  cluster_of total and dense on 0..D-1, entries
+//     < m (ground ranges); exactly one TSCluster row per index
+//     0..m-1 (the geometric shadows enacted: has_idx, has_complex,
+//     inhabited, nonempty roster; keys chase); per cluster,
+//     ambDim(complex) = |cluster| (Lean dimsMatch — counting).
+//   presenters:  exactly one SAFun row per index 0..k-1 (key
+//     enacted; count is counting); in-cone membership ENACTED
+//     (in_reaches_out); cell-freeness ENACTED (refuse).
+//   arity:  the host cell app's output count = prod_c nCells(K_c)
+//     (flavor 1) / 2^k ALWAYS (flavor 2 — emptiness marks never
+//     shrink the roster or the arity; the enacted witness economy).
+//   output order:  mixed-radix BIG-ENDIAN in the cluster index
+//     (flavor 1); binary BIG-ENDIAN in the presenter index, bit i =
+//     1 iff sign i is +, at k = 1 exactly the sigma-pm order
+//     (minus, plus) = positions (0, 1) (flavor 2; matches the
+//     landed expansion's 2*k0 + k1 — Lean quadExp instances).
+//   signature:  host dtype Q ENACTED (report); presenter dom/cod
+//     ties ENACTED (report); rank-1 extent-1 codomain: counting.
+//     All structural comparisons run PRE-CHASE at the realization
+//     (the report modes above are judgment producers, never gates).
+//   certificates:  flavor 0 — the full off-diagonal FarkasPairCert
+//     roster, 2*C(nCells,2) rows, each passing farkasPairValid;
+//     flavor 1 — per cluster, the roster or a CONTENT-BOUND species
+//     citation; flavor 2 — no exclusion bytes (sign_exclusion is
+//     the checker's own lemma); emptiness marks — every SAPruned
+//     row's cited proof passes saEmptyCellForm (enacted at report
+//     strength; oracle discharge awaits a ground provider), marks
+//     duplicate-free per (sa, sign-vector).
+//   coverage (flavor 1):  per cluster, a coverage obligation —
+//     species citation warranting coverage as well as exclusion, or
+//     a per-cluster cover certificate (species NOT YET LANDED
+//     Lean-side; until it lands, species-citation is the only
+//     discharge and a non-species cluster without one REFUSES).
+//     Flavor 2 coverage is free (signMem_total); flavor 0 coverage
+//     remains the raw schema's known, accepted open door.
+//   payload totality:  FarkasPairCert function payloads exactly-once
+//     (alpha, beta, complex, cell_i, cell_k), gamma dense, ONLY
+//     p/q sparse with absent-decodes-to-zero; characteristic-
+//     relation masks (SAPruned/plus) are membership data, never
+//     defaulted payloads; TSCluster/species is the one other
+//     optional row.
+// ============================================================
+
+// ============================================================
+// Fixtures: one loading fixture per flavor, positive and
+// negative. Verdict discipline (the battery's contract,
+// tools/cellflavor_battery.sh): positives chase to "fixpoint:
+// reached, no judgements"; negatives surface their NAMED axiom as
+// a judgment — refuse-mode hits as "denial violated", report-mode
+// hits as a pending-choice menu the engine never takes.
+// ============================================================
+
+// -- flavor 1 positive: the box-fan exemplar —
+//    two clusters over a two-position host, each citing
+//    the interval-fan library species (content-binding:
+//    conformance), each with its complex; linkage on a cell app.
+//    Product disjointness discharge: per-cluster species lemma +
+//    product_exclusion (the additive route, zero Farkas bytes here).
+instance ts_boxfan : CellFlavorChase {
+  bfApp : PrimApp;
+  bfPrim : Primitive;
+  bfS : TSSchema;
+  bfC0, bfC1 : TSCluster;
+  bfI0, bfI1 : ClusterIdx;
+  bfP0, bfP1 : Dim;
+  bfK0, bfK1 : SimpC;
+  bfFan : Species;
+  bfPrim isPCell;
+  [app: bfApp, prim: bfPrim] PrimApp/prim;
+  [s: bfS, pos: bfP0, cluster: bfI0] TSSchema/cluster_of;
+  [s: bfS, pos: bfP1, cluster: bfI1] TSSchema/cluster_of;
+  [c: bfC0, ts: bfS] TSCluster/ts;
+  [c: bfC0, idx: bfI0] TSCluster/idx;
+  [c: bfC0, complex: bfK0] TSCluster/complex;
+  [c: bfC0, species: bfFan] TSCluster/species;
+  [c: bfC1, ts: bfS] TSCluster/ts;
+  [c: bfC1, idx: bfI1] TSCluster/idx;
+  [c: bfC1, complex: bfK1] TSCluster/complex;
+  [c: bfC1, species: bfFan] TSCluster/species;
+  [app: bfApp, schema: bfS] CellSchemaTS;
+}
+
+// -- flavor 1, key discipline: two cluster declarations at the same
+//    (ts, idx) UNIFY to one element (hash-consing semantics; the
+//    chase EGD's positive witness — the battery asserts the merged
+//    carrier). Mutant M5 drops the EGD and the merge disappears.
+instance ts_dup_cluster : CellFlavorChase {
+  dcS : TSSchema;
+  dcA, dcB : TSCluster;
+  dcI : ClusterIdx;
+  dcP : Dim;
+  dcK : SimpC;
+  [s: dcS, pos: dcP, cluster: dcI] TSSchema/cluster_of;
+  [c: dcA, ts: dcS] TSCluster/ts;
+  [c: dcA, idx: dcI] TSCluster/idx;
+  [c: dcA, complex: dcK] TSCluster/complex;
+  [c: dcB, ts: dcS] TSCluster/ts;
+  [c: dcB, idx: dcI] TSCluster/idx;
+  [c: dcB, complex: dcK] TSCluster/complex;
+}
+
+// -- flavor 2 positive: the quadrants exemplar — k = 2
+//    coordinate presenters over a Q-typed host; each presenter a
+//    one-app cone (reaches derives the in-cone tie); full roster,
+//    no pruning marks: disjointness by sign_exclusion, coverage by
+//    signMem_total, ZERO certificate bytes — the flavor's payoff.
+instance sa_quadrants : CellFlavorChase {
+  qApp : PrimApp;
+  qPrim : Primitive;
+  qS : SASchema;
+  qHostT : TensorType;
+  qScalarT : TensorType;
+  qDQ : Dtype;
+  qIn : InputPort;
+  qWHost : Wire;
+  qF0, qF1 : SAFun;
+  qI0, qI1 : FunIdx;
+  qProj0, qProj1 : PrimApp;
+  qProjPrim : Primitive;
+  qIp0, qIp1 : InputPort;
+  qOp0, qOp1 : OutputPort;
+  qW0, qW1 : Wire;
+  qPrim isPCell;
+  qProjPrim isPAdd;
+  qDQ isDtypeQ;
+  [t: qHostT, d: qDQ] TensorType/dtype;
+  [t: qScalarT, d: qDQ] TensorType/dtype;
+  [app: qApp, prim: qPrim] PrimApp/prim;
+  [s: qS, t: qHostT] SASchema/host_type;
+  [port: qIn, app: qApp] InputPort/app;
+  [port: qIn, wire: qWHost] InputPort/wire;
+  [w: qWHost, t: qHostT] Wire/type;
+  [app: qProj0, prim: qProjPrim] PrimApp/prim;
+  [port: qIp0, app: qProj0] InputPort/app;
+  [port: qIp0, wire: qWHost] InputPort/wire;
+  [port: qOp0, app: qProj0] OutputPort/app;
+  [port: qOp0, wire: qW0] OutputPort/wire;
+  [w: qW0, t: qScalarT] Wire/type;
+  [f: qF0, sa: qS] SAFun/sa;
+  [f: qF0, idx: qI0] SAFun/idx;
+  [f: qF0, wire: qWHost] SAFun/in_wire;
+  [f: qF0, wire: qW0] SAFun/out_wire;
+  [app: qProj1, prim: qProjPrim] PrimApp/prim;
+  [port: qIp1, app: qProj1] InputPort/app;
+  [port: qIp1, wire: qWHost] InputPort/wire;
+  [port: qOp1, app: qProj1] OutputPort/app;
+  [port: qOp1, wire: qW1] OutputPort/wire;
+  [w: qW1, t: qScalarT] Wire/type;
+  [f: qF1, sa: qS] SAFun/sa;
+  [f: qF1, idx: qI1] SAFun/idx;
+  [f: qF1, wire: qWHost] SAFun/in_wire;
+  [f: qF1, wire: qW1] SAFun/out_wire;
+  [app: qApp, schema: qS] CellSchemaSA;
+}
+
+// -- negative, flavor 1: a TS linkage on a non-cell app — the
+//    ts_iscell report surfaces (orphan-linkage discipline)
+instance neg_ts_orphan : CellFlavorChase {
+  noApp : PrimApp;
+  noPrim : Primitive;
+  noS : TSSchema;
+  noC : TSCluster;
+  noI : ClusterIdx;
+  noP : Dim;
+  noK : SimpC;
+  noPrim isPAdd;
+  [app: noApp, prim: noPrim] PrimApp/prim;
+  [s: noS, pos: noP, cluster: noI] TSSchema/cluster_of;
+  [c: noC, ts: noS] TSCluster/ts;
+  [c: noC, idx: noI] TSCluster/idx;
+  [c: noC, complex: noK] TSCluster/complex;
+  [app: noApp, schema: noS] CellSchemaTS;
+}
+
+// -- negative, flavor 1: a declared cluster whose index no flat
+//    position maps to — tscluster_inhabited surfaces (the recorded
+//    strengthening's teeth)
+instance neg_ts_uninhabited : CellFlavorChase {
+  nuS : TSSchema;
+  nuC : TSCluster;
+  nuI : ClusterIdx;
+  nuK : SimpC;
+  [c: nuC, ts: nuS] TSCluster/ts;
+  [c: nuC, idx: nuI] TSCluster/idx;
+  [c: nuC, complex: nuK] TSCluster/complex;
+}
+
+// -- negative, flavor mix: one app carrying both a TS and an SA
+//    linkage — flavor_excl_ts_sa refuses (the untagged union's
+//    pairwise exclusivity)
+instance neg_both_flavors : CellFlavorChase {
+  nbApp : PrimApp;
+  nbPrim : Primitive;
+  nbS1 : TSSchema;
+  nbS2 : SASchema;
+  nbC : TSCluster;
+  nbI : ClusterIdx;
+  nbP : Dim;
+  nbK : SimpC;
+  nbPrim isPCell;
+  [app: nbApp, prim: nbPrim] PrimApp/prim;
+  [s: nbS1, pos: nbP, cluster: nbI] TSSchema/cluster_of;
+  [c: nbC, ts: nbS1] TSCluster/ts;
+  [c: nbC, idx: nbI] TSCluster/idx;
+  [c: nbC, complex: nbK] TSCluster/complex;
+  [app: nbApp, schema: nbS1] CellSchemaTS;
+  [app: nbApp, schema: nbS2] CellSchemaSA;
+}
+
+// -- negative, flavor 2: a presenter whose designated output sits
+//    in a cell box's dependency cone — safun_cell_free refuses
+//    (here the cell app's own output IS the presenter output: the
+//    reflexive case, caught through reachesEq)
+instance neg_sa_cellfed : CellFlavorChase {
+  cfApp : PrimApp;
+  cfPrim : Primitive;
+  cfOp : OutputPort;
+  cfW : Wire;
+  cfF : SAFun;
+  cfS : SASchema;
+  cfI : FunIdx;
+  cfPrim isPCell;
+  [app: cfApp, prim: cfPrim] PrimApp/prim;
+  [port: cfOp, app: cfApp] OutputPort/app;
+  [port: cfOp, wire: cfW] OutputPort/wire;
+  [f: cfF, sa: cfS] SAFun/sa;
+  [f: cfF, idx: cfI] SAFun/idx;
+  [f: cfF, wire: cfW] SAFun/out_wire;
+}
+
+// -- negative, flavor 2: a presenter output typed at a non-Q dtype
+//    — safun_cod_dtype surfaces (the sign-reading demand: a
+//    presenter whose output cannot be sign-read breaks the
+//    one-weak-sign-per-presenter arity at its root)
+instance neg_sa_codty : CellFlavorChase {
+  ctF : SAFun;
+  ctS : SASchema;
+  ctI : FunIdx;
+  ctW : Wire;
+  ctT : TensorType;
+  ctDB : Dtype;
+  ctDB isDtypeB;
+  [t: ctT, d: ctDB] TensorType/dtype;
+  [w: ctW, t: ctT] Wire/type;
+  [f: ctF, sa: ctS] SAFun/sa;
+  [f: ctF, idx: ctI] SAFun/idx;
+  [f: ctF, wire: ctW] SAFun/out_wire;
+}
+
+// -- negative, Farkas: a diagonal certificate (cell_i = cell_k) —
+//    farkas_offdiag refuses
+instance neg_farkas_diag : CellFlavorChase {
+  fdF : FarkasPairCert;
+  fdK : SimpC;
+  fdI : CellIdx;
+  [f: fdF, complex: fdK] FarkasPairCert/complex;
+  [f: fdF, cell: fdI] FarkasPairCert/cell_i;
+  [f: fdF, cell: fdI] FarkasPairCert/cell_k;
+}
+
+// -- one-instance aggregation demonstrator (persist_2d in miniature):
+//    a multi-piece, multi-obligation certified task as ONE instance.
+//    The piece structure is declared ONCE at the complex level — a
+//    2-axis product lattice, the tensor-simplicial flavor's home
+//    case: two clusters over a two-position host, each citing the
+//    interval-fan library species. The product cell roster is
+//    DERIVED, never stored, so piece structure costs
+//    O(D + sum_c |K_c|) rows rather than O(prod_c |K_c|) — at the
+//    real persist_2d shape (two lattices, thousands of cells per
+//    lattice, one file per obligation today) the unrolled form
+//    repeats the region description once per obligation FILE, while
+//    this form states it once per AXIS. The obligation plane rides
+//    beside it under the same instance header: three obligation
+//    kinds (drift, floor, nonnegativity) on three of the derived
+//    cells — nine judgments, nine proofs — each keyed to its cell
+//    SCHEMA-EXPLICITLY through a TSCellSel citation (per-cluster
+//    components: the complex's structure does the indexing work;
+//    tsCellObligation rows, ONE selector shared by a cell's three
+//    obligations). Which FORMULA each judgment carries stays
+//    judgment content (value plane, the strata split). One flavored
+//    pinning node (PCellInInteriorTS) rides the same header, citing
+//    cell (0,0) — its schema_bound re-derives the linkage the
+//    instance asserts (no-op at fixpoint) and its two conclusion-
+//    form demands mint, so the chase surface shows the whole
+//    obligations-through-citations-to-rules chain under one roof.
+instance persist_toy : CellFlavorChase {
+  ptApp : PrimApp;
+  ptPrim : Primitive;
+  ptS : TSSchema;
+  ptC0, ptC1 : TSCluster;
+  ptI0, ptI1 : ClusterIdx;
+  ptD0, ptD1 : Dim;
+  ptK0, ptK1 : SimpC;
+  ptFan : Species;
+  ptPrim isPCell;
+  [app: ptApp, prim: ptPrim] PrimApp/prim;
+  [s: ptS, pos: ptD0, cluster: ptI0] TSSchema/cluster_of;
+  [s: ptS, pos: ptD1, cluster: ptI1] TSSchema/cluster_of;
+  [c: ptC0, ts: ptS] TSCluster/ts;
+  [c: ptC0, idx: ptI0] TSCluster/idx;
+  [c: ptC0, complex: ptK0] TSCluster/complex;
+  [c: ptC0, species: ptFan] TSCluster/species;
+  [c: ptC1, ts: ptS] TSCluster/ts;
+  [c: ptC1, idx: ptI1] TSCluster/idx;
+  [c: ptC1, complex: ptK1] TSCluster/complex;
+  [c: ptC1, species: ptFan] TSCluster/species;
+  [app: ptApp, schema: ptS] CellSchemaTS;
+  ptJc0drift, ptJc0floor, ptJc0nonneg : Judgment;
+  ptJc1drift, ptJc1floor, ptJc1nonneg : Judgment;
+  ptJc2drift, ptJc2floor, ptJc2nonneg : Judgment;
+  ptFc0drift, ptFc0floor, ptFc0nonneg : Proof;
+  ptFc1drift, ptFc1floor, ptFc1nonneg : Proof;
+  ptFc2drift, ptFc2floor, ptFc2nonneg : Proof;
+  [p: ptFc0drift, j: ptJc0drift] Proof/concludes;
+  [p: ptFc0floor, j: ptJc0floor] Proof/concludes;
+  [p: ptFc0nonneg, j: ptJc0nonneg] Proof/concludes;
+  [p: ptFc1drift, j: ptJc1drift] Proof/concludes;
+  [p: ptFc1floor, j: ptJc1floor] Proof/concludes;
+  [p: ptFc1nonneg, j: ptJc1nonneg] Proof/concludes;
+  [p: ptFc2drift, j: ptJc2drift] Proof/concludes;
+  [p: ptFc2floor, j: ptJc2floor] Proof/concludes;
+  [p: ptFc2nonneg, j: ptJc2nonneg] Proof/concludes;
+  // cell citations: three product cells by per-cluster components
+  // over the two interval-fan clusters — (0,0), (0,1), (1,0) in
+  // cluster order; cluster 0's cells {ptX0, ptX1}, cluster 1's
+  // {ptY0, ptY1} (roster indices of ptK0/ptK1 respectively)
+  ptSel00, ptSel01, ptSel10 : TSCellSel;
+  ptX0, ptX1, ptY0, ptY1 : CellIdx;
+  [sel: ptSel00, schema: ptS] TSCellSel/schema;
+  [sel: ptSel00, cluster: ptI0, cell: ptX0] TSCellSel/comp;
+  [sel: ptSel00, cluster: ptI1, cell: ptY0] TSCellSel/comp;
+  [sel: ptSel01, schema: ptS] TSCellSel/schema;
+  [sel: ptSel01, cluster: ptI0, cell: ptX0] TSCellSel/comp;
+  [sel: ptSel01, cluster: ptI1, cell: ptY1] TSCellSel/comp;
+  [sel: ptSel10, schema: ptS] TSCellSel/schema;
+  [sel: ptSel10, cluster: ptI0, cell: ptX1] TSCellSel/comp;
+  [sel: ptSel10, cluster: ptI1, cell: ptY0] TSCellSel/comp;
+  // per-cell obligation keys: each judgment cites its cell through
+  // the selector — the piece structure indexes the obligations
+  [j: ptJc0drift, app: ptApp, cell: ptSel00] tsCellObligation;
+  [j: ptJc0floor, app: ptApp, cell: ptSel00] tsCellObligation;
+  [j: ptJc0nonneg, app: ptApp, cell: ptSel00] tsCellObligation;
+  [j: ptJc1drift, app: ptApp, cell: ptSel01] tsCellObligation;
+  [j: ptJc1floor, app: ptApp, cell: ptSel01] tsCellObligation;
+  [j: ptJc1nonneg, app: ptApp, cell: ptSel01] tsCellObligation;
+  [j: ptJc2drift, app: ptApp, cell: ptSel10] tsCellObligation;
+  [j: ptJc2floor, app: ptApp, cell: ptSel10] tsCellObligation;
+  [j: ptJc2nonneg, app: ptApp, cell: ptSel10] tsCellObligation;
+  // one flavored pinning node: Cell-In-Interior at cell (0,0)
+  ptPin : PCellInInteriorTS;
+  ptPinProof, ptPinPremise : Proof;
+  [p: ptPin, proof: ptPinProof] PCellInInteriorTS/proof;
+  [p: ptPin, premise: ptPinPremise] PCellInInteriorTS/premise;
+  [p: ptPin, app: ptApp] PCellInInteriorTS/cellApp;
+  [p: ptPin, schema: ptS] PCellInInteriorTS/schema;
+  [p: ptPin, which: ptSel00] PCellInInteriorTS/which;
+}
+
+// -- flavor 2, the rule pair end-to-end: the quadrants shape (k = 2
+//    coordinate presenters) with one pinning node at cell (+,-) and
+//    one zeroing node against cell (-,-) witnessed at presenter 0 —
+//    Lean interior_onehot (side condition FREE: sign_exclusion) and
+//    onehot_ne_of_witness (one strict opposite-sign atom; the
+//    witness presenter's roster membership is the report tie).
+instance sa_rulepair : CellFlavorChase {
+  rpApp : PrimApp;
+  rpPrim : Primitive;
+  rpS : SASchema;
+  rpHostT : TensorType;
+  rpScalarT : TensorType;
+  rpDQ : Dtype;
+  rpIn : InputPort;
+  rpWHost : Wire;
+  rpF0, rpF1 : SAFun;
+  rpI0, rpI1 : FunIdx;
+  rpProj0, rpProj1 : PrimApp;
+  rpProjPrim : Primitive;
+  rpIp0, rpIp1 : InputPort;
+  rpOp0, rpOp1 : OutputPort;
+  rpW0, rpW1 : Wire;
+  rpPrim isPCell;
+  rpProjPrim isPAdd;
+  rpDQ isDtypeQ;
+  [t: rpHostT, d: rpDQ] TensorType/dtype;
+  [t: rpScalarT, d: rpDQ] TensorType/dtype;
+  [app: rpApp, prim: rpPrim] PrimApp/prim;
+  [s: rpS, t: rpHostT] SASchema/host_type;
+  [port: rpIn, app: rpApp] InputPort/app;
+  [port: rpIn, wire: rpWHost] InputPort/wire;
+  [w: rpWHost, t: rpHostT] Wire/type;
+  [app: rpProj0, prim: rpProjPrim] PrimApp/prim;
+  [port: rpIp0, app: rpProj0] InputPort/app;
+  [port: rpIp0, wire: rpWHost] InputPort/wire;
+  [port: rpOp0, app: rpProj0] OutputPort/app;
+  [port: rpOp0, wire: rpW0] OutputPort/wire;
+  [w: rpW0, t: rpScalarT] Wire/type;
+  [f: rpF0, sa: rpS] SAFun/sa;
+  [f: rpF0, idx: rpI0] SAFun/idx;
+  [f: rpF0, wire: rpWHost] SAFun/in_wire;
+  [f: rpF0, wire: rpW0] SAFun/out_wire;
+  [app: rpProj1, prim: rpProjPrim] PrimApp/prim;
+  [port: rpIp1, app: rpProj1] InputPort/app;
+  [port: rpIp1, wire: rpWHost] InputPort/wire;
+  [port: rpOp1, app: rpProj1] OutputPort/app;
+  [port: rpOp1, wire: rpW1] OutputPort/wire;
+  [w: rpW1, t: rpScalarT] Wire/type;
+  [f: rpF1, sa: rpS] SAFun/sa;
+  [f: rpF1, idx: rpI1] SAFun/idx;
+  [f: rpF1, wire: rpWHost] SAFun/in_wire;
+  [f: rpF1, wire: rpW1] SAFun/out_wire;
+  [app: rpApp, schema: rpS] CellSchemaSA;
+  // cell citations: (+,-) = plus at presenter 0 only; (-,-) = the
+  // empty mask (absence reads minus at every presenter)
+  rpSelPM, rpSelMM : SACellSel;
+  [sel: rpSelPM, schema: rpS] SACellSel/schema;
+  [sel: rpSelPM, i: rpI0] SACellSel/plus;
+  [sel: rpSelMM, schema: rpS] SACellSel/schema;
+  // pinning node at (+,-)
+  rpPin : PCellInInteriorSA;
+  rpPinProof, rpPinPremise : Proof;
+  [p: rpPin, proof: rpPinProof] PCellInInteriorSA/proof;
+  [p: rpPin, premise: rpPinPremise] PCellInInteriorSA/premise;
+  [p: rpPin, app: rpApp] PCellInInteriorSA/cellApp;
+  [p: rpPin, schema: rpS] PCellInInteriorSA/schema;
+  [p: rpPin, which: rpSelPM] PCellInInteriorSA/which;
+  // zeroing node against (-,-), witnessed at presenter 0
+  rpOut : PCellOutSA;
+  rpOutProof, rpOutPremise : Proof;
+  [p: rpOut, proof: rpOutProof] PCellOutSA/proof;
+  [p: rpOut, premise: rpOutPremise] PCellOutSA/premise;
+  [p: rpOut, app: rpApp] PCellOutSA/cellApp;
+  [p: rpOut, schema: rpS] PCellOutSA/schema;
+  [p: rpOut, which: rpSelMM] PCellOutSA/which;
+  [p: rpOut, i: rpI0] PCellOutSA/witnessFun;
+  // one per-cell obligation keyed through the SA citation
+  rpJ : Judgment;
+  [j: rpJ, app: rpApp, cell: rpSelPM] saCellObligation;
+}
+
+// -- obligation key discipline: two obligation rows at one
+//    (judgment, app) with DISTINCT selector entities UNIFY the
+//    selectors (the cited cell is functional per obligation; the
+//    chase EGD's positive witness, ts_dup_cluster's posture).
+//    Mutant CF-M8 drops the EGD and the merge disappears.
+instance obl_dup_sel : CellFlavorChase {
+  odS : TSSchema;
+  odApp : PrimApp;
+  odPrim : Primitive;
+  odC : TSCluster;
+  odI : ClusterIdx;
+  odP : Dim;
+  odK : SimpC;
+  odJ : Judgment;
+  odSelA, odSelB : TSCellSel;
+  odX : CellIdx;
+  odPrim isPCell;
+  [app: odApp, prim: odPrim] PrimApp/prim;
+  [s: odS, pos: odP, cluster: odI] TSSchema/cluster_of;
+  [c: odC, ts: odS] TSCluster/ts;
+  [c: odC, idx: odI] TSCluster/idx;
+  [c: odC, complex: odK] TSCluster/complex;
+  [app: odApp, schema: odS] CellSchemaTS;
+  [sel: odSelA, schema: odS] TSCellSel/schema;
+  [sel: odSelA, cluster: odI, cell: odX] TSCellSel/comp;
+  [sel: odSelB, schema: odS] TSCellSel/schema;
+  [sel: odSelB, cluster: odI, cell: odX] TSCellSel/comp;
+  [j: odJ, app: odApp, cell: odSelA] tsCellObligation;
+  [j: odJ, app: odApp, cell: odSelB] tsCellObligation;
+}
+
+// -- negative, the flavored teeth: a flavored node citing a LEGACY
+//    (flavor-0) app — schema_bound derives the TS arm beside the
+//    asserted legacy arm and flavor_excl_legacy_ts REFUSES (the
+//    raw-only restriction's exact dual; mutant CF-M7 demotes the
+//    bound and the denial vanishes)
+instance neg_tsnode_legacy : CellFlavorChase {
+  nlApp : PrimApp;
+  nlPrim : Primitive;
+  nlK : SimpC;
+  nlS : TSSchema;
+  nlC : TSCluster;
+  nlI : ClusterIdx;
+  nlP : Dim;
+  nlK1 : SimpC;
+  nlSel : TSCellSel;
+  nlPin : PCellInInteriorTS;
+  nlProof, nlPremise : Proof;
+  nlPrim isPCell;
+  [app: nlApp, prim: nlPrim] PrimApp/prim;
+  [app: nlApp, schema: nlK] CellSchema;
+  [s: nlS, pos: nlP, cluster: nlI] TSSchema/cluster_of;
+  [c: nlC, ts: nlS] TSCluster/ts;
+  [c: nlC, idx: nlI] TSCluster/idx;
+  [c: nlC, complex: nlK1] TSCluster/complex;
+  [sel: nlSel, schema: nlS] TSCellSel/schema;
+  [p: nlPin, proof: nlProof] PCellInInteriorTS/proof;
+  [p: nlPin, premise: nlPremise] PCellInInteriorTS/premise;
+  [p: nlPin, app: nlApp] PCellInInteriorTS/cellApp;
+  [p: nlPin, schema: nlS] PCellInInteriorTS/schema;
+  [p: nlPin, which: nlSel] PCellInInteriorTS/which;
+}
+
+// -- negative, cross-flavor: an SA zeroing node citing a TS-linked
+//    app — schema_bound derives the SA arm and flavor_excl_ts_sa
+//    REFUSES
+instance neg_sanode_on_ts : CellFlavorChase {
+  nsApp : PrimApp;
+  nsPrim : Primitive;
+  nsTS : TSSchema;
+  nsC : TSCluster;
+  nsI : ClusterIdx;
+  nsP : Dim;
+  nsK : SimpC;
+  nsSA : SASchema;
+  nsSel : SACellSel;
+  nsOut : PCellOutSA;
+  nsProof, nsPremise : Proof;
+  nsF : SAFun;
+  nsFI : FunIdx;
+  nsPrim isPCell;
+  [f: nsF, sa: nsSA] SAFun/sa;
+  [f: nsF, idx: nsFI] SAFun/idx;
+  [app: nsApp, prim: nsPrim] PrimApp/prim;
+  [s: nsTS, pos: nsP, cluster: nsI] TSSchema/cluster_of;
+  [c: nsC, ts: nsTS] TSCluster/ts;
+  [c: nsC, idx: nsI] TSCluster/idx;
+  [c: nsC, complex: nsK] TSCluster/complex;
+  [app: nsApp, schema: nsTS] CellSchemaTS;
+  [sel: nsSel, schema: nsSA] SACellSel/schema;
+  [p: nsOut, proof: nsProof] PCellOutSA/proof;
+  [p: nsOut, premise: nsPremise] PCellOutSA/premise;
+  [p: nsOut, app: nsApp] PCellOutSA/cellApp;
+  [p: nsOut, schema: nsSA] PCellOutSA/schema;
+  [p: nsOut, which: nsSel] PCellOutSA/which;
+  [p: nsOut, i: nsFI] PCellOutSA/witnessFun;
+}
+
+// -- negative, obligation orphan: a per-cell obligation citing a
+//    NON-cell app — the obligation's schema_bound derives the TS
+//    arm, whose orphan check (ts_iscell) surfaces: the obligation
+//    plane inherits the linkage teeth
+instance neg_obl_orphan : CellFlavorChase {
+  noaApp : PrimApp;
+  noaPrim : Primitive;
+  noaS : TSSchema;
+  noaC : TSCluster;
+  noaI : ClusterIdx;
+  noaP : Dim;
+  noaK : SimpC;
+  noaSel : TSCellSel;
+  noaJ : Judgment;
+  noaPrim isPAdd;
+  [app: noaApp, prim: noaPrim] PrimApp/prim;
+  [s: noaS, pos: noaP, cluster: noaI] TSSchema/cluster_of;
+  [c: noaC, ts: noaS] TSCluster/ts;
+  [c: noaC, idx: noaI] TSCluster/idx;
+  [c: noaC, complex: noaK] TSCluster/complex;
+  [sel: noaSel, schema: noaS] TSCellSel/schema;
+  [j: noaJ, app: noaApp, cell: noaSel] tsCellObligation;
+}
+
+// -- negative, ghost witness cluster: a TS zeroing node whose
+//    witnessCluster index has no TSCluster row in its schema's
+//    roster — the witness-cluster existence tie surfaces
+instance neg_out_ts_ghost_cluster : CellFlavorChase {
+  ngApp : PrimApp;
+  ngPrim : Primitive;
+  ngS : TSSchema;
+  ngC : TSCluster;
+  ngI, ngGhost : ClusterIdx;
+  ngP : Dim;
+  ngK : SimpC;
+  ngSel : TSCellSel;
+  ngOut : PCellOutTS;
+  ngProof, ngPremise : Proof;
+  ngPrim isPCell;
+  [app: ngApp, prim: ngPrim] PrimApp/prim;
+  [s: ngS, pos: ngP, cluster: ngI] TSSchema/cluster_of;
+  [c: ngC, ts: ngS] TSCluster/ts;
+  [c: ngC, idx: ngI] TSCluster/idx;
+  [c: ngC, complex: ngK] TSCluster/complex;
+  [app: ngApp, schema: ngS] CellSchemaTS;
+  [sel: ngSel, schema: ngS] TSCellSel/schema;
+  [p: ngOut, proof: ngProof] PCellOutTS/proof;
+  [p: ngOut, premise: ngPremise] PCellOutTS/premise;
+  [p: ngOut, app: ngApp] PCellOutTS/cellApp;
+  [p: ngOut, schema: ngS] PCellOutTS/schema;
+  [p: ngOut, which: ngSel] PCellOutTS/which;
+  [p: ngOut, cluster: ngGhost] PCellOutTS/witnessCluster;
+}
+
+// -- negative, citation mismatch: a pinning node whose citation
+//    was minted against a DIFFERENT schema — the which_schema tie
+//    surfaces (the report states the node-schema row the citation
+//    lacks)
+instance neg_sel_mismatch : CellFlavorChase {
+  nmApp : PrimApp;
+  nmPrim : Primitive;
+  nmS, nmOther : TSSchema;
+  nmC : TSCluster;
+  nmI : ClusterIdx;
+  nmP : Dim;
+  nmK : SimpC;
+  nmSel : TSCellSel;
+  nmPin : PCellInInteriorTS;
+  nmProof, nmPremise : Proof;
+  nmPrim isPCell;
+  [app: nmApp, prim: nmPrim] PrimApp/prim;
+  [s: nmS, pos: nmP, cluster: nmI] TSSchema/cluster_of;
+  [c: nmC, ts: nmS] TSCluster/ts;
+  [c: nmC, idx: nmI] TSCluster/idx;
+  [c: nmC, complex: nmK] TSCluster/complex;
+  [app: nmApp, schema: nmS] CellSchemaTS;
+  [sel: nmSel, schema: nmOther] TSCellSel/schema;
+  [p: nmPin, proof: nmProof] PCellInInteriorTS/proof;
+  [p: nmPin, premise: nmPremise] PCellInInteriorTS/premise;
+  [p: nmPin, app: nmApp] PCellInInteriorTS/cellApp;
+  [p: nmPin, schema: nmS] PCellInInteriorTS/schema;
+  [p: nmPin, which: nmSel] PCellInInteriorTS/which;
+}

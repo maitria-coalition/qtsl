@@ -1,0 +1,11334 @@
+{
+ "cases": [
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       3,
+       1
+      ],
+      "slp": [
+       6,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -2,
+       1
+      ],
+      "slp": [
+       -6,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     2
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      0,
+      1
+     ],
+     "slp": [
+      -3,
+      4
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       3
+      ],
+      "slp": [
+       1,
+       3
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       1,
+       3
+      ],
+      "slp": [
+       -1,
+       3
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -5,
+     4
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": 3,
+   "n_outputs": 4,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      12,
+      11
+     ],
+     "slp": [
+      -4,
+      11
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     1,
+     3
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     3,
+     1
+    ],
+    [
+     2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       -2,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       3,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     1
+    ],
+    [
+     1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      3,
+      4
+     ],
+     "slp": [
+      3,
+      4
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -3,
+     1
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       3,
+       1
+      ],
+      "slp": [
+       4,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -2,
+       1
+      ],
+      "slp": [
+       -4,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     1,
+     1
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": 3,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      5,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     3,
+     2
+    ],
+    [
+     -4,
+     3
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       5,
+       6
+      ],
+      "slp": [
+       -1,
+       2
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       1,
+       6
+      ],
+      "slp": [
+       1,
+       2
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     5,
+     1
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": 3,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      2,
+      11
+     ],
+     "slp": [
+      -3,
+      22
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     -5,
+     1
+    ],
+    [
+     -3,
+     4
+    ],
+    [
+     -5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     1,
+     1
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       5,
+       7
+      ],
+      "slp": [
+       2,
+       7
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       2,
+       7
+      ],
+      "slp": [
+       -2,
+       7
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     6,
+     1
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      1,
+      5
+     ],
+     "slp": [
+      3,
+      5
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     -3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     1,
+     1
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       6,
+       5
+      ],
+      "slp": [
+       -1,
+       5
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       5
+      ],
+      "slp": [
+       1,
+       5
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     1,
+     1
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     -4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -5,
+     4
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      4,
+      7
+     ],
+     "slp": [
+      -12,
+      35
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -5,
+     2
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     2,
+     3
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     -4,
+     3
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       3
+      ],
+      "slp": [
+       1,
+       2
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       1,
+       3
+      ],
+      "slp": [
+       -1,
+       2
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     2,
+     1
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     3,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 3,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      3,
+      7
+     ],
+     "slp": [
+      12,
+      7
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     1,
+     4
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     3,
+     1
+    ],
+    [
+     -4,
+     3
+    ],
+    [
+     1,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       -1,
+       11
+      ],
+      "slp": [
+       4,
+       11
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       12,
+       11
+      ],
+      "slp": [
+       -4,
+       11
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     1,
+     2
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     2,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 2,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -3,
+      1
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     1,
+     4
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -2,
+     3
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       9,
+       11
+      ],
+      "slp": [
+       -3,
+       11
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       2,
+       11
+      ],
+      "slp": [
+       3,
+       11
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -1,
+     1
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      3,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      9,
+      7
+     ],
+     "slp": [
+      -3,
+      7
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     5,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       10,
+       13
+      ],
+      "slp": [
+       -6,
+       13
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       3,
+       13
+      ],
+      "slp": [
+       6,
+       13
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     1,
+     3
+    ],
+    [
+     1,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      3,
+      19
+     ],
+     "slp": [
+      4,
+      19
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     3,
+     2
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       0,
+       1
+      ],
+      "slp": [
+       -1,
+       4
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       1,
+       1
+      ],
+      "slp": [
+       1,
+       4
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -2,
+     1
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -5,
+     1
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 4,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      1,
+      1
+     ],
+     "slp": [
+      -1,
+      4
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     6,
+     1
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 3,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       6,
+       1
+      ],
+      "slp": [
+       2,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -5,
+       1
+      ],
+      "slp": [
+       -2,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     1,
+     3
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 2,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      -8,
+      7
+     ],
+     "slp": [
+      6,
+      7
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -3,
+     4
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     3
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       9,
+       19
+      ],
+      "slp": [
+       6,
+       19
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       10,
+       19
+      ],
+      "slp": [
+       -6,
+       19
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     6,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      3,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     6,
+     1
+    ],
+    [
+     -6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      1,
+      2
+     ],
+     "slp": [
+      -1,
+      12
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     3,
+     1
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -6,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       5,
+       21
+      ],
+      "slp": [
+       -4,
+       21
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       16,
+       21
+      ],
+      "slp": [
+       4,
+       21
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -1,
+     1
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     4
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      2,
+      5
+     ],
+     "slp": [
+      -4,
+      5
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -2,
+     3
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -3,
+     4
+    ],
+    [
+     1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -6,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       3,
+       1
+      ],
+      "slp": [
+       4,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -2,
+       1
+      ],
+      "slp": [
+       -4,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -2,
+     3
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     -1,
+     3
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": 2,
+   "n_outputs": 4,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      -2,
+      7
+     ],
+     "slp": [
+      3,
+      14
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -3,
+     1
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       8,
+       13
+      ],
+      "slp": [
+       4,
+       13
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       5,
+       13
+      ],
+      "slp": [
+       -4,
+       13
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     3,
+     2
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      3,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": 2,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      0,
+      1
+     ],
+     "slp": [
+      3,
+      2
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     2,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       4,
+       1
+      ],
+      "slp": [
+       6,
+       1
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       -3,
+       1
+      ],
+      "slp": [
+       -6,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     3,
+     4
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -5,
+     2
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     -3,
+     4
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 3,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      1,
+      1
+     ],
+     "slp": [
+      -1,
+      3
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     -3,
+     2
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -5,
+     4
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       12,
+       17
+      ],
+      "slp": [
+       -4,
+       17
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       5,
+       17
+      ],
+      "slp": [
+       4,
+       17
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      2,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     4
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     -4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": 3,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      3,
+      7
+     ],
+     "slp": [
+      -1,
+      7
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     5,
+     1
+    ],
+    [
+     -4,
+     3
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     2,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       20,
+       19
+      ],
+      "slp": [
+       -4,
+       19
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       -1,
+       19
+      ],
+      "slp": [
+       4,
+       19
+      ]
+     }
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     4
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "witness",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": 4,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      8,
+      11
+     ],
+     "slp": [
+      2,
+      11
+     ]
+    }
+   },
+   "verdict": true
+  },
+  {
+   "kind": "holds",
+   "form": "zero",
+   "coords": [
+    [
+     2,
+     1
+    ],
+    [
+     -5,
+     1
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": true
+  },
+  {
+   "kind": "mutant_strict_const_shift",
+   "form": "strict",
+   "coords": [
+    [
+     2,
+     1
+    ],
+    [
+     -4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       5,
+       3
+      ],
+      "slp": [
+       1,
+       6
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       1,
+       3
+      ],
+      "slp": [
+       -1,
+       6
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_wrong_k",
+   "form": "onehot",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_flip_op",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      -2,
+      1
+     ],
+     "slp": [
+      -6,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_prim_rescale",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       5,
+       13
+      ],
+      "slp": [
+       4,
+       13
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_swap_values",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     -1,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      0
+     ],
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_const_shift",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": 1,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      10,
+      9
+     ],
+     "slp": [
+      2,
+      9
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     2,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_flip_op",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     2
+    ],
+    [
+     -4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       8,
+       23
+      ],
+      "slp": [
+       6,
+       23
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       15,
+       23
+      ],
+      "slp": [
+       -6,
+       23
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_drop_other",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_prim_rescale",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -3,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_slope_shift",
+   "form": "strict",
+   "coords": [
+    [
+     -5,
+     2
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     -3,
+     4
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       1,
+       3
+      ],
+      "slp": [
+       13,
+       9
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       2,
+       3
+      ],
+      "slp": [
+       -4,
+       9
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_tail_true_wrong",
+   "form": "onehot",
+   "coords": [
+    [
+     3,
+     4
+    ],
+    [
+     -1,
+     3
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_other_vertex",
+   "form": "witness",
+   "coords": [
+    [
+     6,
+     1
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      10,
+      7
+     ],
+     "slp": [
+      4,
+      7
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     -4,
+     3
+    ],
+    [
+     -1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_swap_arms",
+   "form": "strict",
+   "coords": [
+    [
+     3,
+     4
+    ],
+    [
+     2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       -3,
+       5
+      ],
+      "slp": [
+       4,
+       5
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       8,
+       5
+      ],
+      "slp": [
+       -4,
+       5
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_order",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     4
+    ],
+    [
+     -5,
+     1
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      2,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_flip_op",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     2
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      2,
+      3
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     5,
+     2
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_const_shift",
+   "form": "strict",
+   "coords": [
+    [
+     1,
+     4
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       1,
+       1
+      ],
+      "slp": [
+       4,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       1,
+       1
+      ],
+      "slp": [
+       -4,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_wrong_k",
+   "form": "onehot",
+   "coords": [
+    [
+     5,
+     1
+    ],
+    [
+     -3,
+     4
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      2,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      3,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_const_shift",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     1
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     1,
+     1
+    ],
+    [
+     6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": 2,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      4,
+      1
+     ],
+     "slp": [
+      3,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     2,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_prim_rescale",
+   "form": "strict",
+   "coords": [
+    [
+     -2,
+     3
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       5,
+       1
+      ],
+      "slp": [
+       -3,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       2,
+       7
+      ],
+      "slp": [
+       3,
+       7
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_swap_values",
+   "form": "onehot",
+   "coords": [
+    [
+     -2,
+     1
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      0
+     ],
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_prim_rescale",
+   "form": "witness",
+   "coords": [
+    [
+     3,
+     4
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      4,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_flip_op",
+   "form": "strict",
+   "coords": [
+    [
+     3,
+     1
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       1,
+       4
+      ],
+      "slp": [
+       1,
+       4
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       3,
+       4
+      ],
+      "slp": [
+       -1,
+       4
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_drop_other",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     2
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_other_vertex",
+   "form": "witness",
+   "coords": [
+    [
+     2,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      -5,
+      4
+     ],
+     "slp": [
+      -3,
+      4
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_slope_shift",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       1,
+       4
+      ],
+      "slp": [
+       1,
+       2
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       3,
+       4
+      ],
+      "slp": [
+       1,
+       2
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_tail_true_wrong",
+   "form": "onehot",
+   "coords": [
+    [
+     5,
+     2
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_flip_op",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 3,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      1,
+      2
+     ],
+     "slp": [
+      -1,
+      8
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_swap_arms",
+   "form": "strict",
+   "coords": [
+    [
+     -3,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       6,
+       7
+      ],
+      "slp": [
+       2,
+       7
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       1,
+       7
+      ],
+      "slp": [
+       -2,
+       7
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_order",
+   "form": "onehot",
+   "coords": [
+    [
+     2,
+     1
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     -5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      2,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_const_shift",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     4
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": 1,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      -1,
+      2
+     ],
+     "slp": [
+      -2,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_const_shift",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     -3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       2,
+       5
+      ],
+      "slp": [
+       -2,
+       5
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       8,
+       5
+      ],
+      "slp": [
+       2,
+       5
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_wrong_k",
+   "form": "onehot",
+   "coords": [
+    [
+     0,
+     1
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_prim_rescale",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      1,
+      1
+     ],
+     "slp": [
+      1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_prim_rescale",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       5,
+       1
+      ],
+      "slp": [
+       -4,
+       1
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       16,
+       31
+      ],
+      "slp": [
+       12,
+       31
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_swap_values",
+   "form": "onehot",
+   "coords": [
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     -5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      0
+     ],
+     [
+      0,
+      1
+     ],
+     [
+      2,
+      1
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_other_vertex",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     2
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": 0,
+   "n_outputs": 4,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      3,
+      13
+     ],
+     "slp": [
+      2,
+      13
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_flip_op",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       3,
+       8
+      ],
+      "slp": [
+       1,
+       2
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       5,
+       8
+      ],
+      "slp": [
+       -1,
+       2
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_drop_other",
+   "form": "onehot",
+   "coords": [
+    [
+     2,
+     3
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_flip_op",
+   "form": "witness",
+   "coords": [
+    [
+     1,
+     3
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     -2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": 1,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      -4,
+      11
+     ],
+     "slp": [
+      12,
+      11
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     5,
+     1
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_slope_shift",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     3
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       3,
+       8
+      ],
+      "slp": [
+       11,
+       8
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       5,
+       8
+      ],
+      "slp": [
+       -3,
+       8
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_tail_true_wrong",
+   "form": "onehot",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      2,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_const_shift",
+   "form": "witness",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     -4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 2,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      1,
+      2
+     ],
+     "slp": [
+      -3,
+      8
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     -6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_swap_arms",
+   "form": "strict",
+   "coords": [
+    [
+     -3,
+     2
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       3,
+       2
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       2
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_order",
+   "form": "onehot",
+   "coords": [
+    [
+     1,
+     4
+    ],
+    [
+     3,
+     2
+    ],
+    [
+     4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_prim_rescale",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": 2,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      4,
+      1
+     ],
+     "slp": [
+      1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     0,
+     1
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_const_shift",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       12,
+       11
+      ],
+      "slp": [
+       2,
+       11
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       10,
+       11
+      ],
+      "slp": [
+       -2,
+       11
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_wrong_k",
+   "form": "onehot",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_other_vertex",
+   "form": "witness",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      -3,
+      2
+     ],
+     "slp": [
+      -3,
+      2
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     3,
+     2
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     -4,
+     3
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 3,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_prim_rescale",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     2
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       3,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       2,
+       3
+      ],
+      "slp": [
+       -1,
+       9
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_swap_values",
+   "form": "onehot",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      0
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_flip_op",
+   "form": "witness",
+   "coords": [
+    [
+     3,
+     2
+    ],
+    [
+     -2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      4,
+      13
+     ],
+     "slp": [
+      6,
+      13
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -1,
+     3
+    ],
+    [
+     -6,
+     1
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     2,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_flip_op",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       1,
+       9
+      ],
+      "slp": [
+       -2,
+       9
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       8,
+       9
+      ],
+      "slp": [
+       2,
+       9
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_drop_other",
+   "form": "onehot",
+   "coords": [
+    [
+     -6,
+     1
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     -1,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_const_shift",
+   "form": "witness",
+   "coords": [
+    [
+     -5,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": 2,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      5,
+      1
+     ],
+     "slp": [
+      2,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -3,
+     2
+    ],
+    [
+     1,
+     3
+    ],
+    [
+     -5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     1,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_slope_shift",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     1
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     -6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       5,
+       6
+      ],
+      "slp": [
+       5,
+       6
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       1,
+       6
+      ],
+      "slp": [
+       1,
+       6
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_tail_true_wrong",
+   "form": "onehot",
+   "coords": [
+    [
+     5,
+     4
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     -1,
+     3
+    ],
+    [
+     2,
+     3
+    ],
+    [
+     -3,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      1,
+      1
+     ],
+     [
+      0,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_prim_rescale",
+   "form": "witness",
+   "coords": [
+    [
+     4,
+     3
+    ],
+    [
+     1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      4,
+      1
+     ],
+     "slp": [
+      -3,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_value_one",
+   "form": "zero",
+   "coords": [
+    [
+     1,
+     2
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     1
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_strict_swap_arms",
+   "form": "strict",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     5,
+     3
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       1,
+       1
+      ],
+      "slp": [
+       1,
+       5
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       0,
+       1
+      ],
+      "slp": [
+       -1,
+       5
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_onehot_order",
+   "form": "onehot",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      2,
+      0
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_witness_other_vertex",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     4
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     -5,
+     1
+    ],
+    [
+     5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": 2,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      8,
+      11
+     ],
+     "slp": [
+      -4,
+      11
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "mutant_zero_wrong_wire",
+   "form": "zero",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_strict",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       1,
+       5
+      ],
+      "slp": [
+       2,
+       5
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       4,
+       5
+      ],
+      "slp": [
+       -2,
+       5
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_onehot",
+   "form": "onehot",
+   "coords": [
+    [
+     -1,
+     1
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ]
+    ],
+    "tail_true": true
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     3
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     -4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 2,
+   "witness": 0,
+   "n_outputs": 2,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      9,
+      8
+     ],
+     "slp": [
+      3,
+      8
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_zero",
+   "form": "zero",
+   "coords": [
+    [
+     2,
+     3
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     -5,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_strict",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     3
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     -2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 3,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       12,
+       17
+      ],
+      "slp": [
+       3,
+       17
+      ]
+     },
+     {
+      "op": "lt",
+      "off": [
+       5,
+       17
+      ],
+      "slp": [
+       -3,
+       17
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_onehot",
+   "form": "onehot",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     -1,
+     3
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     -1,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -2,
+     3
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     1,
+     4
+    ],
+    [
+     5,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 3,
+   "witness": 0,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      15,
+      19
+     ],
+     "slp": [
+      -6,
+      19
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_zero",
+   "form": "zero",
+   "coords": [
+    [
+     0,
+     1
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     -1,
+     4
+    ],
+    [
+     6,
+     1
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      2,
+      4
+     ],
+     "ext": [
+      2
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_strict",
+   "form": "strict",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 1,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       1,
+       4
+      ],
+      "slp": [
+       -3,
+       20
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       3,
+       4
+      ],
+      "slp": [
+       3,
+       20
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_onehot",
+   "form": "onehot",
+   "coords": [
+    [
+     -4,
+     3
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     5,
+     2
+    ],
+    [
+     -3,
+     4
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      3,
+      4
+     ],
+     "ext": [
+      4
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ],
+     [
+      2,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_witness",
+   "form": "witness",
+   "coords": [
+    [
+     2,
+     3
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 1,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      3,
+      1
+     ],
+     "slp": [
+      -3,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_zero",
+   "form": "zero",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": [
+      0
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 2,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_strict",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     2
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     -3,
+     1
+    ],
+    [
+     -4,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    },
+    {
+     "simplex": [
+      2,
+      3
+     ],
+     "ext": [
+      3
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      2
+     ]
+    }
+   ],
+   "which": 4,
+   "witness": null,
+   "n_outputs": 4,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "lt",
+      "off": [
+       8,
+       23
+      ],
+      "slp": [
+       6,
+       23
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       15,
+       23
+      ],
+      "slp": [
+       -6,
+       23
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_onehot",
+   "form": "onehot",
+   "coords": [
+    [
+     -3,
+     2
+    ],
+    [
+     5,
+     4
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "chain",
+    "atoms": [
+     [
+      0,
+      1
+     ],
+     [
+      1,
+      0
+     ]
+    ],
+    "tail_true": false
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_range_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     4
+    ],
+    [
+     -2,
+     1
+    ],
+    [
+     5,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": [
+      0
+     ]
+    },
+    {
+     "simplex": [
+      0,
+      2
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      2
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 3,
+   "witness": 0,
+   "n_outputs": 3,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "gt",
+     "off": [
+      20,
+      23
+     ],
+     "slp": [
+      -12,
+      23
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "gate_arity_zero",
+   "form": "zero",
+   "coords": [
+    [
+     0,
+     1
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      3
+     ],
+     "ext": []
+    },
+    {
+     "simplex": [
+      1,
+      3
+     ],
+     "ext": [
+      1
+     ]
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 3,
+   "formula": {
+    "type": "ind",
+    "atom": [
+     0,
+     0
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_1_strict",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     1
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_2_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -5,
+     3
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_1_strict",
+   "form": "strict",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     4,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_2_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     1
+    ],
+    [
+     0,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_1_strict",
+   "form": "strict",
+   "coords": [
+    [
+     4,
+     1
+    ],
+    [
+     3,
+     1
+    ],
+    [
+     -5,
+     2
+    ],
+    [
+     -5,
+     4
+    ],
+    [
+     6,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      4
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_2_witness",
+   "form": "witness",
+   "coords": [
+    [
+     1,
+     1
+    ],
+    [
+     -5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0,
+      1
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 0,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_1_strict",
+   "form": "strict",
+   "coords": [
+    [
+     -5,
+     1
+    ],
+    [
+     -1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_3_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -1,
+     2
+    ],
+    [
+     3,
+     4
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     -3,
+     2
+    ],
+    [
+     5,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3,
+      4
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 2,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_1_strict",
+   "form": "strict",
+   "coords": [
+    [
+     -4,
+     1
+    ],
+    [
+     -5,
+     3
+    ],
+    [
+     -1,
+     1
+    ],
+    [
+     2,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_3_witness",
+   "form": "witness",
+   "coords": [
+    [
+     3,
+     4
+    ],
+    [
+     1,
+     2
+    ],
+    [
+     -3,
+     4
+    ],
+    [
+     -2,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      1,
+      2,
+      3
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 1,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_1_strict",
+   "form": "strict",
+   "coords": [
+    [
+     5,
+     2
+    ],
+    [
+     -1,
+     3
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      0
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": null,
+   "n_outputs": 1,
+   "formula": {
+    "type": "and2",
+    "atoms": [
+     {
+      "op": "gt",
+      "off": [
+       2,
+       1
+      ],
+      "slp": [
+       -1,
+       1
+      ]
+     },
+     {
+      "op": "gt",
+      "off": [
+       -1,
+       1
+      ],
+      "slp": [
+       1,
+       1
+      ]
+     }
+    ]
+   },
+   "verdict": false
+  },
+  {
+   "kind": "none_mask_3_witness",
+   "form": "witness",
+   "coords": [
+    [
+     -3,
+     1
+    ],
+    [
+     -1,
+     3
+    ],
+    [
+     4,
+     1
+    ],
+    [
+     4,
+     3
+    ],
+    [
+     1,
+     1
+    ]
+   ],
+   "cells": [
+    {
+     "simplex": [
+      2,
+      3,
+      4
+     ],
+     "ext": []
+    }
+   ],
+   "which": 0,
+   "witness": 2,
+   "n_outputs": 1,
+   "formula": {
+    "type": "atom",
+    "atom": {
+     "op": "lt",
+     "off": [
+      2,
+      1
+     ],
+     "slp": [
+      -1,
+      1
+     ]
+    }
+   },
+   "verdict": false
+  }
+ ]
+}

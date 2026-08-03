@@ -1,0 +1,237 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof
+at Putnam-exam-solution detail. Substrate, stopped-process machinery,
+and the battery pattern are stated with \rulename{QSafetyBattery}
+(Lemmas \ref{lem:qsb-stopped}--\ref{lem:qsb-ville},
+Proposition~\ref{prop:qsb-pattern}) and cited here by reference. The
+theorems quoted above warrant the rule at the \textbf{discrete-kernel
+profile}; the profile remark at the end states what remains a
+hypothesis beyond it.}
+
+\textbf{Setting and claim.}\enspace The substrate of
+\rulename{QSafetyBattery}: state space $S$, one-step Markov kernel $K$,
+path measure $\Pr_x$, canonical filtration. The rule\textquotesingle s
+data: modelled domain $D$, hull $\bar{D} \supseteq D$, a \emph{target}
+$B$ compiled to \emph{under}-approximate the truth set of the
+$\mathsf{F}_{\le T}$-argument --- note the orientation flip against the
+safety battery\textquotesingle s avoid set: the formula tie here is
+(F$'$)\ $\forall y \in B,\ \mathrm{sat}(y)$ --- a measurable certificate
+$V$, a discrete decay factor $\beta \ge 0$, a horizon $T \in \N$, and
+$p, \mathrm{thr}$. The checked rows, read semantically:
+\begin{itemize}
+\item[(D1)] \emph{decay}: for $y \in D \smallsetminus B$, $V$ integrable
+  against $K\,y$ and $\int V \,dK\,y \le \beta\, V(y)$ --- the discrete
+  reading of $\mathcal{A} V \le -\theta V$ with $\beta = e^{-\theta}$.
+  (At this profile guard rows land inside this one row; see
+  Remark~\ref{rem:qdb-guards}.)
+\item[(D2)] \emph{floor, off-target}: $V \ge 1$ on
+  $\bar{D} \smallsetminus B$.
+\item[(D3)] \emph{nonneg}: $V \ge 0$ on $\bar{D}$; \emph{bound}:
+  $V \le M$ on $\bar{D}$.
+\item[(R3)/(R4)] hull and fail-closed containment at target $B$: from
+  $y \in D \smallsetminus B$, one-step mass stays in $\bar{D}$ and in
+  $D \cup B$.
+\item[($\Theta_{\mathsf F}$)] \emph{deadline threshold}:
+  $\beta^{T} \cdot \mathrm{thr} \le 1 - p$.
+\end{itemize}
+The claim (\texttt{sound\_QDeadline}): for every $x \in D$ with
+$V(x) \le \mathrm{thr}$,
+\[
+\Pr_x\bigl[\exists k \le T,\ \mathrm{sat}(\omega_k)\bigr] \;\ge\; p .
+\]
+
+\begin{blemma}[discounted tail bound at the enlarged target]
+\label{lem:qdb-tail}
+Let $B' := B \cup D^{\mathrm{c}}$. Under (D1)--(D3), (R3), (R4): for
+every $x \in D \smallsetminus B$,
+\[
+\Pr_x\bigl[\forall k \le T,\ \omega_k \notin B'\bigr]
+\;\le\; \beta^{T}\, V(x).
+\]
+\end{blemma}
+\begin{proof}
+Clamp as in the safety battery, but with the floor forced on
+$D \smallsetminus B$ rather than off $D$: let
+$C := \max(M, 1)$ and let $g$ clamp $\max(V,1)$ into $[0,C]$ on
+$D \smallsetminus B$ and $\max(V,0)$ into $[0,C]$ elsewhere. As in
+Lemma~\ref{lem:qsb-clamp}: $0 \le g \le C$; $g \ge 1$ \emph{off} $B'$
+(here the floor (D2) does the work on
+$\bar{D} \smallsetminus B$, and the forced branch covers the rest); on
+$\bar{D} \cap (D \cup B)$ --- which carries all one-step mass from
+$D \smallsetminus B$, by (R3)$+$(R4) --- the clamp is invisible,
+$g = \min(V, C)$; hence $g$ inherits the decay row off $B'$:
+$\int g \,dK\,y \le \beta\, g(y)$; and $g(x) = V(x)$ (using the bound
+$V \le M \le C$ on the hull). Assume first $\beta > 0$. Now the
+discounted process
+$M_n := \beta^{-(n \wedge \tau_{B'})}\, g(\omega_{n \wedge \tau_{B'}})$
+is a nonnegative supermartingale (the decay row supplies exactly the
+extra factor $\beta$ the discount consumes at each surviving step), and
+on the miss event $\{\forall k \le T,\ \omega_k \notin B'\}$ we have
+$\tau_{B'} > T$ and $g(\omega_T) \ge 1$, so $M_T \ge \beta^{-T}$.
+Markov\textquotesingle s inequality at time $T$ gives
+$\Pr[\text{miss}] \le \beta^{T}\, \mathbb{E} M_0
+= \beta^{T} g(x) = \beta^{T} V(x)$. For $\beta = 0$ the inverse
+discount is unavailable and the bound holds directly: at $T = 0$ the
+right side is $V(x) = g(x) \ge 1 \ge \Pr[\text{miss}]$ (the floor off
+$B'$), while for $T \ge 1$ the decay row at $\beta = 0$ forces
+$\int g \,dK_y = 0$ for every $y$ off $B'$, so --- $g \ge 1$ off $B'$
+--- the kernel from any off-$B'$ point charges $B'$ with full mass and
+the miss event is null. The mechanized route packages this
+computation as the geometric-drift engine (the discounted
+supermartingale and its hitting-time moment bound), consumed at the
+enlarged target $B'$.
+\end{proof}
+
+\begin{blemma}[no escape]\label{lem:qdb-noescape}
+Under (R4) at target $B$: for $x \in D$,
+\[
+\Pr_x\Bigl[\,\exists n,\ \bigl(\forall k \le n,\ \omega_k \notin B\bigr)
+\wedge \omega_n \notin D \Bigr] \;=\; 0 .
+\]
+\end{blemma}
+\begin{proof}
+Induction on $n$. Base: coordinate $0$ is deterministically $x \in D$.
+Step: an escape at time $n+1$ that has not yet visited $B$ either
+already escaped by time $n$ (null by the inductive hypothesis) or steps
+from a state in $D \smallsetminus B$ to a state outside $D \cup B$ ---
+and that step is null, because the joint law of the $n$-prefix and the
+next step disintegrates through the one-step kernel, at which (R4) says
+the section $(D \cup B)^{\mathrm{c}}$ has measure zero from every
+surviving prefix endpoint. This lemma is the almost-everywhere
+invariance content of (R4) that a \emph{reach} conclusion cannot avoid:
+the safety battery got fail-closure for free by enlarging its stop set
+--- leaving counts as failing is conservative there --- but a reach
+guarantee cannot count escape as success, so the escape event must be
+shown null outright.
+\end{proof}
+
+\begin{bthm}[target-hit form]\label{thm:qdb-hit}
+Under (D1)--(D3), (R3), (R4), ($\Theta_{\mathsf F}$): for every
+$x \in D$ with $V(x) \le \mathrm{thr}$,
+$\Pr_x[\exists k \le T,\ \omega_k \in B] \ge p$.
+\end{bthm}
+\begin{proof}
+If $x \in B$, the deadline is met at time $0$ almost surely (coordinate
+$0$ is deterministic) and $p \le 1$ suffices --- the degenerate corner,
+handled first so the clamp may assume $x \notin B$. Otherwise decompose
+the miss event: $\{$miss $B$ through $T\} \subseteq \{$miss $B'$ through
+$T\} \cup \{$escape before visiting $B\}$. The second is null
+(Lemma~\ref{lem:qdb-noescape}); the first has probability
+$\le \beta^{T} V(x) \le \beta^{T}\,\mathrm{thr} \le 1 - p$
+(Lemma~\ref{lem:qdb-tail} and ($\Theta_{\mathsf F}$)). Complement.
+\end{proof}
+
+\begin{bprop}[soundness of \rulename{QDeadlineBattery}]
+\label{prop:qdb-sound}
+With the formula tie (F$'$): $\Pr_x[\exists k \le T,\
+\mathrm{sat}(\omega_k)] \ge p$ for every $x \in D$ with
+$V(x) \le \mathrm{thr}$ --- the concluded judgement read on the sublevel
+region.
+\end{bprop}
+\begin{proof}
+$B$ under-approximates the truth set, so the hit event of
+Theorem~\ref{thm:qdb-hit} is contained in the reach-formula event;
+monotonicity of the (outer) measure. As always, no measurability is
+asked of the satisfaction predicate.
+\end{proof}
+
+\begin{bprop}[catalogue form: the $(\theta, q)$ parameterization]
+\label{prop:qdb-catalogue}
+Suppose additionally $\beta \le e^{-\theta}$ with $\theta \ge 0$ (the
+drift tie), $0 \le q \le \sum_{k \le n} (\theta T)^k / k!$ for some $n$
+(the Taylor leaf --- the one closed, wire-free comparison the checker
+replays in exact rational arithmetic, discharged as a ground-fact-rule
+application), and $p \le 1$. Then the conclusion of
+Proposition~\ref{prop:qdb-sound} holds on the region
+$\{V \le (1-p)\,q\}$.
+\end{bprop}
+\begin{proof}
+$q \le \sum_{k \le n} (\theta T)^k/k! \le e^{\theta T}$ --- the first
+transcendental fact, living here and not in the checker --- so
+$\beta^{T} q \le e^{-\theta T} e^{\theta T} = 1$ --- the second. Hence
+$\beta^{T} \cdot (1-p)\,q \le 1 - p$: hypothesis
+($\Theta_{\mathsf F}$) holds at $\mathrm{thr} = (1-p)\,q$, and
+Proposition~\ref{prop:qdb-sound} applies. The checker never needs to
+know $e$ exists; soundness is indifferent to the producer knobs
+$\theta$ and $q$ --- any smaller rate or budget is admissible.
+\end{proof}
+
+\begin{bremark}[why the off-target floor is not decoration]
+\label{rem:qdb-floor}
+Drop (D2) and take $V \equiv 0$ with the identity kernel
+$K\,y = \delta_y$ at some $x \in D \smallsetminus B$: decay holds
+($0 \le \beta \cdot 0$), nonneg and bound hold, and
+($\Theta_{\mathsf F}$) permits any $p \le 1$ since
+$\beta^T \cdot 0 = 0$. The rule would then certify that a chain frozen
+forever outside the target reaches it with probability one. With the
+floor present the certificate dies: $V \ge 1$ on
+$\bar{D} \smallsetminus B \ni x$ contradicts $V(x) = 0$. Missing the
+deadline must cost at least one unit of discounted certificate value ---
+that is precisely the step $M_T \ge \beta^{-T}$ in
+Lemma~\ref{lem:qdb-tail}. And the floor is asked \emph{off the target
+only}: on $B$ the certificate may take any value, because success needs
+no budget. This checked form is deliberately weaker than a global
+floor, and the proven statement binds the weaker form.
+\end{bremark}
+
+\begin{bremark}[the two intrinsic asymmetries against the safety battery]
+\label{rem:qdb-asym}
+Both are consequences of concluding \emph{reach} rather than
+\emph{avoid}, and neither is an artefact of the mechanization. First,
+the boundedness row $V \le M$: the safety battery\textquotesingle s
+process is stopped, so integrability rides the freeze; the deadline
+argument discounts \emph{through} time $T$ regardless of where the path
+is, nothing freezes, and integrability of the unstopped certificate
+along the chain must be bought --- for polynomial certificates over a
+compact hull it is free. Second, escape: the safety battery counts
+leaving the modelled domain as failure by enlarging its stop set, which
+is conservative for an avoid conclusion but would be unsound generosity
+for a reach conclusion --- hence Lemma~\ref{lem:qdb-noescape}, whose
+almost-everywhere argument is the one place this
+section\textquotesingle s hypotheses stop being pointwise.
+\end{bremark}
+
+\begin{bremark}[guards at this profile]\label{rem:qdb-guards}
+The catalogued rule lists guard rows (jumps instantaneous). At the
+discrete-kernel profile the one-step kernel carries flow and enabled
+jumps together, so the guard rows land inside the single decay row (D1)
+--- exactly as the safety battery\textquotesingle s interior and guard
+rows arrive together. The instantaneous-jump reading --- the discount
+factor does not tick during a jump, so the $e^{\theta t}$ factor cancels
+across it --- belongs to the continuous-time transport, i.e.\ to the
+filed profile residue of Remark~\ref{rem:qdb-profile}.
+\end{bremark}
+
+\begin{bremark}[\textbf{profile} --- what is proven, what is filed]
+\label{rem:qdb-profile}
+Proven: the discrete-kernel profile, sorry-free
+(\texttt{sound\_QDeadline\_hit}, \texttt{sound\_QDeadline},
+\texttt{sound\_QDeadlineBattery}). \emph{Not} proven: the
+continuous-time transport --- the $e^{\theta t} V$ supermartingale over
+continuous time, optional stopping for right-continuous processes, and
+the instantaneous-jump cancellation --- which remains a stated
+hypothesis. Unlike the safety battery, no continuous-time sub-profile of
+this rule is machine-checked yet. The conditional mark on the dashboard
+row records exactly this; nothing in this section narrows it.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]\label{rem:qdb-lit}
+The engine is the geometric drift condition of the Foster--Lyapunov
+family \cite{meyntweedie2009}: expected decrease by a factor per step
+off the target, yielding exponential hitting-time tails. The discounted
+supermartingale and its optional-stopping consumption are classical
+\cite{doob1953}; the barrier mechanics are the same
+Ville-type argument \cite{ville1939} the whole family rides. The
+certificate-form packaging --- exact rational rows, transcendental facts
+quarantined inside a verified lemma --- is this
+calculus\textquotesingle s contribution rather than the
+literature\textquotesingle s.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qdb-tail}: discounted engine, clamp for the deadline reading & \texttt{Qtsl.Deadline.deadline\_tail} (via \texttt{supermartingale\_inv\_pow\_mul}, \texttt{expMoment\_hitting}); the clamp $g$ inside \texttt{sound\_QDeadline\_hit}\\
+Lemma \ref{lem:qdb-noescape}: escape-null induction & \texttt{ae\_no\_escape} (file-local; joint prefix--step law via \texttt{Kernel.partialTraj\_compProd\_eq\_map\_traj}); base case \texttt{ae\_coord\_zero\_mem}\\
+Theorem \ref{thm:qdb-hit}: assembly, degenerate corner & \texttt{sound\_QDeadline\_hit}\\
+Proposition \ref{prop:qdb-sound}: formula tie & \texttt{sound\_QDeadline}\\
+Proposition \ref{prop:qdb-catalogue}: Taylor leaf, drift tie, transcendental quarantine & \texttt{sound\_QDeadlineBattery} (via \texttt{Real.sum\_le\_exp\_of\_nonneg})\\
+\end{anchors}

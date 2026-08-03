@@ -1,0 +1,118 @@
+[[rule]]
+id = "QFlatten"
+source = "../QTSL-rules.toml"
+row = "QFlatten"
+proof = "book/proofs/QFlatten.tex"
+conditional = true
+commentary = '''
+\rulename{QFlatten} takes a composite system presentation --- components
+wired together --- to its monolithic manifest, by substitution. A
+producer reaches for it as the bridge to every closed-system pipeline:
+compile nodes, certificate synthesis, and the whole battery machinery
+operate on one flat manifest, while modelling happens compositionally.
+The rule\textquotesingle s two guarantees pull in opposite directions
+and are both essential: wiring adds \emph{structure}, never
+\emph{expressiveness}. Never expressiveness: the flattened
+manifest\textquotesingle s compiled semantics is exactly the
+composite\textquotesingle s --- at the compiled class this is
+definitional (a presentation\textquotesingle s semantics IS its
+flattened object\textquotesingle s), and at the finite-kernel tier it
+is a theorem: the monolithic chain\textquotesingle s law is, at every
+horizon, the product of the component laws. Added structure: the
+flattened manifest remembers its components --- the projections are
+exact simulation witnesses for free, so every component-level
+specification remains addressable on the flattened object through
+\rulename{QSimTransport}.
+
+What the checker recomputes: the substitution itself --- polynomial
+substitution plus guard-product bookkeeping --- which is why the rule is
+admissible rather than core: it discharges against verified
+recomputation and the semantic witness pair, adding no new kernel
+content. Directed substitution wirings reduce to the synchronous
+product by currying the upstream trajectory into the kernel, which is
+the same substitution recompute.
+
+What would break: component well-formedness (unit row sums) is what
+makes the projections exact witnesses --- against a defective second
+factor, the first projection\textquotesingle s pushed row picks up the
+leftover mass as a spurious scale factor, and the component-spec
+addressability claim fails. The scheduling hypotheses (clock rows,
+simultaneity, non-Zeno families) are deliberately premise classes cited
+by every composition rule rather than rows of this one.
+'''
+note = '''
+The proven fragment is the finite-kernel tier, on the same substrate as
+the relational chain machinery --- the tier where
+\textquotedblleft law\textquotedblright, \textquotedblleft
+product\textquotedblright, and \textquotedblleft
+pushforward\textquotedblright{} are finite exact-arithmetic objects.
+The general compiled-class statement is substitution correctness,
+checker recomputation by design.
+'''
+correspondence = '''
+The displayed conclusion --- $\mathrm{flat}(\mathrm{sys})$ has the
+\emph{same} compiled semantics, each projection $\pi_i$ a free
+\rulename{QSimTransport} witness --- $\mapsto$ the theorem pair at the
+finite-kernel tier: \texttt{law\_prodKernel} (never expressiveness)
+and \texttt{pushKernel\_fst}/\texttt{\_snd} (added structure). The
+displayed premise (the substitution recompute) has \emph{no} Lean
+counterpart by design: at the compiled class the
+presentation\textquotesingle s semantics IS its flattened
+object\textquotesingle s, so that premise is checker recomputation,
+and what is theorem-shaped is exactly what is bound.
+\begin{itemize}
+\item $\mathsf{SysWire}(w, \mathit{Sys}_1, \ldots, \mathit{Sys}_n)$
+  $\mapsto$ the \emph{binary synchronous product}: kernels
+  \texttt{K₁ : α → α → ℝ}, \texttt{K₂ : β → β → ℝ} over finite types,
+  flattened as \texttt{prodKernel} on \texttt{α × β}. Two confinements,
+  both refusal-shaped: binary (the $n$-ary and directed-substitution
+  wirings reduce by currying the upstream trajectory into the kernel
+  --- which is the checker\textquotesingle s substitution recompute
+  itself, per the module header), and finite-kernel tier
+  (\texttt{[Fintype α] [Fintype β]}).
+\item same compiled semantics $\mapsto$ \texttt{law\_prodKernel}:
+  \texttt{law (prodKernel K₁ K₂) (prodDist μ₁ μ₂) n = prodDist (law K₁
+  μ₁ n) (law K₂ μ₂ n)} at every \texttt{n} --- and its binder row is
+  the width find: the identity is proven for \emph{arbitrary} kernel
+  and law data, no Markov/distribution well-formedness consumed ---
+  pure bilinear algebra, strictly wider than the display\textquotesingle s
+  well-formed-system reading, safe direction.
+\item projections as free \rulename{QSimTransport} witnesses $\mapsto$
+  \texttt{pushKernel\_fst : PushKernel Prod.fst (prodKernel K₁ K₂) K₁}
+  --- consuming only \texttt{∀ b, ∑ b', K₂ b b' = 1}: the
+  \emph{sibling} component\textquotesingle s unit row sums, nothing of
+  its own, and not even nonnegativity --- the certified statement
+  isolates exactly which well-formedness fragment the
+  commentary\textquotesingle s ``what would break'' paragraph names
+  (a defective second factor leaks scale into the pushed row).
+  \texttt{\_snd} mirrors. \texttt{[DecidableEq]} binders enter only
+  here (the pushforward\textquotesingle s fibre sums).
+\end{itemize}
+Width note: the clock rows (schedule/simultaneity/non-Zeno) are
+premise classes deliberately absent from both display and bound
+statements; the closure facts (\texttt{isMarkov\_prodKernel},
+\texttt{isDist\_prodDist}, \texttt{push\_fst\_prodDist}) live in the
+module but outside this bound set --- cited, not certified here.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslCompose.Flatten"
+src = "../../lean/qtsl-aux/QtslAux/QtslCompose/Flatten.lean"
+decls = [
+  "law_prodKernel",
+  "pushKernel_fst",
+  "pushKernel_snd",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development checks the base calculus\textquotesingle s wire
+format (theory \texttt{qtsl\_catalogue}). \rulename{QFlatten} operates
+on system presentations of the extension theory, whose sorts ride an
+unstaged system-presentation leg; its semantic witnesses live in the
+auxiliary Lean package. Nothing wire-format-shaped exists for a HOL
+statement to be about; the box becomes writable when the presentation
+sorts stage and a flatten recompute joins a ported checker chain.
+'''

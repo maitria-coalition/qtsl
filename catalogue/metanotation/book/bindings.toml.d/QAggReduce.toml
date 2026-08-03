@@ -1,0 +1,29 @@
+# bindings.toml.d/QAggReduce.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QAggReduce'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslCompose.AggReduce"
+decl = "aggReduce"
+sha256 = "6d15a9bbf224bb71836525ec7199d1b97cd77329b71f0cff054e6c8a77f33f1e"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AggReduce"
+decl = "coupling_row"
+sha256 = "1fd36990eb6ef0f7b6b8d07e3735a5fa99680cebad41bf13d1ceea5fde78c369"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AggReduce"
+decl = "moment_row"
+sha256 = "702cf00db6e36033be4056c14f3d0e5b37b4394df60099a9ec5e9774cd8f202c"
+
+[[statement]]
+module = "QtslAux.QtslCompose.AggReduce"
+decl = "query_count"
+sha256 = "9f394d8a50e6e848b4675559c659d1632e4009f1034b46573cd1264b5ed28486"
+
+[[correspondence]]
+entry = "QAggReduce"
+steele_sha256 = "227e55dd50f8f0bcccf581bd25f04bf788d8383b548a5900644b028e59a60d59"
+statements_sha256 = "57d6839579a6f20a0a70b3b9cab2e2575d4c3c32af9ddc31fdd0bc60ac361008"
+prose_sha256 = "14d2507cd4f3ddbfb5fe31e7465e09eeabad642c873e3a1539c95ad7b838ebab"
+

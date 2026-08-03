@@ -1,0 +1,19 @@
+# bindings.toml.d/Weaken.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Weaken'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PWeakenData"
+sha256 = "b67253fd4a781f8e4cd9c000eb8fec3d260e5cbcd299ac1c981a4a133f2df2c4"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_weaken"
+sha256 = "af58221175fe6e003a3559282a28f18d7682c3ad3dbcb7f30f8102fb1ccc23b1"
+
+[[correspondence]]
+entry = "Weaken"
+steele_sha256 = "920209be7869915cb34b8025f9ea551ca4fcf98205c295594b357bb6c3870fe9"
+statements_sha256 = "ff0e9d730d8c481f8064d9a7395be37a71612f394d5574cef7df2c7e1d3c5f4a"
+prose_sha256 = "b89011ecb04276696bc1efbab7ddeda41e413511221a8a3ba1ad5b346ef70743"
+

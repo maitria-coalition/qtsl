@@ -1,0 +1,93 @@
+[[rule]]
+id = "ReLUAbove"
+source = "../BL-rules.toml"
+row = "ReLU-Above"
+proof = "book/proofs/ReLUAbove.tex"
+commentary = '''
+\rulename{ReLU-Above} is the identity minorant: the output wire of a
+cited ReLU application dominates its preactivation, $\Phi \vdash y
+\geq h$, with no proof premises — $\Phi$ arbitrary, the premise-free
+convention. Together with \rulename{ReLU-NN} it gives the exact
+pointwise lower envelope of the activation as two always-available
+atoms ($y \geq 0$ and $y \geq h$); a producer needs no box knowledge
+at all to emit either. Upper bounds are different in kind — no affine
+upper bound on the activation exists without a box, which is why the
+upper side of the family lives in \rulename{LiRPA} behind two box
+premises.
+
+What the checker recomputes: the linkage — the hypernet really
+contains a packaged ReLU application at exactly these ports, of
+positive total size (the family\textquotesingle s port-lookup side
+condition, displayed in the \rulename{LiRPA} section) — and that the
+conclusion is literally the atom $y \geq h$, elementwise over the
+node\textquotesingle s tensor shape.
+
+The linkage is the only hypothesis; without it, two arbitrary wires
+are asserted ordered. Entrywise the fact is immediate from the
+node\textquotesingle s two-case semantics: on the inactive branch $y =
+0 \geq h$ (there $h \leq 0$), on the active branch $y = h$.
+'''
+note = '''
+The proof section uses this rule\textquotesingle s derivation as the
+family\textquotesingle s worked example of atom-orientation plumbing:
+its inactive branch discharges into catalogue nodes through a chain of
+a bound-node polarity flip, a \rulename{Norm} identity, an
+\rulename{ArithAtom} fold, and two \rulename{EqElim} transports — a
+faithful specimen of what ``one node unpacks to many\textquotesingle
+\textquotesingle{} means in practice.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; linkage premise --- including the
+positive-size narrowing hidden under the displayed $\in$ --- exactly
+as in the \rulename{LiRPA} dictionary, the family preamble.
+\begin{itemize}
+\item $h \mapsto$ \texttt{preact}; $y \mapsto$ \texttt{post};
+  $\ReLU_{\{h\}\to\{y\}} \in H$ $\mapsto$ \texttt{hlink} $:$
+  \texttt{reluLinked H preact post}.
+\item premise-freeness $\mapsto$ silence, the \rulename{PConstExact}
+  representation: no hypothesis mentions \texttt{seq.pre}, so the
+  statement holds under arbitrary premises $\Phi$ --- the
+  display\textquotesingle s ``for any
+  $h$\textquotesingle\textquotesingle{} rides the linkage, as at
+  \rulename{ReLU-NN}.
+\item conclusion $\Phi \vdash y \geq h$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .ge (.var post) (.var
+  preact)} --- output wire left, preactivation right, as displayed;
+  the only two-wire atom among the family\textquotesingle s
+  premise-free conclusions, so this dictionary is where the shared
+  shape of the two tensors (from the linkage extraction) is
+  essential rather than convenient.
+\end{itemize}
+Width note: certified atoms elementwise over the cited
+application\textquotesingle s tensor shape (batch semantics, as at
+\rulename{LiRPA}). Beyond the family\textquotesingle s linkage gate,
+neither side is wider: both hypotheses of \texttt{sound\_reluAbove}
+are consumed, and nothing else is stated.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_reluAbove"]
+intro = '''
+The warrant consumes the family linkage extraction
+(\texttt{reluLinked\_facts}, displayed in the \rulename{LiRPA}
+section): entrywise, $y = 0 \geq h$ on the inactive case and $y = h$
+on the active one. The payload structure is \texttt{PReLUAboveData}
+(Core/Catalogue.lean) — no premise field.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+As for the rest of the ReLU family: the HOL4 development ports the
+checker\textquotesingle s first-order computational surface and stops
+short of the proof-object layer, where this rule\textquotesingle s
+payload (a conclusion equation plus the family linkage) lives; the
+linkage inspects the hypernet\textquotesingle s application list, a
+structure the port\textquotesingle s header inventories among its
+deliberate exclusions; and the port predates the
+linkage\textquotesingle s realization. A HOL statement becomes
+writable when the proof-object/payload layer is ported together with
+the hypernet structures and the packaged ReLU application.
+'''

@@ -1,0 +1,25 @@
+\apilang{TypeScript}{judgment.linGrowth}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function linGrowth(args: {
+  f: ReadonlyArray<Poly>;
+  a: QLike;
+  b: QLike;
+  scope: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.linGrowth({ f: g1, a: 2n, b: Q.of(1, 2), scope: unitBox }),
+),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QLinGrowth::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(f: Vec<Poly>, a: WitRat, b: WitRat, scope: RegionAtom) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let growth = QLinGrowth::new(g1(), q(2, 1), q(1, 2), unit_box()).unwrap();
+\end{rustsrc}

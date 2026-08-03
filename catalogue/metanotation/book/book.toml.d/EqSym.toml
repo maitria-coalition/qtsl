@@ -1,0 +1,77 @@
+[[rule]]
+id = "EqSym"
+source = "../BL-rules.toml"
+row = "EqSym"
+proof = "book/proofs/EqSym.tex"
+commentary = '''
+\rulename{EqSym} flips an equality atom: from $\Phi \vdash t = u$
+conclude $\Phi \vdash u = t$. The need is real because downstream
+consumers of equalities match atoms \emph{syntactically} with a fixed
+orientation --- \rulename{EqElim}\textquotesingle s equality premise, in
+particular, names its two terms in order --- while only the combination
+rules expose both polarities of an equality in their own matching. A
+producer whose congruence engine emits $t = u$ but whose rewrite needs
+$u = t$ inserts this one node.
+
+What the checker recomputes: three syntactic form equations (premise
+atom, conclusion atom, shared context) --- nothing else. The rule
+carries \emph{no} typing fields, and that absence is principled twice
+over: the premise\textquotesingle s holding atom already witnesses both
+evaluations (nothing must be manufactured, contrast
+\rulename{EqRefl}), and the elementwise-under-broadcast equality
+relation is symmetric branch by branch, so no shape agreement is needed
+(contrast \rulename{EqElim}, whose typing condition guards transport
+into a \emph{different} formula --- exactly what a flip never does).
+
+Every payload field is structural; there is no droppable hypothesis to
+exhibit a counterexample against. The rule is core rather than
+admissible because its would-be unpack (through
+\rulename{EqRefl} + \rulename{EqElim}) demands typing side data the
+premise atom does not syntactically carry --- the unpack is not
+computable from the node it would replace.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}.
+\begin{itemize}
+\item $t, u \mapsto$ \texttt{tT tU : Term}; the premise judgement $\Phi
+  \vdash t = u$ $\mapsto$ \texttt{ih} with the shape tie
+  \texttt{hpremPost} $:$ \texttt{premise.post = .atom .eq tT tU};
+  $\Phi \mapsto$ \texttt{premise.pre}, shared via \texttt{hpre}.
+\item conclusion $\Phi \vdash u = t$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .eq tU tT} --- the same
+  two term binders, transposed; nothing else changes.
+\item certified alongside: \texttt{QTensor.rel2\_symm}, the branchwise
+  symmetry of the elementwise comparison lifting --- the reason no
+  typing field exists (the premise\textquotesingle s holding atom
+  already witnesses both evaluations, as the commentary explains).
+\end{itemize}
+No width difference in either direction; every hypothesis is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "QTensor.rel2_symm",
+  "sound_eqSym",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "PEqSymData",
+]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_eqsym_def",
+  "Theorem famEq_eqsym",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

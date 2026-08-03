@@ -1,0 +1,3 @@
+# The native geolog reader tier (pure HOL4; no CakeML dependency).
+all: $(DEFAULT_TARGETS)
+.PHONY: all

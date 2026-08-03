@@ -1,0 +1,18 @@
+# qtsl workspace: the rule-catalogue typesetting tool. The Lean
+# soundness packages live in lean/ (built with Lake, not Cargo); the
+# HOL4 development in hol/; the Python checkers in checkers/.
+[workspace]
+resolver = "2"
+members = [
+    "catalogue/metanotation",
+    "crates/qtsl-geolog-provider",
+    "crates/qtsl-geolog-provider-gpu",
+]
+
+[workspace.package]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[profile.release]
+lto = true
+codegen-units = 1

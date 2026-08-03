@@ -1,0 +1,237 @@
+
+\sourcenote{Genre: core rule (tier 1). Scope, stated loudly: the
+finite-chain tier --- finite state spaces, distribution-evolution
+semantics, exact-rational certificate data instantiated over $\R$ by
+cast. The mixture-polynomial tier and the $\mathbb{W}_1$ conclusion
+family are designed, not proven, and nothing below claims them. Every
+hypothesis of the rule is used and remarked on.}
+
+\textbf{Setting and claim.}\enspace Two finite chains are compared:
+state spaces $\sigma_1, \sigma_2$, row-stochastic kernels $K_1, K_2$,
+absorbing target sets $A_i$ (each $a \in A_i$ frozen: $K_i(a, a) = 1$),
+and readouts $f : \sigma_1 \to L$, $g : \sigma_2 \to L$ (resp.\ values
+$v_1, v_2 : \sigma_i \to \R$). The certificate supplies a
+\emph{coupling} kernel $K$ on $\sigma_1 \times \sigma_2$ with initial
+law $\mu_0$, and a function $V \geq 0$ with bound $b$. The chain's law
+evolves by $\mu_{n+1}(t) = \sum_s \mu_n(s) K(s, t)$; the \emph{final
+law} of an absorbing state is its monotone limit mass
+$\mathrm{fin}(a) = \sup_n \mu_n(a)$. Hypotheses (the checker's
+obligation list, in the order the proof consumes them): the coupling
+rows make $K$ a kernel whose row marginals are exactly $K_1, K_2$
+(\emph{marginal identities}); both-absorbed states
+$A_1 \times A_2$ are frozen; $V$ is a supermartingale for $K$
+($\sum_q K(p, q) V(q) \leq V(p)$, every $p$); $V \geq 0$; terminal
+domination ($V(p) \geq 1$ on both-absorbed $p$ with
+$f(p_1) \neq g(p_2)$, resp.\ $V(p) \geq |v_1(p_1) - v_2(p_2)|$); each
+component chain absorbs almost surely (certified by a finite-graph
+reach criterion); and $\sum_p \mu_0(p) V(p) \leq b$. The claims
+(\texttt{sound\_QRelTV}, \texttt{sound\_QRelExpGap}): the
+total-variation distance of the two final readout laws, resp.\ the gap
+of final expected values, is at most $b$.
+
+\begin{blemma}[marginal-process lemma]\label{lem:qcd-marginal}
+If every row of $K$ pushes along $\pi_i$ to the corresponding row of
+$K_i$, then at every time $n$ the pushforward of the coupled law is the
+component law: $\pi_{i\#}\mu_n = \mathrm{law}_i(n)$, where
+$\mathrm{law}_i$ evolves $\pi_{i\#}\mu_0$ under $K_i$.
+\end{blemma}
+\begin{proof}
+Induction on $n$; the base is definitional. For the step it suffices
+that the row identities intertwine the two Markov operators:
+\[
+(\pi_{\#}\,\mathrm{step}_K\,\mu)(c)
+= \sum_{\pi(t) = c} \sum_{s} \mu(s)\, K(s, t)
+= \sum_{s} \mu(s) \sum_{\pi(t) = c} K(s, t)
+= \sum_{s} \mu(s)\, K_i(\pi(s), c)
+= (\mathrm{step}_{K_i}\, \pi_{\#}\mu)(c),
+\]
+where the third equality is the pushed-row identity at $s$ and the last
+regroups the outer sum over the fibres of $\pi$. This is the coupling's
+first duty: the product chain really \emph{is} a joint presentation of
+the two systems being compared.
+\end{proof}
+
+\begin{blemma}[supermartingale induction]\label{lem:qcd-drift}
+$\sum_p \mu_n(p)\, V(p) \leq \sum_p \mu_0(p)\, V(p)$ for all $n$.
+\end{blemma}
+\begin{proof}
+One step: $\sum_t (\mathrm{step}\,\mu)(t) V(t) = \sum_s \mu(s)
+\sum_t K(s, t) V(t) \leq \sum_s \mu(s) V(s)$, using the drift row at
+each $s$ and $\mu(s) \geq 0$. Iterate.
+\end{proof}
+
+\begin{blemma}[the finite optional-stopping bound]\label{lem:qcd-stop}
+Let $A \subseteq$ states be frozen, and let $0 \leq \gamma \leq V$ on
+$A$. Then $\sum_{a \in A} \mathrm{fin}(a)\, \gamma(a) \leq b$.
+\end{blemma}
+\begin{proof}
+At every finite time,
+\[
+\sum_{a \in A} \mu_n(a)\, \gamma(a)
+\;\leq\; \sum_{a \in A} \mu_n(a)\, V(a)
+\;\leq\; \sum_{\text{all } s} \mu_n(s)\, V(s)
+\;\leq\; b,
+\]
+the middle step because $V \geq 0$ lets the sum extend off $A$, the
+last by Lemma~\ref{lem:qcd-drift} and the initial bound. Frozen states
+have monotone mass ($\mu_{n+1}(a) \geq \mu_n(a) K(a,a) = \mu_n(a)$), so
+each term converges upward to $\mathrm{fin}(a)\gamma(a)$; the limit of
+the finite sum obeys the uniform bound. This is optional stopping with
+monotone convergence of finite sums doing Fatou's work --- no measure
+theory enters at this tier.
+\end{proof}
+
+\begin{blemma}[coupling inequality]\label{lem:qcd-couple}
+For any nonnegative weight $\gamma$ on $\sigma_1 \times \sigma_2$,
+\[
+\mathrm{TV}\bigl((f \circ \pi_1)_{\#}\gamma,\ (g \circ \pi_2)_{\#}\gamma\bigr)
+\;\leq\; \gamma\{\, p : f(p_1) \neq g(p_2) \,\}.
+\]
+\end{blemma}
+\begin{proof}
+Fix a label $l$. Splitting each pushed mass over the agreement region
+$\{f = g\}$ and its complement, the agreement contributions to the two
+sides are \emph{equal} (there, $f(p_1) = l \iff g(p_2) = l$), so
+\[
+\bigl| (f\pi_1)_{\#}\gamma(l) - (g\pi_2)_{\#}\gamma(l) \bigr|
+\;\leq\; \gamma\{f \neq g,\ f(p_1) = l\} + \gamma\{f \neq g,\ g(p_2) = l\}.
+\]
+Summing over $l$ counts the disagreement mass twice, and
+$\mathrm{TV} = \tfrac12 \sum_l |\cdot|$ halves it. This is the
+classical coupling lemma \cite[\S I.2]{lindvall1992}, in Doeblin's
+tradition \cite{doeblin1938}; stated for arbitrary nonnegative
+$\gamma$ --- sub-probability final laws included --- because that is the
+form Step 3 of the theorem needs.
+\end{proof}
+
+\begin{blemma}[final marginal identities]\label{lem:qcd-final}
+Suppose additionally each component chain absorbs almost surely
+(its absorbed mass tends to $1$). Then for $a_1 \in A_1$:
+$\sum_{a_2 \in A_2} \mathrm{fin}_K(a_1, a_2) =
+\mathrm{fin}_{K_1}(a_1)$, and symmetrically. Consequently the final
+pair law on $A_1 \times A_2$ is a genuine \emph{coupling of the two
+final component laws}, of total mass $1$.
+\end{blemma}
+\begin{proof}
+Let $S_n = \sum_{a_2 \in A_2} \mu_n(a_1, a_2)$ and
+$T_n = \sum_{s_2} \mu_n(a_1, s_2)$; by Lemma~\ref{lem:qcd-marginal},
+$T_n$ is the component-1 law at $a_1$. Then $S_n \leq T_n$, and
+\[
+T_n - S_n \;=\; \textstyle\sum_{s_2 \notin A_2} \mu_n(a_1, s_2)
+\;\leq\; \textstyle\sum_{s_2 \notin A_2} (\pi_{2\#}\mu_n)(s_2)
+\;=\; 1 - (\text{component-2 absorbed mass at } n) \;\longrightarrow\; 0 :
+\]
+the \emph{one-absorbed-loner} mass --- pairs whose first coordinate has
+frozen while the second still wanders --- is dominated by the second
+chain's unabsorbed mass, which its absorption hypothesis kills.
+Squeeze; both-absorbed pairs are frozen, so $S_n$ also converges to the
+final pair mass. Total mass $1$ follows by summing over $A_1$ and
+applying component-1 absorption.
+\end{proof}
+
+\begin{bthm}[soundness, total-variation form]\label{thm:qcd-tv}
+Under all hypotheses,
+$\mathrm{TV}\bigl(f_{\#}\mathrm{fin}_{K_1},\ g_{\#}\mathrm{fin}_{K_2}\bigr)
+\leq b$.
+\end{bthm}
+\begin{proof}
+\emph{Step 1.} By Lemma~\ref{lem:qcd-final} the final pair law $\gamma$
+on $A_1 \times A_2$ has marginals $\mathrm{fin}_{K_1}$,
+$\mathrm{fin}_{K_2}$, so the two final readout laws are the two
+pushforwards of the single weight $\gamma$.
+\emph{Step 2.} Lemma~\ref{lem:qcd-couple} bounds their total-variation
+distance by $\gamma$'s disagreement mass.
+\emph{Step 3.} Terminal domination says the disagreement indicator is
+$\leq V$ on the frozen set $A_1 \times A_2$ (and $\geq 0$ everywhere),
+so Lemma~\ref{lem:qcd-stop} with $\gamma = \mathbf{1}[f \neq g]$ bounds
+the disagreement mass by $b$.
+\end{proof}
+
+\begin{bthm}[soundness, expectation-gap form]\label{thm:qcd-gap}
+With terminal domination in the form
+$V(p) \geq |v_1(p_1) - v_2(p_2)|$ on $A_1 \times A_2$,
+\[
+\Bigl| \textstyle\sum_{a_1} \mathrm{fin}_{K_1}(a_1)\, v_1(a_1)
+- \sum_{a_2} \mathrm{fin}_{K_2}(a_2)\, v_2(a_2) \Bigr| \;\leq\; b .
+\]
+\end{bthm}
+\begin{proof}
+Rewrite both final expectations over the final pair law via
+Lemma~\ref{lem:qcd-final}; the difference becomes
+$\sum_p \mathrm{fin}_K(p)\,(v_1(p_1) - v_2(p_2))$ over
+$A_1 \times A_2$. The triangle inequality moves the absolute value
+inside, and Lemma~\ref{lem:qcd-stop} with
+$\gamma = |v_1 - v_2|$ closes. The coupling lemma is not consumed here
+--- domination of the value gap replaces domination of the disagreement
+indicator; two conclusion families, one engine.
+\end{proof}
+
+\begin{bremark}[the absorption criterion is discharged, not assumed]
+\label{rem:qcd-reach}
+The checker certifies absorption per component as a finite-graph fact:
+from every state, the frozen set is reachable through
+positive-probability edges. Finiteness uniformizes this into one
+horizon $N$ and one margin $\varepsilon > 0$ valid for all states; each
+$N$-step block then absorbs at least an $\varepsilon$-fraction of the
+still-loose mass (frozen mass never returns), so the unabsorbed mass
+decays geometrically and the absorbed mass tends to $1$
+(\texttt{tendsto\_absorbedMass\_one}). The \texttt{\_of\_reach}
+theorem forms consume the graph criterion directly.
+\end{bremark}
+
+\begin{bremark}[why each hypothesis is needed]\label{rem:qcd-omit}
+\emph{Marginal identities}: drop them and $\gamma$ in
+Theorem~\ref{thm:qcd-tv} no longer has the two systems' final laws as
+marginals --- the bound then constrains an unrelated pair (any $K$ with
+$V \equiv 0$ on a diagonal freeze would ``certify'' distance $0$
+between arbitrary chains). \emph{$V \geq 0$}: the extension step in
+Lemma~\ref{lem:qcd-stop} ($\sum_A \leq \sum_{\text{all}}$) fails, and
+negative values can subsidize the drift row: from an initial state of
+value $0$, branch half-half into a frozen \emph{disagreeing} state of
+value $1$ and a frozen \emph{agreeing} state of value $-1$ (domination
+constrains only disagreeing states). Drift holds at every state
+($\tfrac12 \cdot 1 + \tfrac12 \cdot (-1) = 0 \leq 0$), the initial
+bound passes at $b = 0$ --- and the disagreement mass is $\tfrac12$. \emph{Terminal domination}: with
+$V \equiv 0$ and disagreeing finals, drift and initial rows pass at
+$b = 0$ while the true distance is $1$. \emph{The freeze}: monotone
+convergence of frozen mass (Lemmas \ref{lem:qcd-stop},
+\ref{lem:qcd-final}) is what makes ``final law'' well-defined; an
+unfrozen target lets certified mass drain back out.
+\emph{Absorption}: without it the one-absorbed-loner mass survives ---
+take $K_2$ the identity off $A_2$: the pair never both-absorbs, the
+final pair law is $0$, and Lemma~\ref{lem:qcd-couple} holds vacuously
+about sub-laws that no longer represent the systems; the marginal
+identity of Lemma~\ref{lem:qcd-final} is exactly what fails.
+\emph{Initial bound}: the conclusion's $b$ is
+$V$'s initial expectation; without it nothing quantitative survives.
+A coupling that cannot satisfy the marginal rows simply does not
+exist as a certificate --- emptiness refuses, never lies.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The engine is the coupling method for Markov chains
+\cite{doeblin1938,lindvall1992}: total variation bounded by
+disagreement probability of a coupling, here in distribution-evolution
+form over finite spaces \cite[Ch.~4--5]{levinperes2017}, with a
+relational supermartingale supplying the quantitative disagreement
+bound --- the certificate-side sibling of coupling-based relational
+program logics \cite{hsu2017}, transposed from pre/post judgements to a
+single distance judgement that composes by metric axioms (triangle,
+weakening) at judgement level. The expectation-gap form replaces the
+coupling lemma by direct domination --- the gap-pseudometric readout.
+On correlated perturbations the relational route is strictly sharper
+than composing two one-sided certificates, which is the rule's reason
+to exist: the coupling sees the correlation, unary certificates
+cannot.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qcd-marginal} & \texttt{PushKernel}; \texttt{push\_step}; \texttt{push\_law}\\
+Lemma \ref{lem:qcd-drift} & \texttt{expect\_step\_le}; \texttt{expect\_law\_le}\\
+Lemma \ref{lem:qcd-stop} & \texttt{law\_mono\_absorbing}; \texttt{finalMass}; \texttt{finalExpect\_le}\\
+Lemma \ref{lem:qcd-couple} & \texttt{tvDist}; \texttt{tvDist\_push\_le\_disagree}\\
+Lemma \ref{lem:qcd-final} & \texttt{sum\_finalMass\_snd\_eq}; \texttt{sum\_finalMass\_fst\_eq}; \texttt{sum\_finalMass\_prod\_eq\_one}; \texttt{push\_finalLaw\_fst}/\texttt{\_snd}\\
+Theorem \ref{thm:qcd-tv} & \texttt{sound\_QRelTV} (graph-criterion form \texttt{sound\_QRelTV\_of\_reach})\\
+Theorem \ref{thm:qcd-gap} & \texttt{sound\_QRelExpGap} (graph-criterion form \texttt{sound\_QRelExpGap\_of\_reach})\\
+Remark \ref{rem:qcd-reach} & \texttt{exists\_uniform\_reach}; \texttt{absorbed\_decay}; \texttt{tendsto\_absorbedMass\_one}\\
+\end{anchors}

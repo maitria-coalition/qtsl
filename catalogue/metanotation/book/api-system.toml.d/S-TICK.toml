@@ -1,0 +1,24 @@
+# api-system.toml.d/S-TICK.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-TICK"
+entity = "entry"
+
+[api.ts]
+handle = "system.TickDecl"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_tick"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "fn-body:buildDtmc"
+note = '''The quoted fixture declares an exact tick; the composite fixture's schedule assumption (S-HYBTIME) carries the jitter-bracket form.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::TickDecl"
+sig_file = "crates/mtk-catalogue/src/system/manifest.rs"
+sig = ["marker:tick_decl"]
+snippet_file = "crates/mtk-catalogue/tests/common/mod.rs"
+snippet = "fn-body:dtmc"

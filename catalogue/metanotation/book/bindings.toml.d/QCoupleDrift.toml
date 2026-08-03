@@ -1,0 +1,19 @@
+# bindings.toml.d/QCoupleDrift.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QCoupleDrift'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QRelChain"
+decl = "sound_QRelExpGap"
+sha256 = "7d128f3d43bd62d9a328198af98153970d87f08b5714f270fff04403f2d0f263"
+
+[[statement]]
+module = "QtslAux.QRelChain"
+decl = "sound_QRelTV"
+sha256 = "523a33a66acd09623b7e9e1d5b2fb155caa436734c5c32f755202a519c47353c"
+
+[[correspondence]]
+entry = "QCoupleDrift"
+steele_sha256 = "af1b5668aedf5f1104a228861cde29d1c699681e9e21dda9527e86d1852f9d9a"
+statements_sha256 = "c8ad4a03ddb48dc594fa233b9e916cd5d786dddb006666dad177220918385617"
+prose_sha256 = "c2bd03471040a70b47d32fb502c5958420a76e2c07a9d94db07aa597bbc01b4e"
+

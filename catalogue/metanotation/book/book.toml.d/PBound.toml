@@ -1,0 +1,99 @@
+[[rule]]
+id = "PBound"
+source = "../BL-rules.toml"
+row = "PBound"
+proof = "book/proofs/PBound.tex"
+alias_target = "Syzygy"
+commentary = '''
+\rulename{PBound} is the workhorse bound-node: a compact spelling of a
+\rulename{Syzygy} application whose entries are affine, with the
+conclusion exposed through the three-way reading selector --- the raw
+zero-form $c \leq 0$, the sign-flipped $e \geq 0$ where $c = -e$, or
+the literal atom $l \leq r$ where $c = l - r$. It is the
+taxonomy\textquotesingle s canonical alias: the payload is
+\rulename{Syzygy}\textquotesingle s field-for-field, the unpack is the
+identity transport, and the wire format prices the affine register
+compactly. A producer emits it constantly: it is how an affine
+consequence of proven bounds becomes a first-class node whose
+conclusion can feed the rules that demand a particular atom shape ---
+the $\geq$-reading makes a nonnegativity premise reachable from bound
+facts without a detour, and the literal-atom reading feeds
+interval-shaped consumers with no separate re-arrangement step.
+
+What the checker recomputes is exactly
+\rulename{Syzygy}\textquotesingle s obligation set --- entry decoding
+against the pinned combination encoding, nonnegative weights,
+entry-sourcing from component conclusions and premise equality
+sub-conjuncts (both polarities on equalities), and the exact
+canonical-polynomial fold identity --- plus the same bookkeeping
+(conjunct-wise premise containment, conclusion shape and finiteness,
+positive-size wires on premise, conclusion, and component conclusions).
+That section\textquotesingle s commentary on what breaks without each
+hypothesis applies verbatim here, through the identity transport.
+
+The affine restriction in the catalogued statement is the
+rule\textquotesingle s published register --- wire-format compactness
+for coefficient rows --- and not a checked side condition: the replay
+is degree-blind and soundness never consults linearity. The three
+readings are one exact $\Q$ identity re-presented under a sign flip;
+their semantic transport is proven once, in the target
+rule\textquotesingle s section, and inherited here as a pure
+re-spelling.
+'''
+note = '''
+The wire tag for this rule is deferred to a payload-window allocation;
+the emit path refuses the rule until the tag is allocated. The
+compact-register pricing is the reason the alias exists as a distinct
+spelling at all --- semantically it adds nothing to its target, which
+is the alias genre working as intended.
+'''
+correspondence = '''
+Verbatim the \rulename{Syzygy} dictionary, unbundled: where
+\rulename{Syzygy}\textquotesingle s statement packs its obligations
+into a \texttt{SyzygyStep}, \texttt{sound\_pBound} takes the same
+eleven fields as flat binders --- \texttt{hpreC}, \texttt{hshape},
+\texttt{hfin}, \texttt{hwpos}, \texttt{hcompPos}, \texttt{hvalid},
+\texttt{hform}, over the same \texttt{components}/\texttt{combination}/
+\texttt{conclusion} data with \texttt{hcomps} the component
+validities --- and its entire proof is one application of
+\texttt{sound\_syzygy} to the repacked Step, visible in the displayed
+statement. The alias relation is thereby itself certified: 1 $\to$ 1
+at statement level, and (since the both-polarity core change) 1 $\to$
+1 at reading level too --- the displayed $\Psi$ selector is the same
+\texttt{syzygyConclusionForm} the target consumes. This cell displays
+the evaluability and positive-size rows inline (per the roster
+resync); their mapping is the \rulename{Syzygy}
+dictionary\textquotesingle s, unchanged. No hypothesis differs, none
+is unused, and neither side is wider --- the affine restriction the
+roster note mentions is wire-format compactness, absent from both the
+display\textquotesingle s premises and the statement.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_pBound"]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = ["Definition syzygyCheck_def"]
+receipt = '''
+\texttt{hol-strict} CLEAN over the ported checker chain: theory
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host, scripts
+sha-matched verbatim to the sources cited here (git blob
+\texttt{c6ffee9c\ldots}). Scope, stated honestly: the
+alias\textquotesingle s entire combination check \emph{is} the target
+rule\textquotesingle s, so the ported \texttt{syzygyCheck} (with its
+accept and two reject receipt rows, quoted in the target
+rule\textquotesingle s section) covers this rule\textquotesingle s
+computational content; the conclusion-form reading selector and the
+payload layer ride the dependently-typed proof-object surface, which is
+a separately tracked porting stage. As on the \rulename{Farkas} page:
+the Lean check has since grown a third (mixed tagged-union) branch,
+added 2026-07-19 after this port run --- the divergence is
+refusal-direction only, and its port is named residue.
+'''

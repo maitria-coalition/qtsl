@@ -1,0 +1,174 @@
+[[rule]]
+id = "Subdivide"
+source = "../BL-rules.toml"
+row = "Subdivide"
+proof = "book/proofs/Subdivide.tex"
+commentary = '''
+\rulename{Subdivide} is the case-split rule of region reasoning: from a
+proven membership $\Phi \vdash x \in \mathcal{R}(\Delta, S)$, a finite
+family of branch regions covering the parent, and one sub-proof of the
+goal per branch (each under the strengthened premise
+$\Phi \wedge x \in \mathcal{R}(\Delta_k, S_k)$), it concludes
+$\Phi \vdash \Psi$ on the whole parent region. It is degree
+escalation\textquotesingle s partner and essential for every non-toy
+proof: where a single \rulename{BernCone} certificate at feasible degree
+is too coarse, a producer splits the region, certifies each piece at low
+degree, and lets \rulename{Subdivide} reassemble the global conclusion
+--- the branch-and-bound shape that makes Bernstein enclosures converge.
+
+What the checker recomputes, given the payload (parent region, branch
+family, per-branch sub-proofs): that the parent region reads as a closed
+interval --- ambient dimension 1, support exactly two vertices at
+distinct coordinates, empty extension set; that every branch region
+reads as a closed interval and is tied to its own extension set; and
+that the branch intervals \emph{chain} across the parent interval --- a
+greedy reach, iterated to its fixpoint, that extends past any interval
+whose left endpoint has already been reached and must arrive at the
+parent\textquotesingle s right endpoint. Everything beyond this
+fragment (extension-ray parents or branches, regions of dimension
+$\geq 2$, supports of more than two vertices) is refused, never
+accepted on faith; $n$-dimensional box grids arise by \emph{nesting}
+per-coordinate splits across several rule applications, not inside one.
+
+Each hypothesis is essential. Drop the cover check and a producer
+omits the branch where the goal fails --- a gap family such as
+$[1, \frac{4}{3}] \cup [\frac{3}{2}, 2]$ over $[1, 2]$ proves the goal
+everywhere except where it is false. Drop the branch-region tie and the
+chained intervals belong to different regions than the ones the
+sub-proofs assume. Drop the branch-premise shape and a sub-proof could
+be consulted outside the piece it was proven on. The certificate slot
+for cover evidence rides the wire but is deliberately \emph{not
+consulted}: the checker recomputes the cover from the branch regions
+themselves, so ignoring the slot can only make checking stricter, never
+unsound.
+'''
+note = '''
+The region variable itself plays no role in the cover geometry: the
+soundness argument feeds the \emph{same} evaluated point to the parent
+and to the selected branch, so no tie between the term and the cover is
+needed --- the cover is a fact about intervals, not about wires. A
+future interpretation may read per-gap infeasibility certificates out of
+the wire slot; the catalogued stratum records the corresponding
+unpacking sketch (per-branch cuts discharged through
+\rulename{Farkas} and $\vee$-elimination).
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premises as at
+\rulename{Weaken}.
+\begin{itemize}
+\item $x \mapsto$ \texttt{termX : Term} (a free term --- unlike
+  \rulename{BernCone}, no wire tie is needed here: the note above
+  explains why); $(\Delta, S) \mapsto$ \texttt{simplex},
+  \texttt{S}; the branch family $\{(\Delta_k, S_k)\}_{k=1}^N
+  \mapsto$ \texttt{branchSimplex}, \texttt{branchS} $:$ \texttt{Fin
+  nBranches → \_}.
+\item region premise $\Phi \vdash x \in \mathcal{R}(\Delta, S)$
+  $\mapsto$ \texttt{ihRegion} with \texttt{hregionPost} $:$
+  \texttt{regionPremise.post = .inRegion termX simplex S}; $\Phi$
+  shared via \texttt{hpre}.
+\item the branch judgements $\forall k.\ \Phi \wedge (x \in
+  \mathcal{R}(\Delta_k, S_k)) \vdash \Psi$ $\mapsto$
+  \texttt{ihBranch} with \texttt{hbranchPre} pinning each branch
+  premise to the displayed conjunction in the displayed order ($\Phi$
+  left) and \texttt{hbranchPost} tying every branch conclusion to
+  \texttt{seq.post} --- $\Psi$ is whatever formula the conclusion
+  sequent carries; nothing constrains its shape.
+\item the cover side-condition $\mathcal{R}(\Delta, S) \subseteq
+  \bigcup_k \mathcal{R}(\Delta_k, S_k)$ $\mapsto$ \texttt{hcover} $:$
+  \texttt{coverInfeasibilityValid}, i.e.\ \texttt{coverCheck = true}:
+  the parent extension set must present as a 1-dimensional interval
+  (\texttt{ExtensionSet.interval1D?} --- outside that fragment the
+  check refuses, so the certified reach of the displayed
+  set-inclusion is the interval fragment, the
+  \rulename{ConvElim} class), each branch\textquotesingle s
+  simplex-tie is checked, and the greedy chain
+  (\texttt{coverExtendPass}/\texttt{coverReach}/\texttt{coverChainCheck},
+  certified alongside) verifies the branch intervals chain across the
+  parent interval --- a decidable \emph{sufficient} witness of the
+  displayed inclusion, conservative like every refusal boundary.
+\item consumed by nothing: the payload\textquotesingle s cover
+  certificate term rides into \texttt{coverInfeasibilityValid} as an
+  ignored argument (the binder is underscore-named in the displayed
+  definition) --- a vestige of the earlier per-gap-infeasibility
+  design the note records; the shipped checker recomputes the cover
+  itself and reads no producer-supplied cover data.
+\end{itemize}
+Width note: within the interval fragment neither side is wider ---
+every other hypothesis is consumed, and the displayed rule\textquotesingle
+s ``finite family\textquotesingle\textquotesingle{} is carried by the
+\texttt{Fin nBranches} index type itself.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_subdivide"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "ExtensionSet.interval1D?",
+  "coverExtendPass",
+  "coverReach",
+  "coverChainCheck",
+  "coverCheck",
+  "coverInfeasibilityValid",
+]
+intro = '''
+\textbf{What the cover check means --- and what it does not.}\enspace
+The side condition appears in the payload as the single name
+\texttt{coverInfeasibilityValid}, so this book binds its meaning by
+displaying the definition chain in full, from the checker sources.
+Reading the chain: \texttt{ExtensionSet.interval1D?} is the
+closed-interval reading of a region --- it succeeds only on the checkable
+fragment (dimension 1, two-vertex support at distinct coordinates,
+empty extension set), returning sorted endpoints, and everything else
+reads \texttt{none}, which the cover check turns into refusal.
+\texttt{coverExtendPass} is one greedy pass: extend the reach past any
+interval whose left endpoint has been reached;
+\texttt{coverReach} iterates it, and as many passes as there are
+intervals suffice for the fixpoint (a productive pass strictly
+increases the reach onto a new right endpoint, of which there are only
+finitely many). \texttt{coverChainCheck} asks whether the reach from
+the parent\textquotesingle s left endpoint arrives at its right
+endpoint; \texttt{coverCheck} assembles the whole condition, tying each
+branch\textquotesingle s extension set to its simplex on the way.
+
+What a skeptical reader should confirm by eye: the region term and the
+wire-borne cover certificate are \emph{ignored} --- the relation
+discards both arguments, and the cover is recomputed from the branch
+regions alone (the recompute pattern; a forged certificate cannot
+influence the verdict, and a missing one costs nothing); no valuation
+is consulted anywhere; and the branch sub-proofs enter soundness, not
+the cover computation --- the checker decides pure interval geometry.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = [
+  "Definition extInterval1D_def",
+  "Definition coverExtendPass_def",
+  "Definition coverReach_def",
+  "Definition coverChainCheck_def",
+  "Definition coverCheck_def",
+]
+receipt = '''
+\texttt{hol-strict} CLEAN over the ported checker chain: theory
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host, scripts
+sha-matched verbatim to the sources cited here (git blob
+\texttt{c6ffee9c\ldots}). The ported receipt table replays the cover
+battery: the positive chain
+($[1, \frac{3}{2}] \cup [\frac{3}{2}, 2]$ over $[1, 2]$) and four
+negative controls --- the gap mutant, a point-supported branch, an
+extension-ray parent, and untied branch simplices. Representation seam,
+inventoried in the script: the indexed branch family becomes one list
+of (simplex, extension-set) pairs in index order, and the Lean
+relation\textquotesingle s two inert arguments (region term, cover
+certificate) are not reproduced --- both value-preserving deltas under
+the port\textquotesingle s seam discipline.
+'''

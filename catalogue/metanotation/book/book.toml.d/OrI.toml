@@ -1,0 +1,80 @@
+[[rule]]
+id = "OrI"
+source = "../BL-rules.toml"
+row = '$\vee$I'
+proof = "book/proofs/OrI.tex"
+commentary = '''
+$\vee$I injects a proven conclusion into a disjunction: from
+$\Phi \vdash \Psi_i$, conclude $\Phi \vdash \Psi_1 \vee \Psi_2$ ---
+conclusion-side weakening, the mirror of \rulename{Weaken}\textquotesingle s
+premise side. A producer mostly reaches for it to make the branches of
+a disjunction elimination agree: each branch proves its own
+branch-specific fact and $\vee$I-injects it into the common disjunction
+the elimination\textquotesingle s conclusion-matching check demands.
+The separation instance discussed at $\vee$E is the miniature --- both
+of its branch derivations are an axiom node followed by one $\vee$I
+node.
+
+Like $\wedge$E, the rule is realized as two constructors, one per
+side; the injected side is the constructor choice. The checker
+recomputes two tree identities: shared context, and that the
+conclusion\textquotesingle s post is one new $\vee$-node with the
+sub-derivation\textquotesingle s conclusion on the constructor\textquotesingle s
+side and the \emph{named} added disjunct on the other.
+
+Nothing whatsoever is demanded of the added disjunct --- it may be
+unsatisfiable, ill-typed, or mention untyped wires --- because
+satisfaction of a disjunction demands only the witnessed side, and the
+satisfaction relation carries no typing side conditions of its own;
+typing enters the calculus only through rules that must evaluate.
+Dropping the conclusion identity frees the conclusion outright;
+dropping the context identity admits the context-swap family walked at
+\rulename{Weaken}.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}.
+\begin{itemize}
+\item the display\textquotesingle s index $i \in \{1, 2\}$ $\mapsto$
+  the choice of lemma, exactly as at $\wedge$E:
+  \texttt{sound\_orI\_left} is $i = 1$, \texttt{sound\_orI\_right} is
+  $i = 2$, mirroring the payload\textquotesingle s two constructors.
+\item premise judgement $\Phi \vdash \Psi_i$ $\mapsto$ \texttt{ih};
+  the injected disjunct $\Psi_i$ \emph{is} \texttt{premise.post}, and
+  the added disjunct $\Psi_{3-i}$ $\mapsto$ the binder \texttt{other},
+  of which nothing is demanded.
+\item conclusion $\Phi \vdash \Psi_1 \vee \Psi_2$ $\mapsto$ the goal
+  under \texttt{hpost}: in the left lemma \texttt{seq.post = .or
+  premise.post other} (right lemma mirrored); $\Phi \mapsto$
+  \texttt{premise.pre}, shared via \texttt{hpre}.
+\end{itemize}
+No width difference in either direction: the lemma pair covers exactly
+the displayed $i$-indexed family, and every hypothesis is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_orI_left", "sound_orI_right"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["POrIData"]
+intro = '''
+Payload, read as in the \rulename{Ax} section: one constructor per
+injection, each a sub-derivation plus structural equalities with the
+added disjunct as explicit data.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_ori_def",
+  "Theorem famEq_ori",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

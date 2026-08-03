@@ -1,0 +1,152 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as fixed in the
+\rulename{EqElim} section. The rule is a pair: one payload constructor
+per direction, sharing the comparator gate; both directions are proven,
+and the two proofs are deliberately \emph{not} mirror images --- the
+asymmetry is the interesting content.}
+
+\textbf{Claim} (\texttt{sound\_arithAtom\_fold},
+\texttt{sound\_arithAtom\_unfold}).\enspace The payload supplies terms
+$t_1, t_2$ and a comparator $\bowtie \in \{<, \leq, =, \geq, >\}$ (the
+gate $\bowtie \neq \mathord{\neq}$ is a checked field). The two atom
+spellings in play, both recomputed syntactically by the checker from the
+same payload terms, are the \emph{direct form} $t_1 \bowtie t_2$ and the
+\emph{zero-normal form} $(t_1 - t_2) \bowtie 0$, where the subtrahend
+side is the literal constant $0$ and the left side the literal syntactic
+difference. \emph{Fold}: premise concludes the zero-normal form,
+conclusion is the direct form. \emph{Unfold}: the converse. In both
+directions, validity of the premise sequent gives validity of the
+conclusion sequent, over the shared $\Phi$.
+
+\begin{blemma}[scalar bridge]\label{lem:arith-scalar}
+For $p, q \in \Q$ and $\bowtie$ any of the five comparators:
+$(p - q) \bowtie 0 \iff p \bowtie q$.
+\end{blemma}
+\begin{proof}
+Add $q$ to both sides, respectively subtract it --- the order of $\Q$ is
+translation-invariant. The argument is uniform in $\bowtie$; it would,
+for that matter, be equally valid for $\neq$ --- the comparator gate is
+\emph{not} forced at this level (Remark~\ref{rem:arith-ne}).
+\end{proof}
+
+\begin{blemma}[tensor bridge]\label{lem:arith-tensor}
+Let $A, B$ be tensors whose elementwise difference is defined, say $D$.
+Then $D$ stands in the elementwise lift of $\bowtie$ against the rank-0
+tensor $0$ iff $A, B$ stand in the elementwise lift of $\bowtie$.
+\end{blemma}
+\begin{proof}
+$D$'s entries are the pointwise differences under the broadcast
+discipline: at equal shapes, entry $i$ of $D$ is $A_i - B_i$; with
+rank-0 $A$, entry $i$ is $A_{\mathrm{scalar}} - B_i$; with rank-0 $B$,
+$A_i - B_{\mathrm{scalar}}$ --- and $D$ takes the positive-rank
+operand's shape (the broadcast join). The left side of the claimed
+equivalence reads every entry of $D$ against the scalar $0$; the right
+side reads the operands in the corresponding branch of the elementwise
+lift. In each of the three branches the two readings pair off the same
+scalar comparisons entry by entry, and Lemma~\ref{lem:arith-scalar}
+closes each pair. (\texttt{QTensor.rel2\_sub\_zero\_iff}.)
+\end{proof}
+
+\begin{blemma}[definedness, fold direction]\label{lem:arith-def-fold}
+If the zero-normal atom holds at $\sigma$, then both $t_1$ and $t_2$
+evaluate at $\sigma$, and their elementwise difference is the evaluation
+of $t_1 - t_2$.
+\end{blemma}
+\begin{proof}
+The holding atom includes a defined evaluation of the syntactic
+difference; the evaluator is compositional, so inverting it at the
+subtraction node yields defined evaluations of both operands and the
+elementwise-difference equation. (\texttt{Term.evalQ\_sub\_inv}.)
+\end{proof}
+
+\begin{blemma}[definedness, unfold direction]\label{lem:arith-def-unfold}
+If the direct atom holds at $\sigma$, then the elementwise difference of
+the two (defined, by the atom's holding) evaluations is itself defined.
+\end{blemma}
+\begin{proof}
+A \emph{holding} elementwise comparison forces broadcast-compatible
+shapes --- the lift's fourth branch, unequal positive ranks, is empty ---
+and elementwise subtraction is total on exactly the broadcast-compatible
+pairs. A holding comparison is thereby itself a compatibility
+certificate. (\texttt{QTensor.map2\_defined\_of\_rel2}.)
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{ArithAtom}, both directions]
+\label{thm:arith-sound}
+Over shared $\Phi$: validity of $\Phi \vdash (t_1 - t_2) \bowtie 0$
+gives validity of $\Phi \vdash t_1 \bowtie t_2$, and conversely.
+\end{bthm}
+\begin{proof}
+Fix an admissible $\sigma \models \Phi$ in either direction.
+\emph{Fold}: the premise's zero-normal atom holds; its constant side
+evaluates to the rank-0 tensor $0$; Lemma~\ref{lem:arith-def-fold}
+recovers evaluations $A, B$ of $t_1, t_2$ with difference $D$, and the
+premise's relation is $D \bowtie 0$ elementwise;
+Lemma~\ref{lem:arith-tensor} converts it to $A \bowtie B$ elementwise
+--- the direct atom, on the operands' own evaluations. \emph{Unfold}:
+the premise's direct atom holds with evaluations $A, B$;
+Lemma~\ref{lem:arith-def-unfold} manufactures the difference $D$; the
+evaluator assembles $\mathrm{ev}_\sigma(t_1 - t_2) = D$ from its
+operands' evaluations, the constant side is again rank-0 $0$, and
+Lemma~\ref{lem:arith-tensor}, read right to left, closes the zero-normal
+atom.
+\end{proof}
+
+\begin{bremark}[the direction asymmetry, and payload minimalism]
+\label{rem:arith-asym}
+The fold direction \emph{consumes} definedness of the difference (the
+premise evaluated it); the unfold direction must \emph{manufacture} it
+--- and can, precisely because a holding comparison certifies broadcast
+compatibility (Lemma~\ref{lem:arith-def-unfold}). The consequence is
+worth stating plainly: \rulename{ArithAtom} is definedness-neutral in
+both directions, and the two atom forms mention the \emph{same} wires,
+so neither form can hold vacuously or fail to evaluate unless the other
+does likewise. That is why this payload carries \emph{no} typing or
+positivity fields at all --- compare \rulename{EqRefl}'s typing pack,
+\rulename{EqElim}'s shape agreement, and the positive-size fields of the
+combination rules: every one of those exists to manufacture or protect
+an evaluation this rule gets handed for free. \rulename{ArithAtom} is
+the payload-minimal core rule, and the ``exact rational evaluation
+transported both directions'' is exactly the pair
+(Lemma~\ref{lem:arith-scalar}, Lemma~\ref{lem:arith-tensor}): a
+translation-invariance fact of ordered $\Q$, lifted entrywise through an
+invertible totality argument.
+\end{bremark}
+
+\begin{bremark}[the syntactic pins]\label{rem:arith-pins}
+Both form conditions are single syntactic equations recomputed from the
+payload --- the zero-normal form demands the \emph{literal} constant $0$
+and the \emph{literal} difference term of the same $t_1, t_2$, not any
+term evaluating to zero or any algebraic rearrangement. A producer
+wanting $t_1 \bowtie t_2$ from, say, $(t_2 - t_1) \cdot (-1) \bowtie 0$
+routes through \rulename{Norm} first; this rule does arithmetic on
+\emph{atom shape} only. That severity is what makes the side condition
+decidable by construction and keeps the rule's trusted surface at two
+equations.
+\end{bremark}
+
+\begin{bremark}[why $\neq$ is excluded]\label{rem:arith-ne}
+Not for the reason one might guess: Lemmas \ref{lem:arith-scalar} and
+\ref{lem:arith-tensor} are comparator-uniform, and the rational
+semantics of this section would accept $\neq$ without change. The
+comparator set $\{<, \leq, =, \geq, >\}$ is the source calculus's own
+set for this rule, and the payload's gate enforces it for a reason
+recorded at the sibling closed-fact rule in the development: alongside
+the rational semantics, the development maintains an auxiliary
+three-valued interpretation (a countermodel construction used to police
+vacuity properties of the calculus), under which $\neq$ atoms take a
+nonclassical value; admitting $\neq$ here would preserve the soundness
+theorem above but break that parallel invariant. $\neq$ remains in the
+formula grammar --- it is simply not this rule's business to move it
+across the zero-normal boundary.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:arith-scalar} & inlined in \texttt{QTensor.rel2\_sub\_zero\_iff}'s entrywise closure\\
+Lemma \ref{lem:arith-tensor} & \texttt{QTensor.rel2\_sub\_zero\_iff}\\
+Lemma \ref{lem:arith-def-fold} & \texttt{Term.evalQ\_sub\_inv}\\
+Lemma \ref{lem:arith-def-unfold} & \texttt{QTensor.map2\_defined\_of\_rel2}\\
+Theorem \ref{thm:arith-sound}, fold & \texttt{sound\_arithAtom\_fold}\\
+Theorem \ref{thm:arith-sound}, unfold & \texttt{sound\_arithAtom\_unfold}; both wired as core \texttt{RuleData.arithAtom} into \texttt{ProofObject.sound}\\
+form equations, comparator gate & \texttt{atomicCompareForm}, \texttt{atomicCompareZero}; payload field \texttt{notNE} (\texttt{PArithAtomData})\\
+\end{anchors}

@@ -1,0 +1,51 @@
+\apilang{TypeScript}{spec.poSum / poInt / poDisc / poAvg / poSup / retPath / retFireCount}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function poSum(horizon: number, o: StateObservable): PathObservable
+
+export function poInt(horizon: QLike, o: StateObservable): PathObservable
+
+export function poDisc(o: StateObservable, rate: QLike): PathObservable
+
+export function poAvg(o: StateObservable): PathObservable
+
+export function poSup(o: StateObservable): PathObservable
+
+export function retPath(arg: PathPred): PathObservable
+
+export function retFireCount(trs: ReadonlyArray<number>): PathObservable
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const retLe = s.returnLe(100n, s.poInt(50n, s.oPoly(x0)));
+const discFloor = s.returnGe(-5n, s.poDisc(chanObs, Q.of(1, 10)));
+const countCeiling = s.returnLe(40n, s.retFireCount([0, 2]));
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::PathObservable::\{sum, int, disc, avg, sup, path, fire\_count\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn sum(horizon: u64, o: StateObservable) -> Result<PathObservable, Refusal>
+
+pub fn int(horizon: WitRat, o: StateObservable) -> Result<PathObservable, Refusal>
+
+pub fn disc(o: StateObservable, rate: WitRat) -> Result<PathObservable, Refusal>
+
+pub fn avg(o: StateObservable) -> PathObservable
+
+pub fn sup(o: StateObservable) -> PathObservable
+
+pub fn path(arg: PathPred) -> PathObservable
+
+pub fn fire_count(trs: Vec<u64>) -> Result<PathObservable, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let ret_le = ForallSpec::return_le(
+    q(100, 1),
+    PathObservable::int(q(50, 1), StateObservable::poly(x0())).unwrap(),
+);
+let disc_floor =
+    ForallSpec::return_ge(q(-5, 1), PathObservable::disc(chan_obs, q(1, 10)).unwrap());
+let count_ceiling =
+    ForallSpec::return_le(q(40, 1), PathObservable::fire_count(vec![0, 2]).unwrap());
+\end{rustsrc}

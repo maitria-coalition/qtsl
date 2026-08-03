@@ -1,0 +1,20 @@
+name = "double-cat"
+version = "0.1.0"
+defaultTargets = ["DoubleCat"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+[[lean_lib]]
+name = "DoubleCat"
+globs = ["DoubleCat", "DoubleCat.+"]
+
+[[lean_lib]]
+name = "AxiomReceipts"
+globs = ["AxiomReceipts"]
+

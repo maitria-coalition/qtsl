@@ -1,0 +1,104 @@
+# bindings.toml.d/PSDCertT.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'PSDCertT'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "checkT"
+sha256 = "b5fa219a1b56780a1da1424300d6272e302c47569e0e7f2f54c65eddb42fbf1a"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "conclCheck"
+sha256 = "a691d54b9a6bcf245cb0e968d998892034e93e220b1bcaadb2e377375b5a8945"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "conclCheckCore"
+sha256 = "1bf1ed9a93b3af6b445e2e13ec9c70822f40c701426180a09a8f6bc545e7c0f8"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "conclCheckW"
+sha256 = "b42fa998ef3f83e32ae827b95763a0cf33b8d21583c32371540087040fa89400"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "finQSum"
+sha256 = "b50be602d09a284b920fdb965acdde86c702060b4a6b57310cf80a573d130d4c"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "mulEntry"
+sha256 = "c9b97b5c2687b322462c850eefe9fa4f776379344a2e88ea69b0ae35823ff4c9"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "negQuadFormPoly"
+sha256 = "9897cf6134e4b13fd9d8eb174892749d7754bfed40180192fb22fab20a8c58bd"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "qabs"
+sha256 = "f336b697ce9349f1aa7b5d362cb35c08d6286f121a599ce69c28eaf441963d9c"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "qlsum"
+sha256 = "641ed7101857a5e3983c770c9e4098f3a1f4979562583145e98f3c4977096d15"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "symB"
+sha256 = "5ca9930b7de5d55ced6f735a1ede27d448daa45cbd421ff7c62c994371a193ab"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "upperTriPosDiagB"
+sha256 = "6837e1529c1c397a18f723faef1e3daa9383abdb652b4a1a4a91524136bd43f1"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "checkT_posDef"
+sha256 = "027a0b7f9a52a93cafd6df68eaadb71968148b5be40932cd9eec5278313f80cc"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "checkT_quadForm_nonneg"
+sha256 = "fb96b76587c3c49a9d9e79994a9290e808e9e055493d5f2468f3dca5a7e5709a"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "congruence_eq_diagonal"
+sha256 = "05e5919da70c82c292356266c349828b4b01a455110d4429f332f9286d25306e"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "posDef_of_congruence_posDef"
+sha256 = "47740f2e9b2c91f72818d07e4295672cf250c0be37f83368444946fc5e86078c"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "posDef_of_triangular_witness"
+sha256 = "021d7182df6dc93ae996ec6c8da97f04e8e9b359b224814a60459db190e55632"
+
+[[statement]]
+module = "Qtsl.PsdCert"
+decl = "quadForm_nonneg_of_posSemidef"
+sha256 = "7439064c3be6c28923c5198639ff9fb218a6b3c7d6b277c43754877b2111f155"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_psdCertOf"
+sha256 = "c941c160d4c4108170afaa0cf0e82b142b45d4142f0346a17a65a02ce505ab79"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_psdCertT"
+sha256 = "9e83668a0c1b48f4aba246820ffb2ebeb57f6867c33ced192dd1c8efc5ba2b0d"
+
+[[correspondence]]
+entry = "PSDCertT"
+steele_sha256 = "14bacfa296e43b6577b8fc1abb87d71be9fefbee29016d1a731b1896192a623e"
+statements_sha256 = "30ceb0c5d66103ef8b4f9b8fa640f1a3a581a41409257ff847155735b60da26d"
+prose_sha256 = "49582ead2838e82643990b4548c8a24892c5559d61b47073d15bc75da8766632"
+

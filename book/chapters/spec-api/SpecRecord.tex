@@ -1,0 +1,64 @@
+\apilang{TypeScript}{spec.build / spec.encode / spec.init}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export interface Spec {
+  readonly name?: string;
+  readonly forall?: ReadonlyArray<ForallSpec>;
+  readonly exists?: ReadonlyArray<ExistsSpec>;
+  readonly score?: ReadonlyArray<AttitudeSpec>;
+  readonly iface?: Iface;
+  readonly assume?: StatePred;
+  readonly slack?: Slack;
+}
+
+export function build(record: Spec): Result<Spec, SpecRefusal>
+
+export function encode(record: Spec): Result<Artifact, SpecRefusal>
+
+export function init(arg: StatePred): ForallSpec
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const art = s.unwrap(
+  s.encode({
+    name: "arbiter-liveness",
+    forall: [recur0, recur1],
+    iface: {
+      invars: [{ name: "u", shape: [] }],
+      outvars: [
+        { name: "grant0", shape: [] },
+        { name: "grant1", shape: [] },
+      ],
+    },
+    assume: s.polyLe(1n, s.unwrap(s.polyVar(0, 1))),
+  }),
+);
+\end{tssrc}
+\apiprov{The component families (\textsc{SInit} + the forall / exists / score lists) are driven end to end by the formers-tour vector (the same test file).}
+\apilang{Rust}{mtk\_catalogue::spec::Spec::builder}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs + crates/mtk-catalogue/src/spec/record.rs}}
+\begin{rustsrc}
+pub fn builder() -> SpecBuilder
+
+pub fn forall(mut self, f: ForallSpec) -> Self
+
+pub fn exists(mut self, e: ExistsSpec) -> Self
+
+pub fn score(mut self, h: AttitudeSpec) -> Self
+
+pub fn build(self) -> Result<Spec, Refusal>
+
+pub fn init(arg: StatePred) -> ForallSpec
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let spec = Spec::builder()
+    .forall(recur0)
+    .forall(recur1)
+    .name("arbiter-liveness")
+    .iface(iface)
+    .assume(assume)
+    .build()
+    .unwrap();
+\end{rustsrc}
+\apiprov{The component families (\textsc{SInit} + the forall / exists / score lists) are driven end to end by the formers-tour vector (the same test file).}

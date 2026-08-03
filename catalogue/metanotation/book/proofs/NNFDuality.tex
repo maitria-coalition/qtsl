@@ -1,0 +1,91 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template; the
+batch's shared template is Recipe 1 of the \rulename{StreettDegenerate}
+section. One divergence from the usual alias shape, stated up front:
+there is no single target \emph{rule}. The alias claim is per duality,
+and each duality's target is a definitional region-denotation equality,
+consumed wherever regions are cited.}
+
+\begin{brecipe}[the filled-in applications --- one equality per duality]
+\label{rec:nnf-filled}
+Over a state space $S$, with $[\![\cdot]\!]$ the region denotation of
+spec-surface formulas and $f : S \to \R$ ranging over atom left-hand
+sides:
+\[
+[\![\neg\neg\varphi]\!] = [\![\varphi]\!] ,\qquad
+[\![\neg(\varphi \wedge \psi)]\!] = [\![\neg\varphi \vee \neg\psi]\!] ,\qquad
+[\![\neg(\varphi \vee \psi)]\!] = [\![\neg\varphi \wedge \neg\psi]\!] ,
+\]
+\[
+[\![\neg\{f \le c\}]\!] = \{f > c\} ,\qquad
+[\![\neg\{f < c\}]\!] = \{f \ge c\} ,\qquad
+[\![\neg\{f \ge c\}]\!] = \{f < c\} ,\qquad
+[\![\neg\{f > c\}]\!] = \{f \le c\} .
+\]
+Each is a judgement-level $1 \to 1$ rewrite: a satisfaction judgement
+whose formula contains the left-hand side concludes identically with
+the right-hand side substituted, the certified region unchanged.
+\end{brecipe}
+
+\begin{brecipe}[payload transport]\label{rec:nnf-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{rewritten node} & \textbf{image}\\
+\midrule
+formula (one duality applied at one position) & formula (the dual form at that position)\\
+certified region, judgement kind, all rows & verbatim\\
+\end{tabular}
+\end{center}
+Unpack-function slot: no verified payload function in this edition (batch template) ---
+and here doubly moot, since no negation node is ever staged: the typing
+discipline rejects surviving negative literals, so the dualities exist
+to be applied \emph{before} any payload exists.
+\end{brecipe}
+
+\begin{bprop}[the exactness identities --- two lines each]
+\label{prop:nnf-exact}
+All seven displayed equalities hold.
+\end{bprop}
+\begin{proof}
+The propositional three are complement involution and De Morgan for
+sets. The atom four: pointwise over $S$, the negation of $f(y) \le c$ is
+$c < f(y)$ and the negation of $f(y) < c$ is $c \le f(y)$ --- the total
+order on $\R$ --- and the remaining two are the same facts read in the
+other orientation. (Machine-checked: the four atom swaps as set-level
+equalities, and the propositional three consumed from the ambient set
+library inside the normalization pass's denotation theorem; binding
+pending.)
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:nnf-sound}
+If $R \subseteq [\![\varphi]\!]$ and $\varphi'$ arises from $\varphi$ by
+one duality, then $R \subseteq [\![\varphi']\!]$; hence every
+satisfaction judgement transports across a duality unchanged, in both
+directions.
+\end{bprop}
+\begin{proof}
+Denotations are equal (Proposition~\ref{prop:nnf-exact}) and
+substitution at a position preserves equality of denotations by
+induction on the surrounding formula --- the induction \emph{is} the
+normalization pass's denotation-preservation theorem, whose cases are
+exactly the dualities, each applied once. That single-use structure is
+the precise sense in which each duality is ``stated once'': the equality
+is one definitional fact, and every application cites it.
+\end{proof}
+
+\begin{bremark}[what this rule deliberately does not say]
+The strict-atom swaps are \emph{denotation} facts; whether a strict
+inequality may appear in a concluded region atom is a different
+question, answered by the closure discipline (polarity-directed
+rounding) in its own catalogue rows. And the probability operator is
+absent from the display on purpose: a negated probability bound at even
+polarity is not rewritten but \emph{rejected} by the typing pass --- the
+polarity theorem of the \rulename{StreettRequestNNF} section is what
+makes that rejection a surface-level check.
+\end{bremark}
+
+\begin{anchors}
+atom swaps, both orientations & \texttt{compl\_le\_atom}, \texttt{compl\_lt\_atom}, \texttt{compl\_ge\_atom}, \texttt{compl\_gt\_atom} (\texttt{QtslAux.NNFDuality}; machine-checked, not hash-bound in this edition)\\
+Proposition \ref{prop:nnf-sound} induction & \texttt{denot\_nnfAux} (same module, not hash-bound in this edition)\\
+no wire object, by design & negation nodes are rejected by typing; producers rewrite before emission\\
+\end{anchors}

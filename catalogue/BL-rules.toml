@@ -1,0 +1,1015 @@
+# BL-rules.toml — the base-calculus rules source; one entry per deduction rule.
+#
+# PROVENANCE DISCIPLINE: `original` is David "davidad" Dalrymple's April
+# 2026 Bernstein Logic paper (in preparation, \S6-\S7), TeX verbatim --
+# never normalized. Empty `original` = no counterpart in the paper (the row
+# renders a gray marker on the left and a fully blue right column -- an
+# honest new-rule diff). `amended` is a rendering of the CURRENT
+# Lean realization (lean/qtsl/Qtsl/{Catalogue,Soundness}.lean) into the
+# same metanotation -- distilled, revisable.
+#
+# MARKS ARE DERIVED LIVE, never hand-maintained (2026-07-17,
+# src/marks.rs): each row declares which kernel `lemmas` warrant its check
+# mark, an optional `counterexample` (cross mark, or cross-then-check if
+# paired with lemmas -- the original staging was unsound, the amendment
+# repairs it), or `vacuous` (check with a bottom superscript -- sound only
+# because a pending ruling leaves the side-condition uninhabited). At every
+# render the tool runs `lake build` + `#print axioms` on every cited lemma
+# and refuses to emit a mark over anything outside the standard closure or
+# carrying a live sorryAx -- see src/doc.rs field docs for the full schema.
+# `note` is tool-voice annotation.
+#
+# 2026-07-18 resync (schema migrated from the
+# hand-maintained `marks`/`witness` strings of the 2026-07-16 print run to
+# the live-derivation schema above). The post-D3/D4 marks-flip: Norm (B13),
+# Farkas (B14), Subdivide (B11), the ReLU family + LiRPA (B12/B6 port-lookup
+# linkage), BernCone (now general, not just $S=\emptyset$), BernCone-Intv
+# (the Intv-transport theorem), and Cell-In-Interior/Cell-Out (B2b
+# witnessVertex + the CellIntDisjoint schema field) all went from
+# open/vacuous/staged-unsound to kernel-proven. Two new core rules
+# (EqRefl/EqSym, RATIFIED item 10, core count 12 -> 14) join the page. NOT
+# in this pass: the context-carrying $\vee$E ruling (9') is ratified but NOT
+# YET realized in Catalogue.lean (POrEData is still the plain form) -- the
+# $\vee$E row is schema-migrated but content-unchanged, correctly. Promise
+# and Syzygy (core count 14 -> 16, the AG composition layer) keep their
+# own page (AG-rules.toml, resynced 2026-07-18); the extraction
+# round-trip now counts that page's tagged rows via `rule_enum_also`
+# below, so `meta.rule_enum_check` is ON without pre-empting the
+# still-open decision on whether the AG layer folds into this page.
+#
+# 2026-07-18 taxonomy pass (ratified 2026-07-18; names ratified
+# ~11:5x): every rule row now carries `tier` — 1 = CORE rule (semantic
+# soundness; kernel content), 2 = ADMISSIBLE rule (verified unpacking into
+# core rules, 1 node → many — or, for PConstExact, reduction to verified
+# checking machinery), 3 = ALIAS rule (verified unpacking into a SINGLE
+# admissible-or-core rule application). The sp[Cell] axiom carries no tier
+# (not a proof rule). Two new rows (ratified per-rule 2026-07-18,
+# shipped in Lean at 1abc34a9d): PConstExact (tier 2, wire tag 27) and
+# PBound (tier 3 — the canonical alias, wire tag 28). Genuinely-arguable
+# sorts are FLAGGED in their notes rather than forced (EqRefl, EqSym,
+# plain ∨E post-swap); the audit doc carries the full argument table
+# (the admissible-rules audit, taxonomy addendum).
+#
+# 2026-07-18 retirement (design ruling: retire BernCone-Intv):
+# the BernCone-Intv row is REMOVED from this page (its
+# flagged retire-vs-alias question, resolved). Pre-first-production-byte,
+# so the retirement is free — no grandfathered wire tag, no fossil hole.
+# Rationale on record (D4 transport, 2026-07-16): an Intv certificate IS
+# an exact certificate — recomputation is hard-coded, no producer
+# enclosures ride the wire, so the rule carried zero wire savings;
+# round-down-then-check is checker-time evaluation strategy, not proof
+# content. The fast path folds into the BernCone checker as an
+# implementation branch (a noted follow-up). Lean-side removal (RuleTag
+# bernConeIntv + RuleData constructor, Catalogue.lean; sound_bernConeIntv
+# call site, Soundness.lean) LANDED with the post-wave-2 tidy,
+# 2026-07-18 (tag + RuleData + checker + wire chain + all dispatch arms
+# removed; the S8'' upward-transport lemma family retained for the
+# checker fast-path branch) — and meta.rule_enum_check is back ON.
+#
+# 2026-07-18 PSDCERT rows (design ruling: include all three
+# variants /T //DD //K; shipped in Lean with catalogue wave 2 — the
+# 12:35 log entry): three tier-2 premise-free rows below, hand-authored
+# from the shipped Core/Catalogue.lean payload inductives + Soundness
+# lemmas per the a8836 no-auto-scan finding. Wire tags deferred with
+# pConstExact/pBound (the payload-window allocation).
+#
+# 2026-08-02 fold: the composition rules (Promise, Syzygy, SmallGain,
+# SmallGainN, ProductLattice) are folded INTO this page from the former
+# AG-rules.toml -- resolving the fold decision left open above, in the
+# direction the 2026-07-28 design ruling had already fixed: these rules
+# are Bernstein Logic OUTRIGHT, with no intermediate "AG layer"
+# ("assume--guarantee" survives as purpose vocabulary, never as a layer
+# claim). Their rows carry over verbatim, strata renamed "AG layer:" ->
+# "BL composition:"; `rule_enum_also` is retired (the tagged rows now
+# live on this page); the standalone BL-AG-rules diff page is retired
+# with its file.
+#
+# Re-render: cd metanotation && cargo run --release   (emits + compiles out/)
+
+[meta]
+rule_enum_check = true
+title = "Bernstein Logic: the derivation rules, original \\(\\mid\\) amended"
+subtitle = "one deduction rule per row \\enspace\\(\\cdot\\)\\enspace \\textcolor{DiffRed}{red = only in the original} \\enspace\\(\\cdot\\)\\enspace \\textcolor{DiffBlue}{blue = only in the amendment} \\enspace\\(\\cdot\\)\\enspace soundness marks derived live, outer margin \\enspace\\(\\cdot\\)\\enspace resync + three-tier taxonomy 18 July 2026"
+legend = '''
+\textbf{How to read this document.}\enspace Left column: the rules exactly as the April 2026 paper states them (your TeX, verbatim), or a grey marker if the rule has no counterpart there. Right column: the same rules as they now stand in the Lean realization, rendered back into
+the same metanotation. Red text on the left is absent from the right; blue text on the
+right is absent from the left; black is shared. Margin marks, outer page edge, DERIVED
+LIVE at every render:
+\cmark\ = a machine-checked soundness lemma covers the rule (kernel-replayed, axiom
+closure within propext/Classical.choice/Quot.sound, no live sorry);
+\xmark\ = the rule \emph{as originally staged} is disproven by a concrete counterexample;
+\xmark$\,\to\,$\cmark\ = the original staging was unsound and the amendment repairs it.
+A scope tag on a check means proven for that fragment only -- \(\bot\) means the rule is
+\emph{vacuously} sound because a pending ruling leaves its side-condition uninhabited (it
+currently rejects every certificate). No mark = soundness open (the v1 frontier). Grey
+small print is the tool's voice, not the paper's.
+
+\textbf{The three-tier taxonomy} (your ruling, 18 July 2026): each rule head carries its
+tier --- \textbf{core rule} = kernel content, soundness is semantic (proven against the
+model, not by unpacking); \textbf{admissible rule} = verified unpacking into core rules
+(one node unpacks to a derivation, or reduces to already-verified checking machinery);
+\textbf{alias rule} = verified unpacking into a \emph{single} admissible-or-core rule
+application (a compact spelling; \rulename{PBound} is the canonical case). The
+\(\sp[\Cell]\) axiom carries no tier (not a proof rule). Where a sort is genuinely
+arguable the row's note says so with the argument, rather than forcing it.
+'''
+colophon = '''
+\textbf{Provenance and verification.}\enspace Original: the upstream design paper (not included in this repository), \S6--\S7 (12 core rules, the
+admissible catalogue, the derived \rulename{ReLU-Split}, and the \(\sp[\Cell]\) axiom the
+cell rules ride). Amended: \texttt{lean/qtsl/Qtsl/\{Catalogue,Soundness\}.lean} -- the
+current realization, including several PROPOSED payload fields (B2, B5, B6/B12, B10,
+B11, B13, B14) that remain approval-gated pending your ruling even where their soundness
+lemma is already kernel-proven; builds proceed against them revisably (per-row notes flag
+which). Every check mark on this page is re-derived at render time, not hand-maintained:
+the tool runs \texttt{lake build} + \texttt{\#print axioms} on each row's cited lemmas and
+refuses to render a mark over anything outside the standard closure \([\)propext,
+Classical.choice, Quot.sound\(]\) or carrying a live \texttt{sorryAx} -- see the
+timestamp/tree stamp below this paragraph. Counterexamples cite \texttt{Soundness.lean}'s
+header inventory. This page is generated: the source of truth is
+\texttt{metanotation/rules.toml}; re-run \texttt{qtsl-rules} to re-render.
+'''
+
+# ============================ core rules ============================
+
+[[rule]]
+name = "Ax"
+stratum = "propositional"
+tier = 1
+tag = "ax"
+lemmas = ["sound_ax"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Ax}]{\;}{\Phi \vdash \Phi}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Ax}]{\;}{\Phi \vdash \Phi}
+\end{mathpar}
+'''
+
+[[rule]]
+name = "Weaken"
+stratum = "propositional"
+tier = 1
+tag = "weaken"
+lemmas = ["sound_weaken"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Weaken}]{\Phi \vdash \Psi}{\Phi \wedge \chi \vdash \Psi}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Weaken}]{\Phi \vdash \Psi}{\Phi \wedge \chi \vdash \Psi}
+\end{mathpar}
+'''
+
+[[rule]]
+name = "Cut"
+stratum = "propositional"
+tier = 1
+tag = "cut"
+lemmas = ["sound_cut"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Cut}]{\Phi \vdash \chi \\ \Phi \wedge \chi \vdash \Psi}{\Phi \vdash \Psi}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Cut}]{\Phi \vdash \chi \\ \Phi \wedge \chi \vdash \Psi}{\Phi \vdash \Psi}
+\end{mathpar}
+'''
+
+[[rule]]
+name = "$\\wedge$I"
+stratum = "propositional"
+tier = 1
+tag = "andI"
+lemmas = ["sound_andI"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=$\wedge$I]{\Phi \vdash \Psi_1 \\ \Phi \vdash \Psi_2}{\Phi \vdash \Psi_1 \wedge \Psi_2}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=$\wedge$I]{\Phi \vdash \Psi_1 \\ \Phi \vdash \Psi_2}{\Phi \vdash \Psi_1 \wedge \Psi_2}
+\end{mathpar}
+'''
+
+[[rule]]
+name = "$\\wedge$E"
+stratum = "propositional"
+tier = 1
+tag = "andE"
+lemmas = ["sound_andE_left", "sound_andE_right"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=$\wedge$E]{\Phi \vdash \Psi_1 \wedge \Psi_2}{\Phi \vdash \Psi_i}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=$\wedge$E]{\Phi \vdash \Psi_1 \wedge \Psi_2}{\Phi \vdash \Psi_i}
+\end{mathpar}
+'''
+note = 'Realized as two constructors (left/right), matching the geolog \texttt{which : 2 Index} flag; same statement.'
+
+[[rule]]
+name = "$\\vee$I"
+stratum = "propositional"
+tier = 1
+tag = "orI"
+lemmas = ["sound_orI_left", "sound_orI_right"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=$\vee$I]{\Phi \vdash \Psi_i}{\Phi \vdash \Psi_1 \vee \Psi_2}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=$\vee$I]{\Phi \vdash \Psi_i}{\Phi \vdash \Psi_1 \vee \Psi_2}
+\end{mathpar}
+'''
+
+[[rule]]
+name = "$\\vee$E"
+stratum = "propositional"
+tier = 1
+tag = "orE"
+lemmas = ["sound_orE"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=$\vee$E]{\Phi_1 \vdash \Psi \\ \Phi_2 \vdash \Psi}{\Phi_1 \vee \Phi_2 \vdash \Psi}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=$\vee$E]{\Phi_1 \vdash \Psi \\ \Phi_2 \vdash \Psi}{\Phi_1 \vee \Phi_2 \vdash \Psi}
+\end{mathpar}
+'''
+note = 'Realized exactly as printed — and the printed form cannot reach the worked example\textquotesingle s own case-split (the sp-$\Cell$ disjunction sits inside a conjunction, and the core has no restructuring rules; the paper\textquotesingle s prose and its completeness sketch both use the stronger form). RULING 9\textquotesingle{} (2026-07-16): the context-carrying form IS the core rule; \texttt{sound\_orECtx} is proven (satellite, \texttt{Admissible.lean}), the core constructor swap is scheduled (post-D3 anneal). TIER NOTE: ctx-$\vee$E is core by theorem, not just ruling — \texttt{orECtx\_not\_elaborable} refutes any elaboration into the pre-ctx core (M$_3$ countermodel). Once the swap ships, THIS printed plain form becomes an alias rule of ctx-$\vee$E (the $\pi = \mathrm{here}$ case, \texttt{OrECtxStep.elabHere} — a verified 1-node unpack).'
+
+[[rule]]
+name = "EqElim"
+stratum = "equality"
+tier = 1
+tag = "eqElim"
+lemmas = ["sound_eqElim"]
+counterexample = 'counterexample: the broadcast equality $3/2 = [3/2]$ rewrites a region atom into an unsatisfiable conclusion from a satisfiable premise (\texttt{Soundness.lean} header)'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{EqElim}]{\Phi \vdash t = u \\ \Phi \vdash \Psi\sub{a}{t}}{\Phi \vdash \Psi\sub{a}{u}}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{EqElim}]{\Phi \vdash t = u \\ \Phi \vdash \Psi\sub{a}{t} \\ \exists s.\; \bshape_H(t) = s = \bshape_H(u)}{\Phi \vdash \Psi\sub{a}{u}}
+\end{mathpar}
+'''
+note = 'The new premise is the PROPOSED-B13 \texttt{tyEq} payload field: the equation\textquotesingle s sides carry a common broadcast shape in the hypernet ($\bshape_H$ is the realized broadcast-shape function on terms). Without it, Leibniz substitution across a scalar-to-vector broadcast equality is unsound in region contexts — the equality holds without the terms being interchangeable.'
+
+[[rule]]
+name = "EqRefl"
+stratum = "equality structure (RATIFIED item 10, 2026-07-16)"
+tier = 1
+tag = "eqRefl"
+lemmas = ["sound_eqRefl"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{EqRefl}]{\exists s.\; \bshape_H(t) = s \\ \wires(t) \text{ finitely typed in } H}{\Phi \vdash t = t}
+\end{mathpar}
+'''
+note = 'New core rule (item 10; core count 12 $\to$ 14): reflexivity as a first-class rule rather than an assumed fact, needed because \texttt{Term} equality is by evaluation and an ill-typed or $\infty$-valued term can fail to self-evaluate under the semantics (\rulename{Norm}\textquotesingle s B13 lesson, generalized) — the well-typedness premises are exactly what keeps \rulename{EqRefl} from asserting $\bot \vdash t = t$ vacuously. No counterpart in the April paper (the appendix used reflexivity informally); wire tag 23, BINARY.md \S4. TIER FLAG (arguable): to the extent every \texttt{Term} canonicalizes, \rulename{EqRefl} coincides with \rulename{Norm}\textquotesingle s diagonal $t_1 = t_2 = t$ — an alias-shaped single-node unpack; sorted core as RATIFIED, and the v0 fragment (which excludes \rulename{Norm} outright) needs it to stand alone regardless.'
+
+[[rule]]
+name = "EqSym"
+stratum = "equality structure (RATIFIED item 10, 2026-07-16)"
+tier = 1
+tag = "eqSym"
+lemmas = ["sound_eqSym"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{EqSym}]{\Phi \vdash t = u}{\Phi \vdash u = t}
+\end{mathpar}
+'''
+note = 'New core rule (same ratification): the flipped orientation, previously reachable only by re-deriving through \rulename{EqElim} against an $x = t \to x = u$ template. An earlier R2 alternative (an orientation-flag field bolted onto the existing equality rules) was retired un-built in favour of this free-standing constructor. No counterpart in the April paper; wire tag 24. TIER FLAG (arguable): the \rulename{EqRefl}+\rulename{EqElim} unpack is two nodes (admissible-shaped, not alias) and only goes through where the well-typedness side data is syntactically available — the obstruction that motivated the primitive constructor; sorted core as RATIFIED.'
+
+[[rule]]
+name = "ConvElim"
+stratum = "region atoms"
+tier = 1
+tag = "convElim"
+lemmas = ["sound_convElim"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ConvElim}]{
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+}{
+  \Phi \vdash \textstyle\bigwedge_{i \in S} \lambda_i(x) \leq 0 \;\wedge\; \bigwedge_{i \in \bar S} \lambda_i(x) \geq 0
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ConvElim}]{
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+}{
+  \Phi \vdash \textstyle\bigwedge_{i = 0}^{n} \mathrm{canon}(\epsilon_i\,\lambda_i(x)) \leq 0 \\ \epsilon_i \,=\, {+1} \text{ if } i \in S, \quad {-1} \text{ if } i \in \bar S
+}
+\end{mathpar}
+'''
+note = 'Same content; the realized conjunction is flat, in support-vertex order (one atom per $\lambda_i$), ALL-$\leq$: the complement vertex\textquotesingle s wanted $\lambda_i \geq 0$ is sign-folded into the term, because the calculus has no $\leq/\geq$ flip rule and a $\geq$-atom would connect to nothing (producer finding F4, adopted 2026-07-18, superseding leg C\textquotesingle s mixed-polarity offset-first convention this cell previously displayed — the wave-1 cell-vs-realization polarity drift, resynced in review). $\mathrm{canon}$ is the primitive-integer positive rescale with degree-sorted atom body $s^{\prime}\!\cdot x + c^{\prime}$, constant dropped when zero. Witness: \texttt{f4VertexAtom}/\texttt{f4Lhs}/\texttt{primAffine}/\texttt{barycentricHalfspaceBuild}, \texttt{Core/Catalogue.lean}; emitter and wire format share it.'
+
+[[rule]]
+name = "ConvIntro"
+stratum = "region atoms"
+tier = 1
+tag = "convIntro"
+lemmas = ["sound_convIntro"]
+counterexample = 'counterexample: \rulename{Ax} on the barycentric conjunction at $t := 3/2$ over $\Delta = \mathrm{conv}(1,2)$ derives $\vdash (3/2 : \mathrm{Term}) \in \Delta$, false at every valuation (\texttt{Soundness.lean} header)'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ConvIntro}]{
+  \Phi \vdash \textstyle\bigwedge_{i \in S} \lambda_i(x) \leq 0 \;\wedge\; \bigwedge_{i \in \bar S} \lambda_i(x) \geq 0
+}{
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ConvIntro}]{
+  \Phi \vdash \textstyle\bigwedge_{i = 0}^{n} \mathrm{canon}(\epsilon_i\,\lambda_i(x)) \leq 0 \\ \epsilon_i \,=\, {+1} \text{ if } i \in S, \ {-1} \text{ if } i \in \bar S \\ \bshape_H(x) = [\,n\,]
+}{
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+}
+\end{mathpar}
+'''
+note = 'The shape premise is the PROPOSED-B13 \texttt{termShape} field (with the B1 shape fix): the region term is a rank-1 tensor of extent $n$ — geolog\textquotesingle s \texttt{ax/wf/FInRegion\_shape} restored at the introduction rule. Without it a scalar-termed region conclusion is derivable while semantically unsatisfiable. The premise conjunction is the same all-$\leq$ sign-folded F4 form as \rulename{ConvElim}\textquotesingle s conclusion (one \texttt{barycentricHalfspaceForm}, consumed here, produced there — the polarity resync applies to both cells at once).'
+
+[[rule]]
+name = "ArithAtom"
+stratum = "atomic-formula arithmetic"
+tier = 1
+tag = "arithAtom"
+lemmas = ["sound_arithAtom_fold", "sound_arithAtom_unfold"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ArithAtom}]{
+  \Phi \vdash (t_1 - t_2) \bowtie 0
+}{
+  \Phi \vdash t_1 \bowtie t_2
+}
+\\
+\inferrule*[Right=\rulename{ArithAtom}$^{-1}$]{
+  \Phi \vdash t_1 \bowtie t_2
+}{
+  \Phi \vdash (t_1 - t_2) \bowtie 0
+}
+\end{mathpar}
+with $\bowtie \in \{<, \leq, =, \geq, >\}$.
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ArithAtom}]{
+  \Phi \vdash (t_1 - t_2) \bowtie 0
+}{
+  \Phi \vdash t_1 \bowtie t_2
+}
+\\
+\inferrule*[Right=\rulename{ArithAtom}$^{-1}$]{
+  \Phi \vdash t_1 \bowtie t_2
+}{
+  \Phi \vdash (t_1 - t_2) \bowtie 0
+}
+\end{mathpar}
+with $\bowtie \in \{<, \leq, =, \geq, >\}$.
+'''
+note = 'Identical to your statement — the amendment is against the Lean \emph{appendix}, not the paper: the appendix\textquotesingle s staging let $\bowtie$ range over all six comparators including $\neq$; the realized payload carries an explicit $\bowtie \neq {\neq}$ field (PROPOSED-B5), restoring the paper\textquotesingle s set. ($\neq$ stays in the formula grammar; it is excluded from this rule.)'
+
+[[rule]]
+name = "BernCone"
+stratum = "the arithmetic-closure primitive"
+tier = 1
+tag = "bernCone"
+lemmas = ["sound_bernCone"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{BernCone}]{
+  \Delta = \mathrm{conv}(V_0, \ldots, V_n) \subset \R^n \text{ an } n\text{-simplex};
+  \quad S \subsetneq \{0, 1, \ldots, n\}
+  \\
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+  \\
+  p \colon \R^n \to W \text{ polynomial map of degree } d, \text{ with coefficient tensor } (b_\alpha)_{|\alpha|=d}
+  \\
+  P \text{ conic predicate on } W \text{ (satisfying set is a convex cone)}
+  \\
+  \text{for every } j \in \N^S \text{ with } |j| \leq d, \text{ every degree-}d \text{ Bernstein coefficient of } P_j \text{ on } F_S \text{ satisfies } P
+}{
+  \Phi \vdash P(p(x))
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{BernCone}]{
+  \Delta = \mathrm{conv}(V_0, \ldots, V_n) \subset \R^n \text{ an } n\text{-simplex};
+  \quad S \subsetneq \{0, 1, \ldots, n\}
+  \\
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+  \\
+  p \colon \R^n \to W \text{ polynomial map of degree } d, \text{ with coefficient tensor } (b_\alpha)_{|\alpha|=d}
+  \\
+  \wires(p) = \emptyset \;\vee\; \bigl(x = w \,\wedge\, \wires(p) \subseteq \{w\}\bigr)
+  \\
+  S \neq \emptyset \Rightarrow P \text{ conic}; \qquad S = \emptyset \Rightarrow P \text{ convex suffices}
+  \\
+  \text{for every } j \in \N^S \text{ with } |j| \leq d, \text{ every degree-}d \text{ Bernstein coefficient of } P_j \text{ on } F_S \text{ satisfies } P
+}{
+  \Phi \vdash P(p(x))
+}
+\end{mathpar}
+'''
+note = 'Two amendments. (i) \texttt{polyTie} (PROPOSED-B10, consult item 12): nothing in the frozen signature tied the checked polynomial\textquotesingle s wire to the region variable — as staged, a certificate could prove its region fact about one wire and run the coefficient check on a polynomial over a different one. Constant polynomials need no tie. (ii) The predicate premise\textquotesingle s two-clause form moves the paper\textquotesingle s own prose license ($S = \emptyset$ admits any convex predicate) from Setup text into the rule. The checker recomputes every forward-difference coefficient — no coefficient tensors ride the wire. \texttt{sound\_bernCone} is now general (leg D3, 2026-07-16): the empty-$S$ case goes through the convex kernel as before, and $S \neq \emptyset$ closes via two new kernels (\texttt{fdBernstein\_sound\_const}, any dimension; \texttt{fdBernstein\_sound\_dim1}, the $(1,1)$ extension ray) — exhaustive because the coefficient check\textquotesingle s own scope guard rejects coordinate polynomials over ambient dimension $\neq 1$. The fully general-shape \texttt{ConeLemma.StarIdentity} route stays open (v1; binds only if that scope guard lifts) but no longer gates the rule\textquotesingle s own soundness.'
+
+# ============================ sp-axiom ============================
+
+[[rule]]
+name = "sp[$\\Cell[\\Sigma]$]"
+stratum = "sp-axiom (not a proof rule; what the cell rules ride)"
+witness = 'M4 one-hot revision — consult item 2 (justification corrected since the morning print run); approval-gated, realized provisionally'
+original = '''
+\[
+\sp[\Cell[\Sigma]] \;=\; \bigvee_{i=1}^N \left( a \in \overline{C_i} \;\wedge\; b_i = 1 \;\wedge\; \bigwedge_{j : a \notin \overline{C_j}} b_j = 0 \right)
+\]
+'''
+amended = '''
+\[
+\sp[\Cell[\Sigma]] \;=\; \bigvee_{i=1}^N \left( a \in \overline{C_i} \;\wedge\; b_i = 1 \;\wedge\; \bigwedge_{j \neq i} b_j = 0 \right)
+\]
+'''
+note = 'The tabulated form retains double-hot valuations at shared boundaries (two indicators both 1), contradicting the paper\textquotesingle s own boundary semantics three ways: the boundary set at a shared face is exactly the one-hot set $\{e_i, e_j\}$; admissible valuations come one per cell-choice; and the Cell-Split derivation requires every other indicator zero. One-hot pins interior points to a unique valuation and gives boundary points exactly the one-hot set the hemicontinuous semantics wants. No downstream consumer of the slack was found.'
+
+# ============================ admissible rules ============================
+
+[[rule]]
+name = "Norm"
+stratum = "unpacks via BernCone + ArithAtom"
+tier = 2
+tag = "norm"
+lemmas = ["sound_norm"]
+counterexample = 'counterexample (as originally staged, no well-typedness premise): at an $\infty$-valued ext-dtype wire even $\vdash t = t$ is unsatisfiable — the atom never evaluates (\texttt{Soundness.lean} \S S9)'
+original = '''
+\rulename{Norm}: $\Phi \vdash t_1 = t_2$ whenever $t_1, t_2$ are polynomial terms in the same variables with equal monomial canonical forms over $\Q$.
+'''
+amended = '''
+\rulename{Norm}: $\Phi \vdash t_1 = t_2$ whenever $t_1, t_2$ are polynomial terms in the same variables with equal monomial canonical forms over $\Q$, with $\bshape_H(t_1) = \bshape_H(t_2) \neq \bot$ (a shared defined broadcast shape) and $\wires(t_1), \wires(t_2)$ all finitely typed in $H$.
+'''
+note = 'PROPOSED-B13-Norm realized (leg D3, 2026-07-16): the payload gains \texttt{tyEq}/\texttt{tyDef}/\texttt{finL}/\texttt{finR} — both sides share a defined broadcast shape and are finitely typed. \texttt{sound\_norm} follows by per-entry evaluation at the common shape plus literal equality of canonical polynomials; the former false-as-staged residual is gone. Display resynced to carry the typing pack inline (roster-resync; witness \texttt{PNormData}, \texttt{Core/Catalogue.lean} — the wave\textquotesingle s reviewer had exhibited the extended-dtype falsifier of the bare display as read).'
+
+[[rule]]
+name = "Farkas"
+stratum = "unpacks via BernCone at $d=1$"
+tier = 2
+tag = "farkas"
+lemmas = ["sound_farkas"]
+counterexample = 'counterexample (as originally staged, no positive-size premise): a conclusion mentioning an untyped or zero-size wire has a correct \texttt{toPoly} but never evaluates, or evaluates vacuously — a Farkas combination of two vacuously-true atoms at a zero-size wire can derive $\vdash 2 \leq 0$ from a satisfiable premise (\texttt{Soundness.lean} header)'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Farkas}]{
+  \{\ell_j \bowtie_j 0\}_j \text{ a sub-conjunction of } \Phi \text{ with each } \ell_j \text{ linear, } \bowtie_j \in \{\leq, =\} \\
+  \{\lambda_j \in \Q_{\geq 0}\}_j \text{ nonneg coefficients, with } \lambda_j \text{ free when } \bowtie_j \text{ is } {=}
+}{
+  \Phi \vdash \textstyle\sum_j \lambda_j \ell_j \leq 0
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Farkas}]{
+  \{\ell_j \bowtie_j 0\}_j \text{ a sub-conjunction of } \Phi \text{ with each } \ell_j \text{ linear, } \bowtie_j \in \{\leq, =\} \\
+  \{\lambda_j \in \Q_{\geq 0}\}_j \text{ nonneg coefficients, with } \lambda_j \text{ free when } \bowtie_j \text{ is } {=} \\
+  \bshape_H(\textstyle\sum_j \lambda_j \ell_j) \neq \bot \\
+  \wires(\textstyle\sum_j \lambda_j \ell_j) \text{ all finitely typed in } H \\
+  \wires(\Phi) \cup \wires(\textstyle\sum_j \lambda_j \ell_j) \text{ all typed at positive-size shapes in } H
+}{
+  \Phi \vdash \textstyle\sum_j \lambda_j \ell_j \leq 0
+}
+\end{mathpar}
+'''
+note = 'PROPOSED-B14 realized (leg D3, 2026-07-16): \texttt{PFarkasData.wiresPos} — every premise and conclusion wire typed at a positive-size shape (rules out the zero-size vacuous-atom counterexample). With the field, \texttt{sound\_farkas} is proven at ALL tensor shapes, heterogeneous premise atoms included — the clamped per-entry valuation carries the nonnegative-combination argument entrywise. The former singleton-only \texttt{sound\_farkas\_singleton} is superseded and removed; the v0 fragment\textquotesingle s additional shape-$[]$-or-$[1]$ restriction is a proof-availability choice, not a soundness gap. Display resynced to carry the positive-size row inline (roster-resync; witness \texttt{PFarkasData.wiresPos} over \texttt{seq.pre.freeWires ++ conclusion.freeWires}, \texttt{Core/Catalogue.lean} — the wave\textquotesingle s reviewer had refuted the bare display with the $[0]$-shaped vacuous-atom fold).'
+
+[[rule]]
+name = "Subdivide"
+stratum = "unpacks via Farkas + $\\vee$E + Cut"
+tier = 2
+tag = "subdivide"
+lemmas = ["sound_subdivide"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Subdivide}]{
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+  \\
+  \{(\Delta_k, S_k)\}_{k=1}^N \text{ finite, with cover side-condition } \mathcal{R}(\Delta, S) \subseteq \textstyle\bigcup_k \mathcal{R}(\Delta_k, S_k)
+  \\
+  \forall k.\; \Phi \;\wedge\; (x \in \mathcal{R}(\Delta_k, S_k)) \;\vdash\; \Psi
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Subdivide}]{
+  \Phi \vdash x \in \mathcal{R}(\Delta, S)
+  \\
+  \{(\Delta_k, S_k)\}_{k=1}^N \text{ finite, with cover side-condition } \mathcal{R}(\Delta, S) \subseteq \textstyle\bigcup_k \mathcal{R}(\Delta_k, S_k)
+  \\
+  \forall k.\; \Phi \;\wedge\; (x \in \mathcal{R}(\Delta_k, S_k)) \;\vdash\; \Psi
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+note = 'Statement unchanged. B11 realized (consult item 13, ENDORSED 2026-07-16; shipped same day): \texttt{coverInfeasibilityValid} now receives the subdivide node itself in place of the bare branch count, so the checker can finally see the branch-region family and check the cover it exists to check. \texttt{sound\_subdivide} is proven — the former sound-vacuous ($\False$, every certificate rejected) realization is retired. \rulename{Subdivide} is essential for every non-toy proof — degree escalation\textquotesingle s partner.'
+
+[[rule]]
+name = "LiRPA"
+stratum = "unpacks via Subdivide + ReLU-Pos/Neg + BernCone at $d=1$"
+tier = 2
+tag = "lirpa"
+lemmas = ["sound_lirpa"]
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{LiRPA}]{
+  \Phi \vdash a \leq h \\
+  \Phi \vdash h \leq b \\
+  a < 0 \\
+  0 < b \\\\
+  \alpha a + \beta \leq 0 \\
+  \beta \leq 0 \\
+  \alpha b + \beta \leq b \\\\
+  0 \leq \gamma a + \delta \\
+  0 \leq \delta \\
+  b \leq \gamma b + \delta
+}{
+  \Phi \vdash (\alpha h + \beta) \leq \ReLU(h) \;\wedge\; \ReLU(h) \leq (\gamma h + \delta)
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{LiRPA}]{
+  \Phi \vdash a \leq h \\
+  \Phi \vdash h \leq b \\
+  \ReLU_{\{h\}\to\{y\}} \in H \\
+  a < 0 \\
+  0 < b \\\\
+  \alpha a + \beta \leq 0 \\
+  \beta \leq 0 \\
+  \alpha b + \beta \leq b \\\\
+  0 \leq \gamma a + \delta \\
+  0 \leq \delta \\
+  b \leq \gamma b + \delta
+}{
+  \Phi \vdash (\alpha h + \beta) \leq y \;\wedge\; y \leq (\gamma h + \delta)
+}
+\end{mathpar}
+'''
+note = 'Two amendments to the printed rule. (i) The realized term grammar has no $\ReLU$ symbol: the conclusion speaks of the ReLU application\textquotesingle s output wire $y$, and a linkage premise replaces the function symbol. (ii) That linkage, \texttt{reluLinked}, resolved B12/B6 (the review F20 fix, adopted 2026-07-16): with ReLU realized as a packaged signature symbol, linkage collapses from a pattern-match over a three-node composite to port lookup on a single application — one line, decidable, kernel-reducible, sound against the projection lemma \texttt{relu\_projection}. \texttt{sound\_lirpa} is proven; the former \texttt{PLiRPAData.false\textquotesingle} vacuous realization is retired. The eight arithmetic premises match geolog\textquotesingle s listing (its own prose comment undercounts them at six).'
+
+[[rule]]
+name = "ReLU-Pos"
+stratum = "unpacks via sp + ctx-$\\vee$E + EqElim"
+tier = 2
+tag = "reluPos"
+lemmas = ["sound_reluPos"]
+original = '''
+\rulename{ReLU-Pos}: If $\Phi \vdash h \geq 0$, then $\Phi \vdash \ReLU(h) = h$.
+'''
+amended = '''
+\rulename{ReLU-Pos}: If $\Phi \vdash h \geq 0$ and $\ReLU_{\{h\}\to\{y\}} \in H$, then $\Phi \vdash y = h$.
+'''
+note = 'The whole ReLU family carries the \texttt{reluLinked} port-lookup premise (B12/B6, resolved 2026-07-16 — see the \rulename{LiRPA} row) and speaks of the output wire $y$ rather than the function expression $\ReLU(h)$. \texttt{sound\_reluPos} is proven; the former \texttt{PReLUPosData.false\textquotesingle} vacuous realization is retired.'
+
+[[rule]]
+name = "ReLU-Neg"
+stratum = "unpacks via sp + ctx-$\\vee$E + EqElim"
+tier = 2
+tag = "reluNeg"
+lemmas = ["sound_reluNeg"]
+original = '''
+\rulename{ReLU-Neg}: If $\Phi \vdash h \leq 0$, then $\Phi \vdash \ReLU(h) = 0$.
+'''
+amended = '''
+\rulename{ReLU-Neg}: If $\Phi \vdash h \leq 0$ and $\ReLU_{\{h\}\to\{y\}} \in H$, then $\Phi \vdash y = 0$.
+'''
+note = '\texttt{sound\_reluNeg} is proven (B12/B6 port-lookup linkage, see the \rulename{LiRPA} row); the former \texttt{PReLUNegData.false\textquotesingle} vacuous realization is retired.'
+
+[[rule]]
+name = "ReLU-NN"
+stratum = "unpacks via sp + ctx-$\\vee$E + EqElim"
+tier = 2
+tag = "reluNN"
+lemmas = ["sound_reluNN"]
+original = '''
+\rulename{ReLU-NN}: $\Phi \vdash \ReLU(h) \geq 0$ for any $h$.
+'''
+amended = '''
+\rulename{ReLU-NN}: If $\ReLU_{\{h\}\to\{y\}} \in H$, then $\Phi \vdash y \geq 0$.
+'''
+note = 'The appendix\textquotesingle s payload named only the output wire; \texttt{reluLinked} names the preactivation too (geolog names it in prose: \textquotedblleft$b = \ReLU(h)$ for some $h$\textquotedblright). \texttt{sound\_reluNN} is proven; the former vacuous realization is retired.'
+
+[[rule]]
+name = "ReLU-Above"
+stratum = "unpacks via sp + ctx-$\\vee$E + EqElim"
+tier = 2
+tag = "reluAbove"
+lemmas = ["sound_reluAbove"]
+original = '''
+\rulename{ReLU-Above}: $\Phi \vdash \ReLU(h) \geq h$ for any $h$.
+'''
+amended = '''
+\rulename{ReLU-Above}: If $\ReLU_{\{h\}\to\{y\}} \in H$, then $\Phi \vdash y \geq h$.
+'''
+note = '\texttt{sound\_reluAbove} is proven (B12/B6 port-lookup linkage, see the \rulename{LiRPA} row); the former \texttt{PReLUAboveData.false\textquotesingle} vacuous realization is retired.'
+
+[[rule]]
+name = "Cell-In-Interior"
+stratum = "unpacks via sp[$\\Cell$] + ctx-$\\vee$E + EqElim"
+tier = 2
+tag = "cellInInterior"
+lemmas = ["sound_cellInInterior"]
+original = '''
+\rulename{Cell-In-Interior}: If $\Phi \vdash x \in \mathring{C_i}$ (the strict interior of the $i$-th cell of $\Sigma$, expressed as a conjunction of strict linear inequalities), then $\Phi \vdash \Cell_i[\Sigma](x) = 1$ and $\Phi \vdash \Cell_j[\Sigma](x) = 0$ for $j \neq i$.
+'''
+amended = '''
+\rulename{Cell-In-Interior}: If $\Phi \vdash \bigwedge_{v} \lambda^{C_i}_v(x) \bowtie^{\circ}_v 0$ (strict barycentric interior atoms, flat vertex order; $<$ for extended $v$, $>$ for core $v$) and $\Cell[\Sigma]_{\{x\}\to\{b_1,\ldots,b_N\}} \in H$, then $\Phi \vdash b_i = 1 \wedge \bigwedge_{j \neq i} b_j = 0$.
+'''
+note = 'PROPOSED-B2 completes the conclusion encoding both sources marked \textquotedblleft omitted\textquotedblright, under the one-hot sp[$\Cell$] revision; the payload unpacks the cell application and adds explicit membership in $H$. \texttt{sound\_cellInInterior} is proven (leg D4, 2026-07-16, \S S8\textquotesingle\textquotesingle\textquotesingle): Cell-In-Interior forces the model\textquotesingle s cell choice through the NEW schema well-formedness \texttt{SimpC.CellIntDisjoint} — distinct cells of the enumeration have disjoint interiors — PROPOSED-B2-DISJOINT, approval-gated, realized provisionally; without it the model could one-hot a different overlapping cell. Barycentric builders are 1-D scope for now (decision D2).'
+
+[[rule]]
+name = "Cell-Out"
+stratum = "unpacks via sp[$\\Cell$] + ctx-$\\vee$E + EqElim"
+tier = 2
+tag = "cellOut"
+lemmas = ["sound_cellOut"]
+original = '''
+\rulename{Cell-Out}: If $\Phi \vdash x \notin \overline{C_j}$ (the complement of the $j$-th cell\textquotesingle s closure, expressed as a disjunction of strict linear inequalities), then $\Phi \vdash \Cell_j[\Sigma](x) = 0$. Applies even at boundary points.
+'''
+amended = '''
+\rulename{Cell-Out}: If $\Phi \vdash \lambda^{C_j}_w(x) \bowtie^{\circ} 0$ (a single strict separating atom at a named witness vertex $w$ of $C_j$; $>$ for extended $w$, $<$ for core $w$) and $\Cell[\Sigma]_{\{x\}\to\{b_1,\ldots,b_N\}} \in H$, then $\Phi \vdash b_j = 0$. Applies even at boundary points.
+'''
+note = 'The paper\textquotesingle s not-in-closure premise has no rendering in the negation-free formula grammar; the amendment serializes a witness instead — \emph{which} halfspace is strictly violated, at \emph{which} vertex. One atom replaces the disjunction. \texttt{sound\_cellOut} is proven (leg D4, 2026-07-16, \S S8\textquotesingle\textquotesingle\textquotesingle): Cell-Out refutes the model\textquotesingle s cell choice by weight uniqueness on the two-vertex support against the strict witness atom — the disjointness conjunct is unused here, only \rulename{Cell-In-Interior} needs it.'
+
+# ================= 2026-07-18 rules (ratified) =================
+
+[[rule]]
+name = "PConstExact"
+stratum = "closed exact ground facts; reduces to the verified closed evaluator (not a catalogue derivation — see note)"
+tier = 2
+tag = "pConstExact"
+lemmas = ["sound_pConstExact"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{PConstExact}]{
+  e_1, e_2 \text{ wire-free (closed) terms}
+  \\
+  \bowtie \in \{<, \leq, =, \geq, >\}
+  \\
+  \mathrm{evalClosed}(e_1 \bowtie e_2) = \mathsf{true} \text{ (exact evaluation over } \Q\text{)}
+}{
+  \Phi \vdash e_1 \bowtie e_2
+}
+\end{mathpar}
+'''
+note = 'New admissible rule (design ruling, 2026-07-18: enact the generalization PConstExact, which subsumes PRatFact; wire tag 27). The calculus previously could not state a ground fact at all — $\vdash -3/4 \leq 0$ had no derivation. Premise-free; $\Phi$ arbitrary (the \rulename{Norm} convention). Closedness is IMPLIED, not a payload field: \texttt{evalClosed} returns \texttt{none} on any wire. $\neq$ is excluded (the \texttt{notNE} field, mirroring \rulename{ArithAtom}\textquotesingle s B5): a wireless $\neq$ atom interprets to $\bot$ under the M$_3$ countermodel, so admitting it against arbitrary $\Phi$ would break \texttt{ProofObject.m3sound} — the semantic lemma covers all six comparators; the admissible set is confined to five. TIER NOTE: admissible by REDUCTION TO VERIFIED MACHINERY (\texttt{sound\_pConstExact} is one step to \texttt{Formula.holds\_of\_evalClosed\_true}), not by unpacking into a catalogue derivation — no such derivation exists, which is the rule\textquotesingle s point; it is not core because it adds zero new kernel semantic content. \rulename{PRatFact} is the corner $e_1 = c$, $e_2 = 0$. COVERAGE: the current \texttt{Term} grammar makes every closed term rank-0, so this is every closed SCALAR exact comparison; the matrix corner (MIX\textquotesingle s exact-matrix-identity) needs closed-tensor constructors + a QTensor-valued closed evaluator — the named next leg, not hand-faked here.'
+
+[[rule]]
+name = "PBound"
+stratum = "the affine bound-node; a compact spelling of Syzygy"
+tier = 3
+tag = "pBound"
+lemmas = ["sound_pBound"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{PBound}]{
+  \bigl\{\Phi_i \vdash e_i \leq 0\bigr\}_{i=1}^{n}, \quad \Phi \supseteq \Phi_i \ \text{conjunct-wise (checked)}
+  \\
+  \bigl\{g_k = 0\bigr\}_k \ \text{equality sub-conjuncts of } \Phi
+  \\
+  \lambda_i \in \Q_{\geq 0}
+  \\
+  \nu_k \in \Q
+  \\
+  c \equiv \textstyle\sum_i \lambda_i e_i + \sum_k \nu_k g_k \ \text{(exact canonical polynomial)}
+  \\
+  \bshape_H(c) \neq \bot, \quad \wires(c) \ \text{all finitely typed in } H
+  \\
+  \wires(\Phi) \cup \wires(c) \cup \textstyle\bigcup_i \wires(e_i) \ \text{all typed at positive-size shapes in } H
+  \\
+  \Psi \in \bigl\{\, c \leq 0, \;\; e \geq 0 \text{ where } c = -e, \;\; l \leq r \text{ where } c = l - r \,\bigr\}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+note = 'New ALIAS rule (ratified 2026-07-18; wire tag 28) — the taxonomy\textquotesingle s canonical alias: the payload is \texttt{PSyzygyData}\textquotesingle s verbatim, field for field (\texttt{preContains} + B13 \texttt{conclShape}/\texttt{conclFin} + B14 \texttt{wiresPos}/\texttt{compPostWiresPos} inherited unchanged — all now displayed inline above, per the roster-resync; \texttt{denBoundLog2} the Q7 family), \texttt{postForm} included: the conclusion enters through the \texttt{syzygyConclusionForm} reading selector (known before 2026-07-18 as \texttt{boundConclusionForm}, PBound-local — since LANDED as CORE vocabulary on \rulename{Syzygy} itself, ratified 2026-07-18; witness \texttt{PSyzygyData.postForm}/\texttt{PBoundData.postForm}, \texttt{Core/Catalogue.lean}): (Z$\leq$) the raw zero-form — \rulename{Syzygy}\textquotesingle s own conclusion; (G) the ge-polarity flip $-e \leq 0 \rightsquigarrow e \geq 0$ — the FOLDED-IN ge-premise bridge (ABSORBED, never a standalone rule), making \rulename{ReLU-Pos}\textquotesingle s $h \geq 0$ premise reachable from bound facts; (L$\leq$) the literal atom $l \leq r$ where $c = l - r$ — fed to \rulename{LiRPA} with no \rulename{ArithAtom} fold. Unpack: ONE \rulename{Syzygy} node, each reading transported by a one-line ring equivalence (\texttt{sound\_pBound} SPECIALIZES \texttt{sound\_syzygy}); with both-polarity now core on \rulename{Syzygy}, the alias relation is 1$\to$1 at reading level too. The affine restriction is wire-format compactness (register-2 coefficient rows), not a checked side condition: soundness never needs it.'
+
+[[rule]]
+name = "PSDCERT/T"
+stratum = "exact-matrix positive-definiteness witness fact (triangular-inverse tier); premise-free"
+tier = 2
+tag = "psdCertT"
+lemmas = ["sound_psdCertT"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{PSDCERT/T}]{
+  A \in \Q^{n \times n} \ \text{symmetric}
+  \\
+  Z \ \text{upper-triangular}, \ Z_{ii} > 0
+  \\
+  A \cdot Z \ \text{lower-triangular}, \ (A \cdot Z)_{ii} > 0 \ \text{(recomputed exactly)}
+  \\
+  p_1, \dots, p_n \ \text{payload terms}
+  \\
+  c \equiv -\textstyle\sum_{i,j} A_{ij}\, p_i\, p_j \ \text{(exact canonical polynomial)}
+  \\
+  \Psi \in \bigl\{\, c \leq 0, \;\; Q \geq 0 \text{ where } c = -Q, \;\; l \leq r \text{ where } c = l - r \,\bigr\}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+note = 'New admissible rule (design ruling, 2026-07-18: include all three PSDCERT variants; shipped with catalogue wave 2). The triangular-inverse theorem, all-syntactic premises: the three matrix checks warrant $A \succ 0$ over $\R$ (\texttt{PsdCert.checkT\_posDef}), division-free, $O(\alpha n^2)$ multiplications, exact $\Q$ arithmetic on the zero-mathlib checker closure. The IN-LOGIC fact is the quadratic form\textquotesingle s nonnegativity at the payload terms, entering through \texttt{syzygyConclusionForm} (both-polarity, wave-2 core) — a component conclusion for \rulename{Syzygy}/\rulename{Farkas} combinations; MIX\textquotesingle s LDL-PSD-witness obligation node. Strictness is deliberately dropped at the formula boundary: $\succ$ is certified matrix-side, but the premise-free atom is the $\succcurlyeq$-shaped form (strictness needs $x \neq 0$, which no premise-free atom carries). $\Phi$ arbitrary (the \rulename{Norm} convention); soundness never consults witness accuracy — a forged $Z$ can only refuse, never falsely accept. Elementwise atom semantics batch the fact: tensor-shaped payload terms give per-entry PSD application for free. TIER NOTE: admissible by reduction to the verified \texttt{PsdCert} matrix theorems (the \rulename{PConstExact} pattern), not by unpacking into a catalogue derivation. Wire tag deferred to the payload-window allocation (with tags 27/28); the emit path refuses until allocated.'
+
+[[rule]]
+name = "PSDCERT/DD"
+stratum = "exact-matrix positive-definiteness witness fact (diagonal-dominance tier); premise-free"
+tier = 2
+tag = "psdCertDD"
+lemmas = ["sound_psdCertDD"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{PSDCERT/DD}]{
+  A \in \Q^{n \times n} \ \text{symmetric}
+  \\
+  Z \ \text{upper-triangular}, \ Z_{ii} > 0
+  \\
+  B := Z^{\mathsf{T}} A Z \ \text{strictly row-diagonally dominant (recomputed exactly)}
+  \\
+  p_1, \dots, p_n \ \text{payload terms}
+  \\
+  c \equiv -\textstyle\sum_{i,j} A_{ij}\, p_i\, p_j \ \text{(exact canonical polynomial)}
+  \\
+  \Psi \in \bigl\{\, c \leq 0, \;\; Q \geq 0 \text{ where } c = -Q, \;\; l \leq r \text{ where } c = l - r \,\bigr\}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+note = 'New admissible rule (same ruling and wave as \rulename{PSDCERT/T}). Irving\textquotesingle s formalized shape — the tier a float-LDL ROUNDED witness actually feeds: the congruence $B = Z^{\mathsf{T}}AZ$ is recomputed exactly and strict row-dominance checked (positive diagonal implied: the off-row sum is $\geq 0$), warranting $A \succ 0$ (\texttt{PsdCert.checkDD\_posDef}). Everything else — conclusion shape via \texttt{syzygyConclusionForm}, strictness dropped at the formula boundary, \rulename{Norm}-convention $\Phi$, forged-witness-refuses, elementwise batching, reduction-tier admissibility, deferred wire tag — is verbatim the /T row\textquotesingle s discipline; only the witness check differs.'
+
+[[rule]]
+name = "PSDCERT/K"
+stratum = "exact-matrix positive-SEMIdefiniteness witness fact (kernel-completion tier); premise-free"
+tier = 2
+tag = "psdCertK"
+lemmas = ["sound_psdCertK"]
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{PSDCERT/K}]{
+  A \in \Q^{(m+k) \times (m+k)}, \ \text{kernel coordinates last}
+  \\
+  L := (I \mid N), \ N \in \Q^{m \times k}
+  \\
+  A = L^{\mathsf{T}} B L \ \text{entrywise exactly}
+  \\
+  B \in \Q^{m \times m} \ \text{with a /T-or-/DD inner witness } Z
+  \\
+  p_1, \dots, p_{m+k} \ \text{payload terms}
+  \\
+  c \equiv -\textstyle\sum_{i,j} A_{ij}\, p_i\, p_j \ \text{(exact canonical polynomial)}
+  \\
+  \Psi \in \bigl\{\, c \leq 0, \;\; Q \geq 0 \text{ where } c = -Q, \;\; l \leq r \text{ where } c = l - r \,\bigr\}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+note = 'New admissible rule (same ruling and wave as \rulename{PSDCERT/T}). The PSD-with-kernel companion: $A \succcurlyeq 0$ with exact kernel (\texttt{PsdCert.checkK\_posSemidef}) — $A$ IS the two-sided kernel-completion congruence of its leading block $B$, entrywise exactly, equivalent to the note \S1 premises ($A$ symmetric $\wedge$ $A \cdot K = 0$ exactly for $K = (-N; I_k)$ $\wedge$ leading block $= B$): $C = BN$ and $D = N^{\mathsf{T}}BN$ are forced either way, and a forged $N$ or $B$ refuses. The producer applies its permutation $P$ before emission — $P$-conjugation is index renaming on matrix and term vector alike, so the catalogue rule is the $P = \mathrm{id}$ core. Corners are structural: $k = 0$ gives $L = I$ ($A = B$); $m = 0$ forces $A = 0$ (empty $B$, no inner witness content). Kernel/rank CONTENT is checked but becomes formula-expressible only at the closed-tensor window (\rulename{PConstExact}\textquotesingle s matrix corner — same named next leg). Conclusion/convention discipline verbatim the /T row\textquotesingle s.'
+
+# ============================ derived ============================
+
+[[rule]]
+name = "ReLU-Split"
+stratum = "derived packaging of case analysis (no constructor — the unpacking IS the rule)"
+tier = 2
+witness = 'no proof-term constructor — remains a derivation ($\vee$E + EqElim + $\wedge$E + Weaken + Cut over sp[$\ReLU$]); its soundness is its derivability'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ReLU-Split}]{
+  \Phi \wedge (h \geq 0) \vdash \Psi\sub{b}{h} \\
+  \Phi \wedge (h \leq 0) \vdash \Psi\sub{b}{0}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ReLU-Split}]{
+  \Phi \wedge (h \geq 0) \vdash \Psi\sub{b}{h} \\
+  \Phi \wedge (h \leq 0) \vdash \Psi\sub{b}{0}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+'''
+note = 'Unchanged — but note its derivation applies $\vee$E \emph{on the sp-disjunction inside the premise conjunction}, which is exactly what the printed $\vee$E cannot reach (the R1 wall, row 7). The derivation stands under the proposed context-carrying $\vee$E; under the printed form it needs restructuring rules the core does not have.'
+
+# ==================== composition rules (assume--guarantee) ====================
+#
+# Folded in from the former AG-rules.toml, 2026-08-02; rows verbatim.
+# PROVENANCE (carried from that page): LEFT is the July design-thread
+# sketch (2026-07-07, compressed into the 2026-07-16 handoff) -- a
+# working sketch, NOT the April paper. RIGHT is the certificate contract
+# as realized in Lean (from the 2026-07-16 AG rules draft) -- distilled,
+# revisable. All three AG rules were ENDORSED INTO THE CALCULUS by
+# design ruling, 2026-07-16 (Promise and Syzygy enter the core calculus,
+# with SmallGain admissible); soundness lemmas kernel-proven, sorry-free
+# (sound_promise/sound_syzygy, Soundness.lean; sound_smallGain,
+# Composition.lean, as a sound_syzygy corollary via
+# SmallGainStep.toSyzygy). ProductLattice admitted by design ruling,
+# 2026-07-17; SmallGainN ratified 2026-07-28. RESOLVED 2026-07-28: these
+# rules are Bernstein Logic outright -- no intermediate "AG layer"
+# exists; "assume--guarantee" names their purpose, not a separate
+# stratum. One arithmetic core underneath the AG three: SmallGain's
+# conclusion is identically the (1,lambda,1,1)-weighted Syzygy
+# combination of its four premises -- the cross-supplies cancel by
+# construction, so the checker replays a two-line polynomial identity
+# and never sees a fixpoint.
+
+[[rule]]
+name = "Promise"
+stratum = "BL composition: acyclic composition (interface-promise cut); core RuleData constructor, endorsed 2026-07-16 — tier per the 2026-07-18 taxonomy, see note"
+tier = 2
+tag = "promise"
+lemmas = ["sound_promise"]
+witness = 'predicate-logic cut over the semantics; realized as core \texttt{RuleData.promise}. Contract existence: K3 \texttt{lem:corridor}; contract extraction: Lemma A (\texttt{farkas\_interpolant\_vars}, kernel-checked)'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Promise}]{
+  \Phi_1 \vdash Q \\
+  \Phi_2 \wedge Q \vdash \Psi
+}{
+  \Phi_1 \wedge \Phi_2 \vdash \Psi
+}
+\end{mathpar}
+an assumption is an extra generator of the cone; discharging the promise from elsewhere is cut. BL lacks only the bookkeeping tagging interface promises and restricting them to shared variables.
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Promise}]{
+  \Phi_1 \vdash Q \\
+  \Phi_2 \wedge Q \vdash \Psi \\
+  \wires(Q) \subseteq Y \\
+  \wires(\Phi_1) \cap \bigl(\wires(\Phi_2) \cup \wires(\Psi)\bigr) \subseteq Y
+}{
+  \Phi_1 \wedge \Phi_2 \vdash \Psi
+}
+\end{mathpar}
+Here $Y$ is the declared interface (payload wire list; bundle entries addressed as $\mathrm{TIdx}(w,i)$). The two confinement checks are the locality warrant, not soundness needs: the contract $Q$ is the \emph{datasheet} --- the public artefact whose vocabulary is the separator algebra --- and the cost identities (LP size, ZK disclosure set) quantify over certificates carrying these checks.
+'''
+note = 'geolog draft: \texttt{PPromise} with supplier/consumer proofs, contract formula, interface declaration; bounded-computation relations \texttt{formulaWiresWithin} (Lemma A\textquotesingle s vars-subset machinery, already formalized) and \texttt{wiresSeparated}. Open payload question for the consult: does $Q$ sit at a fixed conjunct position in the consumer\textquotesingle s pre, or at a payload-declared path (the ctx-$\vee$E style)? TIER NOTE (2026-07-18 taxonomy; two rulings in apparent tension, both yours): the 2026-07-16 19:42 endorsement placed \rulename{Promise} in the core calculus-as-realized (a \texttt{RuleData} constructor, wire tag 25); the 2026-07-18 10:58 taxonomy names \rulename{Promise} an ADMISSIBLE example — and proof-theoretically it is: the unpack is \rulename{Weaken} + $\wedge$-restructuring chains ($\wedge$I/$\wedge$E/Cut) + \rulename{Cut}, one node $\to$ many. Read consistently: TIER is proof-theoretic status (admissible), \texttt{RuleData} membership is implementation/wire placement (native constructor, kept for cost + the locality-warrant payload). The confinement premises are warrant, not soundness — soundness is cut.'
+
+[[rule]]
+name = "Syzygy"
+stratum = "BL composition: power-preserving interconnection (dialect D); endorsed core 2026-07-16"
+tier = 1
+tag = "syzygy"
+lemmas = ["sound_syzygy"]
+witness = 'Lemma B dialect D: pure linearity over the per-entry evaluation lemma; realized as core \texttt{RuleData.syzygy}. Tree effectivity: K3 \texttt{thm:main-subdiv} (RIP $\leftarrow$ wiring, clique support $\leftarrow$ component certificates, margin $\leftarrow$ budget ledger)'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Syzygy}]{
+  \bigl\{\Gamma_i \vdash s_i - \mathcal{L}_i V_i \geq 0\bigr\}_i \\
+  \textstyle\sum_i s_i^{\mathrm{int}} = 0 \ \text{(wiring identity)}
+}{
+  \textstyle\sum_i \lambda_i(\text{component sequents}) + \text{syzygy} \ = \ \text{composite sequent for } \sum_i \lambda_i V_i
+}
+\end{mathpar}
+power-preserving interconnections compile to a polynomial identity among supply-rate atoms (Tellegen; typically degree 2, effort$\times$flow). Equational; no slack parameter.
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{Syzygy}]{
+  \bigl\{\Phi_i \vdash e_i \leq 0\bigr\}_{i=1}^{n} \\
+  \bigl\{g_k = 0\bigr\}_k \ \text{equality sub-conjuncts of } \Phi \text{ in wire variables} \\
+  \lambda_i \in \Q_{\geq 0} \\
+  \nu_k \in \Q \\
+  c \equiv \textstyle\sum_i \lambda_i e_i + \sum_k \nu_k g_k \ \text{(exact canonical polynomial)} \\
+  \Psi \in \bigl\{\, c \leq 0, \;\; e \geq 0 \text{ where } c = -e, \;\; l \leq r \text{ where } c = l - r \,\bigr\}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+$\Phi \supseteq$ each $\Phi_i$ conjunct-wise (checked); the $\nu_k$ are free-sign exactly as \rulename{Farkas} frees $\lambda_j$ on $=$ atoms --- Lemma A\textquotesingle s CommRing sign-blindness, one theorem for both dialects. Lifts \rulename{Farkas} in exactly two ways: atoms from sub-\emph{proofs} (not sub-conjuncts), atoms of arbitrary polynomial degree. The conclusion is exposed in any of the three \texttt{syzygyConclusionForm} readings --- one exact $\Q$ identity under a sign flip; the transport is the ge-bridge ring lemma, applied once inside \texttt{sound\_syzygy}.
+'''
+note = 'geolog draft: \texttt{PSyzygy} with proof list, combination Term (the \texttt{combinationCoeffs} compact-encoding style + per-entry source tag \textsc{from-component}/\textsc{from-wiring}), conclusion Term, \texttt{denBoundLog2} (Q7 family); relation \texttt{syzygyCombinationValid}; B14 \texttt{positiveSizeWires} inherited verbatim. BOTH-POLARITY conclusion is CORE here (ratified 2026-07-18; the $\leq$-only \texttt{postEq} this cell displayed through the review wave was the earlier form — resynced in review; witness \texttt{PSyzygyData.postForm : syzygyConclusionForm}, \texttt{Core/Catalogue.lean}). Port-Hamiltonian reading: $e_i = \mathcal{L}_i V_i - s_i^{\mathrm{ext}} - s_i^{\mathrm{int}}$, the $g_k$ cancel the internal supplies, conclusion = dissipation of $\sum_i \lambda_i V_i$. The free-body diagram is the junction tree; internal forces at the cuts are the separator algebra.'
+
+[[rule]]
+name = "SmallGain"
+stratum = "BL composition: directed feedback (dialect G, guarded fixpoint); alias of \\rulename{Syzygy}, ratified 2026-07-18 — see note"
+tier = 3
+lemmas = ["sound_smallGain"]
+witness = 'proven \emph{as} a \texttt{sound\_syzygy} instance at weights $(1,\lambda,1,1)$ + three $\Q$ comparisons (\texttt{SmallGainStep.toSyzygy}) --- admissible, no tag of its own; $(\lambda,\theta)$-existence stays producer-side; the $n$-component form is catalogued as \rulename{SmallGainN} (next row)'
+original = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{SmallGain}]{
+  \mathcal{L}_1 V_1 \leq -\alpha_1(V_1) + \sigma_1(w_2) \\
+  \mathcal{L}_2 V_2 \leq -\alpha_2(V_2) + \sigma_2(w_1) \\
+  \exists \lambda > 0,\ \theta \in (0,1):\quad \lambda\sigma_2 \preccurlyeq (1{-}\theta)\alpha_1, \quad \sigma_1 \preccurlyeq \lambda(1{-}\theta)\alpha_2
+}{
+  \mathcal{L}(V_1 + \lambda V_2) \leq -\theta(\alpha_1 + \lambda\alpha_2)
+}
+\end{mathpar}
+the side condition is an LP feasibility over the Bernstein cone; the optimal slack $\theta$ is the guard modulus, travelling in the proof term as a first-class robustness radius.
+'''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{SmallGain}]{
+  \Phi_1 \vdash e_1 \leq 0 \\
+  \Phi_2 \vdash e_2 \leq 0 \\
+  \Phi_w \vdash \lambda\sigma_2 - (1{-}\theta)\,\alpha_1 \leq 0 \\
+  \Phi_w \vdash \sigma_1 - \lambda(1{-}\theta)\,\alpha_2 \leq 0 \\
+  \lambda \in \Q_{>0} \\
+  \theta \in \Q \cap (0,1)
+}{
+  \Phi \vdash \mathcal{L}(V_1 + \lambda V_2) + \theta\,(\alpha_1 + \lambda\alpha_2) \leq 0
+}
+\end{mathpar}
+$e_i \equiv \mathcal{L}_i V_i + \alpha_i - \sigma_i$; the two membership sequents are ordinary BL sequents over the declared operating box $\Phi_w$, their \rulename{BernCone} multipliers \emph{are} the LP witness. Conclusion identity, checked as exact canonical polynomial: $e_1 + \lambda e_2 + m_1 + m_2 = \mathcal{L}(V_1 + \lambda V_2) + \theta(\alpha_1 + \lambda\alpha_2)$ --- the cross-supplies cancel by construction; the checker never sees a fixpoint.
+'''
+note = 'geolog draft: \texttt{PSmallGain} with four proof refs, $(\lambda, \theta)$ + six polynomial payload Terms, \texttt{denBoundLog2}; relation \texttt{smallGainShapes}. $\theta$ = the Q6 \texttt{theta\_ref} reservation\textquotesingle s first consumer: per-node in the payload, header = composite modulus (min over nodes). The $(0,1)$ range check is well-formedness backing the published meaning, not a soundness need (the identity holds at any $\theta$; the memberships self-police). Signed polynomial contracts or nothing: {\AA}str\"om--Furuta exploits the \emph{sign} of $\dot\theta\cos\theta$, so norm-gain contracts are constitutively too coarse (Q5, the physical-variable world). $n$-component form: catalogued as \rulename{SmallGainN} (ratified by design ruling, 2026-07-28 --- the same alias tier, one \rulename{Syzygy} node). TIER RESOLVED — ALIAS (design ruling, 2026-07-18: SmallGain is an alias for Syzygy, superseding the earlier example list\textquotesingle s admissible sort): \texttt{SmallGainStep.toSyzygy} is the verified unpacking into a SINGLE core rule — one \rulename{Syzygy} node at weights $(1,\lambda,1,1)$ — and \texttt{sound\_smallGain} closes through it as a \texttt{sound\_syzygy} corollary. The admissible reading\textquotesingle s case (the unpack COMPUTES the weighting and cancellation identity, unlike \rulename{PBound}\textquotesingle s verbatim-payload re-spelling) was on record and is resolved against — gloss: the ratified criterion counts derivation nodes, not instantiation work. Nothing downstream changes (no tag either way).'
+
+[[rule]]
+name = "SmallGainN"
+stratum = "BL composition: directed feedback over an $n$-component interconnection graph (dialect G, guarded fixpoint); alias of \\rulename{Syzygy}, ratified 2026-07-28 — see note"
+tier = 3
+witness = 'elaborates to one \rulename{Syzygy} node at weights $(\lambda_1, \ldots, \lambda_n, 1, \ldots, 1)$ --- the exact conclusion identity is the whole obligation, so the target rule\textquotesingle s kernel lemma carries soundness at every instance; the dedicated payload structure + verified $n$-ary unpack (\texttt{SmallGainNStep.toSyzygy}, \texttt{sound\_smallGainN}) is staged, exactly \rulename{SmallGain}\textquotesingle s vehicle at arbitrary $n$'
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{SmallGainN}]{
+  \bigl\{\Phi_i \vdash e_i \leq 0\bigr\}_{i=1}^{n} \\
+  \bigl\{\Phi_w \vdash m_i \leq 0\bigr\}_{i=1}^{n} \\
+  \Phi \supseteq \Phi_1, \ldots, \Phi_n, \Phi_w \ \text{conjunct-wise (checked)} \\
+  \lambda \in \Q_{>0}^{n} \\
+  B \in \Q_{\geq 0}^{n \times n} \\
+  \textstyle\sum_i B_{ij} = \lambda_j \ (\forall j) \\
+  \theta \in \Q \cap (0,1)
+}{
+  \Phi \vdash \mathcal{L}\bigl(\textstyle\sum_i \lambda_i V_i\bigr) + \theta \textstyle\sum_j \lambda_j \alpha_j \leq 0
+}
+\end{mathpar}
+$e_i \equiv \mathcal{L}_i V_i + \alpha_i - \sigma_i$; \quad $m_i \equiv \lambda_i \sigma_i - (1-\theta) \textstyle\sum_j B_{ij}\, \alpha_j$ (the repayment matrix\textquotesingle s membership rows); \quad conclusion identity, checked as exact canonical polynomial: $\textstyle\sum_i \lambda_i e_i + \sum_i m_i = \mathcal{L}(\sum_i \lambda_i V_i) + \theta \sum_j \lambda_j \alpha_j$ under the column condition.
+'''
+flavor = '''
+the $n$ membership sequents are ordinary BL sequents over the declared operating box $\Phi_w$, their \rulename{BernCone} multipliers \emph{are} the LP witness; the repayment matrix $B$ routes each component\textquotesingle s supply through its neighbours, and the column condition $\sum_i B_{ij} = \lambda_j$ makes every cross-supply cancel in the conclusion identity --- the checker never sees a fixpoint, a spectral radius, or the interconnection graph. Like the binary rule it is an alias: no proof-term sort, no wire tag; it elaborates to one \rulename{Syzygy} node at weights $(\lambda_1, \ldots, \lambda_n, 1, \ldots, 1)$, and $B$ itself never reaches the wire (the membership rows carry it; the exact identity is the whole obligation). The binary rule is the $n = 2$ instance on the nose: $\lambda = (1, \lambda)$, $B_{21} = 1$, $B_{12} = \lambda$ reproduce \rulename{SmallGain}\textquotesingle s membership rows and its $(1, \lambda, 1, 1)$ weights.
+'''
+note = 'Ratified by design ruling, 2026-07-28. Pure syzygy alias like \rulename{SmallGain}: no new node kind, no wire species, zero checker motion. Existence theory producer-side (LP + Perron--Frobenius: for $\rho(\Gamma) < 1 - \theta$ the Neumann vector $\lambda := \sum_k (1-\theta)^{-k} (\Gamma^{\mathsf{T}})^k \mathbb{1}$ witnesses $\Gamma^{\mathsf{T}}\lambda \le (1-\theta)\lambda$; under-allocation repaired by diagonal padding, which only weakens the membership row it feeds). Literature anchor: Dashkovskiy--R\"uffer--Wirth, \emph{An ISS small gain theorem for general networks}, MCSS 19(2) 2007, pp.\ 93--122, DOI 10.1007/s00498-007-0014-8. Binary recovery checked symbolically at enactment (identity at $n \in \{2,\ldots,5\}$ with fully symbolic $\lambda, B, \theta$, plus a column-sum mutant that breaks it): conclusion and weights on the nose; one labeling difference, stated --- at the binary instance the $n$-ary membership rows come out order-swapped vs the binary rule\textquotesingle s $(m_1, m_2)$, set-equal (combination order is producer bookkeeping). The dedicated Lean payload vehicle is staged; the producer-side builder (\texttt{small\_gain\_n}, mtk catalogue crate) elaborates today.'
+
+[[rule]]
+name = "ProductLattice"
+stratum = "BL composition, one judgement up: certified attracting-block lattices of wire-disjoint product systems (Kalies--Wehbe; enacted 2026-07-17)"
+tier = 2
+lemmas = ["sound_productLattice"]
+witness = 'transport + weaken, both kernel lemmas (\texttt{Sequent.semanticallyValid\_extend} / \texttt{semanticallyValid\_weaken}); \texttt{sound\_productLattice} discharges every facet sequent of every product block over the disjoint union'
+original = ''
+amended = '''
+\begin{mathpar}
+\inferrule*[Right=\rulename{ProductLattice}]{
+  B_1 \ \text{a certified attracting-block lattice for } \varphi_1 \ \text{over } H_1
+  \\
+  B_2 \ \text{likewise for } \varphi_2 \ \text{over } H_2
+  \\
+  \mathrm{wires}(H_1) \cap \mathrm{wires}(H_2) = \emptyset
+}{
+  \langle B_1 \times B_2 \rangle_{\vee} \ \text{certified for } \varphi_1 \times \varphi_2 \ \text{over } H_1 \sqcup H_2
+}
+\end{mathpar}
+Here $\langle \cdot \rangle_{\vee}$ is the join-closure of pairwise products. Every composite facet sequent is discharged BY CITATION: a composite facet is normal to one factor\textquotesingle s axis, its inwardness polynomial IS that factor\textquotesingle s facet polynomial with the other factor\textquotesingle s coordinates riding along as free box variables (the rider, conjoined onto the premise). Bernstein-wise the composite facet grid is the factor grid tensored with all-ones --- a coefficient identity; nothing for a checker to recompute beyond the ordinary \rulename{BernCone} recompute pattern.
+'''
+note = 'Admissible at the JUDGEMENT layer — the taxonomy\textquotesingle s \textquotedblleft QTSL judgement-kinds one layer up\textquotedblright\ family (the ratified tier-2 list names \rulename{ProductLattice} explicitly): one lattice node unpacks to many cited facet sequents. Enacted by design ruling, 2026-07-17 (pressing past the consult note\textquotesingle s own deferral recommendation); Lean realization \texttt{Qtsl/ProductLattice.lean} (soundness = TRANSPORT: a sequent valid over a factor, well-scoped there, stays valid over any wire-extension — then WEAKEN in the rider). Dynamics-free: sound for flows AND maps; the \textquotedblleft whole attractor lattice\textquotedblright\ completeness reading is paper-side, flows-only (KW \texttt{cor\_flows\_att\_iso}). Worked witnesses: \texttt{kw-product/kw\_witnesses.py}, 33/33 reference-checked (2026-07-17); the Lean fixtures port witness A. NO \texttt{RuleTag}/wire constructor yet — wire placement pending (a named follow-up); this page row ships with the post-wave-2 tidy. Source: Kalies--Wehbe, arXiv:2606.30925 (TeX vendored, cited labels verified).'

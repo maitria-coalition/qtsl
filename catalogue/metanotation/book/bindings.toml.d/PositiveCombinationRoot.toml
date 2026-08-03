@@ -1,0 +1,34 @@
+# bindings.toml.d/PositiveCombinationRoot.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'PositiveCombinationRoot'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "RegionSat"
+sha256 = "c0cf0e31c15b8c80f591bd35c70eb53d85b75bde04e1b628eb410c148f67b4a0"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "positiveCombinationAnd_sound"
+sha256 = "e5e637c647620512c7f137d668156a3d98107d1ed9cabf16a7040f43017d5e63"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "positiveCombinationInter_sound"
+sha256 = "cc36c6d8fa72188f40d73b5cac8ac0b942fda64114bef93046c16cacb91c107b"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "positiveCombinationOr_sound"
+sha256 = "19df326bb97b27eeb021170ae6b69dacad3c88394d6cc63a48db91ebeaeaa2d0"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "positiveCombinationUnion_sound"
+sha256 = "f1f5c48811c0d4c4240bfc811b3e38aab7c1a4d3130b9b6f943b0f18e04909dd"
+
+[[correspondence]]
+entry = "PositiveCombinationRoot"
+steele_sha256 = "794cbae12c8ff32f2ae9d4eb7a1bc746378517f6c7ab1fbc55420fc42e67282c"
+statements_sha256 = "eee6727191ecaf5ce7f56ccfbb16bc11c69b916bb7b7643b6c56dd7c74f8e9a0"
+prose_sha256 = "31817e98a0fc6ff89afa56eb5b338b2bf28f48471e0d9f22143488c63801e2d4"
+

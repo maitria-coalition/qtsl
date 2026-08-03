@@ -1,0 +1,25 @@
+# api-system.toml.d/S-CORE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-CORE"
+entity = "entry"
+
+[api.ts]
+handle = "system.buildSystem"
+sig_file = "ts/src/system.ts"
+sig = ["fn buildSystem", "interface MechanismInit"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "marker:ts_core"
+note = '''The quoted corpus lines run the corpus's preset discipline as an assertion: a preset's output is byte-identical to \texttt{buildSystem}'s on the same mechanism --- presets add checking, never representation.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::SystemManifest"
+sig_file = "crates/mtk-catalogue/src/system/manifest.rs"
+sig = ["fn free", "fn composite"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "fn-body:known_profile_is_a_view_not_a_tag"
+note = '''The quoted corpus lines assert the profile-not-tag doctrine on the wire: same bytes with or without the preset having been consulted.'''

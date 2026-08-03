@@ -1,0 +1,19 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+// exactness.ts — class-E data is Q; number never crosses the boundary.
+import { Q, lp } from "@maitria/mtk";
+
+console.log(Q.from("0.1").add("0.2").toString());        // exact decimal parse
+console.log(Q.from("-2.04e-2").toString());              // scientific, exact
+console.log(Q.of(815, 19683).sub(Q.of(1, 27)).toString());
+
+try {
+  Q.from(0.1);                                           // refused: ambiguous
+} catch (e) {
+  console.log((e as Error).message);
+}
+
+// The one bridge from float to exact: an explicit snap. The snapped
+// value is a new PROPOSAL to certify, never a blessed float.
+console.log(lp.rationalize(0.3333333333333333, 1000).toString());
+console.log(lp.rationalize(Math.PI, 1000).toString());
+\end{Verbatim}

@@ -1,0 +1,144 @@
+// Chase fixtures for the revision-event-6 strata: the event-rate
+// envelope lane, the distance judgments, the timed core, the
+// discharge kit, and the grounded-walk seam — in theory vocabulary
+// (transposed relations keep function names; unary attributes take
+// the synthesized `arg` field; ground fields ride abstract
+// elements). Instance blocks in one file chase jointly in one model,
+// so element names are unique across the file. The battery greps the
+// chase transcript for named derived rows and judgments — never exit
+// codes alone.
+//
+// Walk loci (kit coverage, arithmetic ties, oracle content) are
+// loud-defer-never-silent-green until the provider realizations
+// land: at this tier the instrument is the DEMAND ROW — it must
+// mint per entity, and its minting axiom's demotion must be a named
+// RED. The refuse/report tier (constructor disjointness, range
+// reports) lives at the theory surface, census-fenced.
+
+// The event-rate consumes traversal, both faces and both depths: a
+// spec consuming SRateLE directly, and a disjunction spec whose
+// RIGHT arm consumes SRateGE — the roster projection must reach the
+// roster through the or-walk (the traversal-growth check: rosters
+// inside SRate* formers are reached by spec_consumes_trs, the
+// spec_consumes_ret analog), and the roster-conformance demand must
+// mint at each pairing. The left arm consumes an opaque component:
+// the absence half asserts the projection does not leak onto
+// non-rate components, and the cross-pairing absence half asserts
+// demands key to their own pairing.
+instance E6RateConsumes : Qtsl {
+  rq, rq2 : QSat;
+  rsy, rsy2 : System;
+  rsd, rsl, rsr, rse : Spec;
+  rfo, rfg, rfe : ForallSpec;
+  rst1, rst2 : TrList;
+  rrho, rsig : Q;
+
+  // direct LE consumer, paired with rsy2
+  [arg: rq2, out: rsy2] QSat/sys;
+  [arg: rq2, out: rse] QSat/spec;
+  [rho: rrho, sigma: rsig, trs: rst1, out: rfe] SRateLE;
+  [spec: rse, f: rfe] spec_forall;
+
+  // GE consumer one disjunction deep, paired with rsy
+  [arg: rq, out: rsy] QSat/sys;
+  [arg: rq, out: rsd] QSat/spec;
+  [spec: rsd, left: rsl, right: rsr] spec_or;
+  [spec: rsl, f: rfo] spec_forall;
+  [rho: rrho, sigma: rsig, trs: rst2, out: rfg] SRateGE;
+  [spec: rsr, f: rfg] spec_forall;
+}
+
+// The event-rate certificate lane's three node species: premise-free
+// per-entity walk demands (the QDeadlineTable pattern). The kit
+// content (interior/guard-counted rows, wing prices, the instant
+// member's cbAdditive budget citation) is walk material at the
+// ground seam — an unrealized walk defers loudly on these rows,
+// never accepts.
+instance E6RateNodes : Qtsl {
+  rub : QRateUB;
+  rlb : QRateLB;
+  rfc : QRateFromClocks;
+}
+
+// The distance-functor registry (all three v0 entries symmetric —
+// the derived marker the judgment-level admissibles will consume)
+// and the three distance-concluding node species. qdW1's entity is
+// registry-legal; concluding THROUGH it is the walk-fenced entry
+// license (D-3, walk-side), not a formation fact.
+instance E6DistRegistry : Qtsl {
+  qdt, qdw, qdg : QDistEntry;
+  qdr : PathObservable;
+
+  [out: qdt] qdTV;
+  [out: qdw] qdW1;
+  [ret: qdr, out: qdg] qdGap;
+}
+
+instance E6DistNodes : Qtsl {
+  cdn : QCoupleDrift;
+  fbn : QFixBall;
+  dtn : QDistTransport;
+}
+
+// The timed core's three schema nodes: conclusion resolution
+// (recompute lhs/rhs from node fields, class/rel fixed by schema)
+// is each walk's whole content — loud-defer at this tier.
+instance E6TimedNodes : Qtsl {
+  tin : QInvRelativize;
+  tfn : QFirstService;
+  tsn : QFirstServiceSplit;
+}
+
+// The discharge kit's cover node: all four warrant-hypothesis
+// carriers must mint as chased demands per entity — the split
+// (hdecomp), the two cell-membership form obligations (the roster
+// formula fields, cover and off), and the scope bridge (hbridge —
+// the review round-1 exploit locus: an earlier spelling assigned the bridge
+// to the consuming walk, leaving the conclusion pre unconstrained;
+// the demand row below IS the repair, and its absence is the
+// exploit's signature). The absence half asserts the scope formula
+// takes the BRIDGE demand, never a cell-membership demand.
+instance E6CoverKit : Qtsl {
+  pvc : PVerifiedCover;
+  vcx : QGridCx;
+  vdm : Box;
+  vff, vof, vcf, vsf : Formula;
+  vk, vj, vnc, vno : Nat;
+
+  [arg: pvc, out: vcx] PVerifiedCover/cx;
+  [arg: pvc, out: vdm] PVerifiedCover/dom;
+  [arg: pvc, out: vff] PVerifiedCover/off;
+  [arg: pvc, out: vsf] PVerifiedCover/scopeF;
+  [p: pvc, k: vk, out: vcf] PVerifiedCover/coverForm;
+  [p: pvc, j: vj, out: vof] PVerifiedCover/offForm;
+
+  // the indexed cell-membership demands ride the enumeration guard
+  // (k < nCover, j < nOff): the guard rows are producer CLAIMS at
+  // the ground seam (locked vocabulary — seedable, never decidable
+  // by the chase), and with them claimed the two form obligations
+  // must mint per indexed cell.
+  [arg: pvc, out: vnc] PVerifiedCover/nCover;
+  [arg: pvc, out: vno] PVerifiedCover/nOff;
+  [l: vk, r: vnc] nat_lt;
+  [l: vj, r: vno] nat_lt;
+}
+
+// The grounded-walk seam (the credal stratum's loud-defer face): a
+// compiled verdict form mints the claim-keyed subject-side
+// obligation bundle — where the sigma-face properness read, the
+// per-entry containments, and the witness obligations live once the
+// witness kits land. The sigma/zeta separating subject (all laws at
+// positive finite penalty) is value-tier cargo for that walk; until
+// it lands, the demand row's undischarged presence is the
+// never-silent-green instrument. The spec-side recompute demand
+// (exactly-one-SProper among the exists-face entries) mints beside
+// it through the verdict_compile route.
+instance E6GroundedForm : Qtsl {
+  gfq : QSat;
+  gfs : Spec;
+  gfv : QVerdictForm;
+  gib : QInitBridge;
+
+  [arg: gfq, out: gfs] QSat/spec;
+  [sat: gfq, form: gfv] qsat_verdict;
+}

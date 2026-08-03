@@ -1,0 +1,89 @@
+[[rule]]
+id = "ReLUNeg"
+source = "../BL-rules.toml"
+row = "ReLU-Neg"
+proof = "book/proofs/ReLUNeg.tex"
+commentary = '''
+\rulename{ReLU-Neg} is the exactness rule for the inactive side of a
+ReLU, \rulename{ReLU-Pos}\textquotesingle s mirror: once $\Phi \vdash
+h \leq 0$ is proven for the preactivation wire of a cited ReLU
+application, the output is pinned to a constant — $\Phi \vdash y = 0$.
+A producer reaches for it when bound propagation has shown a neuron
+stably inactive (a proven upper box bound at or below zero): the
+neuron is dead on the region of interest, and the equality lets
+\rulename{EqElim} rewrite $y$ to the literal constant $0$ everywhere
+downstream — dead-neuron elimination in certificate form.
+
+What the checker recomputes, given the payload (premise proof, the two
+wires): the linkage — a packaged ReLU application at exactly these
+ports, of positive total size (the family\textquotesingle s
+port-lookup side condition, displayed in the \rulename{LiRPA}
+section); that the premise\textquotesingle s conclusion is literally
+the atom $h \leq 0$ over the same premise formula; and that the
+conclusion is literally $y = 0$. Both atoms are elementwise over the
+node\textquotesingle s tensor shape.
+
+Drop the premise and the rule is false at any entry with $h > 0$
+(there $y = h \neq 0$). Drop the linkage and an arbitrary wire is
+asserted zero. As with \rulename{ReLU-Pos}, the boundary $h = 0$ needs
+no exclusion: both semantic cases of the node force $y = 0$ there.
+'''
+note = '''
+TIER NOTE: as for \rulename{ReLU-Pos}, and for the mirrored reason —
+the unpacking\textquotesingle s active branch would need $h = 0$ from
+$h \geq 0 \wedge h \leq 0$, an antisymmetry step no catalogue rule
+provides — the rule is admissible by reduction to verified machinery:
+the shipped warrant is the direct lemma \texttt{sound\_reluNeg}. The
+enumeration argument is stated once, in the \rulename{ReLU-Pos}
+proof section.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}; linkage premise --- including the positive-size
+narrowing hidden under the displayed $\in$ --- exactly as in the
+\rulename{LiRPA} dictionary, the family preamble.
+\begin{itemize}
+\item $h \mapsto$ \texttt{preact}; $y \mapsto$ \texttt{post};
+  $\ReLU_{\{h\}\to\{y\}} \in H$ $\mapsto$ \texttt{hlink} $:$
+  \texttt{reluLinked H preact post}.
+\item premise $\Phi \vdash h \leq 0$ $\mapsto$ \texttt{ih} with
+  \texttt{hpremPost} $:$ \texttt{premise.post = .atom .le (.var
+  preact) (.const 0)} --- displayed comparator and operand order
+  carried exactly; $\Phi$ shared via \texttt{hpre}.
+\item conclusion $\Phi \vdash y = 0$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .eq (.var post)
+  (.const 0)} --- output wire left, constant right, as displayed.
+\end{itemize}
+Width note: certified atoms elementwise over the cited
+application\textquotesingle s tensor shape (batch semantics, as at
+\rulename{LiRPA}); the boundary $h = 0$ is again condition-free ---
+the mirrored antisymmetry step of the tier note. Beyond the
+family\textquotesingle s linkage gate, neither side is wider: every
+hypothesis of \texttt{sound\_reluNeg} is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_reluNeg"]
+intro = '''
+The warrant consumes the family linkage extraction
+(\texttt{reluLinked\_facts}, displayed in the \rulename{LiRPA}
+section) and the premise, eliminated entrywise; the payload structure
+is \texttt{PReLUNegData} (Core/Catalogue.lean).
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+As for the rest of the ReLU family: the HOL4 development ports the
+checker\textquotesingle s first-order computational surface and stops
+short of the proof-object layer, where this rule\textquotesingle s
+payload (two formula equations plus the family linkage) lives; the
+linkage inspects the hypernet\textquotesingle s application list, a
+structure the port\textquotesingle s header inventories among its
+deliberate exclusions; and the port predates the
+linkage\textquotesingle s realization. A HOL statement becomes
+writable when the proof-object/payload layer is ported together with
+the hypernet structures and the packaged ReLU application.
+'''

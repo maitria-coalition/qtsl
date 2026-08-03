@@ -1,0 +1,14 @@
+# bindings.toml.d/StreettTargetCellCollapse.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'StreettTargetCellCollapse'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QStreett"
+decl = "ranking_guard_collapse"
+sha256 = "b0165f8ff6fa5941996dc8323fc574e6824d8398d61125f7540df561a5facc77"
+
+[[correspondence]]
+entry = "StreettTargetCellCollapse"
+steele_sha256 = "aa8757e218f3dadf974cd1cda16bbed40abcf2ea12dfaf112ef0ca4679df072b"
+statements_sha256 = "1af1c9a11214399ac27468b49f7dbd37d6edcf82b477b9840b6d509e6d87ede7"
+prose_sha256 = "20a4211e30c346c942220cf16ee89f779771cec4f6754b80dfbbbf86138175f8"
+

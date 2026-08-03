@@ -1,0 +1,69 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as in the \rulename{Ax}
+section; counterexamples read over the one-wire hypernet.}
+
+\textbf{Claim (\texttt{sound\_orI\_left} /
+\texttt{sound\_orI\_right}).}\enspace Two constructors, one per
+injection; the payload of either supplies a premise sequent
+$\Phi \vdash \Psi_i$ with its sub-derivation, the \emph{added} disjunct
+(\texttt{other}), and two tree identities: shared context
+(\texttt{preEq}) and, for the left constructor, that the conclusion's
+post is $\Psi_i \vee \mathrm{other}$ --- for the right,
+$\mathrm{other} \vee \Psi_i$ (\texttt{postEq}). If the premise sequent
+is semantically valid, so is $\Phi \vdash \Psi_1 \vee \Psi_2$.
+
+\begin{bthm}[soundness of $\vee$I]\label{thm:ori-sound}
+Under the payload identities of either constructor, semantic validity of
+the premise sequent implies semantic validity of the conclusion, over
+every hypernet.
+\end{bthm}
+\begin{proof}
+Left constructor; the right is its mirror image.
+
+\emph{Step 1 (apply the premise).} Let $\sigma$ be admissible with
+$\sigma \models \Phi$; by \texttt{preEq} and premise validity,
+$\sigma \models \Psi_i$.
+
+\emph{Step 2 (inject).} The $\vee$-clause of satisfaction is
+meta-disjunction, and a disjunction is satisfied by satisfying either
+side; the witnessed side is $\Psi_i$, and \texttt{postEq} pins the
+conclusion's post as the tree $\Psi_i \vee \mathrm{other}$.
+\end{proof}
+
+\begin{bremark}[the added disjunct is wholly unconstrained]
+\label{rem:ori-other}
+\texttt{other} may be unsatisfiable, ill-typed, or mention untyped
+wires; nothing is demanded of it, because satisfaction of a disjunction
+demands only the witnessed side and the satisfaction relation carries no
+typing side conditions of its own --- typing enters the calculus only
+through rules that must evaluate. $\vee$I is conclusion-side weakening,
+the mirror of \rulename{Weaken}'s premise side: both discard strength,
+and discarding is always semantically safe. Dropping \texttt{postEq}
+frees the conclusion outright; dropping \texttt{preEq} admits the
+context-swap family (the \rulename{Weaken} section).
+\end{bremark}
+
+\begin{bremark}[where a producer actually reaches for it]
+Mostly to make two branches agree: the branches of a disjunction
+elimination must conclude a \emph{common} formula, so each branch
+$\vee$I-injects its own branch-specific conclusion into the shared
+disjunction. The separation instance quoted in the $\vee$E section is
+the miniature: both of its branch derivations are an \rulename{Ax} node
+followed by one $\vee$I node (left in one branch, right in the other).
+\end{bremark}
+
+\begin{bremark}[lattice reading]
+$x \leq y$ implies $x \leq y \sqcup z$: the upper-bound half of join's
+universal property (\texttt{M3.orI\_l\_kit}/\texttt{M3.orI\_r\_kit});
+the other half is exactly $\vee$E. The four $\wedge$/$\vee$ rules are
+the meet and join adjunctions in full, which is the observation the
+$\vee$E section's countermodel turns into a theorem about what the core
+\emph{cannot} derive.
+\end{bremark}
+
+\begin{anchors}
+Steps 1--2 (left) & \texttt{sound\_orI\_left}; payload \texttt{POrIData.left} (fields \texttt{other}, \texttt{preEq}, \texttt{postEq})\\
+mirror (right) & \texttt{sound\_orI\_right}; payload \texttt{POrIData.right}\\
+dispatch & wired as \texttt{RuleData.orI} into \texttt{ProofObject.sound}\\
+lattice reading & \texttt{M3.orI\_l\_kit}, \texttt{M3.orI\_r\_kit}\\
+\end{anchors}

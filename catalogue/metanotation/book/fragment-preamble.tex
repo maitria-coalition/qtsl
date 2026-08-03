@@ -1,0 +1,33 @@
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{stmaryrd}%
+\usepackage{mathpartir}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+
+\directlua{luaotfload.add_fallback("bookmonofb",{
+  "file:FreeMono.otf:mode=node;",
+  "file:DejaVuSans.ttf:mode=node;",
+  "file:FreeSerif.ttf:mode=node;",
+  "file:STIX-Regular.otf:mode=node;",
+  "file:Asana-Math.otf:mode=node;",
+})}
+\setmonofont{DejaVu Sans Mono}[Scale=MatchLowercase,RawFeature={fallback=bookmonofb}]
+
+@@MACROS@@
+
+\newcommand{\blcatrulebreak}{\clearpage}
+\newcommand{\blcatsection}[1]{%
+  \clearpage\section{#1}%
+  \gdef\blcatrulebreak{\par\bigskip\gdef\blcatrulebreak{\clearpage}}}
+\newcommand{\rulesection}[3]{%
+  \blcatrulebreak
+  \refstepcounter{rulesec}%
+  \pdfbookmark[2]{Rule #1.\ #2}{blcat-rule-#1}%
+  {\LARGE\bfseries Rule #1.\ \rulename{#2}}\enspace
+  {\large\textcolor{NoteGray}{(#3)}}\par
+  \medskip\hrule height 0.8pt\medskip}

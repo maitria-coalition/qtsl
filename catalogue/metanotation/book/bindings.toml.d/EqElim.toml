@@ -1,0 +1,44 @@
+# bindings.toml.d/EqElim.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'EqElim'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Formula.subst"
+sha256 = "1e290e37a7b3ec11bc1e6ee302ae0b80561649f248835344cf2995ebc56284d8"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PEqElimData"
+sha256 = "f74f67d03c6792c3dbbce9615562c9e3c240797a5eda30c09ffa7b6f90eb5d82"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Term.subst"
+sha256 = "b4f72d66c8af180819543ae45aa209464b5034a2d1869ebd28df88a280e208a3"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "substituteInFormula"
+sha256 = "99df8b61dbdfa07051dc03b19647aa3b65b7ab5b661ebb3e9c07996c83c581cc"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "Formula.holds_subst_congr"
+sha256 = "db9fe2b74923304cdc48a05fb68627ad499d3bc70c33b4ee59d57d3f9619e142"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "Term.evalQ_subst_congr"
+sha256 = "f6590b2f86f3e72827fa6f7b441876a19779e5fce779b140222fb906330a8627"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_eqElim"
+sha256 = "48e37604f3c7fe0c67a77d53ab040dc702d22de9aa18d601efa4b73713b041c7"
+
+[[correspondence]]
+entry = "EqElim"
+steele_sha256 = "da09cd4f7ee66748fef71325bf46d7dfb59674628a22f13b021fa62c190a9b96"
+statements_sha256 = "403ada1ad528b4667dcf834e1544b89c0728631a2c1bb8bab2ac22c39e4154e9"
+prose_sha256 = "b6e9c687be8d7ce4bc8e1f1fc9d075e3690f84e8cd2b172b20479fdb45afd5d3"
+

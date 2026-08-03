@@ -1,0 +1,597 @@
+\chapter{Tutorial: Producing Proofs with MTK}
+\label{ch:qtsl-tutorial}
+
+The Quick Start (chapter~\ref{ch:qtsl-quickstart}) had you run one
+producer end to end. This tutorial teaches you to \emph{be} one: to
+construct specifications, judgments, and derivation rows with the
+producer toolkit's TypeScript surface, to read refusals as
+instructions, and to leave behind artefacts an independent checker
+will accept. The intended reader is either a capable agent doing
+verification work or a verification-literate human; the text is
+written for the human, and the agent will cope. Every listing below
+runs as printed, and every output shown is the verbatim transcript of
+a real run: the book's build regenerates these transcripts by
+executing the printed listings, and each one's source records the
+exact tool revision and date it ran (one commodity arm64 box).
+
+\section{The producer's stance}
+\label{sec:tut-stance}
+
+Three commitments shape every surface you are about to touch, and
+every signature below answers to one of them:
+
+\begin{enumerate}
+\item \emph{Nothing here is trusted.} No function in the producer
+  toolkit renders a verdict anyone should believe. Validation helpers
+  exist --- they save round-trips --- but they are preflights; the
+  checker's independent replay of your artefact is the only
+  authority. A wrong producer costs a rejected certificate, never a
+  false verdict, which is why the producer is allowed to be fast,
+  heuristic, and as clever as it likes.
+\item \emph{Witnesses always, never bare verdicts.} Any operation
+  that can fail for a content reason returns the geometry of the
+  failure --- which coefficient, which cell, which field, which
+  subformula --- because failure geometry is routing advice for your
+  next attempt. You will spend much of your producing life reading
+  refusals; the API is designed so that this is pleasant.
+\item \emph{Exactness is a type property, not a discipline.} Data
+  that certificates cite is exact --- arbitrary-precision rationals
+  and integers --- and lives in types that say so. Floating-point
+  data proposes and routes but cannot cross into the exact world by
+  accident: the one bridge is an explicit snap, and what comes out of
+  it is a new proposal to certify, not a blessed float.
+\end{enumerate}
+
+\section{Setup}
+\label{sec:tut-setup}
+
+The TypeScript package \texttt{@maitria/mtk} lives in the
+\path{maitria-coalition/mtk} repository as its \path{ts/} package
+over a native addon crate (the front matter's preview note applies to
+the package's migration state at this preview). It is two layers by
+design: a deliberately flat native boundary (napi bindings over the
+Rust core --- there is exactly one implementation of every
+construction, and it is the Rust one; the differential receipts
+shipped with each binding prove the TypeScript-driven path emits
+bytes identical to the Rust-driven one) and an \emph{arrangement}
+layer that owns all public idiom --- discriminated unions, branded
+types, readonly records. You will only ever touch the arrangement.
+
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+git clone https://github.com/maitria-coalition/mtk
+cd mtk/ts && npm install
+npm run build:native   # cargo builds the addon; CUDA optional, loaded at runtime
+\end{Verbatim}
+
+\noindent A Rust toolchain is required --- the native addon builds
+from source. To use the package from your own project, install it by
+path (\texttt{npm install ../mtk/ts}; npm links the checkout), which
+is the shipped route at this preview; \texttt{@maitria/mtk} on the
+npm registry: arriving. Node $\ge 22.18$ (the package's declared
+\texttt{engines} floor); producer scripts run under
+\texttt{npx tsx} with no build step of their own. Boxes without a GPU
+run the same scripts and get the same answers --- acceleration
+changes wall-clock, never content.
+
+\section{Exact numbers, and the one bridge from float}
+\label{sec:tut-exact}
+
+The class the certificates cite is \texttt{Q}: immutable,
+bigint-backed exact rationals with a canonical text form
+\texttt{"n/d"}. Everything about its API enforces stance~3:
+
+\input{generated/transcripts/qtsl-tutorial/exactness-src}
+
+\input{generated/transcripts/qtsl-tutorial/exactness-run}
+
+Decimal \emph{text} parses exactly ($\texttt{"0.1"} \mapsto 1/10$:
+the string denotes a rational, unambiguously), but the
+\emph{double} \texttt{0.1} is refused --- it denotes
+$3602879701896397/2^{55}$, and pretending otherwise is how
+exactness-as-discipline projects fail. When you genuinely hold a
+float and want a rational, you say so: \texttt{rationalize} snaps to
+the best approximation under an explicit denominator budget (note
+$\pi \mapsto 355/113$, as it should). The budget is a knob you will
+meet again: coarser snaps make smaller, cheaper-to-check
+certificates, and no snap can make a false claim true --- the
+checker decides either way.
+
+\section{A first certified fact}
+\label{sec:tut-bernstein}
+
+The smallest genuinely useful certified fact in this toolkit: the
+sign of a polynomial on a region. Bernstein coefficients of $p$ over
+a simplex bound $p$ there, so an all-positive coefficient table
+\emph{is} a sign certificate --- data whose correctness an
+independent checker re-derives by arithmetic alone, no cleverness
+required.
+
+\input{generated/transcripts/qtsl-tutorial/sign-src}
+
+\input{generated/transcripts/qtsl-tutorial/sign-run}
+
+Read the first line closely, because it is stance~3 at work in the
+machinery. The enclosure pipeline is exact end to end --- integer
+numerators over a shared per-cell denominator --- and it runs as a
+\emph{precision ladder}: fixed-width device tiers serve the cells
+they can handle without overflow, and any cell they cannot is flagged
+and re-derived by an arbitrary-precision host replay. Every rung
+computes the same exact integers; the ladder trades width for speed,
+never exactness for speed. The listing pins \texttt{device: "cpu"} so
+that both cells are served by the host rung (\texttt{0,0,2}) and your
+transcript matches this one on any box, GPU or none; drop the pin
+(the default is \texttt{"auto"}) and a free GPU takes the cells
+instead --- on this box the package's own example reported
+\texttt{cuda:NVIDIA GB10 ...\ ladder served F/M/host = 2,0,0}. Same
+cells, same enclosures, same certificate --- the transcript differs
+only in who did the arithmetic.
+
+Cell 1 is the more instructive half of the output: the enclosure
+straddles zero, so the honest answer is \emph{sign open}, with
+subdivision as the routing advice. Bernstein enclosures converge
+under subdivision and degree elevation, so ``open'' is an invitation
+to spend more, not a dead end --- and when the budget runs out
+before the sign closes, that too can be certified rather than
+shrugged (the Cookbook's honest-stop pattern,
+section~\ref{sec:ckbk-honest-stop} of
+chapter~\ref{ch:mtk-cookbook}).
+
+\section{Propose, then dispose}
+\label{sec:tut-two-tier}
+
+The two-tier discipline in one screen: a linear program solved twice,
+once by the float lane (fast, unciteable), once by the exact lane
+(the only tier a certificate may cite).
+
+\input{generated/transcripts/qtsl-tutorial/two-tier-src}
+
+\input{generated/transcripts/qtsl-tutorial/two-tier-run}
+
+The float tier even performs its own indictment: it reports
+\texttt{0.6000000000000001} for a quantity that is $3/5$. On a toy
+problem the exact tier could simply run alone; the discipline earns
+its keep at scale, where the float lane's job is to find \emph{which}
+exact computation is worth paying for --- its duals say which
+constraints bind, its solution says where to warm-start, its speed
+lets you sweep a thousand candidates to find the one worth
+certifying. The full pattern, with the case studies that shaped it,
+is the Cookbook's opening chapter
+(section~\ref{sec:ckbk-proposer-disposer} of
+chapter~\ref{ch:mtk-cookbook}).
+
+\section{Stating claims: specs and judgments}
+\label{sec:tut-spec}
+
+So far we have certified facts the toolkit already knew how to
+phrase. To produce proofs \emph{about systems}, you state the claim
+yourself, in QTSL: a specification is a record of claim components
+--- each a formula over a system's observables --- and a judgment is
+the record that pairs a specification
+with a system (or a region, or a pair of specifications --- one
+record species per judgment kind). Both are constructed here as
+plain data, preflighted in Rust, and emitted as versioned artefacts
+through the same canon encoder that carries every other certificate.
+
+The Quick Start's FrozenLake claim, stated properly this time:
+
+\input{generated/transcripts/qtsl-tutorial/spec-src}
+
+\input{generated/transcripts/qtsl-tutorial/spec-run}
+
+Three habits to take from one screen. First, the wire is visible and
+versioned: every emitted artefact carries a schema string
+(\texttt{maitria.qtsl.spec.v1}) and a version, and the bytes are
+produced by the Rust canon encoder --- TypeScript never
+re-implements an encoding, which is why cross-language byte drift is
+structurally unrepresentable rather than tested away. Second,
+decoded data is data: \texttt{decode} gives you back a record, and
+if you received the bytes from someone else you re-run \texttt{build}
+before leaning on it. Third, the refusal: it is a discriminated value
+(\texttt{kind: "probRange"}), it carries the address of the offence
+inside the formula tree (\texttt{(root)} --- addresses are relative
+to the node you preflighted, and record-level checks come with full
+paths like \texttt{forall[0].prob.path}), and it carries the
+offending exact value as canonical text (\texttt{p: "3/2"}). Producer code branches on refusal kinds the way it
+branches on any other data; nothing is buried in exception strings.
+
+Judgments follow the same grammar one level up: the \texttt{judgment}
+namespace has one builder per judgment kind --- satisfaction, region
+satisfaction, spec equivalence, distance, and the rest --- each
+taking branded citation handles rather than loose strings, each
+emitting a versioned artefact. The claim record is deliberately
+boring; the interesting objects are the derivations that discharge
+it, which is where the rules come in.
+
+\section{Derivation rows: the Rule Catalogue as an API}
+\label{sec:tut-rules}
+
+Every inference rule in the Rule Catalogue
+(chapter~\ref{ch:qtsl-manual}) is available as a typed row builder:
+premises as typed citations, payload fields exact, side conditions
+enforced at construction, canonical bytes out. A proof, in this
+toolkit, is a table of such rows --- which is what lets a checker
+replay it row by row, and what lets a database engine store, merge,
+and re-derive it like any other data.
+
+The smallest interesting rule is a good first row.
+\rulename{QUnionBound} takes two exception-mass bounds and concludes
+their sum --- the workhorse glue for assembling per-obligation
+failure budgets into a system-level one:
+
+\input{generated/transcripts/qtsl-tutorial/rule-row-src}
+
+\input{generated/transcripts/qtsl-tutorial/rule-row-run}
+
+Notice who computed $3/16$: not this script. Derived conclusions
+come back from the Rust core's own \texttt{concludes} logic, so the
+row you emit and the arithmetic it claims were produced by the same
+implementation the differential receipts pin --- your script
+assembles and cites, it never does load-bearing arithmetic. Notice
+also the premise handles: \texttt{judgmentRef("qregionsat", $i$)} is
+a branded type, and a rule whose premise slot wants a region-\allowbreak
+satisfaction judgment will not accept a plain number, a proof
+reference, or a judgment of the wrong kind. The edge discipline of
+the proof calculus is enforced by the type checker before the
+checker ever sees your bytes.
+
+When you need more than glue --- safety batteries, deadline
+batteries, Streett bundles, Morse decompositions, composition rules
+--- the pattern never changes: find the rule in the Rule Catalogue,
+which documents its premises, payload, and side conditions alongside
+its mechanization status; call its builder; read refusals until the
+row constructs. The catalogue chapter is the map and stays the map;
+this tutorial deliberately teaches only the door.
+
+\section{Certificates are documents: read one}
+\label{sec:tut-anatomy}
+
+The Quick Start ended by mutating a certificate through the generic
+document seam. Here is the reading half of that seam, on the same
+bytes --- because the fastest way to understand what a checker
+re-derives is to look at what the producer actually wrote down:
+
+\input{generated/transcripts/qtsl-tutorial/anatomy-src}
+
+\input{generated/transcripts/qtsl-tutorial/anatomy-run}
+
+Everything a checker of this certificate must re-derive --- the
+Quick Start's four obligation families --- is visibly \emph{here}:
+the claim ($\mathtt{0x032f}/\mathtt{0x4ce3} = 815/19683$), the kernel
+as exact rationals (the first row: from state 0 under action 0,
+probability $2/3$ of staying put --- two of its three equally likely
+moves bounce off the corner), the policy, the value table. A
+certificate contains no argument and no trust requests; it contains
+the numbers that make the argument checkable. When you produce a new
+certificate species, this is the standard to hold your bytes to:
+could a stranger's checker re-derive every obligation from the
+document alone?
+
+That standard is what survives every carriage the document rides.
+These particular bytes travel as a sidecar file; the reproduction
+spine commits the same certificate a second way, as rows of a
+signed, content-addressed geolog commit --- ordinary database
+content whose row vocabulary is \path{theories/Qtsl.geolog} in this
+repository, with no certificate file format of its own --- and you
+have already read certificate rows directly, as plain text, in the
+Quick Start's break-it section. What the generic document seam gives
+you here is the producer-side reading of the content in its
+canonical byte carriage; the anatomy lesson is identical on either,
+because completeness reads the same from any carriage.
+
+The mutation seam (\texttt{dp.docMutate}) is the same document
+surface pointed the other way, and it exists because a mutant
+battery is part of a certificate lane's deliverable, not an optional
+extra: every claim species ships with mutants its checker must
+refuse, and a witness that stays green when the claim is broken was
+never a witness (section~\ref{sec:ckbk-mutant-battery} of
+chapter~\ref{ch:mtk-cookbook}). The seam checks that the unmodified
+document round-trips byte-identically before it will perform
+surgery, so your mutants differ from the golden bytes in precisely
+the field you broke.
+
+\section{The shape of a real producer program}
+\label{sec:tut-program}
+
+Scale the last five sections up and you have the actual production
+programs behind the Experiments chapter. The FrozenLake producer you
+ran in the Quick Start is a few hundred lines organized along this
+tutorial's spine, and reading it (the \texttt{gymdp} producer in the
+\path{maitria-coalition/mtk} repository, with its receipts and
+companion drivers in \path{maitria-coalition/qtsl-experiments}) is
+the recommended next hour. The anatomy the campaign's producers
+share:
+
+\begin{itemize}
+\item \emph{a configuration grid}, not a one-off --- environments
+  $\times$ deadlines $\times$ rounding budgets, because certificates
+  are cheap once the lane exists and ladders are how cost curves get
+  published;
+\item \emph{an independent cross-instrument} --- a plain
+  floating-point value sweep, kept structurally separate from the
+  exact lane, with an explicit agreement tolerance; it certifies
+  nothing, and it catches producer bugs before any checker has to;
+\item \emph{exact dominance assertions between lanes} --- each
+  dyadic-rounded certificate is checked against its exact sibling
+  ($0 \le \text{exact} - \text{dyadic} \le T\cdot 2^{-k}$, the
+  \texttt{gymdp} source's own \emph{exact dominance} assertion), so
+  even the cheap lane's error is a theorem, not a hope;
+\item \emph{emission through the canon encoder, then the mutant
+  battery, then receipts} --- machine-readable production receipts
+  (bounds, byte counts, timings, mutant verdicts) written beside the
+  artefacts, because a reproduction spine is built from receipts,
+  not recollections.
+\end{itemize}
+
+\noindent When a step refuses mid-program, the refusal's geometry
+picks the escalation: subdivide the cell, raise the degree, spend a
+bigger denominator budget, climb from the closed form to the LP to
+the heavier rule --- cheapest instrument first, and certify the
+honest stop when the budget genuinely ends
+(sections~\ref{sec:ckbk-cheap-first} and~\ref{sec:ckbk-honest-stop}
+of chapter~\ref{ch:mtk-cookbook}).
+
+\section{Working an obligation workspace}
+\label{sec:tut-session}
+
+Everything so far drove the toolkit imperatively: your script decided
+each call, held the intermediate state in variables, and threw both
+away on exit. That is the right shape for a five-minute production
+and the wrong shape for one that runs long enough to be interrupted,
+plays several instruments against one claim, or is worked by
+something other than its author. The toolkit's session surface
+exists for that regime. Its bookkeeping object is the
+\emph{obligation workspace}, and its vocabulary is four nouns:
+
+\begin{itemize}
+\item an \emph{obligation} is a claim to be certified --- a statement
+  of a registered claim kind --- with a status: \texttt{open},
+  \texttt{discharged}, or \texttt{refuted};
+\item a \emph{move} is one typed action from the obligation's menu.
+  The menu is the claim kind's to offer: each move declares its
+  parameter schema, a cost hint (\texttt{cheap} to
+  \texttt{expensive} --- advice for sequencing, never a gate), and
+  what it may do: discharge, refute, or spawn;
+\item an \emph{attempt} is one executed move: the outcome, the wall
+  time, and either a \emph{witness} (for discharged or refuted ---
+  the exact-tier artefact that justifies the verdict) or
+  \emph{evidence} (for inconclusive --- failure geometry, which by
+  now you know to read as routing advice);
+\item the \emph{event log} is the whole truth: the workspace is a
+  pure fold of an append-only event list, so replaying the log
+  reconstructs the state without re-running any kernel.
+\end{itemize}
+
+\noindent Two disciplines are enforced by the workspace itself
+rather than requested of its users. First, stance~2 is mechanized at
+the recording boundary: a claim kind that returns a verdict without
+a witness is refused on the spot --- the workspace will not record a
+bare verdict, so its bookkeeping can never get ahead of the
+artefacts that justify it. Second, structural moves \emph{spawn}: a
+decomposition move creates child obligations that jointly cover the
+parent's claim, and from that moment the parent's status is nobody's
+to set --- it closes only by propagation. All children discharged
+closes the parent (\texttt{via children}); one refuted child refutes
+it, since the child covers part of the claim. You work the leaves;
+the workspace does the lifting.
+
+Here is the whole model in one sitting, on a claim small enough to
+watch: $x(1-x) - 1/4 \le 0$ on $[0,1]$ --- true, with equality at
+$x = 1/2$. (The package is \texttt{@maitria/mtk-session}, the
+\path{maitria-coalition/mtk} repository's \path{session/} package,
+beside the producer package; install it by path like the producer
+package in section~\ref{sec:tut-setup}. It runs its TypeScript
+sources directly --- Node $\ge 22.18$.)
+
+\input{generated/transcripts/qtsl-tutorial-session/session-src}
+
+\input{generated/transcripts/qtsl-tutorial-session/session-run}
+
+Four things in this transcript repay a close look.
+
+\emph{The straddle is real.} The enclosure on the whole box is
+$[-1/4, 1/4]$: the control polygon of a strictly concave parabola
+lies above it, so the degree-2 ceiling lands at $1/4$ rather than at
+the true maximum $0$. The note beside the evidence says what to do
+about it, and the interesting word in it is \emph{where}: ``near the
+suspected maximum.''
+
+\emph{The split point was knowledge.} Splitting at the touch point
+$x = 1/2$ moves each half's maximizer to an endpoint --- and
+endpoint Bernstein coefficients are function values, so both child
+enclosures land their ceilings at exactly $0$ (the transcript's
+\texttt{["-1/4","0"]}, twice) and discharge by one cheap move each.
+A midpoint-splitting heuristic would have done the same here by
+luck; on a claim whose touch point is off-center, choosing the split
+is a contribution only the mover can make. Hold that thought for one
+section.
+
+\emph{Nobody closed the parent.} The attempted third move on
+\texttt{ob1} was refused, in words that state the discipline; the
+final status arrived by propagation when the second child
+discharged, and the parent's witness is the decomposition itself ---
+\texttt{\{"dischargedChildren":["ob2","ob3"]\}} --- while the
+exact-tier artefacts live on the leaves.
+
+\emph{The log determines the state.} Five events: one pose and four attempts
+(the refused call appended nothing). The last attempt's event
+carries two closures --- the child's, and the root's by propagation
+--- and replay applies recorded effects without re-executing any
+move, which is why the rebuilt workspace is identical even though
+nothing requires a kernel to be deterministic.
+
+The daemon is this same object held behind a socket.
+\texttt{mtk-session serve} (run from the package checkout as
+\texttt{node src/main.ts serve} at this preview) holds one workspace
+and speaks newline-delimited JSON-RPC~2.0 over a unix domain socket,
+or over stdio for harnesses that spawn it as a child: one request
+per line, one response per line, seven methods
+(\texttt{session.info}; \texttt{obligation.pose}, \texttt{.list},
+\texttt{.get}, \texttt{.moves}, \texttt{.apply};
+\texttt{workspace.log} for the event tail). State lives in the
+daemon, so clients disconnect and reconnect freely, and errors carry
+structured codes rather than prose. JSON is a deliberate choice at
+this one boundary --- the clients are foreign by construction: any
+agent runtime, any language, or a person with \texttt{nc} --- and no
+certificate content crosses it: certificates land through the same
+canon encoding as everywhere else in this book, and the protocol
+carries menus, selections, and witness summaries.
+
+\section{The strategy layer}
+\label{sec:tut-strategy}
+
+In the last listing, the workspace kept the books, the kernels
+computed the truth, and everything interesting in between --- range
+first because it is cheap, split \emph{there} because that is where
+$p$ touches zero --- was you. That seat has a name in the session
+surface: the \emph{proposer}. A proposer is shown the open
+obligations, the evidence accumulated so far, and the move menus,
+and asked for one selection at a time. The Executive Summary
+promised this seat when it described agents driving tactic selection
+over an obligation workspace ``with the strategy intelligence
+supplied by the reader as the language model of their choice''
+(chapter~\ref{ch:exec-summary}), and this section is
+that layer --- shaped so that anything can sit in it. The opening
+page addressed this tutorial to a capable agent doing verification
+work; over the serve socket, that reader holds the seat personally.
+
+The trust statement, precisely. A proposer chooses \emph{which}
+exact computation runs next --- nothing else. It cannot fabricate an
+outcome: a proposal outside the posted menu is rejected against the
+menu and the error is fed back; two consecutive failures end the
+loop with the workspace untouched. It cannot inject a witness:
+witnesses are constructed by move execution only, behind the
+no-bare-verdict guard of the previous section. And it cannot upgrade
+a shortfall into a discharge, because the comparisons happen in
+exact rational arithmetic inside the claim kinds. Stance~1 gains its
+corollary: because verdicts never come from the strategist, the
+strategist may be arbitrarily wrong --- confused, overconfident,
+adversarial --- at a cost denominated in budget, never in soundness.
+The same reason the producer was allowed to be fast and heuristic,
+applied one level up.\footnote{This seat has a literature: Laurent
+  and Platzer learn to refine proof-search strategies
+  \cite{laurent22}, and their oracular programming gives LLM-enabled
+  software a modular foundation in which untrusted oracles answer
+  through checked interfaces \cite{laurent25}; closest to this
+  chapter's workflow, Kabra and colleagues use language models to
+  automate interactive theorem proving and control synthesis for
+  hybrid games \cite{kabra26}.}
+
+The package ships two proposers, and the contrast between them is
+the demonstration. The \emph{scripted} proposer is a deterministic
+cheapest-first ladder per claim kind: no key, no network, the CI
+path, and the budget floor any cleverer strategy ought to beat. Here
+it drives the Quick Start's claim (section~\ref{sec:qs-claim} ---
+the same claim; there you ran one producer end to end, here a
+workspace orchestrates a ladder of instruments):
+
+\input{generated/transcripts/qtsl-tutorial-session/demo-scripted}
+
+(Long lines are wrapped at JSON commas to fit the page; the
+package's committed receipts carry both of this section's
+transcripts unbroken.) The three attempts are one story told
+forward. The float sweep is the cross-instrument of
+section~\ref{sec:tut-program} in move form: its margin estimate,
+$-2\times 10^{-17}$, is float for ``the claim sits dead even with
+the optimum'' --- which the Quick Start disclosed in
+advance: $815/19683$ \emph{is} the exact ten-step optimum, so this
+claim has zero slack. The dyadic attempt is a sound certifying lane,
+and its evidence is exact: a lower bound of $694681/2^{24}$, short
+of the claim by exactly $24917/(2^{24}\cdot 3^{9})$. The shortfall
+is structural, not a tuning failure: every reach probability in this
+model has a power of three for its denominator, the claim is such a
+number in lowest terms, and no dyadic rational equals it --- so a
+rounded-down dyadic bound sits strictly below a zero-slack claim at
+every precision, and no \texttt{kBits} fixes it. The workspace
+records that gap as an exact rational, the evidence routes the
+escalation, and the exact tier discharges with zero slack, its
+witness carrying the certificate content --- the same content,
+digest for digest, that the Quick Start produced.
+
+One seam note at this preview: the demo's remaining transcript
+lines, not shown above, hand the emitted certificate and a
+deliberately broken copy of it to an independent checker, which
+accepts the former and refuses the latter naming the violated
+obligation. We leave those lines out because that checking surface
+is mid-migration to consuming certificates the way the Executive
+Summary describes them --- signed, content-addressed commit content,
+checked by any of the three routes --- rather than as files handed
+to a dedicated binary. The workspace is indifferent to the
+migration: what it stores is a witness, and what a witness cites is
+content.
+
+To seat a model instead of the script, supply an OpenRouter key in
+the environment (\texttt{OPENROUTER\_API\_KEY}; any chat-completions
+model works, and the router's default is used if you name none). The
+model is shown the same view a client at the socket gets, and must
+answer with one JSON object selecting a move:
+
+\input{generated/transcripts/qtsl-tutorial-session/demo-llm}
+
+The transcript's shape makes the argument. Shown the sweep's
+dead-even margin, the model --- Gemini 3.5 Flash through OpenRouter,
+in the committed run --- selected the exact tier at once: two moves
+where the ladder spent three, because it read evidence a fixed
+ladder cannot. Nothing depended on it being right. A worse selection
+would have cost one extra attempt; nonsense selections would have
+ended the loop after two rejections with the workspace untouched;
+and no selection of any kind could have moved a verdict, because
+routing is the one contribution a strategist can make here and the
+only one it is allowed. Same claim, same certificate content, same
+digest: strategy changes the path, never the bytes.
+
+Past the demo, the seat generalizes.
+\texttt{node src/main.ts solve claim.json --strategy llm} poses any
+statement of a registered kind and drives it the same way
+(\texttt{--strategy scripted} is the no-key floor), and an agent
+harness that prefers to hold the seat itself connects to
+\texttt{serve} and speaks the protocol directly. The workspace
+neither knows nor cares what kind of mind proposes.
+
+\section{Where this goes}
+\label{sec:tut-next}
+
+You can now construct every kind of object this book's spine runs
+on --- exact scalars, certified enclosures, claim records,
+derivation rows, certificate documents with their mutant batteries
+--- and you have worked their production from an obligation
+workspace under two different strategists. Three directions from
+here, in increasing order of ambition:
+
+\begin{itemize}
+\item \emph{A worked model at full scale.} The fabrication-line
+  chapter (chapter~\ref{ch:qtsl-minifab}) runs this stack over a
+  model with re-entrant flow, batching, failures, and shared
+  personnel --- and shows the checker's economics on the way. The
+  System Catalogue of model types (chapter~\ref{ch:qtsl-mathematical-models})
+  and the composition patterns
+  (chapter~\ref{ch:qtsl-composition-patterns}) are its reference
+  spine.
+\item \emph{The operating philosophy.} The Cookbook
+  (chapter~\ref{ch:mtk-cookbook}) is the patterns manual this
+  tutorial has been quietly citing throughout; read it the way you
+  would read \emph{How to Solve It} \cite{polya1945solve} --- before
+  you need it.
+\item \emph{Sessions under your own harness.} The workspace and the
+  strategy seat (sections~\ref{sec:tut-session}
+  and~\ref{sec:tut-strategy}) are importable pieces ---
+  \texttt{Workspace}, the proposer interface, the RPC client --- and
+  two growth directions are yours from here: hold the seat yourself,
+  over the socket, from whatever harness you already run; or
+  register a new claim species by implementing one
+  \texttt{StatementKind} (\texttt{validate}, \texttt{describe},
+  \texttt{moves}, \texttt{exec}) whose moves call the builders this
+  chapter taught --- which is how the menu discipline extends to
+  specs, judgments, and derivation rows.
+\end{itemize}
+
+\noindent A graduation exercise, meanwhile, that needs nothing not
+already on your disk: FrozenLake has a hitting companion,
+\texttt{dp.cliffwalkingHitting()}. Produce its deadline certificate,
+read its document, and design its claim-inflation mutant --- the
+matched pair the battery discipline requires --- then check the
+committed corpus to see how close your battery came to the shipped
+one (expected verdicts are recorded in the receipts beside the
+artefacts, and the family's sealed row form ships a mutant battery
+of its own, each entry's expected verdict and violated obligation
+named in its manifest).
+

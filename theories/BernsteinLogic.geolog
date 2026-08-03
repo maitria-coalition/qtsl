@@ -1,0 +1,2526 @@
+import std.{Nat, Q, Shape};
+
+// Engine-decided judgements (oracle = the qtsl certification plugin
+// at the engine's ground seam): bounded computations discharged by
+// evaluation, never derivation-defined. Everything declared and not
+// imported below is ordinary (the default). This header replaces the
+// retired .registry classification sidecar.
+import qtsl.{allForwardDiffBernCoeffsSatisfyP,
+             allForwardDiffBernIntvEnclosuresSatisfyP, applyPredicateToTerm,
+             atomicCompareForm, atomicCompareZero, barycentricHalfspaceForm,
+             blockLatticeWF, cellOneHotForm, cellOutWitnessForm,
+             cellOutZeroForm, cellStrictInteriorForm, conjReplace, conjunctAt,
+             constExactEvalTrue, coverInfeasibilityValid,
+             enclosureWitnessValid, extensionSetOmits,
+             extensionSetSameMembers, farkasCombinationValid,
+             isConicPredicate, isConvexPredicate, isExtensionSetEmpty,
+             isUpwardClosedConicPredicate, natPlusIs, pBoundCombinationValid,
+             polynomialCanonicalEq, positiveSizeWires, positiveSizeWiresForm,
+             positiveSizeWiresTerm, premiseContains, productLatticeChecks,
+             promiseContractConfined, promiseWiresSeparated, psdCertDiagConcl,
+             psdCertDiagWitness, psdCertKernelConcl, psdCertKernelWitness,
+             psdCertShapeDDA, psdCertShapeDDZ, psdCertShapeKA, psdCertShapeKB,
+             psdCertShapeKN, psdCertShapeKZ, psdCertShapeTA, psdCertShapeTZ,
+             psdCertTriConcl, psdCertTriWitness, shapeAxisExtentIs,
+             shapeRankIs, simplexIsFaceMinus, simplexIsIntersection,
+             simplexSameMembers, substituteInFormula, syzygyCombinationValid,
+             syzygyConclusionFormRel};
+
+// BernsteinLogic.geolog
+//
+// The Bernstein-Logic theory tower: the canonical specification of the
+// piecewise-polynomial proof-certificate format as a composition of
+// geolog theories. A certificate is an instance of this tower together
+// with the judgment it concludes; the chase, the mode-annotated
+// judgments, and the side-condition oracles together perform the full
+// proof check, so that a small independent checker re-derives every
+// claim without trusting the machinery that produced it.
+//
+// Stack (each theory extends those below; a theory's name is plural
+// where its central sort would otherwise shadow it --- in this grammar
+// a theory's name in type position denotes a model of that theory, so
+// a sort and its home theory cannot share a name):
+//   Dtypes         --- the closed enum of core scalar carriers
+//   TensorTypes    --- bundle of shape and dtype (shapes ride the
+//                      primordial ground Shape sort: flat nat tuples,
+//                      value identity, no inductive encoding)
+//   Primitives     --- primitive-symbol enumeration
+//   RoundModes     --- IEEE-754 rounding modes
+//   Hypernet       --- the IR: wires, primitive applications, and the
+//                      acyclic wiring structure
+//   Simplicial     --- simplicial complexes (schema for Cell primitives)
+//                      plus facet-extension sets (for BernCone's
+//                      region atom)
+//   Formulas       --- term and formula syntax over Hypernet
+//                      (including the region-membership atom)
+//   Judgments      --- sequent-form judgments: pre |- post over the
+//                      hypernet as implicit context (not a Hoare triple)
+//   BernsteinLogic --- proof-term constructors and rule applicability
+//                      for the seventeen core rules plus admissible
+//                      packagings
+//
+// Judgment form: the sequent Phi |- Psi under the hypernet H; the
+// hypernet's sp-axioms form an implicit hypothesis conjunction SP_H
+// available throughout every proof. There is no per-judgment diagram
+// fragment; the hypernet is the context of all sequents. This follows
+// the redesign in sec:judgments of the companion design document.
+//
+// Rule catalogue:
+//   Core (17):
+//     Propositional + equality: Ax, Weaken, Cut, AndI, AndE, OrI, OrE,
+//       EqElim, EqRefl, EqSym, Antisym
+//     Region atoms:             ConvIntro, ConvElim
+//     Atomic arithmetic:        ArithAtom
+//     Bernstein closure:        BernCone
+//     Assume-guarantee:         Promise, Syzygy
+//   Admissible (derivable from core, some with custom TCB decision
+//   procedures):
+//     Norm, BernCone-Intv, Farkas, Subdivide,
+//     SmallGain (NO proof-term sort and NO wire tag --- producers
+//       elaborate it to a Syzygy node at weights (1, lambda, 1, 1);
+//       warrant: the kernel-checked collapse smallGain_is_syzygy +
+//       SmallGainStep.toSyzygy, lean/BernsteinLogic/Composition.lean),
+//     Cell-In-Interior, Cell-Out,
+//     ConstExact, Bound, PsdCert-T/-DD/-K (row families, declared with
+//       the admissible layer below)
+//
+// Earlier revisions also carried five bespoke rules for the piecewise-
+// linear activation: a six-premise affine-envelope rule and four
+// substitution rules for the positive, negative, nonnegativity, and
+// above-the-line cases. Those rules monopolized one inference the core
+// then lacked: the passage from a pair of opposed inequalities to an
+// equality (every equality derivable from an eq-atom-free context has
+// canonically equal sides, by induction on the atom-polynomial
+// closure). With Antisym in the core, each of the five derives from
+// the activation's sp-fact together with context-carrying OrE and the
+// core equality rules, so they have left the trust surface and this
+// theory no longer declares them.
+//
+// Hoare-style structural rules (Seq, Par, Cons, Id, AndI_tri, OrE_tri)
+// from earlier drafts are NOT present: in the sequent-over-SSA view
+// they are subsumed by Cut + AndI + OrE with no diagram composition
+// required.
+//
+// Modes: every axiom carries an explicit mode keyword.
+//   chase  --- derivation fuel: the axiom's conclusion is derived
+//              (rows minted, elements identified) during saturation.
+//              A chase axiom whose conclusion is a side-condition atom
+//              derives a DEMAND; discharge stays oracle-side, behind a
+//              loud-deferral seam.
+//   report --- a judged constraint: an instance violating it is
+//              commit-able but loudly noted as invalid. The entire
+//              proof-validity layer takes this mode, so an incomplete
+//              or invalid proof is a recorded, inspectable object
+//              rather than an unloadable one.
+//   refuse --- a structural rejection: a violation is a malformed
+//              subject that gates admission.
+//
+// Assumes geolog arithmetic primitives as described in
+// sec:geolog-arith-req of the companion design document:
+//   - ground dtype sets (Q, Z, F64, ...) as built-ins
+//   - arithmetic primitive functions (plus_d, mul_d, ...) with rounding
+//   - cross-dtype embedding iota_d to Q_{+-inf}
+//   - decidable comparison relations
+//   - bounded-computation axiom premises (for Bernstein, LP
+//     infeasibility, polynomial canonical form, and the other
+//     side-condition oracles declared below)
+
+// ============================================================
+// Layer 1: Dtype enumeration
+// ============================================================
+
+theory Dtypes {
+  // Dtype: a CLOSED enum of the geolog core scalar types --- the
+  // carriers a tensor entry or hypernet wire may range over.
+  // Closed-world by construction: the closure denial below refuses any
+  // grown element, so a checked verdict cannot silently expire when an
+  // instance adds eltas (an instance-minted dtype element would denote
+  // nothing in the semantic universe). Structured/dependent carriers
+  // are the StateType stratum's business, never Dtype's; float
+  // carriers are well-defined finite sets with no inline tensor-cell
+  // spelling today (entries at float dtypes await a ground-format cell
+  // rider or envelope-only carriage).
+  Dtype : Set;
+
+  Q      : Dtype;   // exact rationals
+  Z      : Dtype;   // integers
+  Nat    : Dtype;   // naturals
+  B      : Dtype;   // booleans
+  ENNRat : Dtype;   // extended nonnegative rationals
+  F64    : Dtype;   // IEEE-754 binary64
+  F32    : Dtype;   // IEEE-754 binary32
+  F16    : Dtype;   // IEEE-754 binary16
+  BF16   : Dtype;   // bfloat16
+
+  // The registry code, for cell agreement (geolog-envelope's dtype
+  // registry: the primordial band for the exact carriers, the staged
+  // ground-format float family for the rest). DIAGNOSTIC/agreement
+  // data only --- distinctness is carried by the pairwise denials
+  // below, never by this map --- conformance-checked against the
+  // actual cell registry by the enactment battery.
+  Dtype/code : Dtype -> Nat;
+  chase ax/dtype/code_q      : |- Q      Dtype/code = 0;
+  chase ax/dtype/code_z      : |- Z      Dtype/code = 1;
+  chase ax/dtype/code_nat    : |- Nat    Dtype/code = 2;
+  chase ax/dtype/code_b      : |- B      Dtype/code = 3;
+  chase ax/dtype/code_ennrat : |- ENNRat Dtype/code = 5;
+  chase ax/dtype/code_f16    : |- F16    Dtype/code = 19;
+  chase ax/dtype/code_bf16   : |- BF16   Dtype/code = 20;
+  chase ax/dtype/code_f32    : |- F32    Dtype/code = 21;
+  chase ax/dtype/code_f64    : |- F64    Dtype/code = 22;
+
+  // Closure: a negated-premise denial, evaluated after saturation ---
+  // an element equal to NO enum constant is a malformed subject.
+  refuse ax/dtype/closed : forall d : Dtype.
+    not d = Q, not d = Z, not d = Nat, not d = B, not d = ENNRat,
+    not d = F64, not d = F32, not d = F16, not d = BF16 |- false;
+
+  // Distinctness: explicit pairwise denials (the two-constructor
+  // disjointness idiom), one per unordered pair.
+  refuse ax/dtype/distinct_q_z        : Q = Z |- false;
+  refuse ax/dtype/distinct_q_nat      : Q = Nat |- false;
+  refuse ax/dtype/distinct_q_b        : Q = B |- false;
+  refuse ax/dtype/distinct_q_ennrat   : Q = ENNRat |- false;
+  refuse ax/dtype/distinct_q_f64      : Q = F64 |- false;
+  refuse ax/dtype/distinct_q_f32      : Q = F32 |- false;
+  refuse ax/dtype/distinct_q_f16      : Q = F16 |- false;
+  refuse ax/dtype/distinct_q_bf16     : Q = BF16 |- false;
+  refuse ax/dtype/distinct_z_nat      : Z = Nat |- false;
+  refuse ax/dtype/distinct_z_b        : Z = B |- false;
+  refuse ax/dtype/distinct_z_ennrat   : Z = ENNRat |- false;
+  refuse ax/dtype/distinct_z_f64      : Z = F64 |- false;
+  refuse ax/dtype/distinct_z_f32      : Z = F32 |- false;
+  refuse ax/dtype/distinct_z_f16      : Z = F16 |- false;
+  refuse ax/dtype/distinct_z_bf16     : Z = BF16 |- false;
+  refuse ax/dtype/distinct_nat_b      : Nat = B |- false;
+  refuse ax/dtype/distinct_nat_ennrat : Nat = ENNRat |- false;
+  refuse ax/dtype/distinct_nat_f64    : Nat = F64 |- false;
+  refuse ax/dtype/distinct_nat_f32    : Nat = F32 |- false;
+  refuse ax/dtype/distinct_nat_f16    : Nat = F16 |- false;
+  refuse ax/dtype/distinct_nat_bf16   : Nat = BF16 |- false;
+  refuse ax/dtype/distinct_b_ennrat   : B = ENNRat |- false;
+  refuse ax/dtype/distinct_b_f64      : B = F64 |- false;
+  refuse ax/dtype/distinct_b_f32      : B = F32 |- false;
+  refuse ax/dtype/distinct_b_f16      : B = F16 |- false;
+  refuse ax/dtype/distinct_b_bf16     : B = BF16 |- false;
+  refuse ax/dtype/distinct_ennrat_f64  : ENNRat = F64 |- false;
+  refuse ax/dtype/distinct_ennrat_f32  : ENNRat = F32 |- false;
+  refuse ax/dtype/distinct_ennrat_f16  : ENNRat = F16 |- false;
+  refuse ax/dtype/distinct_ennrat_bf16 : ENNRat = BF16 |- false;
+  refuse ax/dtype/distinct_f64_f32    : F64 = F32 |- false;
+  refuse ax/dtype/distinct_f64_f16    : F64 = F16 |- false;
+  refuse ax/dtype/distinct_f64_bf16   : F64 = BF16 |- false;
+  refuse ax/dtype/distinct_f32_f16    : F32 = F16 |- false;
+  refuse ax/dtype/distinct_f32_bf16   : F32 = BF16 |- false;
+  refuse ax/dtype/distinct_f16_bf16   : F16 = BF16 |- false;
+}
+
+// ============================================================
+// Layer 2: Tensor types (shape x dtype)
+// ============================================================
+//
+// Shapes are values of the PRIMORDIAL ground sort `Shape` (a finite
+// sequence of naturals, read positionally --- the flat count-then-
+// extents value cell, registry code 8). The earlier inductive
+// empty/cons encoding is DISPLACED: no spine rows, no constructor
+// applications; a shape is ONE ground value compared by value
+// identity. Rank and axis-extent reading are bounded computations
+// over the tuple (the side-condition relations below), never
+// uninterpreted instance-supplied functions.
+
+theory TensorTypes extends Dtypes {
+  TensorType : Set;
+  TensorType/shape : TensorType -> Shape;
+  TensorType/dtype : TensorType -> Dtype;
+
+  mkTensorType : {shape: Shape, dtype: Dtype} -> TensorType;
+
+  chase ax/mkTensorType_shape : forall s : Shape, d : Dtype.
+    |- {shape: s, dtype: d} mkTensorType TensorType/shape = s;
+  chase ax/mkTensorType_dtype : forall s : Shape, d : Dtype.
+    |- {shape: s, dtype: d} mkTensorType TensorType/dtype = d;
+
+  chase ax/TensorType_ext : forall t1 : TensorType, t2 : TensorType.
+    t1 TensorType/shape = t2 TensorType/shape,
+    t1 TensorType/dtype = t2 TensorType/dtype
+    |- t1 = t2;
+
+  // Ground-shape side-conditions (bounded computations over the
+  // primordial Shape value):
+  shapeRankIs : {shape: Shape, rank: Nat} -> Prop;
+  // Bounded computation: rank = the tuple's length.
+  shapeAxisExtentIs : {shape: Shape, axis: Nat, extent: Nat} -> Prop;
+  // Bounded computation: axis < the tuple's length AND the axis'th
+  // entry = extent. An out-of-range axis REFUSES the demand --- it
+  // never holds vacuously.
+}
+
+// ============================================================
+// Layer 3: Primitive symbols and rounding modes
+// ============================================================
+
+theory Primitives extends TensorTypes {
+  Primitive : Set;
+
+  PConst     : Primitive;
+  PContract  : Primitive;
+  PCast      : Primitive;
+  PCell      : Primitive;
+  PReshape   : Primitive;
+  PBroadcast : Primitive;
+  PCopy      : Primitive;
+  PDelete    : Primitive;
+  PSwap      : Primitive;
+}
+
+theory RoundModes extends Primitives {
+  RoundMode : Set;
+
+  Rrne   : RoundMode;   // round to nearest, ties to even
+  Rrtz   : RoundMode;   // round toward zero
+  Rrup   : RoundMode;   // round toward +inf
+  Rrdn   : RoundMode;   // round toward -inf
+  Rexact : RoundMode;   // require exact; assert no rounding occurred
+}
+
+// ============================================================
+// Layer 4: Hypernet (the IR for string diagrams)
+// ============================================================
+
+theory Hypernet extends RoundModes {
+  Wire    : Set;
+  PrimApp : Set;
+
+  // Each wire has a tensor type
+  Wire/type : Wire -> TensorType;
+
+  // Each prim app carries a primitive label and (for arithmetic) a rounding mode
+  PrimApp/prim  : PrimApp -> Primitive;
+  PrimApp/round : PrimApp -> RoundMode;
+
+  // Input/output wire connections
+  // Indexed by position (Nat); missing positions interpreted as absent
+  InputPort  : Set;
+  OutputPort : Set;
+
+  InputPort/app  : InputPort -> PrimApp;
+  InputPort/pos  : InputPort -> Nat;
+  InputPort/wire : InputPort -> Wire;
+
+  OutputPort/app  : OutputPort -> PrimApp;
+  OutputPort/pos  : OutputPort -> Nat;
+  OutputPort/wire : OutputPort -> Wire;
+
+  // Each port is uniquely determined by (app, pos): key identification,
+  // relied on downstream, so duplicate coordinates unify.
+  chase ax/InputPort_unique : forall p1 : InputPort, p2 : InputPort.
+    p1 InputPort/app = p2 InputPort/app,
+    p1 InputPort/pos = p2 InputPort/pos
+    |- p1 = p2;
+  chase ax/OutputPort_unique : forall p1 : OutputPort, p2 : OutputPort.
+    p1 OutputPort/app = p2 OutputPort/app,
+    p1 OutputPort/pos = p2 OutputPort/pos
+    |- p1 = p2;
+
+  // LINEARITY: each wire is the output of at most one port, and the
+  // input of at most one port. Judged, not chased: two distinct ports
+  // sharing a wire are a wiring defect, and unifying them would
+  // quotient the ports' apps and positions by congruence --- a repair
+  // where the theory means a loud judgment.
+  report ax/wf/single_producer : forall p1 : OutputPort, p2 : OutputPort.
+    p1 OutputPort/wire = p2 OutputPort/wire |- p1 = p2;
+  report ax/wf/single_consumer : forall p1 : InputPort, p2 : InputPort.
+    p1 InputPort/wire = p2 InputPort/wire |- p1 = p2;
+
+  // REACHABILITY: from-wire to-wire through prim apps
+  reaches : {from: Wire, to: Wire} -> Prop;
+
+  // One reachability axiom per "input drives output of same app"
+  chase ax/reaches/app : forall ip : InputPort, op : OutputPort, wi : Wire, wo : Wire.
+    ip InputPort/app  = op OutputPort/app,
+    ip InputPort/wire = wi,
+    op OutputPort/wire = wo
+    |- {from: wi, to: wo} reaches;
+
+  // Transitive closure
+  chase ax/reaches/trans : forall w1 : Wire, w2 : Wire, w3 : Wire.
+    {from: w1, to: w2} reaches, {from: w2, to: w3} reaches
+    |- {from: w1, to: w3} reaches;
+
+  // ACYCLICITY: no wire reaches itself. A cyclic hypernet is a
+  // malformed subject; the empty conclusion gates admission.
+  refuse ax/wf/acyclic : forall w : Wire. {from: w, to: w} reaches |- false;
+
+  // ==========================================================
+  // TYPE CONSISTENCY: worked example for PContract
+  // ==========================================================
+  // A Contract application carries an index pattern mapping
+  // (input_port, axis) pairs to a shared index-name, where indices
+  // that don't appear in the output are summed over.
+  //
+  // We introduce a ContractIndex sort to name the shared indices,
+  // and a ContractBinding sort relating (input, axis) pairs to indices.
+  //
+  // Axis positions are members of [rank], not Nat: this uses the
+  // finite-set constructor from requirement 2 of sec:geolog-arith-req.
+  // The axis is in-range by typing, so no separate axis-in-range axiom
+  // is needed.
+
+  ContractIndex : Set;
+  ContractIndex/app    : ContractIndex -> PrimApp;
+  ContractIndex/extent : ContractIndex -> Nat;
+  // Each ContractIndex either appears in the output (via a
+  // ContractOutputBinding) or is summed over; its extent is a Nat.
+
+  // Abbreviation: the rank of the wire carried by an input port
+  // (used only to make signatures below more readable). The defining
+  // tie relates the stored rank to the ground Shape value's actual
+  // length --- a bounded computation over the tuple (shapeRankIs),
+  // judged rather than chased (ground-value agreement is never
+  // chase-repaired; a mismatch is a loud constraint violation).
+  PortRank : InputPort -> Nat;
+  report ax/PortRank_def : forall ip : InputPort.
+    |- {shape: ip InputPort/wire Wire/type TensorType/shape,
+        rank: ip PortRank} shapeRankIs;
+
+  // A ContractBinding says: for input port ip of PContract application app,
+  // axis (ip PortRank) Index is bound to index idx. The axis position lives
+  // in (ip PortRank) Index --- a finite set of cardinality rank(ip's wire) ---
+  // so it is in-range by construction.
+  ContractBinding : Set;
+  ContractBinding/app   : ContractBinding -> PrimApp;
+  ContractBinding/port  : ContractBinding -> InputPort;
+  ContractBinding/axis  : {b: ContractBinding} -> b ContractBinding/port PortRank Index;
+  ContractBinding/index : ContractBinding -> ContractIndex;
+
+  // Similarly for output-axis bindings:
+  OutputRank : OutputPort -> Nat;
+  report ax/OutputRank_def : forall op : OutputPort.
+    |- {shape: op OutputPort/wire Wire/type TensorType/shape,
+        rank: op OutputRank} shapeRankIs;
+
+  ContractOutputBinding : Set;
+  ContractOutputBinding/app   : ContractOutputBinding -> PrimApp;
+  ContractOutputBinding/port  : ContractOutputBinding -> OutputPort;
+  ContractOutputBinding/axis  : {ob: ContractOutputBinding}
+                                  -> ob ContractOutputBinding/port OutputRank Index;
+  ContractOutputBinding/index : ContractOutputBinding -> ContractIndex;
+
+  // Shape-axis extent reading is the shapeAxisExtentIs side-condition
+  // (TensorTypes layer): a bounded computation over the ground tuple,
+  // never an uninterpreted instance-supplied function. In-range-ness
+  // is part of the computation --- an out-of-range axis refuses.
+
+  // -- TC1: dtype uniformity --
+  // All input wires and the output wire of a PContract share a dtype.
+  // Dtype values are hash-consed elements of a declared sort, so the
+  // identification is lawful chase material on elaborated rows.
+  chase ax/wf/PContract/dtype_in : forall app : PrimApp, ip : InputPort, op : OutputPort.
+    app PrimApp/prim = PContract,
+    ip InputPort/app = app,
+    op OutputPort/app = app
+    |- ip InputPort/wire Wire/type TensorType/dtype
+     = op OutputPort/wire Wire/type TensorType/dtype;
+
+  // -- TC2: input-axis extent matches the bound index's extent.
+  // No separate axis-in-range axiom: b.axis has type (ip PortRank) Index
+  // already, and the bounded computation re-checks range against the
+  // actual tuple. Ground-value agreement is judged, never chased.
+  report ax/wf/PContract/extent_in : forall b : ContractBinding,
+      ip : InputPort,
+      idx : ContractIndex.
+    b ContractBinding/port  = ip,
+    b ContractBinding/index = idx
+    |- {shape: ip InputPort/wire Wire/type TensorType/shape,
+        axis:  b ContractBinding/axis,
+        extent: idx ContractIndex/extent} shapeAxisExtentIs;
+
+  // -- TC3: output-axis extent matches the bound index's extent.
+  report ax/wf/PContract/extent_out : forall ob : ContractOutputBinding,
+      op : OutputPort,
+      idx : ContractIndex.
+    ob ContractOutputBinding/port  = op,
+    ob ContractOutputBinding/index = idx
+    |- {shape: op OutputPort/wire Wire/type TensorType/shape,
+        axis:  ob ContractOutputBinding/axis,
+        extent: idx ContractIndex/extent} shapeAxisExtentIs;
+
+  // -- TC4: rank covers all axes --
+  // For every input port of a PContract and every axis of that port's
+  // shape, there exists exactly one ContractBinding for (port, axis).
+  // (Existence plus uniqueness.) Similar for output axes.
+  //
+  // Existence: every axis is bound. A well-formedness demand on the
+  // instance --- chasing it would mint contentless bindings, which is
+  // not what coverage means for user data.
+  report ax/wf/PContract/input_binding_exists : forall app : PrimApp, ip : InputPort,
+      axis : ip PortRank Index.
+    app PrimApp/prim = PContract,
+    ip InputPort/app = app
+    |- exists b : ContractBinding.
+         b ContractBinding/port = ip, b ContractBinding/axis = axis;
+
+  // Uniqueness: each (port, axis) pair has at most one binding ---
+  // key identification, as with the ports above.
+  chase ax/wf/PContract/input_binding_unique :
+    forall b1 : ContractBinding, b2 : ContractBinding.
+    b1 ContractBinding/port = b2 ContractBinding/port,
+    b1 ContractBinding/axis = b2 ContractBinding/axis
+    |- b1 = b2;
+
+  // (Analogous axioms for ContractOutputBinding omitted for brevity.)
+
+  // Note on what is NOT required here: TC5 (axis-in-range) is no longer
+  // needed, because the type of ContractBinding/axis is (ip PortRank) Index,
+  // a finite set whose cardinality is the rank. Geolog's type-checker
+  // rejects any attempt to construct a ContractBinding whose axis is out
+  // of range at elaboration time, before chase.
+
+  // Other primitives have their own ax/wf/typing/<prim> sequents following
+  // the same pattern. For single-input-single-output primitives (Reshape,
+  // Broadcast, Cast, Copy, Swap), the schema is simpler: relate the
+  // input's tensor type to the output's in primitive-specific ways
+  // (e.g. Cast preserves shape, changes dtype; Reshape preserves dtype
+  //  and total size; Broadcast extends shape subject to numpy semantics).
+}
+
+// ============================================================
+// Layer 5: Simplicial complexes (schema for Cell primitives)
+// ============================================================
+//
+// Design: an n-vertex simplicial complex K in Q^d is a flat vertex table
+// (one Q^d point per vertex, indexed by n_vertices Index) plus a set of
+// simplices each of which is a subset of n_vertices Index.
+//
+// Vertices are NOT duplicated across simplices: if simplices sigma_1 and
+// sigma_2 share a vertex, they literally share the same index in
+// (K.n_vertices Index).
+// This is the standard abstract-simplicial-complex representation used in
+// combinatorial topology and by mesh libraries (Delfinado-Edelsbrunner,
+// CGAL's Triangulation_data_structure for moderate dimension, etc.).
+//
+// Uses requirement 2 (finite-set constructor n Index) from
+// sec:geolog-arith-req.
+//
+// The extensionality, closure, and conformity laws below quantify over
+// every vertex index of a complex --- whole-mask comparisons, which a
+// geometric sequent cannot carry directly. Each such comparison is
+// declared as a bounded-computation side-condition over the sealed
+// finite mask rows; the sequents consume the relation as a premise or
+// demand it as a conclusion, and oracle evaluation discharges it.
+
+theory Simplicial extends Hypernet {
+  SimpC : Set;
+  SimpC/n_vertices : SimpC -> Nat;   // number of vertices in the complex
+  SimpC/amb_dim    : SimpC -> Nat;   // ambient space Q^amb_dim
+
+  // Vertex coordinates: a total function
+  //   (K.n_vertices Index) x (K.amb_dim Index) -> Q
+  // giving the j-th coordinate of vertex i of complex K. The signature
+  // depends on K's fields (dependent arity); uses the Index constructor
+  // from requirement 2 of sec:geolog-arith-req.
+  SimpC/coord : {complex: SimpC,
+                 v: complex SimpC/n_vertices Index,
+                 j: complex SimpC/amb_dim Index} -> Q;
+
+  // A simplex of K is a nonempty subset of (K.n_vertices Index), represented
+  // by its characteristic predicate on (K.n_vertices Index).
+  Simplex : Set;
+  Simplex/complex  : Simplex -> SimpC;
+  Simplex/contains : {s: Simplex, v: s Simplex/complex SimpC/n_vertices Index} -> Prop;
+
+  // Mask-comparison side-conditions (bounded computations over the
+  // sealed finite mask rows):
+  simplexSameMembers : {s1: Simplex, s2: Simplex} -> Prop;
+  // Bounded computation: for every vertex index v of s1's complex,
+  // {s: s1, v: v} Simplex/contains holds iff {s: s2, v: v}
+  // Simplex/contains does (mask equality).
+  simplexIsFaceMinus : {sface: Simplex, s: Simplex, v0: Nat} -> Prop;
+  // Bounded computation: sface's mask equals s's mask with v0 removed.
+  simplexIsIntersection : {sint: Simplex, s1: Simplex, s2: Simplex} -> Prop;
+  // Bounded computation: sint's mask equals the intersection of s1's
+  // and s2's masks.
+
+  // Two simplices of the same complex with the same membership are equal.
+  chase ax/Simplex_ext : forall s1 : Simplex, s2 : Simplex.
+    s1 Simplex/complex = s2 Simplex/complex,
+    {s1: s1, s2: s2} simplexSameMembers
+    |- s1 = s2;
+
+  // Nonemptiness: every simplex contains at least one vertex.
+  report ax/wf/simplex_nonempty : forall s : Simplex.
+    |- exists v : s Simplex/complex SimpC/n_vertices Index. {s: s, v: v} Simplex/contains;
+
+  // CLOSURE: every nonempty subset of a simplex is itself a simplex.
+  // Expressed via face existence for single-vertex-removal (enough to
+  // generate all faces by iteration). A well-formedness demand on the
+  // stored complex: chasing it would mint the missing faces instead of
+  // judging their absence.
+  report ax/closure/face : forall K : SimpC, s : Simplex, v0 : K SimpC/n_vertices Index.
+    s Simplex/complex = K,
+    {s: s, v: v0} Simplex/contains,
+    // s has at least two vertices (so removing v0 leaves a simplex)
+    exists v1 : K SimpC/n_vertices Index.
+      {s: s, v: v1} Simplex/contains, v1 != v0
+    |-
+    exists sface : Simplex.
+      sface Simplex/complex = K,
+      {sface: sface, s: s, v0: v0} simplexIsFaceMinus;
+
+  // CONFORMITY: the intersection of two simplices of the same complex is
+  // either empty or itself a simplex of the complex. Stated as: for every
+  // pair of simplices whose intersection is nonempty, there exists a
+  // simplex with exactly that intersection as its vertex set.
+  report ax/conformity : forall K : SimpC, s1 : Simplex, s2 : Simplex.
+    s1 Simplex/complex = K,
+    s2 Simplex/complex = K,
+    exists vw : K SimpC/n_vertices Index.
+      {s: s1, v: vw} Simplex/contains, {s: s2, v: vw} Simplex/contains
+    |-
+    exists sint : Simplex.
+      sint Simplex/complex = K,
+      {sint: sint, s1: s1, s2: s2} simplexIsIntersection;
+
+  // NON-DEGENERACY of vertices: the n_vertices points in Q^amb_dim are
+  // geometrically distinct (no two vertices have the same coordinates).
+  // This rules out redundant vertex-table entries.
+  report ax/wf/distinct_vertices : forall K : SimpC,
+      v1 : K SimpC/n_vertices Index,
+      v2 : K SimpC/n_vertices Index.
+    v1 != v2
+    |- exists j : K SimpC/amb_dim Index.
+         {complex: K, v: v1, j: j} SimpC/coord
+           != {complex: K, v: v2, j: j} SimpC/coord;
+
+  // NON-DEGENERACY of simplices: the vertices of each simplex are
+  // affinely independent (standard condition for a geometric simplex).
+  // Expressed as existence of a full-rank affine map; the concrete
+  // encoding depends on geolog's treatment of linear algebra and is
+  // omitted here. For the proof system, affine independence is only
+  // needed when converting between the abstract simplex and its
+  // geometric realization; intermediate reasoning does not use it.
+
+  // Link to Hypernet: PCell applications reference a SimpC schema.
+  CellSchema : {app: PrimApp, schema: SimpC} -> Prop;
+  // Judged, not chased: under chase, a schema row on an app stored as
+  // another primitive would repair the instance by unifying that app's
+  // primitive value with PCell --- potentially quotienting Primitive
+  // constants --- instead of judging it. Load rejection for orphan
+  // linkage rows is a conformance check against the stored primitive,
+  // run before saturation.
+  report ax/CellSchema_isCell : forall app : PrimApp, schema : SimpC.
+    {app: app, schema: schema} CellSchema |- app PrimApp/prim = PCell;
+
+  // The Cell primitive's input wire tensor type matches the schema:
+  // input is Tensor( (amb_dim,), delta ) for any embeddable delta;
+  // output is Tensor( (n_top_cells,), B ) where n_top_cells counts
+  // top-dimensional simplices of the complex. Type-consistency axioms
+  // omitted here follow the same pattern as PContract in Hypernet.
+
+  // ==========================================================
+  // Facet-extension sets and region atoms (for BernCone)
+  // ==========================================================
+  //
+  // BernCone's region hypothesis x in R(Delta, S) references a simplex
+  // Delta plus a proper subset S of its vertex indices; S is the set of
+  // facets through which we extend. When S = empty, R(Delta, S) is the
+  // bounded simplex itself; when S = all vertices minus one, R(Delta, S)
+  // is an apex cone.
+  //
+  // We represent S as a characteristic predicate on the vertex indices
+  // of a specified simplex.
+
+  ExtensionSet : Set;
+  ExtensionSet/simplex   : ExtensionSet -> Simplex;
+  ExtensionSet/contains  : {S: ExtensionSet,
+                            v: S ExtensionSet/simplex Simplex/complex
+                                  SimpC/n_vertices Index} -> Prop;
+
+  // Mask-comparison side-conditions for extension sets:
+  extensionSetOmits : {S: ExtensionSet, v: Nat} -> Prop;
+  // Bounded computation: v is NOT in S's mask (the negation-free
+  // witness form of non-membership).
+  extensionSetSameMembers : {S1: ExtensionSet, S2: ExtensionSet} -> Prop;
+  // Bounded computation: mask equality on extension sets.
+
+  // Well-formedness: S is a PROPER subset of the simplex's vertex indices.
+  // (S cannot equal the full vertex set; that would describe the empty
+  // region, which is degenerate and not useful.)
+  report ax/wf/ExtensionSet/proper : forall S : ExtensionSet.
+    |- exists v : S ExtensionSet/simplex Simplex/complex SimpC/n_vertices Index.
+         {s: S ExtensionSet/simplex, v: v} Simplex/contains,
+         {S: S, v: v} extensionSetOmits;
+
+  // (Only vertex indices that are IN the simplex can be in the extension
+  // set.) Judged: the simplex mask is primary data, and deriving
+  // membership rows from extension rows would repair a scoping defect
+  // instead of judging it.
+  report ax/wf/ExtensionSet/scope : forall S : ExtensionSet,
+      v : S ExtensionSet/simplex
+            Simplex/complex SimpC/n_vertices Index.
+    {S: S, v: v} ExtensionSet/contains
+    |- {s: S ExtensionSet/simplex, v: v} Simplex/contains;
+
+  // Two extension sets of the same simplex with the same membership are equal.
+  chase ax/ExtensionSet_ext : forall S1 : ExtensionSet, S2 : ExtensionSet.
+    S1 ExtensionSet/simplex = S2 ExtensionSet/simplex,
+    {S1: S1, S2: S2} extensionSetSameMembers
+    |- S1 = S2;
+}
+
+// ============================================================
+// Layer 6: Terms and formulas over Hypernet
+// ============================================================
+
+theory Formulas extends Simplicial {
+  Term    : Set;
+  Formula : Set;
+
+  // Term constructors
+  TVar   : Wire -> Term;          // reference a hypernet wire
+  TConst : Q -> Term;             // rational constant (other dtypes via cast-then-var)
+  TAdd   : {l: Term, r: Term} -> Term;
+  TMul   : {l: Term, r: Term} -> Term;
+  TSub   : {l: Term, r: Term} -> Term;     // l - r (needed for ArithAtom)
+  TNeg   : Term -> Term;
+  // TIdx is the degenerate case of the tensor-contraction primitive of
+  // the companion design sketches: contraction of a single tensor
+  // along a projection map with singleton output. That reading is a
+  // design constraint binding on every extension of this constructor:
+  // the einsum extension of the Term grammar (lazy tensor product plus
+  // contraction along an index map, which together suffice for einsum
+  // and broadcasting) is a purely ADDITIVE generalization, never a
+  // rework. Well-formedness (checker-enforced; the Lean realization
+  // carries it): t is typed at a rank-1 shape (e,) and i < e; the
+  // result is the scalar component, same dtype.
+  TIdx   : {t: Term, i: Nat} -> Term;      // scalar component i of a rank-1 term
+
+  // The result is the scalar component: dtype carried over (a lawful
+  // chase identification on hash-consed Dtype elements), shape pinned
+  // to the rank-0 tuple by the bounded computation (rank 0 determines
+  // the empty extent tuple uniquely).
+  chase ax/TIdx_dtype : forall t : Term, i : Nat, r : Term.
+    r = {t: t, i: i} TIdx
+    |- r Term/type TensorType/dtype = t Term/type TensorType/dtype;
+  report ax/TIdx_rank : forall t : Term, i : Nat, r : Term.
+    r = {t: t, i: i} TIdx
+    |- {shape: r Term/type TensorType/shape, rank: 0} shapeRankIs;
+
+  // Term type (for well-typedness)
+  Term/type : Term -> TensorType;
+
+  chase ax/TVar_type : forall w : Wire, t : Term.
+    t = w TVar |- t Term/type = w Wire/type;
+
+  // Scope: TVar must reference a wire present in the bundled Hypernet
+  // (implicitly enforced since every TVar points to a Wire, and the Wire
+  //  sort belongs to the extended Hypernet theory)
+
+  // Formula constructors
+  //   Atomic comparisons: the five standard relations plus negation.
+  //   Region-membership:  FInRegion(t, simplex, extension_set).
+  //   Boolean structure:  And, Or, True, False.
+  FAtomLE  : {l: Term, r: Term} -> Formula;   // l <= r (pointwise)
+  FAtomLT  : {l: Term, r: Term} -> Formula;   // l < r
+  FAtomEQ  : {l: Term, r: Term} -> Formula;   // l = r
+  FAtomGE  : {l: Term, r: Term} -> Formula;   // l >= r
+  FAtomGT  : {l: Term, r: Term} -> Formula;   // l > r
+  FAtomNE  : {l: Term, r: Term} -> Formula;   // l != r
+  FInRegion : {t: Term, simplex: Simplex, S: ExtensionSet} -> Formula;
+  FAnd     : {l: Formula, r: Formula} -> Formula;
+  FOr      : {l: Formula, r: Formula} -> Formula;
+  FTrue    : Formula;
+  FFalse   : Formula;
+
+  // Well-typedness: comparison sides have matching tensor type.
+  // Formulas arrive in certificates from untrusted producers, so these
+  // are judged constraints: under chase, a mistyped comparison would be
+  // repaired by unifying the two sides' types (and, through
+  // extensionality, their shapes and dtypes) instead of being noted.
+  report ax/wf/FAtomLE_types : forall l : Term, r : Term, f : Formula.
+    f = {l: l, r: r} FAtomLE |- l Term/type = r Term/type;
+  report ax/wf/FAtomLT_types : forall l : Term, r : Term, f : Formula.
+    f = {l: l, r: r} FAtomLT |- l Term/type = r Term/type;
+  report ax/wf/FAtomEQ_types : forall l : Term, r : Term, f : Formula.
+    f = {l: l, r: r} FAtomEQ |- l Term/type = r Term/type;
+  report ax/wf/FAtomGE_types : forall l : Term, r : Term, f : Formula.
+    f = {l: l, r: r} FAtomGE |- l Term/type = r Term/type;
+  report ax/wf/FAtomGT_types : forall l : Term, r : Term, f : Formula.
+    f = {l: l, r: r} FAtomGT |- l Term/type = r Term/type;
+  report ax/wf/FAtomNE_types : forall l : Term, r : Term, f : Formula.
+    f = {l: l, r: r} FAtomNE |- l Term/type = r Term/type;
+
+  // FInRegion well-typedness: t is a VECTOR of length amb_dim --- rank
+  // 1, single axis of extent equal to the simplex's ambient dimension
+  // (an earlier draft demanded rank amb_dim; the companion document's
+  // formula grammar requires the vector form). Stated as two bounded-
+  // computation constraints over the ground shape tuple --- rank 1,
+  // and axis 0's extent = the ambient dimension; ground-value
+  // agreement is judged, never chased.
+  report ax/wf/FInRegion_rank : forall t : Term, simplex : Simplex, S : ExtensionSet, f : Formula.
+    f = {t: t, simplex: simplex, S: S} FInRegion
+    |- {shape: t Term/type TensorType/shape, rank: 1} shapeRankIs;
+  report ax/wf/FInRegion_extent : forall t : Term, simplex : Simplex, S : ExtensionSet, f : Formula.
+    f = {t: t, simplex: simplex, S: S} FInRegion
+    |- {shape: t Term/type TensorType/shape, axis: 0,
+        extent: simplex Simplex/complex SimpC/amb_dim} shapeAxisExtentIs;
+  report ax/wf/FInRegion_match : forall t : Term, simplex : Simplex, S : ExtensionSet, f : Formula.
+    f = {t: t, simplex: simplex, S: S} FInRegion
+    |- S ExtensionSet/simplex = simplex;
+}
+
+// ============================================================
+// Layer 7: Judgments (sequent form)
+// ============================================================
+//
+// A judgment is a sequent Phi |- Psi under the hypernet H, where H is the
+// implicit context (not threaded through individual judgments). The
+// hypernet's sp-axioms SP_H are an implicit hypothesis available via
+// standard first-order deduction (Ax + AndE). There is no diagram
+// fragment in the judgment: all composition happens at the hypernet level,
+// once, before proofs are written.
+//
+// This replaces the earlier Hoare-style presentation { pre } frag { post };
+// see the discussion in sec:struct-rules of the companion document for why
+// the fragment-composition structural rules (Seq, Par, Cons, Id, AndI_tri,
+// OrE_tri) are unnecessary in the sequent-over-SSA view.
+
+theory Judgments extends Formulas {
+  Judgment : Set;
+  Judgment/pre  : Judgment -> Formula;
+  Judgment/post : Judgment -> Formula;
+
+  // Free wires of a term: a derivation by structural induction.
+  FreeInTerm : {term: Term, wire: Wire} -> Prop;
+  chase ax/FreeInTerm_var : forall w : Wire.
+    |- {term: w TVar, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_add/l : forall l : Term, r : Term, w : Wire.
+    {term: l, wire: w} FreeInTerm |- {term: {l: l, r: r} TAdd, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_add/r : forall l : Term, r : Term, w : Wire.
+    {term: r, wire: w} FreeInTerm |- {term: {l: l, r: r} TAdd, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_mul/l : forall l : Term, r : Term, w : Wire.
+    {term: l, wire: w} FreeInTerm |- {term: {l: l, r: r} TMul, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_mul/r : forall l : Term, r : Term, w : Wire.
+    {term: r, wire: w} FreeInTerm |- {term: {l: l, r: r} TMul, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_sub/l : forall l : Term, r : Term, w : Wire.
+    {term: l, wire: w} FreeInTerm |- {term: {l: l, r: r} TSub, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_sub/r : forall l : Term, r : Term, w : Wire.
+    {term: r, wire: w} FreeInTerm |- {term: {l: l, r: r} TSub, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_neg : forall t : Term, w : Wire.
+    {term: t, wire: w} FreeInTerm |- {term: t TNeg, wire: w} FreeInTerm;
+  chase ax/FreeInTerm_idx : forall t : Term, i : Nat, w : Wire.
+    {term: t, wire: w} FreeInTerm
+    |- {term: {t: t, i: i} TIdx, wire: w} FreeInTerm;
+  // (TConst contributes no free wires.)
+
+  // Free wires of a formula: propagate through atomic-comparison sides,
+  // InRegion's term, and boolean-structure sub-formulas.
+  FreeInFormula : {formula: Formula, wire: Wire} -> Prop;
+  chase ax/FreeInFormula_le/l : forall l : Term, r : Term, w : Wire.
+    {term: l, wire: w} FreeInTerm |- {formula: {l: l, r: r} FAtomLE, wire: w} FreeInFormula;
+  chase ax/FreeInFormula_le/r : forall l : Term, r : Term, w : Wire.
+    {term: r, wire: w} FreeInTerm |- {formula: {l: l, r: r} FAtomLE, wire: w} FreeInFormula;
+  // (Analogous axioms for FAtomLT, FAtomEQ, FAtomGE, FAtomGT, FAtomNE; omitted
+  //  for brevity. Pattern: for each comparison, a left-side and right-side rule.)
+  chase ax/FreeInFormula_inregion : forall t : Term, simplex : Simplex, S : ExtensionSet, w : Wire.
+    {term: t, wire: w} FreeInTerm
+    |- {formula: {t: t, simplex: simplex, S: S} FInRegion, wire: w} FreeInFormula;
+  chase ax/FreeInFormula_and/l : forall l : Formula, r : Formula, w : Wire.
+    {formula: l, wire: w} FreeInFormula
+    |- {formula: {l: l, r: r} FAnd, wire: w} FreeInFormula;
+  chase ax/FreeInFormula_and/r : forall l : Formula, r : Formula, w : Wire.
+    {formula: r, wire: w} FreeInFormula
+    |- {formula: {l: l, r: r} FAnd, wire: w} FreeInFormula;
+  chase ax/FreeInFormula_or/l : forall l : Formula, r : Formula, w : Wire.
+    {formula: l, wire: w} FreeInFormula
+    |- {formula: {l: l, r: r} FOr, wire: w} FreeInFormula;
+  chase ax/FreeInFormula_or/r : forall l : Formula, r : Formula, w : Wire.
+    {formula: r, wire: w} FreeInFormula
+    |- {formula: {l: l, r: r} FOr, wire: w} FreeInFormula;
+  // (FTrue and FFalse contribute no free wires.)
+
+  // WELL-FORMEDNESS: free wires of pre and post are wires of the ambient
+  // hypernet. Because Wire is a sort of the extended Hypernet theory, every
+  // Wire-typed value already references some wire in the bundled hypernet;
+  // no additional scoping axiom is required here beyond the existence of
+  // the Wire sort. (Compare with the earlier Hoare-style presentation which
+  // required scoping to an explicit DiagramFragment boundary.)
+}
+
+// ============================================================
+// Layer 8: Proof terms
+// ============================================================
+//
+// Sequent-form proof theory with seventeen core rules plus admissible
+// packagings. Every proof-term sort P<Rule> carries:
+//   - a Proof/concludes field (its conclusion sequent)
+//   - sub-proof fields for each premise
+//   - data fields for ground arithmetic data (if any)
+//   - applicability axioms tying sub-proofs' conclusions to the rule's
+//     own conclusion (the per-rule soundness side-conditions, stated as
+//     geometric sequents)
+//
+// Notation: we write P<Rule> for the proof-term sort (e.g., PAx, PCut),
+// and P<Rule>/proof : P<Rule> -> Proof for the injection into the common
+// Proof sort. The applicability axioms are judged in report mode: a
+// certificate that violates one is commit-able but loudly noted as
+// invalid, never silently repaired. Applicability axioms whose
+// conclusion is a side-condition atom are chased as DEMAND rows; the
+// oracle discharges each demand by bounded computation, and an
+// undischarged demand is a loud deferral.
+//
+// The sp-axioms sp[p] for each primitive p in H are implicit in SP_H and
+// available via Ax + AndE. There are no separate PspConst, PspContract,
+// PspCell constructors: a proof step that uses sp[p] is a PAx + PAndE
+// selecting that primitive's sp-fact from the hypothesis conjunction.
+// (This is simpler than the earlier encoding and aligns with
+// sec:sp-axioms of the companion document.)
+//
+// sp[Cell] NORMATIVE FORM: for a Cell application with schema Sigma
+// (cells C_1..C_m, indicator output wires b_1..b_m) and input point a,
+// the sp-fact is the ONE-HOT disjunction
+//
+//   sp[Cell]  :=  OR_i ( a in closure(C_i)  AND  b_i = 1
+//                                           AND  AND_{j != i} b_j = 0 )
+//
+// --- each disjunct pins the FULL indicator valuation. This supersedes
+// an earlier tabulated form, which zeroed b_j only for cells whose
+// closure MISSES the point and thereby retained double-hot valuations
+// at shared boundaries, contradicting the boundary set {e_i, e_j}, the
+// one-sigma-per-cell-choice reading of admissibility, and Cell-Split's
+// every-other-indicator-zero requirement. Under one-hot, interior
+// points pin a unique valuation and boundary points get the one-hot
+// set the hemicontinuous semantics wants. (Adversarially checked
+// before adoption: no downstream rule consumes a double-hot state ---
+// intermediate bool wires enumerate per-cell values; the convex hull
+// is taken only at the final real-valued output.) Realization:
+// lean/BernsteinLogic/Catalogue.lean, PrimApp.spFact (cell case) and
+// spCellDisjunct. The full geolog-formal listing awaits the
+// cell-enumeration constructor.
+
+theory BernsteinLogic extends Judgments {
+  Proof : Set;
+  Proof/concludes : Proof -> Judgment;
+
+  // ==========================================================
+  // THE GLOBAL WELL-FORMEDNESS INVARIANT (normative)
+  // ==========================================================
+  // This invariant is the normative contract statement; the
+  // field-level applicability axioms of the well-typedness family
+  // (stated at their rules below) are its proven realization, and
+  // nothing proven moves. The framing follows the logical-framework
+  // doctrine: this theory hosts proof TREES as data; well-formedness
+  // is a judgment ABOUT that tree data --- stated as axioms over it
+  // --- and a realization may discharge it as a check-only validity
+  // pass (recompute at verify, with zero stored rows) or materialize
+  // receipts.
+  //
+  // Derived well-formedness predicates over formula/term data, by
+  // structural induction (derivation axioms follow the FreeInTerm
+  // pattern of Layer 7; the load-bearing clauses are documented here):
+  WFTerm     : Term -> Prop;     // has a defined broadcast shape; every
+                                 // mentioned wire present in H
+  WFTermFin  : Term -> Prop;     // WFTerm, and every wire finite-typed
+  WFFormula  : Formula -> Prop;  // comparison atoms: the two sides
+                                 // share a broadcast shape, and ---
+                                 // the strengthened dial, which is
+                                 // what discharges the Norm rule's
+                                 // typing obligation at the invariant
+                                 // level --- EQUALITY atoms require
+                                 // WFTermFin on both sides; region
+                                 // atoms: term bshape = (amb_dim,),
+                                 // SUBSUMING ax/wf/FInRegion_shape at
+                                 // the judgment level; FAnd/FOr:
+                                 // recursively WF
+  WFJudgment : Judgment -> Prop; // pre and post both WFFormula
+  //
+  // THE invariant --- every judgment occurring in a proof tree is
+  // well-formed. Judged: the WF predicates are constraints on proof
+  // data, and chasing this demand would mint the WFJudgment row by
+  // fiat, satisfying the check without running it.
+  report ax/wf/global :
+    forall p : Proof. |- p Proof/concludes WFJudgment;
+  //
+  // REALIZATION MAPPING (which proven Lean payload field realizes
+  // which clause):
+  //   the EqElim substitution-site type equality  -> the comparison-
+  //                                atom clause at the substitution
+  //                                site (equality sides share a
+  //                                broadcast shape)
+  //   the ConvIntro term-shape field  -> the region-atom clause
+  //                                (bshape = (amb_dim,)) at
+  //                                introduction
+  //   the Farkas conclusion-shape and finiteness fields -> WFTerm /
+  //                                WFTermFin of the Farkas conclusion
+  //   (the Norm rule's deferred typing field is discharged by the
+  //    strengthened equality-atom clause)
+  //
+  // HONEST RESIDUE --- genuinely rule-local, NOT subsumed by this
+  // invariant, stated here rather than smoothed:
+  //   PBernCone's polynomial tie   (a relational fact between two
+  //                                 payload slots)
+  //   PFarkas wiresPos             (positive-size is a Farkas-local
+  //                                 side-condition: zero-size wires
+  //                                 are harmless elsewhere)
+  //   cell-interior disjointness   (a property of the SimpC schema,
+  //                                 not of any judgment; the flavored
+  //                                 cell-schema certificates of the
+  //                                 Qtsl omnibus repair it finitely)
+
+  // ==========================================================
+  // CORE RULES (17)
+  // ==========================================================
+
+  // --- Propositional and equality (11 rules) ---
+  PAx      : Set;   PAx/proof      : PAx      -> Proof;
+  PWeaken  : Set;   PWeaken/proof  : PWeaken  -> Proof;
+  PCut     : Set;   PCut/proof     : PCut     -> Proof;
+  PAndI    : Set;   PAndI/proof    : PAndI    -> Proof;
+  PAndE    : Set;   PAndE/proof    : PAndE    -> Proof;
+  POrI     : Set;   POrI/proof     : POrI     -> Proof;
+  POrE     : Set;   POrE/proof     : POrE     -> Proof;
+  PEqElim  : Set;   PEqElim/proof  : PEqElim  -> Proof;
+  PEqRefl  : Set;   PEqRefl/proof  : PEqRefl  -> Proof;
+  PEqSym   : Set;   PEqSym/proof   : PEqSym   -> Proof;
+  PAntisym : Set;   PAntisym/proof : PAntisym -> Proof;
+
+  // --- Region-atom bridges (2 rules) ---
+  PConvIntro : Set;   PConvIntro/proof : PConvIntro -> Proof;
+  PConvElim  : Set;   PConvElim/proof  : PConvElim  -> Proof;
+
+  // --- Atomic-formula arithmetic (1 rule) ---
+  //
+  // ArithAtom: the atomic forms (t1 bowtie t2) and ((t1 - t2) bowtie 0)
+  // are interconvertible. We represent this as a SINGLE proof-term sort
+  // carrying a direction flag, since both directions are sound and the
+  // applicability check is definitional (no side-condition arithmetic).
+  PArithAtom : Set;  PArithAtom/proof : PArithAtom -> Proof;
+
+  // --- Bernstein closure (1 rule) ---
+  PBernCone : Set;   PBernCone/proof : PBernCone -> Proof;
+
+  // --- Assume-guarantee composition (2 rules) ---
+  PPromise : Set;   PPromise/proof : PPromise -> Proof;
+  PSyzygy  : Set;   PSyzygy/proof  : PSyzygy  -> Proof;
+
+  // ==========================================================
+  // ADMISSIBLE RULES (packaged for checking efficiency)
+  // ==========================================================
+
+  PNorm          : Set;   PNorm/proof          : PNorm          -> Proof;
+  PBernConeIntv  : Set;   PBernConeIntv/proof  : PBernConeIntv  -> Proof;
+  PFarkas        : Set;   PFarkas/proof        : PFarkas        -> Proof;
+  PSubdivide     : Set;   PSubdivide/proof     : PSubdivide     -> Proof;
+  PCellInInterior: Set;   PCellInInterior/proof: PCellInInterior-> Proof;
+  PCellOut       : Set;   PCellOut/proof       : PCellOut       -> Proof;
+
+  // ==========================================================
+  // PROPOSITIONAL + EQUALITY RULES: applicability
+  // ==========================================================
+
+  // -- PAx: Phi |- Phi. Just carries its conclusion; no sub-proofs.
+  // Applicability: the conclusion's pre equals its post.
+  report ax/applicable/PAx :
+    forall p : PAx.
+    |- p PAx/proof Proof/concludes Judgment/pre
+     = p PAx/proof Proof/concludes Judgment/post;
+
+  // -- PWeaken: Phi |- Psi  ==>  Phi AND chi |- Psi.
+  PWeaken/premise : PWeaken -> Proof;
+  PWeaken/extra   : PWeaken -> Formula;   // chi
+  report ax/applicable/PWeaken/pre :
+    forall p : PWeaken.
+    |- p PWeaken/proof Proof/concludes Judgment/pre
+     = {l: p PWeaken/premise Proof/concludes Judgment/pre,
+        r: p PWeaken/extra} FAnd;
+  report ax/applicable/PWeaken/post :
+    forall p : PWeaken.
+    |- p PWeaken/proof Proof/concludes Judgment/post
+     = p PWeaken/premise Proof/concludes Judgment/post;
+
+  // -- PCut: Phi |- chi, Phi AND chi |- Psi ==> Phi |- Psi.
+  PCut/left  : PCut -> Proof;   // Phi |- chi
+  PCut/right : PCut -> Proof;   // Phi AND chi |- Psi
+  PCut/cut   : PCut -> Formula; // chi
+  report ax/applicable/PCut/pre :
+    forall p : PCut.
+    |- p PCut/proof Proof/concludes Judgment/pre
+     = p PCut/left Proof/concludes Judgment/pre;
+  report ax/applicable/PCut/post :
+    forall p : PCut.
+    |- p PCut/proof Proof/concludes Judgment/post
+     = p PCut/right Proof/concludes Judgment/post;
+  report ax/applicable/PCut/cut_left :
+    forall p : PCut.
+    |- p PCut/left Proof/concludes Judgment/post = p PCut/cut;
+  report ax/applicable/PCut/cut_right :
+    forall p : PCut.
+    |- p PCut/right Proof/concludes Judgment/pre
+     = {l: p PCut/left Proof/concludes Judgment/pre, r: p PCut/cut} FAnd;
+
+  // -- PAndI: Phi |- Psi1, Phi |- Psi2 ==> Phi |- Psi1 AND Psi2.
+  PAndI/left  : PAndI -> Proof;
+  PAndI/right : PAndI -> Proof;
+  report ax/applicable/PAndI/pre :
+    forall p : PAndI.
+    |- p PAndI/proof Proof/concludes Judgment/pre
+     = p PAndI/left Proof/concludes Judgment/pre;
+  report ax/applicable/PAndI/pre_match :
+    forall p : PAndI.
+    |- p PAndI/left Proof/concludes Judgment/pre
+     = p PAndI/right Proof/concludes Judgment/pre;
+  report ax/applicable/PAndI/post :
+    forall p : PAndI.
+    |- p PAndI/proof Proof/concludes Judgment/post
+     = {l: p PAndI/left Proof/concludes Judgment/post,
+        r: p PAndI/right Proof/concludes Judgment/post} FAnd;
+
+  // -- PAndE: Phi |- Psi1 AND Psi2 ==> Phi |- Psi_i.
+  // The 'which' field selects left (i=1) or right (i=2) projection.
+  PAndE/premise : PAndE -> Proof;
+  PAndE/which   : PAndE -> 2 Index;   // 0 = left, 1 = right
+  report ax/applicable/PAndE/pre :
+    forall p : PAndE.
+    |- p PAndE/proof Proof/concludes Judgment/pre
+     = p PAndE/premise Proof/concludes Judgment/pre;
+  // Premise's post must be a conjunction; conclusion's post is one conjunct.
+  // We state the two sub-cases via two axioms.
+  report ax/applicable/PAndE/left :
+    forall p : PAndE, l : Formula, r : Formula.
+    p PAndE/premise Proof/concludes Judgment/post = {l: l, r: r} FAnd,
+    p PAndE/which = 0
+    |- p PAndE/proof Proof/concludes Judgment/post = l;
+  report ax/applicable/PAndE/right :
+    forall p : PAndE, l : Formula, r : Formula.
+    p PAndE/premise Proof/concludes Judgment/post = {l: l, r: r} FAnd,
+    p PAndE/which = 1
+    |- p PAndE/proof Proof/concludes Judgment/post = r;
+
+  // -- POrI: Phi |- Psi_i ==> Phi |- Psi1 OR Psi2.
+  POrI/premise : POrI -> Proof;
+  POrI/other   : POrI -> Formula;   // the "other" disjunct
+  POrI/which   : POrI -> 2 Index;   // 0: premise is left disjunct, 1: right
+  report ax/applicable/POrI/pre :
+    forall p : POrI.
+    |- p POrI/proof Proof/concludes Judgment/pre
+     = p POrI/premise Proof/concludes Judgment/pre;
+  report ax/applicable/POrI/left :
+    forall p : POrI.
+    p POrI/which = 0
+    |- p POrI/proof Proof/concludes Judgment/post
+     = {l: p POrI/premise Proof/concludes Judgment/post,
+        r: p POrI/other} FOr;
+  report ax/applicable/POrI/right :
+    forall p : POrI.
+    p POrI/which = 1
+    |- p POrI/proof Proof/concludes Judgment/post
+     = {l: p POrI/other,
+        r: p POrI/premise Proof/concludes Judgment/post} FOr;
+
+  // -- POrE (CONTEXT-CARRYING --- the core disjunction elimination):
+  //      Gamma[pi := D1] |- Psi,   Gamma[pi := D2] |- Psi
+  //      ==>  Gamma |- Psi     where Gamma carries (D1 OR D2) at
+  //                            conjunct path pi.
+  // The plain textbook rule is the pi = PathHere instance of this
+  // constructor (at the root path, Gamma IS the disjunction).
+  //
+  // Context-carrying is core by necessity, not convenience: the
+  // kernel-checked separation instance
+  //     P AND (Q OR R) |- (P AND Q) OR (P AND R)
+  // has both branch premises derivable in the plain core while its
+  // conclusion is provably underivable there (a diamond-lattice
+  // countermodel; the plain core never derives distributivity), so
+  // the context-carrying form is NOT admissible over the plain one.
+  // The warrant that ships is sound_orECtx --- kernel-checked semantic
+  // soundness (Lean: Admissible.lean, cx_not_derivable /
+  // orECtx_not_elaborable / OrECtxStep). The obligations below mirror
+  // OrECtxStep field for field.
+
+  // Conjunct paths into a formula's AND-tree:
+  CtxPath  : Set;
+  PathHere : CtxPath;
+  PathL    : CtxPath -> CtxPath;   // descend into an FAnd's left conjunct
+  PathR    : CtxPath -> CtxPath;   // descend into the right conjunct
+  // Bounded-computation relations (the realized spec's conjGet?/
+  // conjReplace?; both REJECT when the path walks off the AND-tree):
+  conjunctAt  : {form: Formula, path: CtxPath, sub: Formula} -> Prop;
+  conjReplace : {form: Formula, path: CtxPath, sub: Formula,
+                 result: Formula} -> Prop;
+
+  POrE/left  : POrE -> Proof;
+  POrE/right : POrE -> Proof;
+  POrE/path  : POrE -> CtxPath;
+  POrE/disjL : POrE -> Formula;
+  POrE/disjR : POrE -> Formula;
+  // pathReads: the conclusion's pre carries the disjunction at path
+  // (on the wire the disjuncts are NOT serialized --- the checker reads
+  // them here and populates the payload; recompute pattern):
+  report ax/applicable/POrE/path_reads :
+    forall p : POrE.
+    |- {form: p POrE/proof Proof/concludes Judgment/pre,
+        path: p POrE/path,
+        sub: {l: p POrE/disjL, r: p POrE/disjR} FOr} conjunctAt;
+  // branch premises = the conclusion's pre with the disjunction
+  // replaced by the respective disjunct:
+  report ax/applicable/POrE/left_pre :
+    forall p : POrE.
+    |- {form: p POrE/proof Proof/concludes Judgment/pre,
+        path: p POrE/path,
+        sub: p POrE/disjL,
+        result: p POrE/left Proof/concludes Judgment/pre} conjReplace;
+  report ax/applicable/POrE/right_pre :
+    forall p : POrE.
+    |- {form: p POrE/proof Proof/concludes Judgment/pre,
+        path: p POrE/path,
+        sub: p POrE/disjR,
+        result: p POrE/right Proof/concludes Judgment/pre} conjReplace;
+  report ax/applicable/POrE/post :
+    forall p : POrE.
+    |- p POrE/proof Proof/concludes Judgment/post
+     = p POrE/left Proof/concludes Judgment/post;
+  report ax/applicable/POrE/post_match :
+    forall p : POrE.
+    |- p POrE/left Proof/concludes Judgment/post
+     = p POrE/right Proof/concludes Judgment/post;
+
+  // -- PEqElim: Phi |- t = u, Phi |- Psi[a := t] ==> Phi |- Psi[a := u].
+  // Carries: the proof of equality, the proof under substitution, the wire
+  // being substituted, and the two substitutable terms (t, u).
+  //
+  // Substitution is encoded via a bounded-computation relation
+  // 'substituteInFormula' (requirement 6 of sec:geolog-arith-req) that
+  // verifies one formula is obtained from another by replacing all
+  // TVar(a) occurrences with a given term.
+  PEqElim/eqProof  : PEqElim -> Proof;    // proves Phi |- t = u
+  PEqElim/bodyProof: PEqElim -> Proof;    // proves Phi |- Psi[a := t]
+  PEqElim/wire     : PEqElim -> Wire;     // the wire a being replaced
+  PEqElim/termT    : PEqElim -> Term;     // the term t
+  PEqElim/termU    : PEqElim -> Term;     // the term u
+  PEqElim/bodyForm : PEqElim -> Formula;  // the abstracted body Psi
+
+  substituteInFormula : {form: Formula, wire: Wire, term: Term,
+                         result: Formula} -> Prop;
+  // Bounded-computation relation: 'result' equals 'form' with every TVar(wire)
+  // replaced by 'term'. Verified by structural recursion over Formula/Term.
+
+  report ax/applicable/PEqElim/pre :
+    forall p : PEqElim.
+    |- p PEqElim/proof Proof/concludes Judgment/pre
+     = p PEqElim/eqProof Proof/concludes Judgment/pre;
+  report ax/applicable/PEqElim/pre_match :
+    forall p : PEqElim.
+    |- p PEqElim/eqProof Proof/concludes Judgment/pre
+     = p PEqElim/bodyProof Proof/concludes Judgment/pre;
+  report ax/applicable/PEqElim/eq :
+    forall p : PEqElim.
+    |- p PEqElim/eqProof Proof/concludes Judgment/post
+     = {l: p PEqElim/termT, r: p PEqElim/termU} FAtomEQ;
+  report ax/applicable/PEqElim/bodySub :
+    forall p : PEqElim.
+    |- {form: p PEqElim/bodyForm,
+        wire: p PEqElim/wire,
+        term: p PEqElim/termT,
+        result: p PEqElim/bodyProof Proof/concludes Judgment/post} substituteInFormula;
+  report ax/applicable/PEqElim/conclSub :
+    forall p : PEqElim.
+    |- {form: p PEqElim/bodyForm,
+        wire: p PEqElim/wire,
+        term: p PEqElim/termU,
+        result: p PEqElim/proof Proof/concludes Judgment/post} substituteInFormula;
+
+  // -- PEqRefl and PEqSym: reflexivity and symmetry as plain core
+  // rules. Parsimony once kept them out of the core, when each core
+  // rule's soundness lemma was a real cost; that cost is gone, so both
+  // enter the core directly, and the orientation-flag alternative on
+  // EqElim is retired un-built: EqElim keeps the orientation printed
+  // above, and the flipped orientation derives via PEqSym.
+
+  // PEqRefl: Phi |- t = t, unconditionally. Pre is arbitrary (as with
+  // Norm); no premise.
+  PEqRefl/term : PEqRefl -> Term;
+  report ax/applicable/PEqRefl/conclusion :
+    forall p : PEqRefl.
+    |- p PEqRefl/proof Proof/concludes Judgment/post
+     = {l: p PEqRefl/term, r: p PEqRefl/term} FAtomEQ;
+
+  // PEqSym: Phi |- t = u ==> Phi |- u = t.
+  PEqSym/premise : PEqSym -> Proof;
+  PEqSym/termT   : PEqSym -> Term;
+  PEqSym/termU   : PEqSym -> Term;
+  report ax/applicable/PEqSym/pre :
+    forall p : PEqSym.
+    |- p PEqSym/proof Proof/concludes Judgment/pre
+     = p PEqSym/premise Proof/concludes Judgment/pre;
+  report ax/applicable/PEqSym/premise_post :
+    forall p : PEqSym.
+    |- p PEqSym/premise Proof/concludes Judgment/post
+     = {l: p PEqSym/termT, r: p PEqSym/termU} FAtomEQ;
+  report ax/applicable/PEqSym/conclusion :
+    forall p : PEqSym.
+    |- p PEqSym/proof Proof/concludes Judgment/post
+     = {l: p PEqSym/termU, r: p PEqSym/termT} FAtomEQ;
+
+  // -- PAntisym: order antisymmetry as a core equality rule.
+  //      Phi |- t <= u,   Phi |- t >= u   ==>   Phi |- t = u.
+  // Without it the calculus has no route from a pair of opposed
+  // inequalities to an equality: every equality derivable from an
+  // eq-atom-free context has canonically equal sides (an induction on
+  // the atom-polynomial closure), and earlier revisions kept bespoke
+  // activation rules in the catalogue solely because they were the
+  // only antisymmetry carriers --- an inference bespoke rules should
+  // not monopolize. With Antisym core, those rules derive from the
+  // activation's sp-fact together with context-carrying OrE, and their
+  // sorts are gone from this theory.
+  //
+  // Soundness (Lean: sound_antisym) needs no extra typing pack
+  // (contrast EqRefl): both premise atoms hold only where the two
+  // sides already evaluate finitely at compatible shapes, which is the
+  // evaluation evidence the equality atom's semantics consumes ---
+  // entrywise antisymmetry of <= lifted through the paired-evaluation
+  // relation, so the broadcast branches align. The conclusion is the
+  // broadcast-sense equality, sufficient for atom truth; substitution
+  // via EqElim still demands its own type-equality side-condition ---
+  // no change to that rule's discipline. The wire tag and checker arm
+  // for Antisym ride the reader-widening queue; the theory roster is
+  // the normative statement.
+  PAntisym/lePremise : PAntisym -> Proof;   // proves Phi |- t <= u
+  PAntisym/gePremise : PAntisym -> Proof;   // proves Phi |- t >= u
+  PAntisym/termT     : PAntisym -> Term;    // t
+  PAntisym/termU     : PAntisym -> Term;    // u
+
+  report ax/applicable/PAntisym/pre :
+    forall p : PAntisym.
+    |- p PAntisym/proof Proof/concludes Judgment/pre
+     = p PAntisym/lePremise Proof/concludes Judgment/pre;
+  report ax/applicable/PAntisym/pre_match :
+    forall p : PAntisym.
+    |- p PAntisym/lePremise Proof/concludes Judgment/pre
+     = p PAntisym/gePremise Proof/concludes Judgment/pre;
+  report ax/applicable/PAntisym/le_post :
+    forall p : PAntisym.
+    |- p PAntisym/lePremise Proof/concludes Judgment/post
+     = {l: p PAntisym/termT, r: p PAntisym/termU} FAtomLE;
+  report ax/applicable/PAntisym/ge_post :
+    forall p : PAntisym.
+    |- p PAntisym/gePremise Proof/concludes Judgment/post
+     = {l: p PAntisym/termT, r: p PAntisym/termU} FAtomGE;
+  report ax/applicable/PAntisym/conclusion :
+    forall p : PAntisym.
+    |- p PAntisym/proof Proof/concludes Judgment/post
+     = {l: p PAntisym/termT, r: p PAntisym/termU} FAtomEQ;
+
+  // ==========================================================
+  // REGION-ATOM RULES: applicability
+  // ==========================================================
+  //
+  // ConvIntro: the barycentric-halfspace conjunction implies InRegion.
+  // ConvElim : InRegion implies the barycentric-halfspace conjunction.
+  // The "barycentric-halfspace conjunction" for (simplex, extension_set)
+  // is a specific formula over the term argument t: it asserts
+  //   AND_{i in S} lambda_i(t) <= 0  AND  AND_{i notin S} lambda_i(t) >= 0
+  // where lambda_i are the barycentric-coordinate affine functions
+  // determined by the simplex. We represent the conjunction as a bounded
+  // computation on (simplex, extension_set, term, formula) that the
+  // checker evaluates by constructing the conjunction from the simplex's
+  // vertex coordinates.
+
+  barycentricHalfspaceForm : {t: Term, simplex: Simplex, S: ExtensionSet,
+                              formula: Formula} -> Prop;
+  // Relation: 'formula' is the conjunction of barycentric halfspaces
+  // determined by (t, simplex, S).
+
+  // PConvIntro: Phi |- (barycentric halfspace conjunction on t)
+  //         ==> Phi |- FInRegion(t, simplex, S).
+  PConvIntro/premise : PConvIntro -> Proof;
+  PConvIntro/term    : PConvIntro -> Term;
+  PConvIntro/simplex : PConvIntro -> Simplex;
+  PConvIntro/S       : PConvIntro -> ExtensionSet;
+
+  report ax/applicable/PConvIntro/pre :
+    forall p : PConvIntro.
+    |- p PConvIntro/proof Proof/concludes Judgment/pre
+     = p PConvIntro/premise Proof/concludes Judgment/pre;
+  report ax/applicable/PConvIntro/halfspace :
+    forall p : PConvIntro.
+    |- {t: p PConvIntro/term, simplex: p PConvIntro/simplex,
+        S: p PConvIntro/S,
+        formula: p PConvIntro/premise Proof/concludes Judgment/post}
+       barycentricHalfspaceForm;
+  report ax/applicable/PConvIntro/post :
+    forall p : PConvIntro.
+    |- p PConvIntro/proof Proof/concludes Judgment/post
+     = {t: p PConvIntro/term,
+        simplex: p PConvIntro/simplex,
+        S: p PConvIntro/S} FInRegion;
+
+  // PConvElim: Phi |- FInRegion(t, simplex, S)
+  //        ==> Phi |- (barycentric halfspace conjunction on t).
+  PConvElim/premise : PConvElim -> Proof;
+  PConvElim/term    : PConvElim -> Term;
+  PConvElim/simplex : PConvElim -> Simplex;
+  PConvElim/S       : PConvElim -> ExtensionSet;
+
+  report ax/applicable/PConvElim/pre :
+    forall p : PConvElim.
+    |- p PConvElim/proof Proof/concludes Judgment/pre
+     = p PConvElim/premise Proof/concludes Judgment/pre;
+  report ax/applicable/PConvElim/premise_post :
+    forall p : PConvElim.
+    |- p PConvElim/premise Proof/concludes Judgment/post
+     = {t: p PConvElim/term,
+        simplex: p PConvElim/simplex,
+        S: p PConvElim/S} FInRegion;
+  report ax/applicable/PConvElim/halfspace :
+    forall p : PConvElim.
+    |- {t: p PConvElim/term, simplex: p PConvElim/simplex,
+        S: p PConvElim/S,
+        formula: p PConvElim/proof Proof/concludes Judgment/post}
+       barycentricHalfspaceForm;
+
+  // ==========================================================
+  // ARITHATOM: applicability
+  // ==========================================================
+  //
+  // ArithAtom: atomic forms (t1 bowtie t2) and ((t1 - t2) bowtie 0) are
+  // interconvertible for any bowtie in {<, <=, =, >=, >}. We encode this
+  // as a bidirectional structural rule.
+  //
+  // Direction "0 = fold": from (t1 - t2) bowtie 0 derive t1 bowtie t2.
+  // Direction "1 = unfold": from t1 bowtie t2 derive (t1 - t2) bowtie 0.
+
+  PArithAtom/premise   : PArithAtom -> Proof;
+  PArithAtom/direction : PArithAtom -> 2 Index;   // 0 = fold, 1 = unfold
+  PArithAtom/termL     : PArithAtom -> Term;       // t1
+  PArithAtom/termR     : PArithAtom -> Term;       // t2
+  PArithAtom/bowtie    : PArithAtom -> 5 Index;    // 0=LT, 1=LE, 2=EQ, 3=GE, 4=GT
+
+  // Helpers: build the atomic formula corresponding to (termL bowtie termR)
+  // and to ((termL - termR) bowtie 0). These are pure syntactic constructions
+  // over Formula/Term; encoded as bounded-computation relations.
+  atomicCompareForm : {bowtie: 5 Index, l: Term, r: Term, formula: Formula} -> Prop;
+  atomicCompareZero : {bowtie: 5 Index, l: Term, r: Term, formula: Formula} -> Prop;
+  // atomicCompareForm: 'formula' = (l bowtie r)
+  // atomicCompareZero: 'formula' = ((l - r) bowtie 0)
+
+  report ax/applicable/PArithAtom/pre :
+    forall p : PArithAtom.
+    |- p PArithAtom/proof Proof/concludes Judgment/pre
+     = p PArithAtom/premise Proof/concludes Judgment/pre;
+  // Fold direction: premise's post is "(l - r) bowtie 0"; conclusion's is "l bowtie r".
+  report ax/applicable/PArithAtom/fold/premise :
+    forall p : PArithAtom.
+    p PArithAtom/direction = 0
+    |- {bowtie: p PArithAtom/bowtie,
+        l: p PArithAtom/termL, r: p PArithAtom/termR,
+        formula: p PArithAtom/premise Proof/concludes Judgment/post}
+       atomicCompareZero;
+  report ax/applicable/PArithAtom/fold/conclusion :
+    forall p : PArithAtom.
+    p PArithAtom/direction = 0
+    |- {bowtie: p PArithAtom/bowtie,
+        l: p PArithAtom/termL, r: p PArithAtom/termR,
+        formula: p PArithAtom/proof Proof/concludes Judgment/post}
+       atomicCompareForm;
+  // Unfold direction: mirror image.
+  report ax/applicable/PArithAtom/unfold/premise :
+    forall p : PArithAtom.
+    p PArithAtom/direction = 1
+    |- {bowtie: p PArithAtom/bowtie,
+        l: p PArithAtom/termL, r: p PArithAtom/termR,
+        formula: p PArithAtom/premise Proof/concludes Judgment/post}
+       atomicCompareForm;
+  report ax/applicable/PArithAtom/unfold/conclusion :
+    forall p : PArithAtom.
+    p PArithAtom/direction = 1
+    |- {bowtie: p PArithAtom/bowtie,
+        l: p PArithAtom/termL, r: p PArithAtom/termR,
+        formula: p PArithAtom/proof Proof/concludes Judgment/post}
+       atomicCompareZero;
+
+  // ==========================================================
+  // BERNCONE: applicability
+  // ==========================================================
+  //
+  // BernCone closes Phi |- P(p(x)) for a polynomial p of degree d, a
+  // conic-or-convex predicate P, and a region (simplex, extension_set).
+  // The side-condition is that every forward-difference Bernstein
+  // coefficient of each P_j on the core face F_S satisfies P --- a
+  // finite, decidable enumeration over (j, gamma) pairs.
+
+  PBernCone/regionProof : PBernCone -> Proof;   // proves Phi |- x in R(simplex, S)
+  PBernCone/termX       : PBernCone -> Term;    // the region's argument x
+  PBernCone/simplex     : PBernCone -> Simplex; // Delta
+  PBernCone/S           : PBernCone -> ExtensionSet;
+  PBernCone/degree      : PBernCone -> Nat;     // d
+  PBernCone/polynomial  : PBernCone -> Term;    // p (a polynomial in x)
+  PBernCone/predicate   : PBernCone -> Formula; // P, a conic predicate form
+
+  // Bounded-computation relation: every forward-difference Bernstein
+  // coefficient of P_j (on the core face F_S) for the polynomial satisfies
+  // the predicate. The checker realizes this as a loop over multi-indices
+  // j (with |j| <= d) and gamma (coefficient indices of P_j), testing each.
+  // This is requirement 6 of sec:geolog-arith-req applied to BernCone.
+  allForwardDiffBernCoeffsSatisfyP :
+    {simplex: Simplex, S: ExtensionSet, degree: Nat,
+     polynomial: Term, predicate: Formula} -> Prop;
+
+  // Predicate conicness (side-condition for S non-empty; otherwise P merely
+  // convex suffices). This too is a bounded-computation relation on the
+  // Formula that tests whether P's satisfying set is a convex cone.
+  isConicPredicate : {predicate: Formula} -> Prop;
+  isConvexPredicate : {predicate: Formula} -> Prop;
+
+  // Extension-set nonemptiness (used to branch the conic/convex check)
+  isExtensionSetEmpty : {S: ExtensionSet} -> Prop;
+
+  report ax/applicable/PBernCone/pre :
+    forall p : PBernCone.
+    |- p PBernCone/proof Proof/concludes Judgment/pre
+     = p PBernCone/regionProof Proof/concludes Judgment/pre;
+  report ax/applicable/PBernCone/region_post :
+    forall p : PBernCone.
+    |- p PBernCone/regionProof Proof/concludes Judgment/post
+     = {t: p PBernCone/termX,
+        simplex: p PBernCone/simplex,
+        S: p PBernCone/S} FInRegion;
+  // Predicate applicability: conic (if S non-empty) or convex (if S
+  // empty). Demand rows conditional on the oracle-owned emptiness test.
+  report ax/applicable/PBernCone/predicate_conic :
+    forall p : PBernCone.
+    not {S: p PBernCone/S} isExtensionSetEmpty
+    |- {predicate: p PBernCone/predicate} isConicPredicate;
+  report ax/applicable/PBernCone/predicate_convex :
+    forall p : PBernCone.
+    {S: p PBernCone/S} isExtensionSetEmpty
+    |- {predicate: p PBernCone/predicate} isConvexPredicate;
+  // The main side-condition: all forward-difference Bernstein coefficients
+  // satisfy the predicate.
+  report ax/applicable/PBernCone/coefficients :
+    forall p : PBernCone.
+    |- {simplex: p PBernCone/simplex,
+        S: p PBernCone/S,
+        degree: p PBernCone/degree,
+        polynomial: p PBernCone/polynomial,
+        predicate: p PBernCone/predicate} allForwardDiffBernCoeffsSatisfyP;
+  // Conclusion: Phi |- P(p(x)). The post formula is obtained by applying
+  // the predicate to p(x), which is a syntactic construction on Formula.
+  applyPredicateToTerm : {predicate: Formula, arg: Term, result: Formula} -> Prop;
+  report ax/applicable/PBernCone/post :
+    forall p : PBernCone.
+    |- {predicate: p PBernCone/predicate,
+        arg: p PBernCone/polynomial,
+        result: p PBernCone/proof Proof/concludes Judgment/post}
+       applyPredicateToTerm;
+
+  // ==========================================================
+  // ADMISSIBLE RULES: applicability
+  // ==========================================================
+  //
+  // Admissible rules are derivable from core rules plus the hypernet's
+  // sp-axioms; see sec:admissible-rules of the companion document for
+  // each derivation. We catalog them here with their ground data and
+  // applicability axioms so the checker can validate packaged rule
+  // applications directly without unfolding. Each admissibility lemma
+  // is a meta-theorem proved once in Lean (not part of the check-time
+  // arithmetic).
+
+  // ----------------------------------------------------------
+  // Norm: polynomial-canonical-form equality
+  // ----------------------------------------------------------
+  // Concludes Phi |- t1 = t2 whenever t1 and t2 have equal monomial
+  // canonical forms over Q. Admissibility: cover the domain by simplex-
+  // extension regions, apply BernCone with P(w) = (w = 0) on each (all
+  // Bernstein coefficients of t1 - t2 are zero since t1 - t2 is
+  // identically zero), combine via OrE/Cut, apply ArithAtom to convert
+  // (t1 - t2) = 0 to t1 = t2.
+  // Check-time TCB: direct monomial-canonical-form comparison, polynomial
+  // in the coefficient count. Exponentially cheaper than unfolding.
+  PNorm/termL : PNorm -> Term;
+  PNorm/termR : PNorm -> Term;
+
+  polynomialCanonicalEq : {l: Term, r: Term} -> Prop;
+  // Bounded-computation relation: l and r have equal monomial canonical
+  // forms over Q. The checker computes both canonical forms and compares.
+
+  report ax/applicable/PNorm/eq :
+    forall p : PNorm.
+    |- {l: p PNorm/termL, r: p PNorm/termR} polynomialCanonicalEq;
+  report ax/applicable/PNorm/post :
+    forall p : PNorm.
+    |- p PNorm/proof Proof/concludes Judgment/post
+     = {l: p PNorm/termL, r: p PNorm/termR} FAtomEQ;
+  // The pre is arbitrary; Norm's conclusion is unconditional in the
+  // ambient hypothesis (any Phi is fine, with matching pre on the conclusion).
+
+  // ----------------------------------------------------------
+  // BernCone-Intv: validated-numerics enclosure variant of BernCone
+  // ----------------------------------------------------------
+  // Same setup as BernCone but the forward-difference Bernstein
+  // coefficients are given as validated interval enclosures at some
+  // floating-point dtype, and the predicate is assumed upward-closed.
+  // Check-time TCB: validated-numerics comparison; no exact Q arithmetic.
+  // Admissibility: enclosure soundness discharged by arithmetic on the
+  // rational structure; BernCone then closes on exact coefficients.
+  PBernConeIntv/regionProof : PBernConeIntv -> Proof;
+  PBernConeIntv/termX       : PBernConeIntv -> Term;
+  PBernConeIntv/simplex     : PBernConeIntv -> Simplex;
+  PBernConeIntv/S           : PBernConeIntv -> ExtensionSet;
+  PBernConeIntv/degree      : PBernConeIntv -> Nat;
+  PBernConeIntv/polynomial  : PBernConeIntv -> Term;
+  PBernConeIntv/predicate   : PBernConeIntv -> Formula;
+  PBernConeIntv/dtype       : PBernConeIntv -> Dtype;  // enclosure dtype
+
+  isUpwardClosedConicPredicate : {predicate: Formula} -> Prop;
+  allForwardDiffBernIntvEnclosuresSatisfyP :
+    {simplex: Simplex, S: ExtensionSet, degree: Nat,
+     polynomial: Term, predicate: Formula, dtype: Dtype} -> Prop;
+  // Bounded computation: checker independently recomputes the interval
+  // enclosures in validated floating-point from (simplex, S, degree,
+  // polynomial, dtype) and verifies P holds at each lower endpoint.
+  // No exact Q arithmetic at check time. See sec:bernstein-interval of
+  // the companion document, "Recomputation vs trust," option (a).
+
+  report ax/applicable/PBernConeIntv/pre :
+    forall p : PBernConeIntv.
+    |- p PBernConeIntv/proof Proof/concludes Judgment/pre
+     = p PBernConeIntv/regionProof Proof/concludes Judgment/pre;
+  report ax/applicable/PBernConeIntv/region_post :
+    forall p : PBernConeIntv.
+    |- p PBernConeIntv/regionProof Proof/concludes Judgment/post
+     = {t: p PBernConeIntv/termX,
+        simplex: p PBernConeIntv/simplex,
+        S: p PBernConeIntv/S} FInRegion;
+  report ax/applicable/PBernConeIntv/upward_closed :
+    forall p : PBernConeIntv.
+    |- {predicate: p PBernConeIntv/predicate} isUpwardClosedConicPredicate;
+  report ax/applicable/PBernConeIntv/enclosures :
+    forall p : PBernConeIntv.
+    |- {simplex: p PBernConeIntv/simplex,
+        S: p PBernConeIntv/S,
+        degree: p PBernConeIntv/degree,
+        polynomial: p PBernConeIntv/polynomial,
+        predicate: p PBernConeIntv/predicate,
+        dtype: p PBernConeIntv/dtype}
+       allForwardDiffBernIntvEnclosuresSatisfyP;
+  report ax/applicable/PBernConeIntv/post :
+    forall p : PBernConeIntv.
+    |- {predicate: p PBernConeIntv/predicate,
+        arg: p PBernConeIntv/polynomial,
+        result: p PBernConeIntv/proof Proof/concludes Judgment/post}
+       applyPredicateToTerm;
+
+  // ----------------------------------------------------------
+  // Promise: the interface-promise cut, ctx-style (CORE)
+  // ----------------------------------------------------------
+  // Context-carrying, matching OrE's style (the dividends context-
+  // carrying pays in disjunction elimination pay again here). Lean
+  // realization: PPromiseData (Core/Catalogue.lean) + sound_promise
+  // (Soundness.lean).
+  // The supplier proves the contract Q; the consumer's premise carries
+  // Q at a declared conjunct path; the composite premise is the
+  // consumer's premise with that conjunct replaced by the supplier's
+  // premise (cut, plus the bookkeeping plain sequent calculi lack for
+  // assume-guarantee work: the contract tag and interface confinement).
+  PPromise/supplier : PPromise -> Proof;
+  PPromise/consumer : PPromise -> Proof;
+  PPromise/contract : PPromise -> Formula;
+  PPromise/path     : PPromise -> CtxPath;   // contract's address in the
+                                             // consumer's premise AND-tree
+  PPromise/nIfaceWires : PPromise -> Nat;    // the declared interface
+  PPromise/ifaceWire   : {p: PPromise,
+                          k: p PPromise/nIfaceWires Index} -> Wire;
+
+  report ax/applicable/PPromise/supplier_post :
+    forall p : PPromise.
+    |- p PPromise/supplier Proof/concludes Judgment/post
+     = p PPromise/contract;
+  report ax/applicable/PPromise/path_reads :
+    forall p : PPromise.
+    |- {form: p PPromise/consumer Proof/concludes Judgment/pre,
+        path: p PPromise/path,
+        sub:  p PPromise/contract} conjunctAt;
+  report ax/applicable/PPromise/pre_plumb :
+    forall p : PPromise.
+    |- {form:   p PPromise/consumer Proof/concludes Judgment/pre,
+        path:   p PPromise/path,
+        sub:    p PPromise/supplier Proof/concludes Judgment/pre,
+        result: p PPromise/proof Proof/concludes Judgment/pre} conjReplace;
+  report ax/applicable/PPromise/post :
+    forall p : PPromise.
+    |- p PPromise/proof Proof/concludes Judgment/post
+     = p PPromise/consumer Proof/concludes Judgment/post;
+
+  // Interface-confinement side-conditions (checked; soundness does NOT
+  // consume them --- cut is sound regardless. They are the LOCALITY
+  // warrant: the LP-size and ZK-disclosure theorems are theorems about
+  // certificates WITH these checks. Prover-side warrant that demanding
+  // them costs no completeness: the Farkas-interpolant lemma
+  // (farkas_interpolant_vars) --- contracts are mined confined.)
+  // Both relations receive the node (the node-passing idiom: the
+  // indexed iface family is field access on p). The context formula
+  // referenced below is RECOMPUTED, never carried: the consumer's
+  // premise with the contract slot blanked to FTrue (conjReplace at
+  // FTrue --- the same recompute pattern as OrE's disjuncts).
+  promiseContractConfined : {p: PPromise} -> Prop;
+  // Bounded computation: every free wire of (p PPromise/contract) is
+  // among p's iface wires (Lean: formulaWiresWithin).
+  promiseWiresSeparated : {p: PPromise} -> Prop;
+  // Bounded computation: every free wire of the supplier's premise that
+  // is also free in the recomputed context or in the conclusion is
+  // among p's iface wires (Lean: wiresSeparated).
+  report ax/applicable/PPromise/contract_confined :
+    forall p : PPromise. |- {p: p} promiseContractConfined;
+  report ax/applicable/PPromise/separation :
+    forall p : PPromise. |- {p: p} promiseWiresSeparated;
+
+  // ----------------------------------------------------------
+  // Syzygy: Newton's-third-law cancellation (CORE)
+  // ----------------------------------------------------------
+  // Lean realization: PSyzygyData (Core/Catalogue.lean) + sound_syzygy
+  // (Soundness.lean).
+  // A nonneg combination of proven COMPONENT conclusions plus (either
+  // polarity of) equality sub-conjuncts of the composite premise --- the
+  // compiled wiring --- checked as an exact canonical-polynomial identity.
+  // PFarkas's shape, lifted two ways: entry atoms may come from the
+  // component sub-proofs (not only premise sub-conjuncts), and atom
+  // polynomials are unrestricted in degree. Free-sign wiring multipliers
+  // are realized exactly as PFarkas realizes free sign on '=' atoms:
+  // both polarities exposed, nonneg weights on each (self-policing ---
+  // a free-sign weight on an inequality is unrepresentable).
+  PSyzygy/nComponents : PSyzygy -> Nat;
+  PSyzygy/component   : {p: PSyzygy,
+                         k: p PSyzygy/nComponents Index} -> Proof;
+  PSyzygy/combinationCoeffs : PSyzygy -> Term;  // farkasEntries encoding
+  PSyzygy/conclusion        : PSyzygy -> Term;
+  // Witness-denominator bound (see PFarkas/denBoundLog2; zero
+  // proof-theoretic weight in v1):
+  PSyzygy/denBoundLog2 : PSyzygy -> Nat;
+  // Small-gain metadata: theta is present exactly when the node is
+  // small-gain-shaped (SmallGain is elaborated to a Syzygy node at
+  // weights (1, lambda, 1, 1); the wire header's reference theta is
+  // the minimum over present per-node thetas). Placement follows the
+  // guard-metadata rule: guard metadata means fields IN the schema.
+  // Zero proof-theoretic weight, exactly as denBoundLog2: no
+  // applicability axiom consumes it; the small-gain membership
+  // self-polices. PARTIAL: absent row = not small-gain-shaped (no-row
+  // is native absence).
+  PSyzygy/theta : PSyzygy -> Q;
+
+  // Combination validity receives the node (the node-passing idiom ---
+  // it consumes the indexed component family):
+  syzygyCombinationValid : {p: PSyzygy} -> Prop;
+  // Bounded computation: farkasCombinationValid's fold, with the entry
+  // sources generalized as above; entry encoding, exactness discipline,
+  // and the idx-freedom gates inherited verbatim (Lean: syzygyCheck).
+  report ax/applicable/PSyzygy/valid :
+    forall p : PSyzygy. |- {p: p} syzygyCombinationValid;
+
+  // Component premises are sub-conjunctions of the composite premise
+  // (decouples component boxes from the composite box --- the core has no
+  // AND-restructuring rules):
+  premiseContains : {pre: Formula, sub: Formula} -> Prop;
+  // Bounded computation: every conjunct of 'sub' (flattened AND-tree)
+  // is a conjunct of 'pre'.
+  report ax/applicable/PSyzygy/pre_contains :
+    forall p : PSyzygy, k : p PSyzygy/nComponents Index.
+    |- {pre: p PSyzygy/proof Proof/concludes Judgment/pre,
+        sub: {p: p, k: k} PSyzygy/component Proof/concludes Judgment/pre}
+       premiseContains;
+
+  report ax/applicable/PSyzygy/post :
+    forall p : PSyzygy.
+    |- p PSyzygy/proof Proof/concludes Judgment/post
+     = {l: p PSyzygy/conclusion, r: 0 TConst} FAtomLE;
+  // (This axiom states the single zero-form conclusion; it predates
+  //  the both-polarity conclusion selector declared with the Bound
+  //  rule below, and its re-statement over that relation is a
+  //  deliberately separate cross-stack parity change, not smuggled
+  //  into this revision.)
+
+  // Positive-size side-conditions on the composite (as PFarkas):
+  report ax/applicable/PSyzygy/wiresPos :
+    forall p : PSyzygy.
+    |- {pre: p PSyzygy/proof Proof/concludes Judgment/pre,
+        conclusion: p PSyzygy/conclusion} positiveSizeWires;
+  // The positive-size EXTENSION to component-conclusion wires ---
+  // REQUIRED for soundness, not inherited from PFarkas's fields
+  // (counterexample, kernel-checkable, Composition.lean header: over
+  // w : ([0], Q) both tt |- w + 5 <= 0 and tt |- 0 <= w hold
+  // vacuously, and their weight-(1,1) combination derives tt |- 5 <= 0
+  // --- a vacuously-held component conclusion over a zero-size wire
+  // poisons the combination):
+  positiveSizeWiresForm : {form: Formula} -> Prop;
+  report ax/applicable/PSyzygy/comp_post_wiresPos :
+    forall p : PSyzygy, k : p PSyzygy/nComponents Index.
+    |- {form: {p: p, k: k} PSyzygy/component Proof/concludes Judgment/post}
+       positiveSizeWiresForm;
+
+  // ----------------------------------------------------------
+  // Farkas: nonneg-linear-combination closure
+  // ----------------------------------------------------------
+  // Concludes Phi |- sum_j lambda_j * ell_j <= 0, given that the ell_j
+  // (linear terms) are sub-conjuncts of Phi with known inequality
+  // directions and the lambda_j are nonneg rationals.
+  // Admissibility: BernCone at d=1 on the covering simplex, with the
+  // linear combination as polynomial.
+  // Check-time TCB: verify the rational linear combination arithmetically.
+  PFarkas/combinationCoeffs : PFarkas -> Term;  // encodes (lambda_j, ell_j) data
+  // The claimed bound on the denominators of every rational in this
+  // node's witness data, as a log2 --- den(q) <= 2^denBoundLog2 for all
+  // witness rationals q. ZK-enabling metadata only ("just a few
+  // integers, to enable future ZK checking"): NO applicability axiom
+  // consumes it in v1 (zero proof-theoretic weight; readers-before-ZK
+  // treat it as opaque-but-present). log2 because the a-priori
+  // denominator bound is of the form M <= 2^poly(N, L). The same field
+  // appears on PSubdivide (covering the cover certificate's rationals).
+  PFarkas/denBoundLog2 : PFarkas -> Nat;
+  // (We use a single Term-valued field as a compact encoding; a more
+  //  verbose encoding would carry separate per-j lambda and ell fields.)
+  PFarkas/conclusion : PFarkas -> Term;          // the combined term (sum)
+
+  farkasCombinationValid : {combinationCoeffs: Term, premise: Formula,
+                            conclusion: Term} -> Prop;
+  // Bounded computation: the combination-coefficient data identifies a
+  // collection of nonneg rationals and a sub-conjunction of 'premise'
+  // whose nonneg linear combination equals 'conclusion', and each ell_j's
+  // sign direction permits nonneg scaling to produce the sum's direction.
+
+  report ax/applicable/PFarkas/valid :
+    forall p : PFarkas, pre : Formula.
+    p PFarkas/proof Proof/concludes Judgment/pre = pre
+    |- {combinationCoeffs: p PFarkas/combinationCoeffs,
+        premise: pre,
+        conclusion: p PFarkas/conclusion} farkasCombinationValid;
+  report ax/applicable/PFarkas/post :
+    forall p : PFarkas.
+    |- p PFarkas/proof Proof/concludes Judgment/post
+     = {l: p PFarkas/conclusion, r: 0 TConst} FAtomLE;
+
+  // Excluding dimension zero is a Farkas-local side-condition, the
+  // last member of the well-typedness family and the first whose
+  // realization preceded its adoption: general-shape Farkas is unsound
+  // without it, and the guard was realized and sound_farkas proved at
+  // all shapes with it before the design settled. The counterexample
+  // (Soundness.lean header): at a zero-size wire w : ([0], Q) the atoms
+  // 5 <= w and w <= 3 hold VACUOUSLY (empty entry lists satisfy every
+  // elementwise comparison), yet their <=0-normal-forms sum with
+  // lambda = 1 each to the constant 2 --- a payload-legal combination
+  // deriving the false |- 2 <= 0 from a satisfiable premise. An earlier
+  // singleton-wire discipline masked this by accident of strength.
+  // No wire representation: computable from existing payload + symbol
+  // table (Prop-valued, checked at elaboration).
+  // Every wire free in the premise or the conclusion is typed at a
+  // POSITIVE-total-size shape (zero-size atoms assert nothing and must
+  // not enter a combination):
+  positiveSizeWires : {pre: Formula, conclusion: Term} -> Prop;
+  report ax/applicable/PFarkas/wiresPos :
+    forall p : PFarkas.
+    |- {pre: p PFarkas/proof Proof/concludes Judgment/pre,
+        conclusion: p PFarkas/conclusion} positiveSizeWires;
+
+  // ----------------------------------------------------------
+  // Subdivide: region subdivision plus per-branch reasoning
+  // ----------------------------------------------------------
+  // Given Phi |- x in R(simplex, S) and a finite cover {(simplex_k, S_k)}_k
+  // of R(simplex, S) plus per-branch sub-proofs Phi AND (x in R_k) |- Psi,
+  // concludes Phi |- Psi.
+  // Admissibility: cover implication provable by Farkas per gap-LP;
+  // combine via propositional OrE and Cut.
+  // Check-time TCB: verify the cover via LP-infeasibility Farkas
+  // certificates (one per gap LP), or re-run a canonical subdivision.
+  PSubdivide/regionProof : PSubdivide -> Proof;
+  PSubdivide/termX       : PSubdivide -> Term;
+  PSubdivide/simplex     : PSubdivide -> Simplex;
+  PSubdivide/S           : PSubdivide -> ExtensionSet;
+  PSubdivide/nBranches   : PSubdivide -> Nat;
+  // Per-branch data: indexed by (p PSubdivide/nBranches) Index
+  PSubdivide/branchSimplex : {p: PSubdivide,
+                              k: p PSubdivide/nBranches Index} -> Simplex;
+  PSubdivide/branchS       : {p: PSubdivide,
+                              k: p PSubdivide/nBranches Index} -> ExtensionSet;
+  PSubdivide/branchProof   : {p: PSubdivide,
+                              k: p PSubdivide/nBranches Index} -> Proof;
+  // Cover certificate: ground data attached to the rule.
+  PSubdivide/coverCertificate : PSubdivide -> Term;
+  // Witness-denominator bound (see PFarkas/denBoundLog2): covers the
+  // cover certificate's rationals.
+  PSubdivide/denBoundLog2 : PSubdivide -> Nat;
+  // (Representation: the cover certificate is a Term-typed value encoding
+  //  the per-gap-LP Farkas certificates or a named canonical-subdivision
+  //  algorithm. The checker interprets it via the following relation.)
+
+  // The cover relation receives the subdivide node p itself ---
+  // geolog's idiom for passing the indexed branch-region family
+  // (branchSimplex/branchS at each k : nBranches Index are field
+  // accesses on p). An earlier signature received only the branch
+  // COUNT, so the cover side-condition could not check what it exists
+  // to check (the realization was sound-vacuous: Subdivide rejected
+  // everything); passing the node repaired it. The Lean mirror
+  // receives the branch-region family the same way, with the real
+  // cover computation (coverCheck: 1-D interval chain fragment,
+  // fail-toward-refusal) and the covering soundness case
+  // (sound_subdivide). The cover certificate term is carried but not
+  // consulted --- the checker recomputes the cover from the branch
+  // regions (recompute pattern); a future LP-infeasibility
+  // interpretation may consume it.
+  coverInfeasibilityValid :
+    {termX: Term, simplex: Simplex, S: ExtensionSet,
+     p: PSubdivide, coverCertificate: Term} -> Prop;
+  // Bounded computation: the cover certificate validly witnesses that
+  // R(simplex, S) is a subset of the union of the branch regions
+  // R({p,k} branchSimplex, {p,k} branchS) for k < p nBranches --- read
+  // through p. Requirement 6 of sec:geolog-arith-req.
+
+  report ax/applicable/PSubdivide/pre :
+    forall p : PSubdivide.
+    |- p PSubdivide/proof Proof/concludes Judgment/pre
+     = p PSubdivide/regionProof Proof/concludes Judgment/pre;
+  report ax/applicable/PSubdivide/region_post :
+    forall p : PSubdivide.
+    |- p PSubdivide/regionProof Proof/concludes Judgment/post
+     = {t: p PSubdivide/termX,
+        simplex: p PSubdivide/simplex,
+        S: p PSubdivide/S} FInRegion;
+  report ax/applicable/PSubdivide/branch_pre :
+    forall p : PSubdivide, k : p PSubdivide/nBranches Index.
+    |- {p: p, k: k} PSubdivide/branchProof Proof/concludes Judgment/pre
+     = {l: p PSubdivide/regionProof Proof/concludes Judgment/pre,
+        r: {t: p PSubdivide/termX,
+            simplex: {p: p, k: k} PSubdivide/branchSimplex,
+            S: {p: p, k: k} PSubdivide/branchS} FInRegion} FAnd;
+  report ax/applicable/PSubdivide/branch_post :
+    forall p : PSubdivide, k : p PSubdivide/nBranches Index.
+    |- {p: p, k: k} PSubdivide/branchProof Proof/concludes Judgment/post
+     = p PSubdivide/proof Proof/concludes Judgment/post;
+  report ax/applicable/PSubdivide/cover :
+    forall p : PSubdivide.
+    |- {termX: p PSubdivide/termX,
+        simplex: p PSubdivide/simplex,
+        S: p PSubdivide/S,
+        p: p,
+        coverCertificate: p PSubdivide/coverCertificate}
+       coverInfeasibilityValid;
+
+  // ----------------------------------------------------------
+  // Cell substitution rules (admissible from sp-Cell + OrE + EqElim)
+  // ----------------------------------------------------------
+  //
+  // For brevity we give only the sub-proof fields and post-formula axioms;
+  // the detailed pre-post chain matches the pattern of the derivations in
+  // sec:admissible-rules.
+  //
+  // Cell-In-Interior: Phi |- x in interior of C_i ==> Phi |- Cell_i[Sigma](x) = 1
+  //                   and Cell_j[Sigma](x) = 0 for j != i.
+  // We encode the "x in interior of C_i" premise via the strict-interior
+  // barycentric halfspaces; the post is a conjunction asserting the bool
+  // indicator values on the Cell-output wires.
+  //
+  // (Drafted from the one-hot sp[Cell] pattern above; boundary cases
+  // and the admissibility re-derivations live with the companion
+  // document. Realization: Catalogue.lean PCellInIntData / PCellOutData.)
+  //
+  // The conclusion syntax delegates to bounded-computation relations.
+  // Each relation destructures the cell application (input wire, output
+  // wires) and REJECTS unless: the index is in range of the schema's
+  // cells, and the app's output arity equals the schema's cell count
+  // (the appInH membership obligation is free here --- geolog sorts ARE
+  // the model --- and explicit only in the Lean payload).
+  //
+  //   cellStrictInteriorForm: formula = the strict-interior barycentric
+  //     conjunction for cell whichI --- per vertex v of the cell's simplex,
+  //     lambda_v(x) > 0 (core) / lambda_v(x) < 0 (extended), atoms in
+  //     increasing vertex order (the pinned realization convention).
+  //   cellOneHotForm: formula = (b_whichI = 1) AND AND_{j != whichI}
+  //     (b_j = 0) over the app's output wires (chain convention uniform;
+  //     a single-cell schema yields (b_0 = 1) AND FTrue).
+  //   cellOutWitnessForm: formula = ONE strict separating barycentric
+  //     atom at witnessVertex --- which must belong to cell whichJ's
+  //     simplex mask (rejects otherwise) --- lambda_w(x) < 0 for core w,
+  //     > 0 for extended w: the negation-free certificate of
+  //     "x not in closure(C_whichJ)".
+  //   cellOutZeroForm: formula = (b_whichJ = 0).
+  cellStrictInteriorForm : {app: PrimApp, schema: SimpC, whichI: Nat,
+                            formula: Formula} -> Prop;
+  cellOneHotForm         : {app: PrimApp, schema: SimpC, whichI: Nat,
+                            formula: Formula} -> Prop;
+  cellOutWitnessForm     : {app: PrimApp, schema: SimpC, whichJ: Nat,
+                            witnessVertex: Nat, formula: Formula} -> Prop;
+  cellOutZeroForm        : {app: PrimApp, schema: SimpC, whichJ: Nat,
+                            formula: Formula} -> Prop;
+
+  PCellInInterior/premise : PCellInInterior -> Proof;
+  PCellInInterior/cellApp : PCellInInterior -> PrimApp;
+  PCellInInterior/schema  : PCellInInterior -> SimpC;
+  PCellInInterior/whichI  : PCellInInterior -> Nat;  // index of the selected cell
+  report ax/applicable/PCellInInterior/app_isCell :
+    forall p : PCellInInterior.
+    |- p PCellInInterior/cellApp PrimApp/prim = PCell;
+  // the schema in the formulas is the app's own. Chased: the derived
+  // CellSchema row is what the flavor-uniqueness conformance scan
+  // counts after saturation (a flavored app referenced by this rule
+  // acquires a second linkage arm there and refuses).
+  chase ax/applicable/PCellInInterior/schema_bound :
+    forall p : PCellInInterior.
+    |- {app: p PCellInInterior/cellApp,
+        schema: p PCellInInterior/schema} CellSchema;
+  report ax/applicable/PCellInInterior/pre :
+    forall p : PCellInInterior.
+    |- p PCellInInterior/proof Proof/concludes Judgment/pre
+     = p PCellInInterior/premise Proof/concludes Judgment/pre;
+  report ax/applicable/PCellInInterior/premise_post :
+    forall p : PCellInInterior.
+    |- {app: p PCellInInterior/cellApp, schema: p PCellInInterior/schema,
+        whichI: p PCellInInterior/whichI,
+        formula: p PCellInInterior/premise Proof/concludes Judgment/post}
+       cellStrictInteriorForm;
+  report ax/applicable/PCellInInterior/conclusion :
+    forall p : PCellInInterior.
+    |- {app: p PCellInInterior/cellApp, schema: p PCellInInterior/schema,
+        whichI: p PCellInInterior/whichI,
+        formula: p PCellInInterior/proof Proof/concludes Judgment/post}
+       cellOneHotForm;
+
+  // Cell-Out: Phi |- x not in closure of C_j ==> Phi |- Cell_j[Sigma](x) = 0.
+  PCellOut/premise : PCellOut -> Proof;
+  PCellOut/cellApp : PCellOut -> PrimApp;
+  PCellOut/schema  : PCellOut -> SimpC;
+  PCellOut/whichJ  : PCellOut -> Nat;
+  PCellOut/witnessVertex : PCellOut -> Nat;  // the separating vertex
+  report ax/applicable/PCellOut/app_isCell :
+    forall p : PCellOut.
+    |- p PCellOut/cellApp PrimApp/prim = PCell;
+  chase ax/applicable/PCellOut/schema_bound :
+    forall p : PCellOut.
+    |- {app: p PCellOut/cellApp, schema: p PCellOut/schema} CellSchema;
+  report ax/applicable/PCellOut/pre :
+    forall p : PCellOut.
+    |- p PCellOut/proof Proof/concludes Judgment/pre
+     = p PCellOut/premise Proof/concludes Judgment/pre;
+  report ax/applicable/PCellOut/premise_post :
+    forall p : PCellOut.
+    |- {app: p PCellOut/cellApp, schema: p PCellOut/schema,
+        whichJ: p PCellOut/whichJ,
+        witnessVertex: p PCellOut/witnessVertex,
+        formula: p PCellOut/premise Proof/concludes Judgment/post}
+       cellOutWitnessForm;
+  report ax/applicable/PCellOut/conclusion :
+    forall p : PCellOut.
+    |- {app: p PCellOut/cellApp, schema: p PCellOut/schema,
+        whichJ: p PCellOut/whichJ,
+        formula: p PCellOut/proof Proof/concludes Judgment/post}
+       cellOutZeroForm;
+
+  // ==========================================================
+  // ROW-FAMILY ADMISSIBLE RULES
+  // ==========================================================
+  // Semantic authority for every payload shape: the Lean records
+  // PConstExactData / PBoundData / PPsdCert{T,DD,K}Data
+  // (Core/Catalogue.lean). These rules carry no bespoke wire tags:
+  // their payload ABI is this theory's rows. The catalogue reading:
+  // the admissible layer gains ConstExact (which subsumes the earlier
+  // rational-fact rule) and PsdCert-T/-DD/-K; the compact-spelling
+  // layer gains Bound; and two judgment-kind certificate species land
+  // --- ProductLattice and Enclosure, sibling sorts concluding
+  // famJudgment/encJudgment, root-only.
+
+  // ----------------------------------------------------------
+  // ConstExact: closed exact comparison
+  // ----------------------------------------------------------
+  // Premise-free: |- e1 bowtie e2 for CLOSED (wire-free) terms, decided
+  // by exact ground-Q evaluation (Lean: Formula.evalClosed = some true;
+  // soundness bridge holds_of_evalClosed_true). Closedness is IMPLIED
+  // by evaluability, never a separate field. The pre is arbitrary (the
+  // Norm convention). The `ne` comparator is UNREPRESENTABLE here ---
+  // the 5-Index carve (0=LT 1=LE 2=EQ 3=GE 4=GT, PArithAtom's carve)
+  // realizes the Lean notNE side condition as a domain fact rather
+  // than a check (a wireless `ne` atom interprets to bottom under the
+  // diamond-lattice countermodel and would break the countermodel
+  // soundness lemma against arbitrary pre).
+  PConstExact : Set;   PConstExact/proof : PConstExact -> Proof;
+  PConstExact/termL  : PConstExact -> Term;      // Lean e1
+  PConstExact/termR  : PConstExact -> Term;      // Lean e2
+  PConstExact/bowtie : PConstExact -> 5 Index;
+
+  constExactEvalTrue : {bowtie: 5 Index, l: Term, r: Term} -> Prop;
+  // Bounded computation: Term.evalQ? on both sides (exact ground Q;
+  // succeeds iff the side is wire-free) + the comparator's decidable
+  // test --- Lean: (Formula.atom b e1 e2).evalClosed = some true.
+
+  report ax/applicable/PConstExact/eval :
+    forall p : PConstExact.
+    |- {bowtie: p PConstExact/bowtie,
+        l: p PConstExact/termL, r: p PConstExact/termR}
+       constExactEvalTrue;
+  report ax/applicable/PConstExact/post :
+    forall p : PConstExact.
+    |- {bowtie: p PConstExact/bowtie,
+        l: p PConstExact/termL, r: p PConstExact/termR,
+        formula: p PConstExact/proof Proof/concludes Judgment/post}
+       atomicCompareForm;
+  // (No pre axiom, no wire conditions: a closed comparison mentions no
+  //  wires --- Lean PConstExactData carries no wiresPos/conclShape.)
+
+  // ----------------------------------------------------------
+  // Bound: the affine bound-node (compact spelling)
+  // ----------------------------------------------------------
+  // PSyzygy's payload VERBATIM under its own tag --- the compact-tier
+  // alias made visible in the schema (the unpack is 1-node-to-1-node
+  // constructor renaming; sound_pBound IS sound_syzygy re-handed the
+  // same data). Field-for-field PSyzygy minus theta: theta is
+  // PSyzygy's OPTIONAL small-gain metadata, outside the PSyzygyData
+  // payload proper --- a small-gain-shaped node is a PSyzygy node, so a
+  // PBound/theta row would be a category error, and its absence here
+  // keeps the 1-to-1 relation clean.
+  PBound : Set;   PBound/proof : PBound -> Proof;
+  PBound/nComponents : PBound -> Nat;
+  PBound/component   : {p: PBound,
+                        k: p PBound/nComponents Index} -> Proof;
+  PBound/combinationCoeffs : PBound -> Term;  // farkasEntries encoding,
+                                              // PSyzygy's verbatim
+  PBound/conclusion        : PBound -> Term;
+  PBound/denBoundLog2      : PBound -> Nat;   // witness-denominator bound,
+                                              // zero proof weight
+
+  pBoundCombinationValid : {p: PBound} -> Prop;
+  // Bounded computation: syzygyCombinationValid's computation, verbatim
+  // (Lean: PBoundData.valid IS syzygyCombinationValid --- same predicate,
+  // same fold; the affine-entry restriction is the producer's
+  // discipline, not a weaker check). Own relation symbol only because
+  // the node-passing idiom pins the domain at the node's sort.
+
+  // The both-polarity conclusion selector, as a relation --- shared by
+  // Bound and the PsdCert family below.
+  syzygyConclusionFormRel : {conclusion: Term, formula: Formula} -> Prop;
+  // Bounded computation: PSyzygy's own core conclusion selector (Lean:
+  // syzygyConclusionForm) --- 'formula' is the zero-form
+  // (conclusion <= 0), the ge-polarity flip (conclusion = neg e and
+  // formula = e >= 0 --- the dissolved ge-premise bridge), or the
+  // literal split (conclusion = l - r and formula = l <= r).
+
+  report ax/applicable/PBound/valid :
+    forall p : PBound. |- {p: p} pBoundCombinationValid;
+  report ax/applicable/PBound/pre_contains :
+    forall p : PBound, k : p PBound/nComponents Index.
+    |- {pre: p PBound/proof Proof/concludes Judgment/pre,
+        sub: {p: p, k: k} PBound/component Proof/concludes Judgment/pre}
+       premiseContains;
+  report ax/applicable/PBound/post :
+    forall p : PBound.
+    |- {conclusion: p PBound/conclusion,
+        formula: p PBound/proof Proof/concludes Judgment/post}
+       syzygyConclusionFormRel;
+  report ax/applicable/PBound/concl_wf :
+    forall p : PBound. |- p PBound/conclusion WFTermFin;
+  // Positive-size side-conditions on the composite plus the
+  // component-conclusion extension --- the PSyzygy pair, verbatim
+  // (Lean: wiresPos / compPostWiresPos):
+  report ax/applicable/PBound/wiresPos :
+    forall p : PBound.
+    |- {pre: p PBound/proof Proof/concludes Judgment/pre,
+        conclusion: p PBound/conclusion} positiveSizeWires;
+  report ax/applicable/PBound/comp_post_wiresPos :
+    forall p : PBound, k : p PBound/nComponents Index.
+    |- {form: {p: p, k: k} PBound/component Proof/concludes Judgment/post}
+       positiveSizeWiresForm;
+
+  // ----------------------------------------------------------
+  // PsdCert-T / -DD / -K: exact-matrix PSD witness facts
+  // ----------------------------------------------------------
+  // Premise-free exact-matrix positive-(semi)definiteness facts,
+  // concluded IN-LOGIC as nonnegativity of the certified matrix's
+  // quadratic form at a payload term vector, entering through the
+  // both-polarity conclusion selector. The pre is arbitrary (the Norm
+  // convention); soundness never consults witness accuracy --- a forged
+  // Z/N/B can only refuse, never falsely accept (kernel fact,
+  // PsdCert.lean).
+  //
+  // MATRIX PAYLOAD REPRESENTATION: a per-entry row encoding would make
+  // every matrix entry a row; instead each matrix payload is ONE
+  // tensor-valued field. `Q DynTensor` is the tensor FAMILY over Q ---
+  // shape-in-value: the position types the family, the value carries
+  // its own shape (a netstring-style inline spelling: rank, extents,
+  // element dtype, then length-framed canonical Q entries, all minimal
+  // varints). Shape AGREEMENT with the node's own extent fields is
+  // stated IN-THEORY by the per-field ax/shape/* demand rows beside
+  // each family below: one named side-condition relation per tensor
+  // field, whose d0/d1 fields carry the EXPECTED extents as theory
+  // data (auditable from sealed rows), and whose bounded computation
+  // reads the value's shape through the ONE shared decoder ---
+  // geolog-envelope's validated cell views, the same views the witness
+  // oracles consume (the one-decoder rule; the decoded shape is a
+  // Nat-list value at the kernel layer, read by the {len, at, concat}
+  // ground roster). An unresolved envelope container DEFERS the demand
+  // (never passes); a mismatched shape refuses it loudly. Tensor
+  // values are side-condition payload, never term-language citizens,
+  // so the relations consume the node --- this theory's node-passing
+  // idiom. The earlier parametrized-position (type-level) refinement
+  // is RETIRED UNBUILT for this stratum: fields stay `Q DynTensor`,
+  // and the axiom rows carry the dependent typing. Size partition:
+  // small entry streams ride inline; larger values ride the identity
+  // envelope + content-addressed container. The /term vectors
+  // deliberately STAY dependent families: their entries are Term
+  // ELEMENTS --- object references, the rows idiom working as
+  // intended, O(n) rows not O(n^2) --- and a reference-element tensor
+  // is the container format's named non-goal (a reference's meaning is
+  // body-relative, so a literal cannot carry one).
+  PPsdCertT : Set;   PPsdCertT/proof : PPsdCertT -> Proof;
+  PPsdCertT/n : PPsdCertT -> Nat;
+  PPsdCertT/A : PPsdCertT -> Q DynTensor;  // [n, n]; the ax/shape/
+                                        // PPsdCertT/A row below
+  PPsdCertT/Z : PPsdCertT -> Q DynTensor;  // [n, n]; ax/shape/PPsdCertT/Z
+  PPsdCertT/term : {p: PPsdCertT, i: p PPsdCertT/n Index} -> Term;
+                                      // Lean ts (arity n = the domain)
+  PPsdCertT/conclusion : PPsdCertT -> Term;
+
+  psdCertTriWitness : {p: PPsdCertT} -> Prop;
+  // Bounded computation (node-passing idiom --- consumes the
+  // tensor-valued matrix fields): PsdCert.checkTri n A Z --- A
+  // symmetric; Z upper-triangular with positive diagonal; A*Z
+  // lower-triangular with positive diagonal (a triangular-inverse
+  // argument, all-syntactic premises; division-free, O(alpha n^2)
+  // exact-Q multiplications). Shape agreement is normatively the
+  // ax/shape/PPsdCertT/* rows below; this oracle's own first-clause
+  // shape read is defensive re-derivation through the same decoder
+  // (bounds safety --- an oracle indexing a malformed payload must
+  // refuse regardless).
+  psdCertTriConcl : {p: PPsdCertT} -> Prop;
+  // Bounded computation: PsdCert.conclCheck n A ts conclusion --- the
+  // conclusion's canonical polynomial IS the negated quadratic form
+  // -sum_ij A_ij t_i t_j at the payload terms (idx-free and
+  // wire-coordinate branches, syzygyCheck's split; ts arity re-checked).
+
+  // Per-field shape agreement (dependent typing as theory data): the
+  // expected extents ride the d0/d1 fields, instantiated from the
+  // node's own extent fields by the ax/shape rows.
+  psdCertShapeTA : {p: PPsdCertT, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: dyn-shape(/A) = [d0, d1] through the shared
+  // decoder; unresolved container defers, mismatch refuses.
+  psdCertShapeTZ : {p: PPsdCertT, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: as /A, for /Z.
+
+  report ax/applicable/PPsdCertT/witness :
+    forall p : PPsdCertT. |- {p: p} psdCertTriWitness;
+  report ax/applicable/PPsdCertT/concl :
+    forall p : PPsdCertT. |- {p: p} psdCertTriConcl;
+  report ax/shape/PPsdCertT/A :
+    forall p : PPsdCertT.
+    |- {p: p, d0: p PPsdCertT/n, d1: p PPsdCertT/n} psdCertShapeTA;
+  report ax/shape/PPsdCertT/Z :
+    forall p : PPsdCertT.
+    |- {p: p, d0: p PPsdCertT/n, d1: p PPsdCertT/n} psdCertShapeTZ;
+  report ax/applicable/PPsdCertT/post :
+    forall p : PPsdCertT.
+    |- {conclusion: p PPsdCertT/conclusion,
+        formula: p PPsdCertT/proof Proof/concludes Judgment/post}
+       syzygyConclusionFormRel;
+  report ax/applicable/PPsdCertT/concl_wf :
+    forall p : PPsdCertT. |- p PPsdCertT/conclusion WFTermFin;
+  report ax/applicable/PPsdCertT/wiresPos :
+    forall p : PPsdCertT.
+    |- {conclusion: p PPsdCertT/conclusion} positiveSizeWiresTerm;
+
+  PPsdCertDD : Set;   PPsdCertDD/proof : PPsdCertDD -> Proof;
+  PPsdCertDD/n : PPsdCertDD -> Nat;
+  PPsdCertDD/A : PPsdCertDD -> Q DynTensor;  // [n, n]; the ax/shape/
+                                          // PPsdCertDD/A row below
+  PPsdCertDD/Z : PPsdCertDD -> Q DynTensor;  // [n, n]; ax/shape/PPsdCertDD/Z
+  PPsdCertDD/term : {p: PPsdCertDD, i: p PPsdCertDD/n Index} -> Term;
+  PPsdCertDD/conclusion : PPsdCertDD -> Term;
+
+  psdCertDiagWitness : {p: PPsdCertDD} -> Prop;
+  // Bounded computation: PsdCert.checkDiag n A Z --- A symmetric; Z
+  // upper-triangular with positive diagonal; B := Z^T A Z strictly
+  // row-diagonally dominant (the formalized diagonal-dominance shape
+  // --- the tier a rounded float-LDL witness actually feeds). Shape
+  // agreement is normatively the ax/shape/PPsdCertDD/* rows below;
+  // the oracle's own shape read is defensive re-derivation through
+  // the same decoder.
+  psdCertDiagConcl : {p: PPsdCertDD} -> Prop;
+  // Bounded computation: PsdCert.conclCheck n A ts conclusion (as /T).
+
+  psdCertShapeDDA : {p: PPsdCertDD, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: dyn-shape(/A) = [d0, d1] (shared decoder).
+  psdCertShapeDDZ : {p: PPsdCertDD, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: as /A, for /Z.
+
+  report ax/applicable/PPsdCertDD/witness :
+    forall p : PPsdCertDD. |- {p: p} psdCertDiagWitness;
+  report ax/applicable/PPsdCertDD/concl :
+    forall p : PPsdCertDD. |- {p: p} psdCertDiagConcl;
+  report ax/shape/PPsdCertDD/A :
+    forall p : PPsdCertDD.
+    |- {p: p, d0: p PPsdCertDD/n, d1: p PPsdCertDD/n} psdCertShapeDDA;
+  report ax/shape/PPsdCertDD/Z :
+    forall p : PPsdCertDD.
+    |- {p: p, d0: p PPsdCertDD/n, d1: p PPsdCertDD/n} psdCertShapeDDZ;
+  report ax/applicable/PPsdCertDD/post :
+    forall p : PPsdCertDD.
+    |- {conclusion: p PPsdCertDD/conclusion,
+        formula: p PPsdCertDD/proof Proof/concludes Judgment/post}
+       syzygyConclusionFormRel;
+  report ax/applicable/PPsdCertDD/concl_wf :
+    forall p : PPsdCertDD. |- p PPsdCertDD/conclusion WFTermFin;
+  report ax/applicable/PPsdCertDD/wiresPos :
+    forall p : PPsdCertDD.
+    |- {conclusion: p PPsdCertDD/conclusion} positiveSizeWiresTerm;
+
+  // PsdCert-K: PSD-with-kernel --- the family's largest payload. A (over
+  // nTotal = m + k coordinates, kernel coordinates LAST) is checked to
+  // BE the two-sided kernel-completion congruence L^T B L of its
+  // leading block B for L = (I | N), plus a T-or-DD inner witness for
+  // B; a forged N or B refuses. The producer applies its permutation
+  // before emission (P-conjugation is index renaming; the catalogue
+  // rule is the P = id core). Corners structural: k = 0 gives A = B;
+  // m = 0 forces A = 0.
+  PPsdCertK : Set;   PPsdCertK/proof : PPsdCertK -> Proof;
+  PPsdCertK/m : PPsdCertK -> Nat;
+  PPsdCertK/k : PPsdCertK -> Nat;
+  PPsdCertK/nTotal : PPsdCertK -> Nat;  // = m + k; the ax/shape/
+                                        // PPsdCertK/nTotal row (natPlusIs)
+  PPsdCertK/A : PPsdCertK -> Q DynTensor;  // [nTotal, nTotal]
+  PPsdCertK/N : PPsdCertK -> Q DynTensor;  // [m, k] --- the non-square case
+  PPsdCertK/B : PPsdCertK -> Q DynTensor;  // [m, m]
+  PPsdCertK/innerT : PPsdCertK -> 2 Index;  // 1 = T inner witness,
+                                            // 0 = DD (Lean innerT : Bool)
+  PPsdCertK/Z : PPsdCertK -> Q DynTensor;  // [m, m]
+  PPsdCertK/term : {p: PPsdCertK, i: p PPsdCertK/nTotal Index} -> Term;
+  PPsdCertK/conclusion : PPsdCertK -> Term;
+
+  psdCertKernelWitness : {p: PPsdCertK} -> Prop;
+  // Bounded computation: PsdCert.checkKernel m k A N B innerT Z ---
+  // the entrywise congruence A = L^T B L for L = (I | N), plus
+  // checkTri or checkDiag on (B, Z) per innerT. The arity tie
+  // nTotal = m + k is normatively the ax/shape/PPsdCertK/nTotal row
+  // below (checked addition), and shape agreement --- /A: [nTotal,
+  // nTotal], /N: [m, k], /B: [m, m], /Z: [m, m] --- is normatively
+  // the ax/shape/PPsdCertK/* rows; the oracle's own re-derivations of
+  // both are defensive, through the same decoder.
+  psdCertKernelConcl : {p: PPsdCertK} -> Prop;
+  // Bounded computation: PsdCert.conclCheck (m + k) A ts conclusion.
+
+  natPlusIs : {l: Nat, r: Nat, sum: Nat} -> Prop;
+  // Bounded computation: sum = l + r, CHECKED addition (overflow
+  // refuses, never wraps).
+  psdCertShapeKA : {p: PPsdCertK, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: dyn-shape(/A) = [d0, d1] (shared decoder).
+  psdCertShapeKN : {p: PPsdCertK, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: as /A, for /N (the non-square case).
+  psdCertShapeKB : {p: PPsdCertK, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: as /A, for /B.
+  psdCertShapeKZ : {p: PPsdCertK, d0: Nat, d1: Nat} -> Prop;
+  // Bounded computation: as /A, for /Z.
+
+  report ax/applicable/PPsdCertK/witness :
+    forall p : PPsdCertK. |- {p: p} psdCertKernelWitness;
+  report ax/applicable/PPsdCertK/concl :
+    forall p : PPsdCertK. |- {p: p} psdCertKernelConcl;
+  report ax/shape/PPsdCertK/nTotal :
+    forall p : PPsdCertK.
+    |- {l: p PPsdCertK/m, r: p PPsdCertK/k,
+        sum: p PPsdCertK/nTotal} natPlusIs;
+  report ax/shape/PPsdCertK/A :
+    forall p : PPsdCertK.
+    |- {p: p, d0: p PPsdCertK/nTotal, d1: p PPsdCertK/nTotal}
+       psdCertShapeKA;
+  report ax/shape/PPsdCertK/N :
+    forall p : PPsdCertK.
+    |- {p: p, d0: p PPsdCertK/m, d1: p PPsdCertK/k} psdCertShapeKN;
+  report ax/shape/PPsdCertK/B :
+    forall p : PPsdCertK.
+    |- {p: p, d0: p PPsdCertK/m, d1: p PPsdCertK/m} psdCertShapeKB;
+  report ax/shape/PPsdCertK/Z :
+    forall p : PPsdCertK.
+    |- {p: p, d0: p PPsdCertK/m, d1: p PPsdCertK/m} psdCertShapeKZ;
+  report ax/applicable/PPsdCertK/post :
+    forall p : PPsdCertK.
+    |- {conclusion: p PPsdCertK/conclusion,
+        formula: p PPsdCertK/proof Proof/concludes Judgment/post}
+       syzygyConclusionFormRel;
+  report ax/applicable/PPsdCertK/concl_wf :
+    forall p : PPsdCertK. |- p PPsdCertK/conclusion WFTermFin;
+  report ax/applicable/PPsdCertK/wiresPos :
+    forall p : PPsdCertK.
+    |- {conclusion: p PPsdCertK/conclusion} positiveSizeWiresTerm;
+
+  // The positive-size side-condition restricted to one Term (shared by
+  // the PsdCert family): every wire free in 'conclusion' is typed at a
+  // POSITIVE-total-size shape. The pre is deliberately EXCLUDED ---
+  // Lean PPsdCert*Data.wiresPos sweeps conclusion.freeWires only
+  // (pre is arbitrary under the Norm convention; a zero-size wire in
+  // an untouched pre is harmless), and reusing the pre-inclusive
+  // positiveSizeWires here would silently STRENGTHEN the rule.
+  positiveSizeWiresTerm : {conclusion: Term} -> Prop;
+
+  // ==========================================================
+  // JUDGMENT-KIND CERTIFICATE SPECIES: row families
+  // ==========================================================
+  // The sequent Judgment sort is UNTOUCHED --- these two species
+  // conclude judgment KINDS (famJudgment / encJudgment), realized as
+  // SIBLING sorts per the certificate discipline: add the sibling,
+  // never split the inherited sort. They carry NO P<Rule>/proof
+  // injection into Proof: ax/wf/global quantifies over sequent proofs
+  // only and is untouched, and no sequent rule consumes a
+  // judgment-kind conclusion --- they are root-only certificate
+  // species, reached from the certificate revision's partial
+  // rootFam/rootEnc funs.
+  // Correspondence note (answered by inspection): the Qtsl certificate
+  // stratum's QBlockLattice is this object's Qtsl-side KIN, not its
+  // realization --- its axes are Qtsl state-space grids with no
+  // hypernet coupling, while this lattice's axes each carry a
+  // (Wire, drift Term) pair against the ambient hypernet; the two
+  // remain distinct sorts on purpose, and any future unification is
+  // its own deliberate change, not an accident of naming.
+
+  // -- The block-lattice family object, entity idiom.
+  // Joins/meets/closure/readout are RECOMPUTED by the checker, never
+  // serialized (recompute, don't trust).
+  BlockLattice : Set;
+  BlockLattice/nAxes   : BlockLattice -> Nat;
+  BlockLattice/nBlocks : BlockLattice -> Nat;
+
+  // Per-axis data: (wire, drift term, strictly increasing gridlines).
+  BLAxis : Set;
+  BLAxis/lattice : BLAxis -> BlockLattice;
+  BLAxis/index   : BLAxis -> Nat;         // < nAxes; bijective presence
+                                          // is blockLatticeWF's charge
+  BLAxis/wire    : BLAxis -> Wire;
+  BLAxis/drift   : BLAxis -> Term;
+  BLAxis/nGridlines : BLAxis -> Nat;
+  BLAxis/gridline : {x: BLAxis, g: x BLAxis/nGridlines Index} -> Q;
+
+  // Stored generator blocks: a nonempty PROPER cell subset (sorted
+  // row-major cell indices, axis 0 slowest --- the wire's bitmask in
+  // rows form, the sorted-cell-set idiom) plus facet proofs aligned
+  // 1:1 with the CANONICAL boundary-facet list (sorted by (cell,
+  // axis, direction with - before +), grid-boundary facets excluded).
+  FamBlock : Set;
+  FamBlock/lattice : FamBlock -> BlockLattice;
+  FamBlock/index   : FamBlock -> Nat;     // < nBlocks
+  FamBlock/nCells  : FamBlock -> Nat;
+  FamBlock/cell    : {b: FamBlock, c: b FamBlock/nCells Index} -> Nat;
+  FamBlock/nFacets : FamBlock -> Nat;     // = canonical boundary-facet
+                                          // count (blockLatticeWF)
+  FamBlock/facetProof : {b: FamBlock,
+                         f: b FamBlock/nFacets Index} -> Proof;
+                                          // sequent proofs --- the
+                                          // inherited Proof sort
+
+  blockLatticeWF : {bl: BlockLattice} -> Prop;
+  // Bounded computation: axis/block index families are exactly
+  // {0..n-1} (bijective presence); >= 2 strictly increasing gridlines
+  // per axis; each block's cell list sorted, nonempty, PROPER, in
+  // range; each block's nFacets equals the canonical boundary-facet
+  // count of its cell set and the facet family is aligned to the
+  // canonical order.
+
+  // -- famJudgment: "this lattice is a certified attracting-block
+  // lattice over its declared axes" (arena forward invariance
+  // DECLARED, not certified).
+  FamJudgment : Set;
+  FamJudgment/lattice : FamJudgment -> BlockLattice;
+
+  // -- ProductLattice: the first certificate-FAMILY rule. Its
+  // conclusion's lattice IS the composite (the wire parse rule
+  // "record must equal composite lattice", carried structurally: no
+  // separate composite field exists to disagree). flows_only is
+  // published metadata with zero proof weight (1 licenses the
+  // completeness citation for flow factors; 0 = sound-only).
+  PProductLattice : Set;
+  PProductLattice/concludes : PProductLattice -> FamJudgment;
+  PProductLattice/left      : PProductLattice -> BlockLattice;
+  PProductLattice/right     : PProductLattice -> BlockLattice;
+  PProductLattice/flowsOnly : PProductLattice -> 2 Index;
+
+  productLatticeChecks : {p: PProductLattice} -> Prop;
+  // Bounded computation: facet discharge by citation (shared facet
+  // proofs conclude the required facet-sign sequents), composite
+  // closure membership, readout agreement, and product correctness ---
+  // the composite lattice is the product of left and right (disjoint
+  // wire sets; block cell-sets the pairwise products; facet slots
+  // paired canonically). Checker territory ported once; the relation
+  // is its schema hook, exactly the allForwardDiffBernCoeffsSatisfyP
+  // precedent.
+
+  report ax/applicable/PProductLattice/wf_left :
+    forall p : PProductLattice.
+    |- {bl: p PProductLattice/left} blockLatticeWF;
+  report ax/applicable/PProductLattice/wf_right :
+    forall p : PProductLattice.
+    |- {bl: p PProductLattice/right} blockLatticeWF;
+  report ax/applicable/PProductLattice/wf_composite :
+    forall p : PProductLattice.
+    |- {bl: p PProductLattice/concludes FamJudgment/lattice}
+       blockLatticeWF;
+  report ax/applicable/PProductLattice/product :
+    forall p : PProductLattice. |- {p: p} productLatticeChecks;
+
+  // -- encJudgment: the remainder bound
+  // "forall x, |x| <= r -> |f(x) - sum_{k<=n} a_k x^k| <= cap" with
+  // a_k the tagged function's exact Maclaurin coefficients --- NOT
+  // stored (recompute pattern: determined by (func, n)). cap is the
+  // spec's R. Meaning theorem: encCheck_sound (Lean Enclosure.lean;
+  // the HOL4 development banks the same foundation theorems).
+  EncJudgment : Set;
+  EncJudgment/func : EncJudgment -> 3 Index;  // 0=exp 1=sin 2=cos
+  EncJudgment/n    : EncJudgment -> Nat;
+  EncJudgment/r    : EncJudgment -> Q;
+  EncJudgment/cap  : EncJudgment -> Q;
+
+  // -- Enclosure: a LEAF whose witness IS its conclusion; no
+  // rule-specific fields. Root-only (the enclosure-root profile) ---
+  // enforced at the certificate layer, not here.
+  PEnclosure : Set;
+  PEnclosure/concludes : PEnclosure -> EncJudgment;
+
+  enclosureWitnessValid : {j: EncJudgment} -> Prop;
+  // Bounded computation: the func's exact Maclaurin prefix a_0..a_n is
+  // recomputed; the remainder bound at radius r against cap is
+  // certified by the banked foundation theorems (alternating-series /
+  // ratio-tail arguments --- exact Q throughout); refusal on any
+  // non-certifiable (func, n, r, cap) tuple.
+
+  report ax/applicable/PEnclosure/witness :
+    forall p : PEnclosure.
+    |- {j: p PEnclosure/concludes} enclosureWitnessValid;
+}
+
+// ============================================================
+// Top-level theory
+// ============================================================
+//
+// The top-level theory is BernsteinLogic, which extends the whole
+// tower. (The flavored cell-schema stratum lives with the Qtsl
+// omnibus theory, which extends this file's top — so this file is
+// exactly the proof-calculus fragment the certified external checker
+// consumes, plus its tower.) A certificate is an instance of the
+// tower together with the judgment it concludes. Geolog's chase and
+// constraint enforcement on such an instance perform the full proof
+// check: refuse-mode violations (linearity's kin, acyclicity,
+// constructor confusion) reject at the point of malformation;
+// report-mode violations (type consistency, scoping, rule
+// applicability) leave the instance commit-able but loudly noted as
+// invalid; side-condition demands are discharged by bounded oracle
+// evaluation, with any undischarged demand a loud deferral.
+
+// ============================================================
+// Example instance (abbreviated): the tiny worked example from
+// sec:example of the companion document
+// ============================================================
+//
+// instance SmallExample : BernsteinLogic = chase {
+//   // Dtypes layer: the enum constants Q, F64
+//   // TensorTypes: Q-scalar = the TensorType whose shape is the
+//   //   rank-0 primordial Shape tuple and whose dtype is Q
+//   // Hypernet: Poly(X-1); the piecewise-linear activation;
+//   //   Poly(2*X+1) with wires w0, w1, w2, w3, plus the
+//   //   reverse-mode-AD generator wire y for the output
+//   // Simplicial: the 2-cell sign complex Sigma_pm on R, with a
+//   //   ContractIndex matching its ambient dimension 1
+//   // Formulas: pre is "0 <= w0 AND w0 <= 2"; post is "y <= 1/2"
+//   // Proof: POrE on the disjunctive sp[Cell[Sigma_pm]] from SP_H, with
+//   //   two branches; branch A closes via PEqElim (substituting the
+//   //   indicator's sp-value) + PBernCone at degree 0 on the constant 1/2;
+//   //   branch B closes via PEqElim + PBernCone at degree 1 on
+//   //   (1/2 + 2*w0) over the simplex conv(1, 2).
+// }
+

@@ -1,0 +1,132 @@
+
+\sourcenote{Genre: core rule (tier 1) --- the battery
+family\textquotesingle s smallest member, and its only
+\emph{measure-generic} one: the theorems below are stated over an
+arbitrary measure, so the rule carries no profile conditionality at all
+--- its instance at any system-semantics profile is the same lemma
+applied at that profile\textquotesingle s path measure. A Putnam grader
+would accept the one-line proof and then ask where the content went; the
+honest answer --- into the decomposition hypothesis --- is
+Remark~\ref{rem:qub-content}.}
+
+\textbf{Setting and claim.}\enspace Let $(\Omega, \mu)$ be any
+measurable space with a measure. The rule: from
+$\mu(E_1) \le a$, $\mu(E_2) \le b$, and a decomposition
+$\mathrm{fail} \subseteq E_1 \cup E_2$, conclude
+$\mu(\mathrm{fail}) \le a + b$. In its battery consumption, $\mu$ is the
+path measure $\Pr_x$ of the profile at hand, $\mathrm{fail}$ is the
+failure event of a composite temporal property, and $a, b$ are the
+initial values of two certificates.
+
+\begin{bthm}[soundness of \rulename{QUnionBound}]\label{thm:qub-sound}
+$\mu(E_1) \le a$, $\mu(E_2) \le b$, and
+$\mathrm{fail} \subseteq E_1 \cup E_2$ imply
+$\mu(\mathrm{fail}) \le a + b$.
+\end{bthm}
+\begin{proof}
+Monotonicity, then subadditivity (Boole\textquotesingle s inequality):
+$\mu(\mathrm{fail}) \le \mu(E_1 \cup E_2) \le \mu(E_1) + \mu(E_2)
+\le a + b$. Note what is \emph{not} used: no measurability of
+$\mathrm{fail}$ (monotonicity of the outer measure suffices), no
+disjointness of $E_1, E_2$, no probability normalization --- the
+statement holds for any measure, which is exactly what makes the rule
+profile-generic.
+\end{proof}
+
+\begin{bprop}[real-valued form]\label{prop:qub-ofreal}
+With $a, b \ge 0$ real and the bounds given as
+$\mu(E_i) \le \mathrm{ofReal}$-embedded budgets, the conclusion is
+$\mu(\mathrm{fail}) \le a + b$ under the same embedding.
+\end{bprop}
+\begin{proof}
+The embedding of nonnegative reals into extended nonnegative reals is
+additive on nonnegatives; apply Theorem~\ref{thm:qub-sound}. This is the
+shape battery bounds actually arrive in --- certificate initial values
+--- and its nonnegativity hypotheses are free at every use site
+(certificate nonneg rows).
+\end{proof}
+
+\begin{blemma}[the d\'ebut decomposition --- the packaged instance]
+\label{lem:qub-debut}
+Over sequence space $S^{\N}$, fix a stop set
+$\mathit{Stop} \subseteq S$, a good-exit set $\mathit{Good} \subseteq S$,
+and a horizon $T$. Then the complement of the first-exit-success event
+--- some $n \le T$ with $\omega_n \in \mathit{Good}$ and no earlier
+visit to $\mathit{Stop}$ --- is contained in
+\[
+\bigl\{\exists n,\ \omega_n \in \mathit{Stop} \smallsetminus \mathit{Good}
+\ \wedge\ \forall j < n,\ \omega_j \notin \mathit{Stop}\bigr\}
+\;\cup\;
+\bigl\{\forall k \le T,\ \omega_k \notin \mathit{Stop}\bigr\},
+\]
+i.e.\ in $\{$some \emph{first} $\mathit{Stop}$-visit presents a bad
+state$\}$ $\cup$ $\{$no $\mathit{Stop}$-visit through $T\}$.
+\end{blemma}
+\begin{proof}
+Suppose the path is not a first-exit success. If it never visits
+$\mathit{Stop}$ through $T$, the second disjunct holds. Otherwise some
+$k \le T$ has $\omega_k \in \mathit{Stop}$; let $n$ be the \emph{least}
+index with $\omega_n \in \mathit{Stop}$ (the well-ordering of $\N$ ---
+this is the entire ``d\'ebut'' content; at continuous time the
+first-entry construction is a genuine theorem, while over $\N$ it is a
+minimum). Then $n \le k \le T$ and no $j < n$ visits $\mathit{Stop}$;
+were $\omega_n \in \mathit{Good}$, the path would be a first-exit
+success at $n$ --- contradiction. So $\omega_n \in \mathit{Stop}
+\smallsetminus \mathit{Good}$, and $n$ is a first visit: the first
+disjunct holds. No measure, no measurability, no topology was consulted
+--- the lemma is pure path-set algebra.
+\end{proof}
+
+\begin{bremark}[where the content lives]\label{rem:qub-content}
+The rule is sound for \emph{any} events $E_1, E_2$; every gram of
+content sits in the hypothesis
+$\mathrm{fail} \subseteq E_1 \cup E_2$, which the citing rule must
+justify and the checker must see justified. Drop it and the conclusion
+is unrelated to the premises --- one could ``bound'' any event by any
+two budgets. In the bounded-until battery\textquotesingle s use,
+Lemma~\ref{lem:qub-debut} \emph{is} the justification, at
+$\mathit{Stop} := (A \cup R) \cup D^{\mathrm{c}}$ and
+$\mathit{Good} := R$: failure of ``stay safe until the target, by the
+deadline'' splits into a bad first exit (bounded by the avoid
+certificate) and no exit by the horizon (bounded by the deadline
+certificate). The split is exhaustive precisely because the first
+$\mathit{Stop}$-visit either is or is not a good landing --- there is no
+third thing a stopped path can do.
+\end{bremark}
+
+\begin{bremark}[measure-genericity, stated sibling-aware]
+\label{rem:qub-generic}
+Within this book\textquotesingle s battery family --- safety, deadline,
+until, and this rule --- the other three carry conditional marks naming
+their discrete-kernel profile; this rule alone is warranted
+unconditionally, because its statement never mentions a kernel, a path
+construction, or a filtration. The same two theorems will serve the
+continuous-time profiles verbatim when their siblings\textquotesingle{}
+transports ship: nothing here will need to be touched.
+\end{bremark}
+
+\begin{bremark}[the second consumer]\label{rem:qub-second}
+The same additivity is the slack-composition device in assume--guarantee
+composition: when interface contracts compose across a wiring, their
+slack budgets add, and the addition is this rule\textquotesingle s
+theorem applied to the composed failure events. One lemma, two consumers
+--- which is the reason the rule is kept as a separate node rather than
+inlined into the until battery: every consumer\textquotesingle s
+soundness proof stays honest about where its additivity comes from.
+\end{bremark}
+
+\begin{bremark}[why core, and why this small]\label{rem:qub-tier}
+There is nothing to unpack into: subadditivity of measure is not
+derivable from the other battery rules, so the rule cannot be admissible
+--- it is new semantic content, deliberately minimal. Its smallness is a
+design decision inherited from the base
+calculus\textquotesingle s taste: keep kernel-level content atomic, let
+composite rules be admissible unpackings over the atoms.
+\end{bremark}
+
+\begin{anchors}
+Theorem \ref{thm:qub-sound} & \texttt{sound\_QUnionBound}\\
+Proposition \ref{prop:qub-ofreal} & \texttt{sound\_QUnionBound\_ofReal}\\
+Lemma \ref{lem:qub-debut} & \texttt{compl\_firstExit\_subset}\\
+the until-battery consumption & the \texttt{sound\_QUnionBound\_ofReal} application inside \texttt{sound\_QUntilBattery\_firstHit}\\
+\end{anchors}

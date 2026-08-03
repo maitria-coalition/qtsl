@@ -1,0 +1,27 @@
+// rule-row.ts — a Rule Catalogue row: cite premises, get the conclusion.
+import { rules } from "@maitria/mtk";
+const { qtslCore } = rules;
+
+// QUnionBound: from two exception-mass bounds, conclude their sum.
+const row = qtslCore.unionBound({
+  e1: qtslCore.judgmentRef("qregionsat", 0),   // typed premise citations
+  e2: qtslCore.judgmentRef("qregionsat", 1),
+  a: "1/8",
+  b: "1/16",
+});
+if (row.ok) {
+  console.log(row.value.schema, "-", row.value.cbor.length, "bytes");
+  console.log("concluded bound:", row.value.bound.toString());
+}
+
+// A negative mass is refused with the witness attached.
+const bad = qtslCore.unionBound({
+  e1: qtslCore.judgmentRef("qregionsat", 0),
+  e2: qtslCore.judgmentRef("qregionsat", 1),
+  a: "-1/8",
+  b: "1/16",
+});
+if (!bad.ok) {
+  console.log("refused:", bad.refusal.kind);
+  console.log("  " + bad.refusal.message);
+}

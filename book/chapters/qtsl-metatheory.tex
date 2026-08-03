@@ -1,0 +1,320 @@
+\chapter{Partial Completeness}
+\label{ch:qtsl-partial-completeness}
+
+Every rule in the catalogue of \bookref{ch:qtsl-manual}{the QTSL
+manual} carries its own soundness story: a statement, a proof, and,
+where mechanization has caught up, a machine-checked realization.
+Soundness can therefore be audited locally. Each rule earns its keep
+on its own, and a user who trusts the kernel need trust nothing else.
+
+Completeness makes a different kind of claim, and no amount of local
+auditing can establish it. A completeness theorem says that the rule
+set as a whole is not missing anything, so that every true entailment
+expressible in some class of specifications is actually derivable.
+Claims of that shape must be won fragment by fragment, by exhibiting
+either a derivation or a countermodel for every specification the
+fragment can express. The prize is a change in the meaning of
+refusal. Without completeness, a tool that fails to derive a
+specification reports only that a rule might be missing; within a
+complete fragment, the same failure delivers a definite verdict about
+the specification itself.
+
+This chapter records what has been proved. A reader who wants only
+the shape of the result can stop after the completeness theorem
+(Theorem~\ref{thm:gnand-completeness}); the axiom basis in
+section~\ref{sec:gnand-proof-theory} shows what completeness costs,
+and the closing sections account for the evidence and draw the
+boundary of the claim. The most surprising idea in the chapter, for
+a reader browsing, lives in Remark~\ref{rem:delayer-wings} and in
+Figure~\ref{fig:delayer-wings}: the models that witness completeness
+must branch, even though nothing in the specifications mentions
+branching.
+
+\section{A complete fragment: hard deadlines under staggering}
+\label{sec:qtsl-gnand}
+
+The fragment lives in the timed core of the calculus and uses two
+modalities over propositional logic.
+
+\begin{definition}[clocked model]
+\label{def:clocked-model}
+A \emph{clocked model} has finitely many locations, each carrying a
+positive maximal dwell time and a fixed valuation of the atoms. A
+\emph{trajectory} is a timed path through locations that respects the
+dwell bounds.
+\end{definition}
+
+The two modalities read as follows.
+\begin{itemize}
+\item $\Box\varphi$, \emph{invariance}: $\varphi$ holds at every
+  point reachable from here. The formula $D := \Box\bot$
+  (``deadness'') holds exactly at the states with no future, so
+  $\neg D$ asserts liveness.
+\item $\mathsf{A}_T\varphi$, \emph{worst-case service}: \emph{every}
+  trajectory from here reaches a $\varphi$-point within time at most
+  $T$. The quantifier ranges over all branches, so the operator
+  reports a worst case rather than a per-path promise. That one word,
+  ``every'', is the source of everything difficult below.
+\end{itemize}
+
+The characteristic constraint of the fragment, and the origin of its
+working name, is the \emph{gnand}\footnote{``Graded NAND'': a
+prohibited conjunction, as in NAND, whose conjuncts are graded by
+time bounds. The name arose as a working label during the
+development and proved too convenient to retire.}, a globally held
+prohibition of joint imminence:
+\[
+\mathrm{gnand}(a, d_a, b, d_b) \;:=\;
+\Box\neg\big(\mathsf{A}_{d_a}a \wedge \mathsf{A}_{d_b}b\big),
+\]
+read: at no reachable moment is $a$ due within $d_a$ while $b$ is due
+within $d_b$. It serves as a natural mutual-exclusion primitive for
+services that must stay temporally staggered, two operations that may
+never both be imminent, in either order.
+
+\begin{example}[a single-boiler espresso machine]
+\label{ex:espresso}
+A single-boiler espresso machine cannot brew and steam at the same
+time. Suppose an espresso order $e$ must be served within $90$
+seconds on every branch of the schedule, a milk order $m$ within
+$120$, and the boiler forbids any reachable moment at which both are
+due within $30$ seconds. The specification comprises the pending
+obligations $\neg e \wedge \mathsf{A}_{90}\,e$ and $\neg m \wedge
+\mathsf{A}_{120}\,m$, the staggering constraint
+$\mathrm{gnand}(e, 30, m, 30)$, and liveness $\neg D$. Suppose the
+caf\'e also advertises that the $90$-second figure is tight, so that
+some branch really does take the full $90$. That assertion,
+$\neg\mathsf{A}_{89}\,e$, already forces the schedule to
+\emph{branch}: a barista who always serves promptly would make the
+worst case better than declared, so some branch of the schedule must
+dawdle while another serves. This innocent observation grows into
+the central construction of the completeness proof
+(Remark~\ref{rem:delayer-wings}).
+\end{example}
+
+The example's shape, in general, defines the fragment.
+
+\begin{definition}[gnand core]
+\label{def:gnand-core}
+A \emph{gnand core} is a specification asserting, over $n$ atoms:
+\begin{itemize}
+\item \textbf{pending obligations} $\neg a \wedge \mathsf{A}_{s_a}a$,
+  meaning $a$ has not yet been served and must be served within $s_a$
+  on every branch;
+\item optionally, \textbf{exactness} $\neg\mathsf{A}_{s_a-1}a$ (the
+  deadline is tight: some branch delays past $s_a - 1$) or an
+  \textbf{avoidance fact} $\neg\mathsf{A}_h a$ (some branch withholds
+  $a$ through time $h$);
+\item any finite set of gnand constraints over pairs of atoms; and
+  liveness $\neg D$.
+\end{itemize}
+Deadlines may be taken to be integers with no loss of
+generality.\footnote{Rational rescaling and the decomposition of a
+deadline into iterated unit deadlines are derivable rewrites in the
+proof theory, so a fractional menu of deadlines reduces to an
+integer one.}
+\end{definition}
+
+The fragment deliberately excludes triggered obligations
+$\Box(x \to \mathsf{A}_d y)$, the atom-level variant of the
+staggering constraint, and possibility assertions $\neg\Box\nu$ with
+their associated time-locks. The boundary is principled rather than
+incidental; it follows a \emph{sign}. Every constraint in the
+fragment either forbids joint imminence or states a fact at the
+initial state, and the model construction below is protected by a
+monotonicity lemma that holds for such negative-side checks.
+The excluded formers \emph{demand} positive worst-case facts at
+interior states of a model. Constructions that meet such demands
+exist in the development record, but their completeness theory is
+open, and this section claims nothing about them.
+
+\subsection{The proof theory}
+\label{sec:gnand-proof-theory}
+
+The axiom basis was not designed in advance; it was
+\emph{discovered}, by iterating between attempted completeness proofs
+and machine searches for countermodels. Three axiom schemata were
+added to the seed basis this way, each certified genuinely new by an
+explicit independence witness before being adopted, and several
+others were pruned as derivable. The final basis comprises:
+\begin{itemize}
+\item four axioms governing the invariance modality;
+\item reflexive service, $\varphi \to \mathsf{A}_T\varphi$;
+\item budget composition,
+  $\mathsf{A}_{T_1}\mathsf{A}_{T_2}\varphi \leftrightarrow
+  \mathsf{A}_{T_1+T_2}\varphi$;
+\item the graded absurdity law, $\mathsf{A}_T\bot \to D$;
+\item relativization of obligations through invariants,
+  $\Box\nu \wedge \mathsf{A}_T(\chi \wedge \nu) \leftrightarrow
+  \Box\nu \wedge \mathsf{A}_T\chi$;
+\item a first-service law: at the first service among $n$ co-pending
+  obligations, the remaining obligations still bind; and
+\item the last and decisive addition, a \emph{residual-split}
+  first-service law. For any cutoff $c$ strictly below all deadlines,
+  \[
+  \bigwedge_{i \le n} \mathsf{A}_{T_i}\alpha_i \;\to\;
+  \mathsf{A}_c\Big(\bigvee_{i}\big(\alpha_i \wedge
+  \bigwedge_{i' \ne i} \mathsf{A}_{T_{i'}}\alpha_{i'}\big) \;\vee\;
+  \bigwedge_i \mathsf{A}_{T_i - c}\alpha_i\Big),
+  \]
+  meaning that within $c$, either some first service has occurred
+  (and the co-obligations persist), or nothing has been served and
+  every obligation holds at its true residual $T_i - c$.
+\end{itemize}
+Derivation rules are propositional calculus, modus ponens, import of
+a background theory, monotonicity for both modalities, and rational
+rescaling.
+
+\subsection{The completeness theorem}
+\label{sec:gnand-theorem}
+
+\begin{theorem}[completeness for the gnand fragment]
+\label{thm:gnand-completeness}
+For gnand cores, the following are equivalent:
+\begin{enumerate}
+\item the core is satisfiable in a clocked model;
+\item an effective arithmetic on the core (a fixpoint computation on
+  per-atom effective deadlines and service-precedence edges, with
+  one additional branch-conditional check) fires none of its
+  refutation conditions;
+\item an explicit finite model of the core exists on the uniform
+  grid with dwell $\tfrac{1}{n+1}$, where $n$ is the number of
+  pending atoms, and the theorem's proof constructs it;
+\item the core is consistent: $\not\vdash D$ from the core in the
+  basis above.
+\end{enumerate}
+\end{theorem}
+
+In particular, derivability and clocked validity coincide on the
+fragment. Since soundness is proved over a much broader class of
+trajectory spaces, of which clocked models are a special case,
+validity over every intermediate semantic class coincides with both.
+Satisfiability and validity of cores are therefore
+\emph{decidable}, not merely semi-decidable; the fixpoint arithmetic
+of item~(2) decides both.
+
+Within its fragment the theorem is unconditional; its statement
+carries no unproven hypotheses. Its proof, however, forms a chain
+with several links, and the accounting must proceed link by link.
+That every arithmetic refutation in item~(2) is matched by a formal
+derivation of $D$ is a theorem, with the residual-split law doing
+the work its adoption promised: the arithmetic's
+deadline-tightening step is derivable by iterating the law at
+successive cutoffs, descending step by step to the arithmetic's own
+value. That every arithmetic-feasible core yields a model at grid
+$\tfrac{1}{n+1}$ combines a proved monotone-protection lemma with one
+combinatorial schema whose verification is per-instance and
+population-scale (section~\ref{sec:gnand-evidence}) rather than
+symbolic.
+
+\begin{remark}[delayer wings]
+\label{rem:delayer-wings}
+The model construction deserves a name of its own. The emitted
+models are \emph{schedule trees}: an earliest-deadline-first spine
+together with \emph{delayer wings}, auxiliary branches whose only
+role is to keep each declared worst case at its declared value, so
+that the negative graded facts remain true even though every
+individual path serves early (Figure~\ref{fig:delayer-wings}). That
+branching structure can satisfy staggering constraints which every
+branching-free model provably violates. This was the central
+semantic discovery of the development, and it is why the fragment's
+models are trees rather than runs.
+\end{remark}
+
+\begin{figure}[b]
+\centering
+\begin{tikzpicture}[
+    >=Stealth,
+    state/.style={draw, rounded corners=2pt, inner sep=4pt,
+                  minimum height=2.6em,
+                  font=\footnotesize, align=center},
+    spine/.style={->, thick},
+    wing/.style={->, thick, dashed, gray!55!black},
+    lbl/.style={font=\footnotesize\itshape, midway, above=1pt},
+    winglbl/.style={font=\footnotesize\itshape, midway, below=2pt,
+                    sloped, gray!55!black}]
+  \node[state] (root) {$\neg e,\ \neg m$\\ $e$ due $90$, $m$ due $120$};
+  \node[state, right=30mm of root] (se) {$e$ served\\ $m$ due $75$};
+  \node[state, right=16mm of se] (sm) {$m$ served};
+  \node[state, below right=16mm and 6mm of root] (wait)
+    {still $\neg e,\ \neg m$\\ $e$ due $30$, $m$ due $60$};
+  \node[state, right=22mm of wait] (we) {$e$ served late\\ ($t = 90$)};
+  \draw[spine] (root) -- node[lbl] {serve $e$ at $t=45$} (se);
+  \draw[spine] (se) -- node[lbl] {serve $m$} (sm);
+  \draw[wing] (root.south) -- node[winglbl] {dawdle to $t=60$} (wait.west);
+  \draw[wing] (wait) -- node[winglbl] {serve $e$} (we);
+\end{tikzpicture}
+\caption{A schedule tree for the espresso core of
+Example~\ref{ex:espresso}. The solid spine serves early, in
+earliest-deadline-first order. The dashed delayer wing dawdles, so
+that the worst-case service time of $e$ really attains the declared
+$90$ seconds and the exactness assertion $\neg\mathsf{A}_{89}\,e$
+comes out true. No single run can do both jobs; the tree does.}
+\label{fig:delayer-wings}
+\end{figure}
+
+\subsection{Evidence and assurance status}
+\label{sec:gnand-evidence}
+
+The proofs are prose mathematics, developed against an unusually
+dense instrument battery. The completeness chain itself is not yet
+mechanized in a proof assistant. The three axiom schemata the search
+added, however, now carry sorry-free machine-checked soundness
+lemmas (\texttt{sound\_u10f}, \texttt{sound\_firstService}, and
+\texttt{sound\_fsResidual}, in \texttt{Qtsl/TimedCore.lean} under
+\texttt{lean/qtsl} in \path{maitria-coalition/qtsl}; their
+statements are reproduced in Appendix~\ref{app:lean-cone}). A
+machine-checked countermodel,
+\texttt{firstService\_attainment\_necessary}, accompanies them. The
+two first-service lemmas assume two properties of the trajectory space,
+fusion closure and attainment of first service; clocked models
+satisfy both. The countermodel shows that the attainment hypothesis
+cannot be dropped, by exhibiting a fusion-closed space in which the
+first-service schema's premises hold and its conclusion fails.
+Rule-level mechanization otherwise tracks the
+catalogue's own realization discipline (\bookref{ch:qtsl-manual}{the
+QTSL manual}). The machine evidence behind the chain, all of it
+replayable from the development record as it migrates to
+\path{maitria-coalition/qtsl}:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+instrument & what it checks & result \\
+\midrule
+derivation sweep & arithmetic-refuted cores derive $D$ &
+  $64{,}786$ cells, $0$ underivable \\
+cross-pair sweep & the descent lemma's coverage &
+  $4{,}116/4{,}116$ derived \\
+branch engine & branch-conditional refutations derive $D$ &
+  $1{,}000/1{,}000$; cycle mode $200/200$ \\
+model emitter & feasible cores yield grid models &
+  $122/122$ named; $541/541$ random \\
+soundness controls & no false derivations of $D$ &
+  silent on every satisfiable core \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The controls in the last row did real work during the development.
+They caught two draft derivation engines asserting more than their
+machinery guaranteed, both retired before any proof consumed them,
+and the same battery falsified three earlier conjectured axiom bases
+outright. A rule set that has survived that regime differs, as an
+epistemic object, from one that has merely not yet failed.
+
+\subsection{What is not claimed}
+\label{sec:gnand-not-claimed}
+
+Completeness is claimed for gnand cores only. The composition of
+this fragment with triggered obligations and possibility constraints
+is open theory; so is the calculus's next expressive tier, in which
+worst-case service generalizes to a time-bounded \emph{until} that
+carries safety clauses along the way. Minimality of the basis, a
+separate question from sufficiency, is settled for integer deadline
+menus (the residual-split law is genuinely underivable from the
+rest: there is a six-state witness, and six states is minimal) and
+open for arbitrarily fine fractional menus. No answer to the
+minimality question can weaken the theorem, since a redundant axiom
+would only mean that the same completeness holds from fewer
+assumptions.

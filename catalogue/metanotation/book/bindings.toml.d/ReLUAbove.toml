@@ -1,0 +1,14 @@
+# bindings.toml.d/ReLUAbove.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ReLUAbove'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_reluAbove"
+sha256 = "7ff45809a16b63839d1d22ce55a8dd1e6c359557617f4c71768b8e5a48ba5a13"
+
+[[correspondence]]
+entry = "ReLUAbove"
+steele_sha256 = "3f843728bb7a4529d158e4efdd8e9664f6e3889fbc1dea7eae762ab26454701c"
+statements_sha256 = "c4ae915c352cf795e9fdcbd14af93db7617dbaf8acbec42a75d9ba81ec6e2c65"
+prose_sha256 = "71c2f5676eb8d1917db9b1f490703b6745427461bfdeb0c2c0a83070f953c69d"
+

@@ -1,0 +1,24 @@
+# api-system.toml.d/S-SPDE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-SPDE"
+entity = "model type"
+
+[api.ts]
+handle = "system.spde"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_spde", "marker:ts_sig_spdegen"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "fn-body:buildSpde"
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Spde::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_spde"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "marker:spde_happy"
+note = '''The tail form is the spectrum's required member: the corpus's \texttt{spde\_missing\_tail\_refused\_never\_read\_as\_zero} sibling exercises the admission refusal, and the divergent-tail plain-trace refusal is witnessed in \texttt{plain\_trace\_derived\_never\_stored}. The derived kit's Rust face is \texttt{mtk\_catalogue::system::spde\_gen\_kit}: the q-table diagonal, the explicit trace as the summed diagonal, the plain-trace enclosure (structurally refused on a divergent tail), and the dissipation floor $\mathrm{tr}(Q)/2\nu$ exactly where the presentation exhibits it --- the kit's tests recompute the reference constants ($q_1 = 1/5$, $q_2 = 3/50$, trace $13/50$, floor $13/10$) from the committed golden vector's own presentation.'''

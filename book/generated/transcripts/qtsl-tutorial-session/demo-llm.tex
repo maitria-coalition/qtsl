@@ -1,0 +1,21 @@
+\begin{Verbatim}[fontsize=\footnotesize,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ node src/main.ts demo --llm --model google/gemini-3.5-flash
+mtk-session demo — the FrozenLake deadline claim, end to end
+
+claim ob1: FrozenLake-4x4 (slippery, success 1/3): recorded policy reaches the goal
+  within 10 steps with probability >= 815/19683
+strategy: llm:google/gemini-3.5-flash
+  ... asking google/gemini-3.5-flash
+  [1] ob1 float_sweep -> inconclusive (1 ms) {"estimate":0.04140628969161203,
+      "claim":0.04140628969161205,"marginEstimate":-2.0816681711721685e-17}
+  ... asking google/gemini-3.5-flash
+  [2] ob1 exact -> discharged (1 ms) {"tier":"exact","bound":"815/19683","claim":"815/19683",
+      "certificate":{"bytes":2511,
+      "sha256":"66040e596ece30efcb1e500350396477f6e4f56d9af1b8f2896c30bece2fc391",
+      "path":"out/frozenlake-4x4/exact_T10.cbor"}}
+result ob1: discharged (via exact)
+witness: {"tier":"exact","bound":"815/19683","claim":"815/19683","certificate":{"bytes":2511,
+  "sha256":"66040e596ece30efcb1e500350396477f6e4f56d9af1b8f2896c30bece2fc391",
+  "path":"out/frozenlake-4x4/exact_T10.cbor"}}
+strategy ended: solved; moves used: 2
+\end{Verbatim}

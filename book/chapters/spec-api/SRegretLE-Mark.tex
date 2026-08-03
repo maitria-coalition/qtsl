@@ -1,0 +1,40 @@
+\apilang{TypeScript}{spec.regretLeMark}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function regretLeMark(eps: QLike, ret: PathObservable): ExistsSpec
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const markGe = s.probMayBeGe(Q.of(1, 2), s.always(band));
+const markRet = s.returnMayBeLe(0n, s.poSum(7, s.oChan(0)));
+const markLevel = s.levelMayBeGe(Q.of(1, 4), s.poAvg(s.oChan(1)), s.ennFin(1n));
+const regretMark = s.regretLeMark(
+  Q.of(1, 100),
+  s.poDisc(s.oChan(0), Q.of(1, 20)),
+);
+\end{tssrc}
+\apiprov{The safety face \textsc{SRegretLE} has no producer former yet; the \textsc{Mark} is the landed surface, and the marks vector quoted here also drives the probability, return, and level \textsc{MayBe} marks.}
+\apilang{Rust}{mtk\_catalogue::spec::ExistsSpec::regret\_le\_mark}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn regret_le_mark(eps: WitRat, ret: PathObservable) -> Result<ExistsSpec, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let mark_ge = ExistsSpec::prob_may_be_ge(q(1, 2), PathPred::always(band.clone())).unwrap();
+let mark_ret = ExistsSpec::return_may_be_le(
+    q(0, 1),
+    PathObservable::sum(7, StateObservable::chan(0)).unwrap(),
+);
+let mark_level = ExistsSpec::level_may_be_ge(
+    q(1, 4),
+    PathObservable::avg(StateObservable::chan(1)),
+    EnnRat::fin(q(1, 1)).unwrap(),
+);
+let regret_mark = ExistsSpec::regret_le_mark(
+    q(1, 100),
+    PathObservable::disc(StateObservable::chan(0), q(1, 20)).unwrap(),
+)
+.unwrap();
+\end{rustsrc}
+\apiprov{The safety face \textsc{SRegretLE} has no producer former yet; the \textsc{Mark} is the landed surface, and the marks vector quoted here also drives the probability, return, and level \textsc{MayBe} marks.}

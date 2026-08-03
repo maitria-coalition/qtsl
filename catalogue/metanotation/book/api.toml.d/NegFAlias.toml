@@ -1,0 +1,21 @@
+# api.toml.d/NegFAlias.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "NegFAlias"
+
+[api.ts]
+handle = "rules.qtslCore.negFAlias"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn negFAlias", "interface NegFAliasArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_neg_f_alias.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::neg_f_alias"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/surface.rs"
+sig = ["fn neg_f_alias"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_neg_f_alias"

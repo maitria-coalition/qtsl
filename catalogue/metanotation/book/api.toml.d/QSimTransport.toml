@@ -1,0 +1,21 @@
+# api.toml.d/QSimTransport.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QSimTransport"
+
+[api.ts]
+handle = "rules.qtslExt.simTransport"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn simTransport", "interface SimTransportArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_sim_transport.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::sim_transport"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/compose.rs"
+sig = ["fn sim_transport"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_sim_transport"

@@ -1,0 +1,14 @@
+      9 theories; 255 axioms (41 moves; aux helpers: none)
+[2/5] geometric linter: CLEAN
+[3/5] two-run construction stability: byte-identical (57318 bytes of listing body)
+[4/5] idempotence (normalize ∘ normalize = normalize): GREEN
+[5/5] instance conformance: no instance blocks in this file
+modes: 40 chase · 177 report (29 by the unmarked default) · 38 refuse
+
+move census (41 moves):
+   29  Index-erasure
+    9  negated premise equation crosses the turnstile
+    2  exists-in-premise hoisted to universal vars
+    1  negated premise side-condition isExtensionSetEmpty discharges in place as not/isExtensionSetEmpty
+termination (C-WA advisory): weakly acyclic (chase terminates on every seed, polynomially; special-rank 2; 50 positions, 67 edges, 34 chased axioms) [carriage: 253 function(s) as functional relations, 21 constant(s), 4 opaque ground sort(s), 3 builtin(s) injected, 237 minted axiom(s)]
+CHECK: GREEN

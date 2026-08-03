@@ -1,0 +1,24 @@
+# bindings.toml.d/AndE.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'AndE'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PAndEData"
+sha256 = "c8d7a82a6831da91b2a06717e2814ee0b8e7e086d949331826284c8c9e317139"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_andE_left"
+sha256 = "391039ab8c928e8d77bcd53ea0a1054e672ed6bd88dac5e631bea2c6c35d4bff"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_andE_right"
+sha256 = "9473f2a2d2a3e54c4dd89ccce5dc123520b3ac288ebc86f803952b61d6fc2b91"
+
+[[correspondence]]
+entry = "AndE"
+steele_sha256 = "e3ab5b2a09a9b32f6ef6e465bd7a85494d0701e8b712183f72dea902644a8a31"
+statements_sha256 = "0ade5a418354d7a57a013734ffbd3ec95e2649dccd01300b3f23dcd81ac08e13"
+prose_sha256 = "a0e3e3fee35841fa3f4af804619c4e76271a87481c4c0ff5e4d00dd7d09007f7"
+

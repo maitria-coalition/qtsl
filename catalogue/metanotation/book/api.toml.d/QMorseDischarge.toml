@@ -1,0 +1,21 @@
+# api.toml.d/QMorseDischarge.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QMorseDischarge"
+
+[api.ts]
+handle = "rules.qtslExt.morseDischarge"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn morseDischarge", "interface MorseDischargeArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_morse_discharge.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::morse_discharge"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/morse.rs"
+sig = ["fn morse_discharge"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_morse_discharge"

@@ -1,0 +1,127 @@
+[[rule]]
+id = "QCoupleDrift"
+source = "../QTSL-rules.toml"
+row = "QCoupleDrift"
+proof = "book/proofs/QCoupleDrift.tex"
+conditional = true
+conditional_label = "finite"
+commentary = '''
+\rulename{QCoupleDrift} is the coupling-witnessed discharge of the
+distance judgement: from a certified coupling of two absorbing Markov
+chains and a relational supermartingale on the product, it concludes a
+bound on how far the two systems\textquotesingle{} final readouts can
+differ --- total-variation distance of the final readout laws, or the
+gap of final expected values. A producer reaches for it to compare two
+models of the same system (a nominal chain against a faulted one, a
+fine model against a simplification): the producer chooses a coupling
+--- a product-space kernel whose marginals are the two chains --- that
+keeps the pair together where the chains agree, and a nonnegative
+function $V$ that decreases along the coupled dynamics and dominates
+the disagreement indicator at absorption. The certified bound is
+$V$\textquotesingle s initial expectation.
+
+What the checker recomputes, all in exact rational arithmetic: that the
+coupling rows form a genuine kernel (entrywise nonnegative, unit row
+sums) whose row marginals are exactly the two completed component
+kernels; that both-absorbed states are frozen; the drift inequality
+$\sum_q K(p,q)\, V(q) \le V(p)$ at every product state; nonnegativity
+of $V$; the terminal-domination rows ($V \ge 1$ on disagreeing
+both-absorbed states for the total-variation form, $V \ge |v_1 - v_2|$
+for the expectation-gap form); the per-component absorption criterion
+as a finite-graph reachability check; and the initial bound
+$\sum_p \mu_0(p)\, V(p) \le b$.
+
+Each hypothesis is essential, and the proof section walks the
+omission counterexamples: broken marginals sever the product chain from
+the systems being compared; without nonnegativity the drift induction
+cannot be localized to the absorbing set; without terminal domination
+the coupling inequality has nothing to consume; without absorption the
+final pair law is not a coupling of the final component laws (mass that
+never both-absorbs escapes the accounting). A coupling that cannot be
+completed refuses --- the rule never lies by emptiness.
+'''
+note = '''
+The judgement-primary form ($\mathsf{QDist}[d] \le \varepsilon$, one
+conclusion per certificate) deliberately differs from pre/post-style
+relational program logics \cite{hsu2017}: it composes at judgement level
+(triangle, weaken, symmetry where flagged), and expectation-gap
+readouts enter as gap-pseudometric registry entries rather than as a
+second judgement form. The proven fragment is the finite-chain tier ---
+the scope the Lean statements carry; the mixture-polynomial tier and
+the $\mathbb{W}_1$ registry entry are designed, not yet realized. The
+pilot ran four exact-rational certificates against an independent
+checker with a mutant battery; on correlated faulting the relational
+route certified a total-variation bound roughly three times tighter
+than the best single-chain route --- the reason the tier exists.
+'''
+correspondence = '''
+The displayed $d \in \{\mathrm{TV}, \text{gap-pseudometrics}\}$ is two
+theorems: $\mathsf{QDist}[\mathrm{TV}](\mathcal{M}_1, \mathcal{M}_2)
+\le b$ $\mapsto$ \texttt{sound\_QRelTV}\textquotesingle s goal
+\texttt{tvDist (push f (finalLaw K₁ …)) (push g (finalLaw K₂ …)) ≤ b}
+--- the true total-variation distance of the two final \emph{readout}
+laws (the readout maps \texttt{f}/\texttt{g} are the displayed
+pseudometric\textquotesingle s observation structure, explicit in the
+binder) --- and the gap form $\mapsto$
+\texttt{sound\_QRelExpGap}\textquotesingle s absolute-difference goal.
+The obligation roster C1--C9 maps row family by row family:
+\begin{itemize}
+\item coupling rows $\mapsto$ \texttt{hK : IsMarkov K} (entrywise
+  nonneg, unit sums) + \texttt{hm₁}/\texttt{hm₂} (\texttt{PushKernel
+  Prod.fst/snd K Kᵢ} --- marginals equal the completed component
+  kernels, both faces).
+\item freeze rows $\mapsto$ \texttt{hfreeze} (both-absorbed diagonal
+  $= 1$) + \texttt{hfr₁}/\texttt{hfr₂} (component freezes).
+\item drift row $\mapsto$ \texttt{hdrift : ∀ p, ∑ q, K p q * V q ≤ V
+  p}, every product state, displayed vocabulary carried exactly;
+  $V \ge 0$ $\mapsto$ \texttt{hV0}.
+\item terminal domination $\mapsto$ \texttt{hterm}, per flavour: the
+  indicator form (\texttt{f p.1 ≠ g p.2 → 1 ≤ V p}) and the gap form
+  (\texttt{|v₁ p.1 − v₂ p.2| ≤ V p}), both on both-absorbed states
+  only.
+\item the absorption criterion carries this
+  entry\textquotesingle s one representation delta: the display says
+  ``per-component graph reach criterion (recomputed)''; the BOUND
+  statements consume absorption in \emph{semantic} form ---
+  \texttt{habs₁}/\texttt{habs₂}, absorbed mass tending to one. The
+  \texttt{\_of\_reach} variants consuming the checker\textquotesingle s
+  own graph criterion (via \texttt{tendsto\_absorbedMass\_one})
+  exist in the module and are cited by the roster witness, but are
+  not in this bound set --- a named re-bind candidate of the same
+  class as on the discharge pages.
+\item initial marginal rows $\mapsto$ carried \emph{by construction}:
+  the component initial laws in the goal ARE \texttt{push Prod.fst/snd
+  μ₀} --- no separate hypothesis exists because the statement never
+  admits mismatched initials; $\vdash \sum_p \mu_0(p) V(p) \le b$
+  $\mapsto$ \texttt{hb}.
+\end{itemize}
+Width note: the conditional mark is the finite tier
+(\texttt{Fintype} state spaces, exact real arithmetic standing in for
+exact $\Q$) --- the $\mathbb{W}_1$ registry entry and the
+mixture-polynomial tier are designed, not realized, exactly as the
+display\textquotesingle s footline says; coupling emptiness has no
+Lean face because the theorems consume a supplied coupling ---
+refusal-shaped completeness cost lives producer-side.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QRelChain"
+src = "../../lean/qtsl-aux/QtslAux/QRelChain.lean"
+decls = [
+  "sound_QRelTV",
+  "sound_QRelExpGap",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development checks the base calculus\textquotesingle s wire
+format (theory \texttt{qtsl\_catalogue}, the first-order check-function
+cone of the core catalogue). \rulename{QCoupleDrift} concludes a
+distance judgement of the extension theory: no rule sort is staged into
+any wire format, and the soundness spine lives in the auxiliary Lean
+package. Nothing exists yet for a HOL statement to be about; the box
+becomes writable when the relational certificate format stages and its
+checker chain is ported.
+'''

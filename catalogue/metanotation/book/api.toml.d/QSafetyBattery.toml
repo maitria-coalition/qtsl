@@ -1,0 +1,21 @@
+# api.toml.d/QSafetyBattery.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QSafetyBattery"
+
+[api.ts]
+handle = "rules.qtslCore.safetyBattery"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn safetyBattery", "interface SafetyBatteryArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "marker:safetyBattery"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::safety_battery"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/battery.rs"
+sig = ["fn safety_battery"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_safety_battery"

@@ -1,0 +1,129 @@
+[[rule]]
+id = "QSimTransport"
+source = "../QTSL-rules.toml"
+row = "QSimTransport"
+conditional = true
+proof = "book/proofs/QSimTransport.tex"
+commentary = '''
+\rulename{QSimTransport} transports certification along a
+coarse-graining: if the abstract system $S'$ is certified, and
+$\sigma : S \to S'$ is a simulation witness --- a per-mode polynomial
+map whose compatibility squares are checked as inherited BL leaves ---
+then the concrete system $S$ is certified for the pulled-back spec
+$\sigma^{*}\mathit{spec}'$. A producer uses it in the direction the
+rule states: certify the abstraction \emph{once} (small state space,
+cheap rows), then reuse that certificate under every refinement that
+simulates it, paying only the compatibility squares per refinement.
+
+What the cited theorems warrant --- the scope of this
+entry\textquotesingle s conditional check --- is two strata. The
+\emph{behavioural} form: over compiled behaviour classes, if $\sigma$
+maps every behaviour of $S$ to a behaviour of $S'$ (the semantic content
+of the squares) and $S'$\textquotesingle s behaviours all satisfy the
+spec, then $S$\textquotesingle s behaviours satisfy the pullback --- two
+lines, which is the honest size of the rule\textquotesingle s semantic
+content; everything substantive in an application is the sequent-level
+discharge of the squares. The \emph{finite-kernel} instance, where the
+house has machine-checked simulation machinery: a functional simulation
+witness at the finite Markov tier is exactly a pushforward-kernel
+identity (per state, the pushed concrete kernel row equals the abstract
+kernel row at the image state), the marginal-process lemma then
+transports laws at every time, and both spec-transport faces follow ---
+expectation specs pull back along $\sigma$ with the bound intact, and
+region/invariance specs pull back to the preimage region.
+
+The witness is one-sided by design: a simulation map is functional
+refinement, not a two-sided relational coupling. A functional
+simulation induces a degenerate coupling, but the transport theorems
+never route through it --- they are the pushforward identity plus
+summation identities, and the relational tier\textquotesingle s
+coupling machinery (joint kernels, absorption hypotheses) is
+deliberately not shared. What breaks without the hypotheses: without
+the compatibility squares the pushed law and the abstract law decouple
+at the first step, and the pullback claims anything; without the
+nonnegativity hypotheses of the region form, signed
+\textquotedblleft mass\textquotedblright{} could cancel and hide
+probability outside the preimage region.
+'''
+note = '''
+Beyond the two proven strata, the general measurable-kernel tier is
+future work, as is the categorical strengthening under which the
+composition rule could cite the lens-composition theorem as a lemma
+\emph{template} rather than proving its cells directly --- the direct
+proofs never pull back along strict weakenings, which is why the
+strengthening is not a dependency of anything on this page. Related
+reading, not dependency: an
+exchangeability quotient is a simulation map, so aggregate-space
+reduction can be \emph{read} as an instance of this rule --- it stands
+on its own proof.
+'''
+correspondence = '''
+Two strata, as the commentary\textquotesingle s conditional scope
+states; the display maps onto each at its own granularity.
+\emph{Behavioural}: the displayed conclusion $\mathsf{QSatI}(S,
+\sigma^{*}\mathit{spec}')$ $\mapsto$ \texttt{pullback}\textquotesingle s
+goal \texttt{Beh ⊆ σ ⁻¹\textquotesingle{} spec\textquotesingle} over
+compiled behaviour classes; the E1 premise $\mathsf{QSatI}(S',
+\mathit{spec}')$ $\mapsto$ \texttt{hsat : Beh\textquotesingle{} ⊆
+spec\textquotesingle}; the compatibility squares $\mapsto$
+\texttt{hsim : σ \textquotesingle\textquotesingle{} Beh ⊆
+Beh\textquotesingle} --- their \emph{semantic content} only: the
+per-mode polynomial structure of the displayed $\sigma$ (E2) is
+erased (\texttt{σ} is any function), and the BL discharge of the
+squares is the shipped sequent machinery, outside this bound set. The
+statement is axiom-free set algebra --- two lines, the honest size of
+the rule\textquotesingle s semantic content.
+\begin{itemize}
+\item \emph{finite-kernel instance}: the simulation witness $\mapsto$
+  \texttt{PushKernel σ K Q} --- the per-state marginal identity
+  \texttt{push σ (K s) = Q (σ s)}, which is what a functional
+  simulation IS at this tier.
+\item expectation specs pull back ``with the bound intact'' $\mapsto$
+  \texttt{sim\_expect}, and the certified statement is
+  \emph{stronger} than the display\textquotesingle s reading: an
+  \emph{equality} of expectations at every horizon (\texttt{∑ s, law
+  K μ₀ n s * g (σ s) = ∑ b, law Q (push σ μ₀) n b * g b}), with
+  \texttt{sim\_expect\_bound} the displayed inequality direction as
+  its corollary (certify the abstraction once, reuse under
+  refinement).
+\item region/invariance specs pull back to the preimage $\mapsto$
+  \texttt{sim\_region}: abstract law puts no mass outside
+  $R'$ $\Rightarrow$ concrete law puts none outside
+  $\sigma^{-1} R'$ --- and this face alone consumes
+  nonnegativity (\texttt{hK}, \texttt{hμ₀}): the commentary\textquotesingle s
+  ``signed mass could cancel'' hypothesis, visible as exactly two
+  binder rows.
+\item \texttt{expect\_push} is the observable-pullback engine
+  ($\sigma^{*}$ at expectation granularity), fibre-summation algebra.
+\end{itemize}
+Width note: one-sidedness is structural in the bound statements ---
+nothing consumes or constructs a joint kernel; \texttt{push\_law} (the
+shared marginal-process lemma) is genuinely the same lemma the
+relational tier rides, while the coupling machinery is deliberately
+absent from this bound set. The general measurable-kernel tier and
+the lex/fibred strengthening are future work (the note names them);
+their absence is the conditional mark\textquotesingle s content.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslCompose.SimTransport"
+src = "../../lean/qtsl-aux/QtslAux/QtslCompose/SimTransport.lean"
+decls = [
+  "pullback",
+  "expect_push",
+  "sim_expect",
+  "sim_expect_bound",
+  "sim_region",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The satisfaction-judgement extension postdates the HOL4 port entirely:
+the ported cone is the base calculus\textquotesingle s check-function
+surface (theory \texttt{qtsl\_catalogue}), and no extension-theory
+definition --- nothing shaped like simulation transport --- exists in
+the HOL development. The box waits on a HOL port of the satisfaction
+stratum, which is its own campaign.
+'''

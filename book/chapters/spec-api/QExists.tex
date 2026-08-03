@@ -1,0 +1,37 @@
+\apilang{TypeScript}{judgment.zeroExists / equilibriumExists / fixedPointExists}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function zeroExists(args: {
+  g: ReadonlyArray<Poly>;
+  cell: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+
+export function equilibriumExists(args: {
+  field: ReadonlyArray<Poly>;
+  cell: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+
+export function fixedPointExists(args: {
+  map: ReadonlyArray<Poly>;
+  cell: RegionAtom;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(j.zeroExists({ g: g1, cell: unitBox })),
+\end{tssrc}
+\apiprov{The equilibrium and fixed-point members construct beside it in the same test.}
+\apilang{Rust}{mtk\_catalogue::judgment::\{QZeroExists, QEquilibriumExists, QFixedPointExists\}::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(g: Vec<Poly>, cell: RegionAtom) -> Result<Self, Refusal>
+
+pub fn new(field: Vec<Poly>, cell: RegionAtom) -> Result<Self, Refusal>
+
+pub fn new(map: Vec<Poly>, cell: RegionAtom) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let zero = QZeroExists::new(g1(), unit_box()).unwrap();
+\end{rustsrc}
+\apiprov{The equilibrium and fixed-point members construct beside it in the same test.}

@@ -1,0 +1,161 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof at
+Putnam-exam-solution detail. Every hypothesis of the rule is used below and
+remarked on; the formal-anchor table maps each step to the Lean declaration
+that carries it. This section also fixes the semantic setting that the
+other equality and conversion sections cite.}
+
+\textbf{Setting.}\enspace Fix a hypernet $H$. A \emph{valuation} $\sigma$
+assigns each wire a tensor of its declared shape over its declared
+dtype (an extended dtype admits infinite entries); the rational term
+evaluation
+$\mathrm{ev}_\sigma(t)$ is \emph{partial} (a wire holding an infinite
+value of an extended dtype, or a broadcast-incompatible operation, yields
+no value). A comparison atom $t_1 \bowtie t_2$ \emph{holds} at $\sigma$
+when both sides evaluate and the evaluated tensors stand in the relation
+$\bowtie$ \emph{elementwise under broadcast}: equal shapes compare entry
+by entry; a rank-0 (scalar) tensor against a tensor of any shape compares
+against every entry; two unequal positive-rank shapes never compare. A
+sequent $\Phi \vdash \Psi$ is \emph{semantically valid} when every
+admissible $\sigma$ satisfying $\Phi$ satisfies $\Psi$. Note two
+consequences that drive everything below: equality atoms are
+\emph{evaluation-level} facts, not syntactic ones; and a holding equality
+between tensors of \emph{different} broadcast shapes (a scalar against a
+vector) does not make the two sides interchangeable --- it only says the
+scalar matches every entry.
+
+\textbf{Claim} (\texttt{sound\_eqElim}).\enspace The rule's payload
+supplies a hole wire $a$, terms $t, u$, a body formula $\Psi$, and checked
+side conditions: the two premises share the composite premise $\Phi$; the
+first premise concludes the atom $t = u$; the second premise concludes
+$\Psi\sub{a}{t}$; the conclusion is $\Psi\sub{a}{u}$; and (the typing
+condition) $\exists s.\ \bshape_H(t) = s = \bshape_H(u)$ --- both terms
+carry a \emph{common defined} broadcast shape in $H$. If both premises are
+semantically valid, so is $\Phi \vdash \Psi\sub{a}{u}$.
+
+\begin{blemma}[substitution congruence, term level]\label{lem:eqelim-term}
+Fix $\sigma$, and suppose $\mathrm{ev}_\sigma(t) = \mathrm{ev}_\sigma(u)$
+as partial values (both undefined, or both defined and equal). Then for
+every term $e$,
+$\mathrm{ev}_\sigma(e\sub{a}{t}) = \mathrm{ev}_\sigma(e\sub{a}{u})$.
+\end{blemma}
+\begin{proof}
+Structural induction on $e$. The base case $e = a$ is the hypothesis; the
+base cases $e$ a constant or a different wire are reflexivity; every
+compound constructor is a congruence of the evaluator (the evaluator of a
+sum, product, difference, negation, or projection is a function of the
+evaluations of the parts). Two remarks. First, the hypothesis and
+conclusion are equalities of \emph{partial} values --- the lemma never
+manufactures definedness, it only transports whatever is there; in the
+theorem, definedness will come out of the equality premise. Second, the
+term grammar has no binders, so substitution is plain leaf replacement
+and no capture condition is needed anywhere.
+\end{proof}
+
+\begin{blemma}[substitution congruence, formula level]\label{lem:eqelim-form}
+Under the hypothesis of Lemma~\ref{lem:eqelim-term}: for every formula
+$F$,\ $\sigma \models F\sub{a}{t}$ iff $\sigma \models F\sub{a}{u}$.
+\end{blemma}
+\begin{proof}
+Induction on $F$. Comparison atoms substitute in both sides and satisfy
+the same relation by Lemma~\ref{lem:eqelim-term}; a region atom
+substitutes in its term slot only (its simplex and extension-set data
+carry no wires), so its holding --- an assertion about the evaluated
+tensor --- transports the same way; $\wedge$ and $\vee$ are the inductive
+steps; $\top$ and $\bot$ are untouched by substitution.
+\end{proof}
+
+\begin{blemma}[the shape pin]\label{lem:eqelim-pin}
+Suppose $\sigma \models t = u$, and suppose $t$ and $u$ carry a common
+defined broadcast shape $s$ in $H$. Then
+$\mathrm{ev}_\sigma(t) = \mathrm{ev}_\sigma(u)$ --- equality of
+\emph{tensors}, not merely the elementwise relation.
+\end{blemma}
+\begin{proof}
+The holding atom yields evaluations $A$ of $t$ and $B$ of $u$ in the
+elementwise-equality relation. Broadcast-shape soundness
+(\texttt{Term.evalQ\_bshape}) pins $A.\mathrm{shape} = s =
+B.\mathrm{shape}$: a defined evaluation of a $\bshape$-typed term lands
+exactly at the declared broadcast shape. Elementwise equality at
+\emph{equal} shapes is equality of the (equal-length) entry lists,
+position by position, hence equality of the tensors. This is the one step
+that consumes the typing condition, and it is false without it: the
+elementwise relation between a rank-0 tensor and a vector says only that
+the scalar matches every entry (Remark~\ref{rem:eqelim-cex}).
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{EqElim}]\label{thm:eqelim-sound}
+Under the payload's checked hypotheses, if $\Phi \vdash t = u$ and
+$\Phi \vdash \Psi\sub{a}{t}$ are semantically valid, then so is
+$\Phi \vdash \Psi\sub{a}{u}$.
+\end{bthm}
+\begin{proof}
+Fix an admissible $\sigma$ with $\sigma \models \Phi$. By validity of the
+first premise, $\sigma \models t = u$; with the typing condition,
+Lemma~\ref{lem:eqelim-pin} upgrades this to
+$\mathrm{ev}_\sigma(t) = \mathrm{ev}_\sigma(u)$ (both defined and equal,
+so in particular equal as partial values). By validity of the second
+premise --- its premise formula is $\Phi$ itself, by the checked premise
+match --- $\sigma \models \Psi\sub{a}{t}$. Lemma~\ref{lem:eqelim-form}
+transports this to $\sigma \models \Psi\sub{a}{u}$, which is the
+conclusion formula by the checked substitution equation.
+\end{proof}
+
+\begin{bremark}[why the typing condition is not decoration]
+\label{rem:eqelim-cex}
+Drop the common-shape condition and the rule is \emph{unsound}, by a
+counterexample recorded in the soundness development's header inventory
+(orientation of the equality atom flipped here to spare an
+\rulename{EqSym} step). Let $v$ be a wire of shape $[1]$ over $\Q$, let
+$\Delta$ be the segment $\mathrm{conv}(1,2) \subset \Q^1$, and take
+\[
+\Phi \;:=\; \bigl(v = \tfrac{3}{2}\bigr) \;\wedge\; \bigl(v \in
+\mathcal{R}(\Delta, \emptyset)\bigr).
+\]
+$\Phi$ is satisfiable: set $v := [\,3/2\,]$; the equality holds by rank-0
+broadcast (the scalar $3/2$ matches the single entry), and the region
+atom holds. \rulename{Ax} and $\wedge$E derive $\Phi \vdash v = 3/2$ and
+$\Phi \vdash v \in \mathcal{R}(\Delta, \emptyset)$; the un-gated rule
+with body $\Psi := (a \in \mathcal{R}(\Delta, \emptyset))$, $t := v$,
+$u := 3/2$ then concludes
+$\Phi \vdash (\tfrac{3}{2} : \mathrm{Term}) \in \mathcal{R}(\Delta,
+\emptyset)$ --- which is \emph{unsatisfiable}: a constant term evaluates
+to a rank-0 tensor, and a region atom demands a rank-1 tensor of extent
+equal to the ambient dimension. A satisfiable premise, an unsatisfiable
+conclusion. The root cause is precisely the gap between ``elementwise
+equal under broadcast'' and ``interchangeable'': $3/2 = [\,3/2\,]$ holds
+without the terms being exchangeable in region contexts. With the typing
+condition the payload is uninhabitable here ---
+$\bshape_H(\tfrac{3}{2}) = [\,]$ while $\bshape_H(v) = [1]$, and no
+common $s$ exists --- so the certificate refuses. Note what the repair
+does \emph{not} do: broadcast equalities remain derivable and usable as
+facts; what is forbidden is exactly using one as a Leibniz license.
+\end{bremark}
+
+\begin{bremark}[the equational kit; relation to practice]
+\label{rem:eqelim-kit}
+\rulename{EqElim} with \rulename{EqRefl} and \rulename{EqSym} (next two
+sections) completes a certificate-side equational kit: reflexivity and
+symmetry are primitive, and transitivity is a one-node derivation ---
+from $\Phi \vdash t = u$ and $\Phi \vdash u = w$, apply \rulename{EqElim}
+with body $\Psi := (t = a)$, rewriting the $u$ in the \emph{first}
+premise (taken as body premise, $\Psi\sub{a}{u}$) to $w$; the derived
+node inherits the common-shape typing obligation on $(u, w)$ ---
+broadcast equality is not transitive without it. On the producer side,
+equational goals are typically discharged by congruence-closure engines
+\cite{nelsonoppen1980,nieuwenhuisoliveras2007}; what ships in a
+certificate is not the closure computation but its residue: a chain of
+\rulename{EqRefl}/\rulename{EqSym}/\rulename{EqElim} nodes, each checked
+by syntactic recomputation of one substitution.
+\end{bremark}
+
+\begin{anchors}
+Setting: elementwise-under-broadcast atom semantics & \texttt{QTensor.rel2}, \texttt{Formula.holds} (Layer 10)\\
+Lemma \ref{lem:eqelim-term} & \texttt{Term.evalQ\_subst\_congr}\\
+Lemma \ref{lem:eqelim-form} & \texttt{Formula.holds\_subst\_congr}\\
+Lemma \ref{lem:eqelim-pin} & \texttt{Term.evalQ\_bshape}; \texttt{QTensor.eq\_of\_rel2}; payload field \texttt{tyEq}\\
+substitution equations & \texttt{substituteInFormula} = \texttt{Formula.subst} (payload fields \texttt{bodySubT}, \texttt{conclSubU})\\
+premise sharing & payload fields \texttt{preEq}, \texttt{preMatch}\\
+Theorem \ref{thm:eqelim-sound} & \texttt{sound\_eqElim}; wired as core \texttt{RuleData.eqElim} into \texttt{ProofObject.sound}\\
+Remark \ref{rem:eqelim-cex} & the counterexample inventory, \texttt{Soundness.lean} header\\
+\end{anchors}

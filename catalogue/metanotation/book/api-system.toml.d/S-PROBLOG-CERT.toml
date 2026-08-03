@@ -1,0 +1,26 @@
+# api-system.toml.d/S-PROBLOG-CERT.toml — the certificate stratum over
+# the S-PROBLOG declaration (fan seam: one fragment per entry, stem =
+# id). Everything rendered is extracted from the toolkit sources at
+# emission; specs here are pointers, never quoted text. Emit/verify:
+# `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-PROBLOG-CERT"
+entity = "certificate species"
+note = '''The claims stratum over the \texttt{S-PROBLOG} declaration: a \texttt{problog-v0} certificate carries the ground program (coin, fact, and clause rows), the producer's search artifacts (explanation and cut rows), and the claimed bracket on the query's success probability --- lower by inclusion--exclusion over coin-set unions, upper by min-over-cuts, exact by world enumeration where the coin count permits. The builder verifies every row it is handed (an explanation must derive the query on its own; a cut's joint absence must block it against every other coin) and computes the bracket itself; where the rows came from is the producer's business, and the checker re-derives every claim from the certificate bytes alone.'''
+
+[api.ts]
+handle = "problog.builder / problog.fromSystem"
+sig_file = "ts/src/problog.ts"
+sig = ["marker:ts_sig_problog_cert"]
+snippet_file = "ts/tests/problog-native.test.ts"
+snippet = "marker:ts_problog_cert"
+note = '''\texttt{smokersBuilder} and its clause fixture are defined beside the quoted lines; the same file's die-chain exemplar exercises the direct-builder path (\texttt{builder}, \texttt{mswCoin} switch domains) against its own golden vector.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::problog::ProblogCertBuilder"
+sig_file = "crates/mtk-catalogue/src/system/problog.rs"
+sig = ["fn new", "fn from_decl", "fn claims_from_rows", "fn build"]
+snippet_file = "crates/mtk-catalogue/tests/problog_builders.rs"
+snippet = "marker:problog_cert_happy"
+note = '''\texttt{smokers\_decl}, \texttt{smokers\_clauses}, \texttt{antichain}, and \texttt{cuts} are the corpus's shared fixtures (\texttt{tests/problog\_common}), each re-derived by the reference-number tests beside the quoted construction.'''

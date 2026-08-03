@@ -1,0 +1,35 @@
+\apilang{TypeScript}{spec.atomLe / atomGe / polyLe / polyGe}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function atomLe(c: QLike, o: StateObservable): StatePred
+
+export function atomGe(c: QLike, o: StateObservable): StatePred
+
+export function polyLe(c: QLike, p: Poly): StatePred
+
+export function polyGe(c: QLike, p: Poly): StatePred
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const goal = s.polyGe(1n, s.unwrap(s.polyVar(0, 2)));
+const cap = s.probGe(Q.of(3, 4), s.deadline(20n, goal));
+\end{tssrc}
+\apiprov{\texttt{polyLe} / \texttt{polyGe} are the polynomial-atom conveniences (atom at the \textsc{oPoly} injection); polynomials are minted canonical by \texttt{poly} / \texttt{polyVar} (the same module).}
+\apilang{Rust}{mtk\_catalogue::spec::StatePred::\{atom\_le, atom\_ge\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn atom_le(c: WitRat, o: StateObservable) -> StatePred
+
+pub fn atom_ge(c: WitRat, o: StateObservable) -> StatePred
+
+pub fn poly_le(c: WitRat, poly: Poly) -> StatePred
+
+pub fn poly_ge(c: WitRat, poly: Poly) -> StatePred
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let goal = StatePred::poly_ge(q(1, 1), Poly::var(0, 2).unwrap());
+let cap =
+    ForallSpec::prob_ge(q(3, 4), PathPred::deadline(q(20, 1), goal, false).unwrap()).unwrap();
+\end{rustsrc}
+\apiprov{Polynomials are minted canonical by \texttt{Poly::new} / \texttt{Poly::var} (crates/mtk-catalogue/src/spec/poly.rs).}

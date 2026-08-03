@@ -1,0 +1,81 @@
+[[rule]]
+id = "Weaken"
+source = "../BL-rules.toml"
+row = "Weaken"
+proof = "book/proofs/Weaken.tex"
+commentary = '''
+\rulename{Weaken} moves a proven sequent under a larger set of
+assumptions: from $\Phi \vdash \Psi$ to
+$\Phi \wedge \chi \vdash \Psi$. A producer reaches for it when contexts
+must be made to agree --- the structural rules with two premises
+(\rulename{Cut}, $\wedge$I, $\vee$E) and the composition
+rule\textquotesingle s containment check all compare premise trees
+structurally, so a sequent proven from fewer assumptions is weakened
+into the context the next node expects.
+
+The checker recomputes two tree identities: the
+conclusion\textquotesingle s premise is exactly the
+sub-derivation\textquotesingle s premise conjoined \emph{on the right}
+with the named conjunct $\chi$ (one new $\wedge$-node --- position is
+data, since formulas are ordered trees), and the conclusion is carried
+over unchanged. Naming $\chi$ in the payload keeps this a comparison,
+never a search.
+
+Each hypothesis earns its keep. Drop the premise identity and
+weakening could silently \emph{replace} assumptions rather than extend
+them --- the proof section\textquotesingle s counterexample derives $\top \vdash w \leq 0$ from the valid
+$w \leq 0 \vdash w \leq 0$. Drop the conclusion identity and the
+conclusion is free. Nothing at all is demanded of $\chi$ itself: an
+unsatisfiable or ill-typed conjunct only makes the new premise harder to
+satisfy, which costs applicability, never soundness --- the rule only
+discards information.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}.
+\begin{itemize}
+\item the premise judgement $\Phi \vdash \Psi$ $\mapsto$ \texttt{ih}
+  $:$ \texttt{premise.semanticallyValid H} --- in the proof-object
+  recursion this hypothesis is the sub-derivation\textquotesingle s
+  induction hypothesis; the payload (\texttt{PWeakenData}, certified
+  alongside) carries the sub-derivation itself as a
+  \texttt{ProofObject} field beside the same two ties.
+\item $\Phi \mapsto$ \texttt{premise.pre}; $\Psi \mapsto$
+  \texttt{premise.post}; $\chi \mapsto$ the binder \texttt{extra :
+  Formula}, of which nothing is demanded.
+\item conclusion $\Phi \wedge \chi \vdash \Psi$ $\mapsto$ the goal
+  under \texttt{hpre} $:$ \texttt{seq.pre = .and premise.pre extra}
+  --- the displayed conjunction in the displayed order ($\Phi$ left,
+  $\chi$ right; formulas are ordered trees, so the position is part of
+  the certified statement) --- and \texttt{hpost} $:$ \texttt{seq.post
+  = premise.post}.
+\end{itemize}
+No width difference in either direction: every hypothesis is consumed,
+and the statement proves exactly the displayed rule at every hypernet
+and sequent.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_weaken"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+decls = ["PWeakenData"]
+intro = '''
+Payload, read as in the \rulename{Ax} section: a sub-derivation plus
+structural equalities, nothing else.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_fam_residScript.sml"
+theory = "qtsl_fam_resid"
+decls = [
+  "Definition checkFam_weaken_def",
+  "Theorem famEq_weaken",
+]
+receipt = '''
+Documentary citations. Family validation: \texttt{qtsl\_fam\_resid} built GREEN with all ten \texttt{famEq} arms validated, \texttt{hol-strict} clean; spine census: \texttt{qtsl\_joins} GREEN under \texttt{hol-strict} (55 theorems, 0 offences, 208-theory ancestry including this theory), \texttt{checkJoins\_eq\_checkPf} verified verbatim in the built signature. The cited \texttt{famEq} lemma is the kernel-checked per-node equivalence: under well-formed columns (\texttt{wfColumns}/\texttt{mkCtx}/\texttt{nodeCorr}) at this rule\textquotesingle s wire tag, the columnar family check coincides with the flat reference walk\textquotesingle s arm for this rule. There is no signed HOL receipt store yet --- these citations are documentary.
+'''

@@ -1,0 +1,134 @@
+[[rule]]
+id = "Norm"
+source = "../BL-rules.toml"
+row = "Norm"
+proof = "book/proofs/Norm.tex"
+commentary = '''
+\rulename{Norm} is the calculus\textquotesingle s computation rule: it
+states, as a premise-free sequent, every equality of polynomial terms
+that holds by \emph{canonical form} --- $w + w = 2 \cdot w$,
+distributivity, collection of like monomials, exact $\Q$ coefficient
+arithmetic. A producer uses it constantly and invisibly: whenever an
+emitted derivation needs two spellings of the same polynomial to be
+interchangeable (before an \rulename{EqElim}, to massage a term into
+the pinned shape another rule\textquotesingle s payload demands), a
+single \rulename{Norm} node discharges the rewriting that an
+equational-logic presentation would smear across many congruence steps.
+
+What the checker recomputes: that both sides are idx-free (projection
+terms have no canonical form in the wire-keyed polynomial space --- the
+comparison would not carry the rule\textquotesingle s meaning), and
+that the two canonical polynomials are \emph{identical} ---
+coefficient-for-coefficient equality over $\Q$, never evaluation at
+test points, and never rescaling: $2 \cdot w$ and $w + w$ are equal as
+canonical forms; $2 \cdot w$ and $w$ are not, proportional though they
+are. The remaining payload fields are well-typedness, not computation:
+both sides share a defined broadcast shape and mention only finitely
+typed wires.
+
+Each hypothesis is essential. Drop the canonical-form identity and
+the rule asserts arbitrary equalities. Drop the shared-shape and
+finiteness fields and the rule is false \emph{as staged}: at a wire of
+extended dtype holding an infinite value, even $\vdash t = t$ is
+unsatisfiable --- the atom never evaluates --- and since the premise is
+arbitrary, the staged rule concluded an unsatisfiable formula from a
+satisfiable one; likewise a cancelling sub-term $w_2 - w_2$ over a wire
+whose shape does not join with the other side\textquotesingle s leaves
+the same canonical form but an atom that never evaluates. The typing
+fields are exactly what makes ``equal canonical forms\textquotesingle
+\textquotesingle{} imply ``equal evaluated tensors\textquotesingle
+\textquotesingle{} at every valuation.
+'''
+note = '''
+The rule also names a convention the premise-free rules of this
+catalogue share (\emph{the \rulename{Norm} convention}): the premise
+$\Phi$ is arbitrary and never consulted --- a fact that holds at every
+valuation holds under any premise. The catalogued stratum records an
+unpacking sketch through \rulename{BernCone} and \rulename{ArithAtom};
+the shipped warrant is direct and stronger (one verified semantic
+lemma, all tensor shapes), with the well-typedness fields carrying what
+the sketch left implicit.
+'''
+comparator = '''
+\badge{BadgeGreen}{comparator: fixture NormOutsideFragment} the
+three-implementation comparator harness (compiled machine code,
+kernel-reduction probes, and the compiler-IR interpreter, all executing
+the same elaborated checker functions) carries a well-typed single
+\rulename{Norm} node as its fixture \texttt{NormOutsideFragment},
+expected verdicts \texttt{check = true}, \texttt{v0frag = false}. The
+fixture is the suite\textquotesingle s false-verdict control:
+\rulename{Norm} sits outside the restricted fragment recognizer by
+design, so the fixture pins the reject lane end to end --- a comparator
+that could only confirm acceptance would be blind to a path that
+wrongly accepts everything.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}.
+\begin{itemize}
+\item $t_1, t_2 \mapsto$ \texttt{termL termR : Term}; the displayed
+  side condition (equal monomial canonical forms) $\mapsto$
+  \texttt{hcanon} $:$ \texttt{polynomialCanonicalEq termL termR},
+  quoted in full below --- both sides idx-free and the canonical
+  polynomials literally equal. The display\textquotesingle s ``same
+  variables\textquotesingle\textquotesingle{} and ``polynomial
+  terms\textquotesingle\textquotesingle{} have no separate binders:
+  canonical forms are wire-keyed (equality forces the same variable
+  set) and the term grammar is polynomial by construction.
+\item conclusion $\Phi \vdash t_1 = t_2$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .eq termL termR};
+  the arbitrary $\Phi$ is premise-freeness by silence (no hypothesis
+  mentions \texttt{seq.pre} --- the \rulename{PConstExact}
+  representation).
+\end{itemize}
+Width note, narrower than the displayed sentence and loud about it:
+the mechanized statement carries four well-typedness hypotheses the
+display\textquotesingle s one-line spelling does not show ---
+\texttt{htyEq} (both broadcast shapes equal), \texttt{htyDef} (and
+defined --- the \texttt{some}), \texttt{hfinL}/\texttt{hfinR} (all
+free wires at finite dtypes). They are the rule\textquotesingle s
+realized payload fields, and they are not optional: without them the
+rule as literally displayed is refuted (an $\infty$-valued wire makes
+even $t = t$ unsatisfiable --- the roster row\textquotesingle s
+counterexample). The displayed sentence is the rule\textquotesingle s
+\emph{intent}; the certified statement is the display plus exactly
+this typing pack.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_norm"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = ["Term.idxFree", "polynomialCanonicalEq"]
+intro = '''
+\textbf{The whole computational content, displayed.}\enspace The
+check is two gates and one equality: both sides idx-free, and the
+canonical polynomials literally equal. Everything else the rule needs
+is well-typedness data carried in the payload and consumed by the
+soundness lemma, not by the checker.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = ["Definition polynomialCanonicalEqB_def"]
+receipt = '''
+\texttt{hol-strict} CLEAN over the ported checker chain: theory
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host, scripts
+sha-matched verbatim to the sources cited here (git blob
+\texttt{c6ffee9c\ldots}). The ported receipt table pins the
+rule\textquotesingle s exactness discipline in both directions: the
+canonical-form accept ($w_0 + w_0 = 2 \cdot w_0$) and the
+scale-preserving reject ($2 \cdot w_0 \neq w_0$ as canonical forms).
+Scope note, honest by the port\textquotesingle s own seam inventory:
+the ported surface is the first-order check function; the
+payload\textquotesingle s well-typedness fields (broadcast shapes,
+finite typing) live in the dependently-typed proof-object layer, which
+is a separately tracked porting stage.
+'''

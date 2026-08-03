@@ -1,0 +1,15 @@
+name = "optional-sampling-rc"
+version = "0.1.0"
+defaultTargets = ["OptionalSamplingRC"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+[[lean_lib]]
+name = "OptionalSamplingRC"
+globs = ["OptionalSamplingRC", "OptionalSamplingRC.+"]

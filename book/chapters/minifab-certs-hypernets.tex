@@ -1,0 +1,180 @@
+
+\newgeometry{hmargin=1cm,vmargin=1.2cm}
+\begin{landscape}
+\setlength{\parskip}{0pt}%
+\vspace*{\fill}
+\centering
+\begin{tikzpicture}[x=1cm, y=1cm,
+  cell/.style={draw=hndeep, fill=hnaccent!50, rounded corners=1pt,
+    font=\footnotesize, inner sep=3pt, minimum height=4.2mm},
+  fold/.style={draw=hndeep, fill=hnaccent!50, rounded corners=1pt,
+    font=\footnotesize, inner sep=3pt, minimum height=4.2mm,
+    align=center},
+  pbox/.style={draw=hngray, fill=hngray!12, rounded corners=1pt,
+    font=\footnotesize\ttfamily, inner sep=2.5pt, minimum height=4.2mm},
+  plate/.style={draw=hnmid, line width=0.7pt, rounded corners=2pt,
+    fill=hnaccent!18, inner sep=5pt},
+  platelab/.style={font=\tiny\ttfamily, text=hnmid, inner sep=1pt},
+  wire/.style={-, line width=0.5pt, draw=black!75},
+  wlab/.style={font=\scriptsize, inner sep=1pt},
+  port/.style={font=\small\itshape, inner sep=1.5pt},
+  ptitle/.style={font=\footnotesize\bfseries, anchor=west, inner sep=0pt},
+  ann/.style={font=\scriptsize, text=black!70, align=left,
+    anchor=north west, inner sep=0pt}]
+
+\begin{scope}[shift={(0,0)}]
+\node[ptitle] at (-0.4,1.0)
+  {(a) work-potential --- hard progress (ranking); fold $\Sigma$;
+   dictionary $F$};
+\node[port] (a-in0) at (0,0)    {$q_0$};
+\node[port] (a-in1) at (0,-1.35) {$q_k$};
+\node[port] (a-in2) at (0,-2.7)  {$p_k$};
+\node[cell] (a-c0) at (2.7,0)     {$F_1 + 1$};
+\node[cell] (a-c1) at (2.7,-1.35) {$F_k$};
+\node[cell] (a-c2) at (2.7,-2.7)  {$w + 1 + F_{k+1}$};
+\begin{pgfonlayer}{plates}
+  \node[plate, fit=(a-c0)] (a-pl0) {};
+  \node[plate, fit=(a-c1)] (a-pl1) {};
+  \node[plate, fit=(a-c2)] (a-pl2) {};
+\end{pgfonlayer}
+\node[platelab, anchor=north east] at (a-pl0.south east) {plate $q_0$};
+\node[platelab, anchor=north east] at (a-pl1.south east) {plate $q_k$};
+\node[platelab, anchor=north east] at (a-pl2.south east) {plate $p_k$};
+\node[fold] (a-f) at (6.4,-1.35) {fold $\Sigma$};
+\node[port] (a-V) at (8.1,-1.35) {$V$};
+\draw[wire] (a-in0) -- node[wlab, above, pos=0.4] {$[q_0]$} (a-c0);
+\draw[wire] (a-in1) -- node[wlab, above, pos=0.4] {$[q_k]$} (a-c1);
+\draw[wire] (a-in2) -- node[wlab, above, pos=0.4] {$[p_k]$} (a-c2);
+\draw[wire] (a-c0.east) -- (a-f.west);
+\draw[wire] (a-c1.east) -- (a-f.west);
+\draw[wire] (a-c2.east) -- (a-f.west);
+\draw[wire] (a-f) -- (a-V);
+\node[ann, text width=9.4cm] at (-0.4,-3.7)
+  {(one $q_k$ and one $p_k$ row per step, $k = 1, \dots, 6$; all
+   plate indices bound by the fold) \\[2pt]
+   $F_k = \sum_{j \ge k} (T_j + 2)$, the firings a lot still owes;
+   $v(m) = 0$: machines uncited. One gap row per transition, gap
+   $1$ --- $19$ rows; along every run, from any marking $m_0$, total
+   firings $\le V(m_0)$, tight at $638$ per lot.};
+\end{scope}
+
+\begin{scope}[shift={(0,-7.3)}]
+\node[ptitle] at (-0.4,1.0)
+  {(b) machine conservation --- place invariants; fold $\Sigma$;
+   $\pm$ twins};
+\node[port] (b-in0) at (0,0)     {$m_s$};
+\node[port] (b-in1) at (0,-1.35) {$p_i$};
+\node[port] (b-in2) at (0,-2.7)  {$p_j$};
+\node[cell] (b-c0) at (2.7,0)     {$+1$};
+\node[cell] (b-c1) at (2.7,-1.35) {$+1$};
+\node[cell] (b-c2) at (2.7,-2.7)  {$+1$};
+\begin{pgfonlayer}{plates}
+  \node[plate, fit=(b-c0)] (b-pl0) {};
+  \node[plate, fit=(b-c1)] (b-pl1) {};
+  \node[plate, fit=(b-c2)] (b-pl2) {};
+\end{pgfonlayer}
+\node[platelab, anchor=north east] at (b-pl0.south east) {plate $m_s$};
+\node[platelab, anchor=north east] at (b-pl1.south east) {plate $p_i$};
+\node[platelab, anchor=north east] at (b-pl2.south east) {plate $p_j$};
+\node[fold] (b-f) at (6.4,-1.35) {fold $\Sigma$};
+\node[port] (b-V) at (8.1,-1.35) {$\kappa_s$};
+\draw[wire] (b-in0) -- node[wlab, above, pos=0.4] {$[m_s]$} (b-c0);
+\draw[wire] (b-in1) -- node[wlab, above, pos=0.4] {$[p_i]$} (b-c1);
+\draw[wire] (b-in2) -- node[wlab, above, pos=0.4] {$[p_j]$} (b-c2);
+\draw[wire] (b-c0.east) -- (b-f.west);
+\draw[wire] (b-c1.east) -- (b-f.west);
+\draw[wire] (b-c2.east) -- (b-f.west);
+\draw[wire] (b-f) -- (b-V);
+\node[ann, text width=9.4cm] at (-0.4,-3.7)
+  {the $-1$ twin certifies the reverse inequality, pinning
+   $\kappa_s = \#m_s + \#p_i + \#p_j = C_s$ under every scheduler, at
+   every lot count; $(s;\, i, j) \in \{(\mathrm{diff};\, 1, 5),\,
+   (\mathrm{impl};\, 2, 4),\, (\mathrm{lith};\, 3, 6)\}$ with
+   $(C_{\mathrm{diff}}, C_{\mathrm{impl}}, C_{\mathrm{lith}}) =
+   (2, 2, 1)$ --- $6$ safety rows per certificate, $36$ in all.};
+\end{scope}
+
+\begin{scope}[shift={(12.3,0)}]
+\node[ptitle] at (-0.4,1.0)
+  {(c) the bottleneck pair --- two folds, one dictionary $R$};
+\node[port] (c-in0) at (0,0)     {$q_0$};
+\node[port] (c-in1) at (0,-1.35) {$q_k$};
+\node[port] (c-in2) at (0,-2.7)  {$p_k$};
+\node[cell] (c-c0) at (2.6,0)     {$R_1$};
+\node[cell] (c-c1) at (2.6,-1.35) {$R_k$};
+\node[cell] (c-c2) at (2.6,-2.7)  {$w + R_{k+1}$};
+\begin{pgfonlayer}{plates}
+  \node[plate, fit=(c-c0)] (c-pl0) {};
+  \node[plate, fit=(c-c1)] (c-pl1) {};
+  \node[plate, fit=(c-c2)] (c-pl2) {};
+\end{pgfonlayer}
+\node[platelab, anchor=north east] at (c-pl0.south east) {plate $q_0$};
+\node[platelab, anchor=north east] at (c-pl1.south east) {plate $q_k$};
+\node[platelab, anchor=north east] at (c-pl2.south east) {plate $p_k$};
+\node[pbox] (c-cp0) at (5.1,0)     {copy$_2$};
+\node[pbox] (c-cp1) at (5.1,-1.35) {copy$_2$};
+\node[pbox] (c-cp2) at (5.1,-2.7)  {copy$_2$};
+\node[fold] (c-f1) at (7.6,-0.55) {fold $\Sigma_\varphi$,\;
+  $\varphi = ({\cdot})^2$};
+\node[fold] (c-f2) at (7.6,-3.05) {fold $\max$};
+\node[port] (c-V1) at (10.1,-0.55) {$V_2$};
+\node[port] (c-V2) at (10.1,-3.05) {$V_{\max}$};
+\draw[wire] (c-in0) -- node[wlab, above, pos=0.4] {$[q_0]$} (c-c0);
+\draw[wire] (c-in1) -- node[wlab, above, pos=0.4] {$[q_k]$} (c-c1);
+\draw[wire] (c-in2) -- node[wlab, above, pos=0.4] {$[p_k]$} (c-c2);
+\draw[wire] (c-c0.east) -- (c-cp0.west);
+\draw[wire] (c-c1.east) -- (c-cp1.west);
+\draw[wire] (c-c2.east) -- (c-cp2.west);
+\draw[wire] ([yshift= 1.1mm]c-cp0.east) -- (c-f1.west);
+\draw[wire] ([yshift= 1.1mm]c-cp1.east) -- (c-f1.west);
+\draw[wire] ([yshift= 1.1mm]c-cp2.east) -- (c-f1.west);
+\draw[wire] ([yshift=-1.1mm]c-cp0.east) -- (c-f2.west);
+\draw[wire] ([yshift=-1.1mm]c-cp1.east) -- (c-f2.west);
+\draw[wire] ([yshift=-1.1mm]c-cp2.east) -- (c-f2.west);
+\draw[wire] (c-f1) -- (c-V1);
+\draw[wire] (c-f2) -- (c-V2);
+\node[ann, text width=10.6cm] at (-0.4,-4.2)
+  {$R_k = \sum_{j \ge k} T_j$, the work a lot still owes ($R_1 =
+   625$); rows repeat per step as in (a). Congestion-$\ell_2$
+   (upper fold): obligations stated in $\varphi$-scale --- $\sum
+   v^2$, no root ever computed, verdicts transporting monotonely ---
+   $6$ $\varphi$-gap rows (the ticks) $+$ $13$ safety rows.
+   Work-ceiling (lower fold): safety rows only ($19$); its gap row
+   is \emph{refused at load} --- a gap row on an idempotent fold is a
+   formation error, not a lint (section~\ref{sec:mt-sdcpn}).};
+\end{scope}
+\end{tikzpicture}%
+\par\medskip
+\begin{minipage}{0.94\linewidth}
+\platecaption{The exhibit's certificate hypernets, in plate
+notation. Each tinted enclosing box is a functorial box declared per
+node: the enclosed feature cell is applied once per token of the plate
+named at the box corner (its whiskered lift,
+section~\ref{sec:hyp-plates}), and its wires carry the plate's
+symbolic extent, marked $[q_k]$, $[p_k]$; a fold node consumes the
+plated wires into one scalar. The drawn artefact is therefore a single
+finite object denoting a function of the whole variable-dimensional
+marking --- the grammar has no expression for ``the $i$-th token,''
+which is why one footprint row per (certificate, transition) pair
+covers every instance at every marking
+(section~\ref{sec:minifab-footprint}). The sum fold is contraction
+with the plate indices bound; constant features compile to the
+standard count wire, so (b) reads
+$\kappa_s = \#m_s + \#p_i + \#p_j$. Four shapes carry all twelve
+certificates of the classification tables
+(section~\ref{sec:minifab-sdcpn}): (a) the ranking; (b) the six
+machine invariants; (c) the two folds sharing the remaining-work
+dictionary $R$; the lot census is (b)'s wiring with feature $1$ on the
+nine lot populations ($q_0$, $q_k$, $p_k$; machines uncited), $18$
+safety rows and a gap row exactly at shipment; and the deadline pair
+(section~\ref{sec:minifab-deadline}) is (a)'s wiring twice more, its
+dictionary split pointwise into $D$ and $F - D$ ($16$ gap $+$ $3$
+safety, and $3$ gap $+$ $16$ safety). Row total:
+$19 + 19 + 36 + 19 + 19 + 38 = 150$ footprint rows, the tables'
+census.}{fig:minifab-cert-hypernets}
+\end{minipage}
+\par
+\vspace*{\fill}
+\thispagestyle{empty}
+\end{landscape}
+\restoregeometry

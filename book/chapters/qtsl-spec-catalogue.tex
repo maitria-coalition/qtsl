@@ -1,0 +1,3202 @@
+\chapter{Specification Language}
+\label{ch:qtsl-specification-language}
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{1}}
+
+\noindent\draftmark\medskip
+
+Every certificate in this stack ultimately concludes a claim of the
+form \emph{this system satisfies this specification}. The
+Mathematical Models catalogue (chapter~\ref{ch:qtsl-mathematical-models}) is the
+normative inventory of the left-hand side of that judgment; this
+chapter is its right-hand side: the \emph{spec language} --- the
+temporal-logic proposition formers a modeller actually states
+requirements in --- together with the record that packages a
+requirement for composition, the derived spellings that cover
+recurring claim species without new grammar, the rewrite layer that
+lets the spec \emph{as stated} be the spec \emph{as certified}, the
+deliberate absences, and the judgment kinds: the satisfaction-side
+sorts that certificates conclude into.
+
+The presentation is semantics-first, and its form follows the rest of
+this book. The grammar is not given as productions: each former is a
+\emph{deduction rule} in Computer Science
+Metanotation~\cite{steele2017}, concluding a formation judgment ---
+premises above the line are the former's well-formedness conditions,
+side conditions stand beside the rule, and what used to be checked
+into existence is now visible in the rule that brings the term into
+existence at all. The discipline pays twice. First, the deliberate
+absences of section~\ref{sec:spec-lang-fences} stop being policy
+prose: a fence is the \emph{absence of a rule}, and several of the
+absences carry a semantic theorem as their warrant
+(section~\ref{sec:spec-lang-formation}). Second, each formation rule
+is the natural index of its semantics: every former carries a
+\emph{compile clause} into the spec storey of the semantic universe
+(chapter~\ref{ch:qtsl-semantic-universe}), an \emph{adequacy
+obligation} relating the compile to the former's intended reading ---
+stated with its current status, machine-checked where it is
+machine-checked and named where it is owed --- a \emph{witness} from
+the certified corpus, and the producer \emph{API} that constructs it.
+The record-level compile is a structural recursion over the formation
+derivation, so the adequacy of a whole specification is the fold of
+its rules' cells (section~\ref{sec:spec-lang-record}).
+
+\paragraph{Why the grammar exists at all.} Before these formers were
+typed rows, two claim species --- expected return and bounded always
+--- lived in certificate-header \emph{sidecars}: prose fields beside
+the proof rows, spelling claims the grammar could not. A claim that
+lives in a sidecar is a claim no checker re-derives and no
+composition rule can consume. The discipline this chapter enforces is
+the retirement of that disease: \textbf{a spec claim is a typed row},
+and the rows' schema has a normative home in this repository ---
+\path{theories/Qtsl.geolog}, the theory encoding this chapter's
+vocabulary as data, with its well-formedness and mutant battery
+beside it. Everything below exists so that the statement a reader
+sees is the statement the checker replayed.
+
+The grammar is deliberately small --- threshold atoms over
+observables, Boolean structure, probability, expectation, and level
+thresholds, run-functional accumulation, and the temporal
+operators (\emph{always}, \emph{always up to a deadline},
+\emph{reach by a deadline}, \emph{until}, metered Streett
+acceptance) --- and
+the catalogue's completeness claim is empirical and checkable:
+\textbf{every claim species asserted by a certificate in the
+certified corpus appears in this chapter}, either as a former, as a
+derived spelling, or as a judgment kind --- with the exercising
+artefact named. A claim species with no catalogue entry is a defect
+of the catalogue, never a licensed side channel: the admission rule
+is that a new species gets its former, with a named kernel and a
+named semantics obligation, when its first certificate lane arrives.
+
+\section{The Compile Target: Spec Classes of the Semantic Universe}
+\label{sec:spec-lang-target}
+
+What a specification denotes is fixed once, in the semantic universe,
+and this chapter compiles into it rather than re-deriving it. The
+stock this chapter consumes
+(chapter~\ref{ch:qtsl-semantic-universe}, section~\ref{sec:su-classes}):
+a \emph{spec atom} is a safety face together with a finite set of
+liveness demands; its class in the hyperspace is a \emph{crescent} ---
+one closed containment face cut by finitely many open escape faces, a
+locally closed set --- and a compound specification in disjunctive
+normal form denotes the union of its disjuncts' crescents, a
+\emph{constructible} class. Satisfaction is the fibre order itself:
+a system's belief (level-of-inconsistency functional;
+chapter~\ref{ch:qtsl-semantic-universe}) satisfies a spec when the
+spec's belief lies
+below it (\texttt{SuFunctor.Universe.Sat}), and the crisp judgment
+against a class has two faces --- \emph{safety} is wall domination,
+the system's permitted region contained in the demanded one, and
+\emph{liveness} is a dip, some admitted state permitted at a finite
+level of inconsistency under each demand (\texttt{wallOn\_le\_iff},
+\texttt{dip\_top\_iff}). Where the model leaves openness --- demonic
+inputs, worst-case initial conditions, imprecise kernels --- the
+judgment reads against a \emph{set} of behavioural laws through the
+credal envelope faces (\texttt{SatCredal},
+in the adequacy layer), lower for guarantees; a singleton set
+recovers the plain reading, a purely demonic model recovers
+min-over-branches. This one convention removes any need for
+separate worst-case formers.
+
+An earlier edition of this chapter fixed four denotation strata ---
+region, path, credal, $\omega$-word --- as primitives of its front
+matter. They survive, but as \emph{views} of the landed semantics,
+not as axioms of the catalogue:
+
+\begin{itemize}
+\item the \emph{region} view: a state formula's denotation is a set
+  of states, entering the judgment as threshold walls --- and nothing
+  expressible is lost by compiling regions to walls, because rational
+  threshold rows generate the flat universe
+  (\texttt{iSup\_boxRows\_eq\_self});
+\item the \emph{path} view: a path formula's denotation is a class of
+  records over the site --- occupied-stage classes over the record
+  lens at the finitary stratum, trajectory classes at the clocked
+  strata (section~\ref{sec:spec-lang-pathf});
+\item the \emph{credal} view: probability and expectation atoms read
+  \emph{lower} bounds against the whole set of admitted laws, through
+  the envelope faces named above;
+\item the \emph{$\omega$-word} view: the rewrite layer
+  (section~\ref{sec:spec-lang-rewrite}) reads formulas over infinite
+  words --- one carrier instance among those a former admits, the one
+  on which the eighteen rewrite rules are machine-checked today.
+\end{itemize}
+
+\paragraph{The properness presupposition.} One structural fact of the
+compile target shapes the entire chapter, so it is stated once, here.
+Every spec atom's liveness set contains the top demand --- in the
+mechanization this is a \emph{field} of the atom
+(\texttt{SpecAtom.top\_mem}), so an atom without it is not merely
+refused but unrepresentable --- and therefore \textbf{every
+specification's interpretation includes the trivial liveness bound}:
+eventually \emph{something}, at a finite level of inconsistency.
+Satisfaction of any
+spec asserts \emph{safe and proper}: to satisfy anything, first
+exist. This is a law of the semantics, not a default a producer
+opts into --- the compile emits the mark unconditionally, and that
+emission is itself a theorem
+(\texttt{elabSpec\_top\_mem}) --- and it costs nothing in syntax:
+there is no conjunct to write and no flag to store, because the
+demand lives in the judgment.
+
+What it buys is that infeasibility is observable. An inconsistent
+system --- one admitting no behaviour at all --- satisfies every
+safety demand vacuously and no liveness demand
+(\texttt{top\_notMem\_modelClass}: the inconsistent system belongs to
+no spec class); a pure-safety reading would let a bricked system
+satisfy the specification of a working one, and composition could
+manufacture such systems from proper components while every
+certificate stayed green. Under the presupposition the true constant
+is not vacuous: $\mathsf{Spec}(\mathsf{SInit}(\mathsf{STrue}))$ ---
+the initial-state injection wrapping the true constant
+(section~\ref{sec:spec-lang-record}) --- is the \emph{bare
+feasibility spec}, the minimal claim distinguishing a bricked system
+from a working one (section~\ref{sec:spec-lang-const}). The same
+guard appears at the other end of the judgment, where the Rule
+Catalogue's liveness verdicts carry their existential conjunct
+(chapter~\ref{ch:qtsl-manual}) --- one guard, two ends. What it costs
+is one nonemptiness discharge per root satisfaction claim, discharged
+where the claim is consumed; and where infeasibility is genuinely
+expected in some conditions, the honest spelling is the assumption
+slot of the spec record --- satisfaction relativized to conforming
+inputs, with nothing demanded off-assumption
+(section~\ref{sec:spec-lang-vdashi}) --- never a properness opt-out,
+which the grammar deliberately does not provide.
+
+\section{Formation Judgments}
+\label{sec:spec-lang-formation}
+
+Eight sorts carry the grammar, and they are not a flat list: four of
+them arrange as a two-by-two grid --- the \emph{temporal} axis
+(state: atemporal, against path: trajectory) crossed with the
+\emph{shape} axis (observable: $\mathbb{Q}$-valued, against pred:
+Boolean) --- and the grid is capped by the polarity sorts --- two
+faces and the attitude blend --- and the record.
+
+\begin{center}
+\begin{tabular}{l|cc}
+ & \textbf{Observable} ($\mathbb{Q}$-valued) & \textbf{Pred} (Boolean)\\
+\hline
+\textbf{State} (atemporal) & $o\ \mathsf{StateObservable}$ & $\varphi\ \mathsf{StatePred}$\\
+\textbf{Path} (trajectory) & $R\ \mathsf{PathObservable}$ & $\psi\ \mathsf{PathPred}$\\
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ll}
+$o\ \mathsf{StateObservable}$ & $o$ is a well-formed atemporal observable\\
+$\varphi\ \mathsf{StatePred}$ & $\varphi$ is a well-formed atemporal predicate (a region)\\
+$R\ \mathsf{PathObservable}$ & $R$ is a well-formed run-functional\\
+$\psi\ \mathsf{PathPred}$ & $\psi$ is a well-formed trajectory event\\
+$\Phi\ \mathsf{ForallSpec}$ & $\Phi$ is a well-formed safety-face component\\
+$E\ \mathsf{ExistsSpec}$ & $E$ is a well-formed liveness-mark component\\
+$H\ \mathsf{AttitudeSpec}$ & $H$ is a well-formed attitude blend (a design score)\\
+$s\ \mathsf{Spec}$ & $s$ is a well-formed spec record\\
+\end{tabular}
+\end{center}
+
+Three of the eight are this edition's names for sorts the catalogue
+always had: $\mathsf{StatePred}$ was \textsf{StateF},
+$\mathsf{PathPred}$ was \textsf{PathF}, and $\mathsf{PathObservable}$
+was \textsf{Return} --- repairing a standing defect of the earlier
+edition, whose formation table omitted \textsf{Return} entirely while
+eight rules concluded into it. $\mathsf{StateObservable}$ names the
+atemporal quantitative stratum that was previously anonymous: a
+polynomial argument, a channel index, a gate citation --- material
+the rules always consumed without a judgment to its name; its four
+injections are now formers with an entry of their own
+(section~\ref{sec:spec-lang-obs}). The two polarity caps are new,
+and they are the point of the redesign; the attitude cap completes
+them, entered with the theory revision because the blend it carries
+fits \emph{neither} face --- its discipline is stated at its entry
+(section~\ref{sec:spec-lang-hurwicz}). One further sort stands
+beside the eight as pair vocabulary rather than as a grid cell:
+$\pi\ \mathsf{StreettPair}$ ($\pi$ is a well-formed request/response
+pair), feeding the two acceptance formers. Its dissolution into
+per-pair premise structure was designed, and the theory revision
+settled the question the other way, deliberately: the pair spine
+persists at the row stratum as list-spine \emph{encoding} --- small
+hash-consed nodes, pairs-as-data --- with the two pair constructors
+carrying the consumption-parity vocabulary, and no rule reads the
+pair sort as a judgment.
+
+\paragraph{The stratification law.} The State row admits no
+trajectory quantification and no credal quantification; the Path row
+lifts State-row material along trajectories; \textbf{all
+quantification over the credal body happens at the cap, and the cap
+is where polarity lives}. A $\mathsf{ForallSpec}$ component reads its
+bound against \emph{every} admitted law --- the safety face,
+compiling to a floor: wall domination, the closed containment face of
+the compile target (section~\ref{sec:spec-lang-target}) --- while an
+$\mathsf{ExistsSpec}$ component asserts that \emph{some} admitted law
+attains --- a liveness mark, compiling to a dip: the open escape
+face. An $\mathsf{AttitudeSpec}$ component reads \emph{both}
+envelopes and mixes them arithmetically before thresholding --- no
+face, no participation in the floor/mark algebra, a design score
+rather than a guarantee; in one line, \textbf{a Spec mixes verdicts;
+an attitude mixes envelopes} (section~\ref{sec:spec-lang-hurwicz}).
+Polarity is thereby a \emph{sort}, not an annotation: a
+specification cannot be written without declaring the face of every
+component, a mis-faced premise is a formation error rather than a
+semantic surprise, and a rule that needs a face restriction states it
+as a sort premise instead of a prose side condition. The judgment
+layer is untouched --- one turnstile, no subscripts: the face of
+every component is read off the constructor vocabulary of the
+\emph{arguments}.
+
+\paragraph{The formers are the grid's structure maps.} Every former
+of this chapter lands on exactly one cell or arrow of the diagram:
+
+\begin{itemize}
+\item \emph{within-cell structure} (State--Pred): the constants and
+  Boolean closure --- \textsc{STrue}, \textsc{SFalse}, \textsc{SAnd},
+  \textsc{SOr}, \textsc{SNot};
+\item \emph{within-cell structure} (State--Observable): the
+  provenance injections \textsc{oChan}, \textsc{oGate},
+  \textsc{oPoly} (section~\ref{sec:spec-lang-obs}) --- one
+  observable, whatever its provenance;
+\item \emph{thresholding}, Observable $\to$ Pred at the State row:
+  \textsc{SAtomLE}, \textsc{SAtomGE};
+\item \emph{indicator embedding}, Pred $\to$ Observable at the State
+  row: \textsc{oInd}, the evident square-filler
+  ($\mathbf{1}_\varphi$ as an observable);
+\item \emph{temporal lifting}, Pred column, State $\to$ Path:
+  \textsc{PAlways}, \textsc{PAlwaysT}, \textsc{PDeadline},
+  \textsc{PUntil}, the metered acceptance pair
+  \textsc{PDwellStreett} and \textsc{PCrossStreett},
+  \textsc{PNotPath};
+\item \emph{accumulation}, Observable column, State $\to$ Path: the
+  accumulators \textsc{poSum}, \textsc{poInt}, \textsc{poDisc},
+  \textsc{poAvg}, \textsc{poSup}, each over one observable --- the
+  earlier edition's provenance-fused run-functional constructors,
+  re-founded as injections plus accumulation modes at unchanged
+  denotations --- beside the transition-count functional
+  \textsc{retFireCount} (section~\ref{sec:spec-lang-returnstratum});
+\item \emph{indicator embedding}, Pred $\to$ Observable at the Path
+  row: \textsc{retPath};
+\item \emph{thresholding}, Observable $\to$ Pred at the Path row:
+  \textsc{PAtomLE}, \textsc{PAtomGE} --- pathwise accumulated-cost
+  \emph{events}, a claim species distinct from any expectation bound
+  (section~\ref{sec:spec-lang-patom});
+\item \emph{the cap}: \textsc{SProbGE}, \textsc{SProbLE},
+  \textsc{SReturnGE}, \textsc{SReturnLE}, \textsc{SLevelGE},
+  \textsc{SLevelLE}, the event-rate envelope pair \textsc{SRateGE},
+  \textsc{SRateLE} (over transition rosters, horizon-parametric ---
+  section~\ref{sec:spec-lang-rate}), the initial-state injection
+  \textsc{SInit}, and
+  the regret certificate face \textsc{SRegretLE} conclude
+  $\mathsf{ForallSpec}$; the possibility marks
+  \textsc{SProbMayBeGE}, \textsc{SProbMayBeLE},
+  \textsc{SReturnMayBeGE}, \textsc{SReturnMayBeLE},
+  \textsc{SLevelMayBeGE}, \textsc{SLevelMayBeLE}, and the regret
+  query face \textsc{SRegretLEMark} conclude $\mathsf{ExistsSpec}$;
+  the attitude pair \textsc{SHurwiczGE}, \textsc{SHurwiczLE}
+  concludes $\mathsf{AttitudeSpec}$. The mark roster is
+  \emph{polarity-total}: each threshold family --- probability,
+  expectation, level --- presents both faces (the level marks are
+  new with this edition, completing the grid), and the regret pair
+  is the same duality one seat up
+  (section~\ref{sec:spec-lang-regret});
+\item \emph{the record}: $\mathsf{Spec}$ packages face components
+  (section~\ref{sec:spec-lang-record}); and spec-level disjunction
+  $(s_1 \vee s_2)\ \mathsf{Spec}$ for $s_1, s_2\ \mathsf{Spec}$ ---
+  its denotation is the union of the two record classes,
+  constructible by definition, and it never asks the impossible
+  merge (the no-single-floor and no-single-mark facts below are
+  about \emph{one} record's slots); discharge is by disjunct
+  selection.
+\end{itemize}
+
+\paragraph{The one deliberate absence.} The completed diagram has
+exactly one missing arrow family, and it is absent on purpose: the
+\emph{descending} arrows,
+$\mathsf{Path}\{\mathsf{Pred},\mathsf{Observable}\} \to
+\mathsf{State}\{\mathsf{Pred},\mathsf{Observable}\}$ --- nested path
+quantification in the CTL style, where a path-quantified claim
+re-enters the atemporal row as a state label
+($\mathbb{P}_{\ge q}[\psi]$ as a state predicate; a value functional
+as a state observable). Its status is recorded in three
+facts. First, the \emph{raw} formers are not cautiously deferred but
+fenced by the geometry: a single level of such re-entry already
+exits the constructible classes --- neither face's rooted class is a
+crescent --- and the negation fence forbids recovering the universal
+face from the existential one, so any admission would have to carry
+both faces as primitives (the analysis is mechanized in the adequacy
+layer's path-to-state development). Second, the pathway is open, not
+closed: the behavioural tier already \emph{denotes} the descending
+arrows --- the probability-threshold and expected-return sets of the
+compile clauses below are exactly path-to-state denotations --- and
+the principled admission route is a \emph{certified-citation}
+former: the tower discipline promoted from convention to formation
+rule, Observable column first, where certified envelopes carry the
+right one-sided semicontinuity. Third, that route is deliberately
+out of scope for this edition, planned for the language's second
+major revision (2026Q4) --- a choice made with the open pathway in
+full view, which is what distinguishes a scoped fence from an
+impossibility. What the
+certified corpus actually needs of nesting is already served through
+the judgment stratum: a child claim's \emph{certified region} enters
+a parent formula as an ordinary $\mathsf{StatePred}$ atom
+(entry \textsc{SProbGE}; the reach-then-hold spelling of
+section~\ref{sec:spec-lang-dfunnel} is the landed witness).
+
+\paragraph{Refinements.} Two further judgments are read off
+derivations rather than declared:
+$\varphi\ \Theta_0$ --- membership in the \emph{base stratum}
+(nonstrict polynomial atoms, constants, and their and/or closure;
+nothing else), demanded wherever a consumer needs base-exact
+material --- and the \emph{carrier-requirement synthesis}
+$\psi \rhd \kappa$ with
+$\kappa \subseteq \{\mathsf{steps}, \mathsf{duration}\}$, which
+computes what temporal structure a former demands of the carrier it
+is interpreted on (per-tick accumulation demands steps; deadlines,
+discounts, and time-integral accumulation demand duration). Under
+the grid the synthesis is a \emph{Path-row device}, and the
+stratification law gains a checkable spelling: every State-row
+former synthesizes $\rhd \varnothing$ --- atemporality as a
+computation, not a convention. Carrier
+scope is \emph{derived, never stored} --- the consequence for
+equivalence judgments is drawn at entry \textsc{QSpecEquiv}
+(section~\ref{sec:spec-lang-qspecequiv}).
+
+One further stratum is deliberately \emph{not} a formation judgment:
+consumability at parity. Negation is a surface former
+(\textsc{SNot}, \textsc{PNotPath}), resolved by negation normal
+form, and whether a residue survives to a consumable position is
+\emph{checked} --- by the producer-side typing preflight, and
+independently by the checker --- not stored in the term. In rule
+form the refusal table becomes a family of absences: there is no
+rule concluding consumability of a negated path atom at even
+parity, of negated Streett acceptance, of negated bounded until,
+or of negated unbounded always. (The table's historical first
+member, the negated \emph{probability} atom, no longer needs a row
+at all: no probability former concludes $\mathsf{StatePred}$ any
+more, so $\mathsf{SNot}$ cannot reach one --- the fence became a
+type; the path atom of the theory revision inherits its seat in the
+table.) These absences carry a semantic
+warrant, stated once and cited by the fence entries: \textbf{under
+the properness presupposition, no spec class has an expressible
+complement}. The proof is two lines --- every class excludes the
+inconsistent system (\texttt{top\_notMem\_modelClass}), so every
+complement \emph{contains} it, and no union of crescents does ---
+so the class algebra is a distributive lattice, irreducibly
+non-Boolean, and the refused residues are not missing engineering
+but missing mathematics. The dual machinery that would consume them
+(probability upper bounds as positive claims, Rabin acceptance,
+over-approximating towers) is deliberately absent until a
+certificate lane demands it
+(section~\ref{sec:spec-lang-fences}).
+
+The surface grammar, its normal forms, and its compile are
+themselves mechanized, and the mechanization consumes the formation
+discipline literally: state predicates and path predicates are
+inductive types whose constructors are the rules below
+(\texttt{SuFunctor.Universe.SpecElab} and the path-lens development
+beside it) --- and the mechanized state-predicate grammar was
+already atemporal and atom-abstract before the grid named the
+discipline, so $\mathsf{StatePred}$ is a rename at that stratum, not
+a rebuild; negation normal
+form has \emph{no negation node by type}, so unconsumable residues
+have no clause because they have no constructor; and the compile is
+one clause per formation rule, with the record-level adequacy
+statement the fold of the per-rule cells over the formation
+derivation --- the same architecture as the Rule Catalogue's
+soundness, one lemma per rule composed by induction over admitted
+derivations, transposed from the inference stratum to the formation
+stratum.
+
+\paragraph{Sequencing.} The grid was enacted grammar-first, and this
+section is its normative statement; the normative theory's row
+schema now carries it whole (\path{theories/Qtsl.geolog}): the
+re-sorted conclusions, the level marks, the initial-state injection,
+spec-level disjunction, the embedding and threshold arrows, the
+metered acceptance pair, the running-sup and transition-count
+functionals, the attitude cap, and the component-record assembly are
+all rows of the landed revision, with their well-formedness and
+mutant battery beside them. Denotations are unchanged throughout,
+and every inhabitant of the earlier edition's grammar has a total
+spelling transport --- the re-homed cap formers keep their names and
+field labels with only sort membership moved; a fused run-functional
+becomes its accumulator over the matching injection; a polynomial
+atom becomes the same atom over \textsc{oPoly}; a bare root region
+becomes its explicit \textsc{SInit} component --- so no certified
+artefact and no published number moved with the re-sort. The
+producer surface has since followed: the toolkit's revision landed
+the grid spellings, and the quoted API blocks below are extracted
+from that revised surface --- the residual producer gaps (the
+record-top disjunction, the compiled verdict form, the regret
+certificate face) are named at the entries that own them.
+
+\paragraph{How to read an entry.} Each entry carries two blocks. The
+\emph{Formation} block states the former's deduction rules, with
+$\Theta_0$ rules inline where the former preserves or demands base
+membership and $\rhd$ annotations beside the rules that demand
+carrier structure. The prose beneath it states the \emph{compile
+clause} --- what the former elaborates to in the semantic universe's
+vocabulary --- the \emph{adequacy} mode and status (exact where the
+compile's class provably equals the intended reading; directed where
+a sound implication is proved and no converse is claimed; per
+consuming battery where the obligation is discharged rule-side), and
+the \emph{witness}: the landed artefact that exercises the former.
+
+The \emph{API} block is the producer surface of the \texttt{mtk}
+toolkit for that entry: the TypeScript arrangement (npm package
+\texttt{@maitria/mtk}) and the Rust catalogue crate
+(\texttt{crates/mtk-catalogue}) --- one Rust implementation
+underneath, reached from TypeScript in-process through a native
+binding, so the two surfaces cannot diverge. Signatures and
+constructions are quoted \emph{verbatim} from the toolkit sources and
+its conformance corpus: code whose emitted certificate bytes are
+verified byte-identical against committed golden vectors, from both
+languages (the TypeScript-driven path re-emits the same bytes the
+Rust-driven path committed). The quoted blocks are regenerated
+mechanically from the sources by the catalogue's extraction tooling
+--- a missing declaration or marker fails the regeneration loudly ---
+so quoted code cannot drift silently. This API constructs and emits;
+it never checks: constructors refuse malformed \emph{syntax} with the
+failure's geometry attached (which field, which subterm, which
+value), the typing preflight is a courtesy image of the checker-side
+oracle, and the checker's independent replay is the only authority.
+
+Two vocabulary facts used throughout, stated once. \emph{Exact
+scalars}: every threshold, deadline, probability, and coefficient is
+an exact rational (\texttt{Q} in TypeScript, an exact-rational
+witness type in Rust); no floating point enters a claim.
+\emph{Positional variables}: an atom's polynomial reads the paired
+system's state coordinates positionally --- or, for interface-indexed
+specs, the interface's output wires in list order (guarantees) and
+input wires (assumptions); port names are presentation data.
+
+\section{The Spec Record}
+\label{sec:spec-lang-record}
+
+\subsection{Spec: root, interface, assumptions, slack}
+\label{sec:spec-lang-spec}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SInit}]
+  {\varphi\ \mathsf{StatePred}}
+  {\mathsf{SInit}(\varphi)\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{Spec-C}]
+  {\Phi_i\ \mathsf{ForallSpec} \quad (i < m) \\
+   E_j\ \mathsf{ExistsSpec} \quad (j < k) \\
+   H_l\ \mathsf{AttitudeSpec} \quad (l < r) \\\\
+   \mathrm{widths}(\vec\Phi; \vec E; \vec H) \text{ agree pairwise}}
+  {\mathsf{Spec}(\vec\Phi; \vec E; \vec H)\ \mathsf{Spec}}
+
+\inferrule*[Right=\textsc{Spec-I}]
+  {\Phi_i\ \mathsf{ForallSpec} \quad (i < m) \\
+   E_j\ \mathsf{ExistsSpec} \quad (j < k) \\
+   H_l\ \mathsf{AttitudeSpec} \quad (l < r) \\
+   \mathrm{width}(\vec\Phi; \vec E; \vec H) = \mathrm{arity}_{\mathrm{out}}(I) \\\\
+   \alpha\ \mathsf{StatePred} \\ \alpha\ \Theta_0 \\
+   \mathrm{width}(\alpha) = \mathrm{arity}_{\mathrm{in}}(I)}
+  {\mathsf{Spec}(\vec\Phi; \vec E; \vec H, I, \alpha)\ \mathsf{Spec}}
+\\
+\inferrule*[Right=\textsc{Spec-Or}]
+  {s_1\ \mathsf{Spec} \\ s_2\ \mathsf{Spec}}
+  {(s_1 \vee s_2)\ \mathsf{Spec}}
+\end{mathpar}
+
+A specification is a package of \emph{face components} --- alone
+(\textsc{Spec-C}, the closed form) or against an interface with an
+optional $\Theta_0$ assumption on input wires (\textsc{Spec-I}); an
+optional slack slot (a candidate gain function for quantitative
+composition) may accompany either form. The rule shape wears the compile
+target's own algebra: the $\mathsf{ForallSpec}$ components conjoin
+invertibly --- floors merge by pointwise maximum, one slot --- while
+the $\mathsf{ExistsSpec}$ components aggregate as a \emph{list},
+because marks do not merge (no single mark expresses two demands;
+the record holds a list exactly where the semantics refuses a
+merge); the $\mathsf{AttitudeSpec}$ components stand beside the
+faced ones and render as design scores, never as guarantees
+(section~\ref{sec:spec-lang-hurwicz}), taking no part in either the
+floor merge or the mark list. A record must carry at least one
+component --- across the three families, or a disjunction --- as an
+admission conformance fact: the empty record claims nothing, and
+the bare feasibility spec is its minimal inhabitant.
+The initial-state injection \textsc{SInit} is the honest
+name for what the earlier edition attached silently to a bare region
+at spec root: $\mathsf{SInit}(\varphi)$ reads \emph{every admitted
+initial state satisfies $\varphi$} --- the $\forall$-face reading,
+now one visible rule --- so the bare feasibility spec is spelled
+$\mathsf{Spec}(\mathsf{SInit}(\mathsf{STrue}))$, its properness mark
+carried by the judgment exactly as before
+(\texttt{elabSpec\_top\_mem} unchanged). Spec-level disjunction
+(\textsc{Spec-Or}) sits at the record top
+(section~\ref{sec:spec-lang-formation}): a union of record classes,
+discharged by disjunct selection --- deliberately \emph{above} the
+record, so it never asks two records to merge into one floor slot
+and mark list; a disjunction record carries \emph{no} component rows
+of its own (the exclusivity is refuse-mode at the row stratum: its
+class is its arms'), and or-graph acyclicity is admission
+conformance. Three record-level disciplines are rule shapes
+rather than checks. There is no rule introducing an assumption without an
+interface --- ``a spec carrying an assumption must carry an
+interface'' is the absence of an $\alpha$-with-no-$I$ rule, and in
+the mechanization the assumption slot lives \emph{inside} the
+interface option, so the discipline holds by type. Assumptions are
+policed to the base stratum at formation (temporal assumptions would
+reintroduce assume--guarantee circularity, so they are fenced at the
+grammar). And closed versus open is an absence distinction: a spec
+with no interface row is closed, and the closed satisfaction
+judgment is the empty-interface instance of the one satisfaction
+kind (entry \textsc{QSat}) --- there is no second sort for
+interface-indexed satisfaction, deliberately. The slack slot's
+$\mathcal{K}_\infty$-class membership obligations (zero at zero,
+monotone, unbounded) are discharged where the slack is
+\emph{consumed} --- by the composition rules of
+chapter~\ref{ch:qtsl-manual} --- never stored as facts. There is
+also deliberately \emph{no model binding} on a spec: pairing a spec
+with its system is the satisfaction judgment's job, and a spec that
+named its model would be the sidecar disease in miniature.
+
+At the row stratum the record reads the same way, at the row
+schema's grain. A specification is an \emph{entity}; its face
+components attach as relation rows, one family per cap sort ---
+\texttt{spec\_forall}, \texttt{spec\_exists}, \texttt{spec\_score}
+--- zero or more rows each, read per the algebra above, with
+component presence, pairwise width agreement (arity arithmetic), and
+the disjunction row's exclusivity all admission conformance rather
+than rows. The earlier edition's single root \emph{attribute} is
+retired with the re-sort: a bare-region root was the \textsc{SInit}
+conflation, and a mixed-face conjunction root is what the
+component families now spell explicitly. The interface and the slack
+(a declared candidate gain function --- a polynomial, in the row
+schema) attach as zero-or-one relation rows; assumptions attach as
+\emph{zero-or-more} relation rows, read conjunctively --- several
+assumption rows constrain jointly, and each row is policed to the
+base stratum by a load-time refusal: a provably nonbase assumption
+is a malformed record, not a false one. The
+assumption-implies-interface discipline itself is carried by the
+formation calculus and the mechanization's option type; the row
+schema leaves it to them.
+
+\emph{Compile.} The record-level compile is
+\texttt{elabSpec}: \emph{interface resolution, then structural
+recursion}. Resolution fixes the record's positional geometry ---
+the interface's arities for an open spec, pairwise width agreement
+for a closed one --- and is total on conformant records
+(\texttt{resolveArity\_isOk\_iff}), refusing otherwise \emph{before
+any recursion} with the failure's geometry attached: the offending
+atom, its found width, the expected arity
+(\texttt{resolveArity\_error\_names\_offender}). Decoded records
+re-validate with the same checks --- decoded data is data. The
+recursion is then one clause per formation rule, and the compile
+factors through resolution (\texttt{elabSpec\_isOk\_iff}); its
+class-level adequacy is the fold of the per-former cells over the
+formation derivation (\texttt{elabSpec\_ok\_modelClass}), with the
+properness mark carried unconditionally
+(\texttt{elabSpec\_top\_mem}). One deferral, fail-closed and named:
+the compile reads the \emph{guarantee} only. An assumption is
+carried as data --- its conditional-satisfaction semantics (entry
+\textsc{QSat}, the interface-indexed reading) is deferred, never
+silently read as an unconditional strengthening, and any consumer
+that would need it refuses until the relativized compile lands.
+
+\emph{Witness}: every certificate in the corpus pairs a system with a
+record of this shape; the interface-indexed form is exercised by the
+liveness vector quoted below (two output wires, one input wire, a
+$\Theta_0$ assumption).
+
+\ruleblock{API}
+The record-top disjunction (\textsc{Spec-Or}) remains a logged
+deferred former on the producer side; everything else below is the
+revised all-relations surface.
+\input{chapters/spec-api/SpecRecord}
+
+\section{State-Row Formers}
+\label{sec:spec-lang-statef}
+
+This wing is the grid's State row, whole
+(section~\ref{sec:spec-lang-formation}): both cells and both arrows
+between them. State observables ($\mathsf{StateObservable}$) carry
+the row's quantitative material --- one observable, whatever its
+provenance --- and state predicates ($\mathsf{StatePred}$) denote
+\emph{regions} --- sets of states from which the claim holds ---
+compiling to spec atoms whose safety face is the region's wall, with
+the properness mark on every atom; thresholding (\textsc{SAtom})
+passes from observables to predicates, and indicator embedding
+(\textsc{oInd}) passes back. Everything here is atemporal by the
+stratification law, checkably: every former of this wing synthesizes
+$\rhd \varnothing$. Trajectories enter with the next wing, and the
+credal body only at the spec faces
+(section~\ref{sec:spec-lang-faces}). Two
+moves organize everything. The tower discipline of
+chapter~\ref{ch:qtsl-manual} is \emph{certificate-mediated}: a
+certified child region enters a parent formula as an ordinary
+$\mathsf{StatePred}$ atom through the judgment stratum, never by
+syntactic embedding (entry \textsc{SProbGE}). And the grammar is
+closed, nonstrict,
+and canonical by construction, so the checker never normalizes ---
+producers do.
+
+\subsection{STrue and SFalse: the constants}
+\label{sec:spec-lang-const}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{STrue}]
+  {\;}
+  {\mathsf{STrue}\ \mathsf{StatePred}}
+
+\inferrule*[Right=\textsc{SFalse}]
+  {\;}
+  {\mathsf{SFalse}\ \mathsf{StatePred}}
+
+\inferrule*[Right=$\Theta_0$]
+  {\;}
+  {\mathsf{STrue},\, \mathsf{SFalse}\ \Theta_0}
+\end{mathpar}
+
+\emph{Compile.} $\mathsf{STrue}$ elaborates to the one-atom
+presentation $(0, \{\top\})$ --- the free wall carrying the
+properness mark alone --- and $\mathsf{SFalse}$ to the empty
+disjunct family. Exact at the class level: the true constant's class
+is the proper systems (\texttt{SpecDnf.modelClass\_top}), the false
+constant's class is empty (\texttt{SpecDnf.modelClass\_bot}). Under
+the properness presupposition the true constant is therefore not
+vacuous: $\mathsf{Spec}(\mathsf{SInit}(\mathsf{STrue}))$ is the bare
+feasibility
+spec --- the minimal claim distinguishing a bricked system from a
+working one --- and certifying it is certifying existence.
+
+\emph{Witness}: exercised everywhere; $\mathsf{STrue}$ is the
+trivially-true base-exact Streett request under the recurrence sugar
+(entry \textsc{PDwellStreett} and the derived spellings below).
+
+\ruleblock{API}
+\input{chapters/spec-api/SConst}
+
+\subsection{oChan, oGate, oPoly, oInd: the observable injections}
+\label{sec:spec-lang-obs}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{oChan}]
+  {k \in \mathbb{N}}
+  {\mathsf{oChan}(k)\ \mathsf{StateObservable}}
+\and
+\inferrule*[Right=\textsc{oGate}]
+  {g\ \mathsf{HypernetRef}}
+  {\mathsf{oGate}(g)\ \mathsf{StateObservable}}
+\\
+\inferrule*[Right=\textsc{oPoly}]
+  {p\ \mathsf{Poly} \\ p \text{ canonical}}
+  {\mathsf{oPoly}(p)\ \mathsf{StateObservable}}
+\and
+\inferrule*[Right=\textsc{oInd}]
+  {\varphi\ \mathsf{StatePred}}
+  {\mathsf{oInd}(\varphi)\ \mathsf{StateObservable}}
+\end{mathpar}
+
+The State row's quantitative cell, and the stratum where reward
+\emph{provenance} lives --- so that everything downstream consumes
+\emph{one observable, whatever its provenance}. A \emph{channel}
+citation names a positional output wire of the paired subject's
+interface; channel-within-arity is record-level conformance at the
+pairing, where the interface is in hand, and the citation elaborates
+to the readout's gate there --- computed, never trusted. A
+\emph{gate} cites a scalar-codomain hypernet on the (possibly
+augmented) state carrier by content address --- the carve
+vocabulary's gate object itself --- with scalar-codomain-ness
+checked at admission, where the cited content is reachable; the
+demand is minted once, at the injection, and every gate-bearing
+consumer inherits it through this single locus. A \emph{polynomial}
+is the view over the paired carrier's positional variables, carrying
+the canonicality premise (coefficients nonzero and exactly rational,
+exponent tuples of uniform width, strictly ascending in the
+canonical order --- established by producer-side canonicalization
+rather than checked into existence). And \textsc{oInd} embeds a
+predicate as its characteristic observable
+($\mathbf{1}_\varphi$) --- the State row's Pred $\to$ Observable
+arrow, one of the grid's two indicator arrows (\textsc{retPath} is
+the other, one per row): probability is the expectation of an
+indicator \emph{by the diagram}, and the alias ties stay denotation
+lemmas at the mechanized stratum, never schema equations. Only the
+polynomial injection reaches the base stratum: a channel, gate, or
+indicator atom is nonbase by the refinement's own negative rows,
+which is what keeps $\Theta_0$ base-\emph{exact} rather than
+base-shaped.
+
+\emph{Witness}: every polynomial atom in the corpus enters through
+\textsc{oPoly} under the re-sort's spelling transport; the channel
+and gate injections carry the provenance the run-functional formers
+of section~\ref{sec:spec-lang-returnstratum} previously fused.
+
+\ruleblock{API}
+\input{chapters/spec-api/SObservable}
+
+\subsection{SAtomLE and SAtomGE: threshold atoms}
+\label{sec:spec-lang-atom}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SAtomLE}]
+  {c \in \mathbb{Q} \\ o\ \mathsf{StateObservable}}
+  {\mathsf{SAtomLE}(c, o)\ \mathsf{StatePred}}
+
+\inferrule*[Right=\textsc{SAtomGE}]
+  {c \in \mathbb{Q} \\ o\ \mathsf{StateObservable}}
+  {\mathsf{SAtomGE}(c, o)\ \mathsf{StatePred}}
+
+\inferrule*[Right=$\Theta_0$]
+  {c \in \mathbb{Q} \\ p\ \mathsf{Poly}}
+  {\mathsf{SAtomLE}(c,\mathsf{oPoly}(p)),\,
+   \mathsf{SAtomGE}(c,\mathsf{oPoly}(p))\ \Theta_0}
+\end{mathpar}
+
+The thresholding arrow of the grid: an atom bounds an
+\emph{observable} against an exact rational, and the observable's
+provenance is the previous entry's business, not the atom's. Over
+the polynomial injection this is the closed polynomial halfspace ---
+the kernel's native object, with no obligation standing between the
+atom and the exact arithmetic that checks it, and the only form the
+base stratum admits ($\Theta_0$ reads the \textsc{oPoly} image
+alone). Over a channel or gate injection the same atom thresholds
+the cited observable, its wall read at the pairing through the
+computed elaboration. The surface
+grammar is nonstrict \emph{by construction}: strict atoms are
+compiler-internal artifacts of negation normal form and are
+unrepresentable here --- the schema's testable negative; the
+negation of a closed atom is the strict open one, a
+normal-form-internal literal consumable at either parity
+(\texttt{den\_compl\_le}). Boolean wires need no dedicated former:
+``wire $b$ is set'' is spelled $b \ge 1$ on a $\{0,1\}$-valued wire
+(the derived spelling below cites the circuit suite, whose atoms
+compile to exactly this form).
+
+\emph{Compile.} The wall of the closed sublevel set, with the
+properness mark:
+$\mathsf{SAtomLE}(c,\mathsf{oPoly}(p)) \mapsto
+(\mathrm{wall}\{x : p(x) \le c\}, \{\top\})$, and symmetrically ---
+channel and gate atoms compile the same wall species over the
+observable the pairing resolves. Exact: satisfaction of the compiled
+atom is containment of the permitted region in the halfspace
+\emph{and} properness (\texttt{safetyAtom},
+\texttt{coupledSat\_safetyAtom\_iff},
+\texttt{safetyAtom\_modelClass}), and nothing expressible is lost by
+compiling regions to threshold walls --- rational threshold rows
+generate the flat universe (\texttt{iSup\_boxRows\_eq\_self}), the
+generation theorem grounding the region view of
+section~\ref{sec:spec-lang-target}.
+
+\emph{Witness}: every certificate in the corpus.
+
+\ruleblock{API}
+\input{chapters/spec-api/SAtom}
+
+\subsection{SAnd and SOr: Boolean structure}
+\label{sec:spec-lang-andor}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SAnd}]
+  {\varphi_i\ \mathsf{StatePred} \quad (i < n)}
+  {\mathsf{SAnd}(\varphi_0, \ldots, \varphi_{n-1})\ \mathsf{StatePred}}
+
+\inferrule*[Right=\textsc{SOr}]
+  {\varphi_i\ \mathsf{StatePred} \quad (i < n)}
+  {\mathsf{SOr}(\varphi_0, \ldots, \varphi_{n-1})\ \mathsf{StatePred}}
+
+\inferrule*[Right=$\Theta_0$]
+  {\varphi_i\ \Theta_0 \quad (i < n)}
+  {\mathsf{SAnd}(\vec\varphi),\, \mathsf{SOr}(\vec\varphi)\ \Theta_0}
+\end{mathpar}
+
+$n$-ary as built; binary presentations are sugar, folding through
+associativity of the exact cells.
+
+\emph{Compile.} Conjunction is the \emph{atom merge},
+disjunct-family-wise: safety floors join by pointwise maximum, mark
+families union --- and the merge is exact, its class the
+intersection of the classes (\texttt{SpecAtom.modelClass\_merge},
+\texttt{SpecDnf.modelClass\_conj}; the safety face is the
+conjunction-is-max universal property, the order-theoretic kin of
+\texttt{sat\_sup\_iff}). Disjunction is the disjunct union outright,
+and its class is the plain union
+(\texttt{SpecDnf.modelClass\_disj}). Every merge carries the
+properness mark by construction. One design fact deserves its theorem here,
+because it is why the compile's semantics is \emph{class} semantics:
+disjunction of presentations is deliberately \emph{not} the
+pointwise-minimum coproduct of beliefs. A proper system can hold
+its permitted region inside the union of two regions while belonging
+to neither disjunct's class --- models of a disjunction may
+\emph{hedge}, and the presentation semantics excludes hedging; the
+gap is machine-checked (\texttt{exists\_hedging\_gap}), and the
+region reading collapses to safe-and-proper against the denoted
+region exactly on the disjunction-free fragment
+(\texttt{elabNnf\_modelClass\_disjFree}).
+
+\emph{Witness}: exercised everywhere; the full-grammar tour vector
+drives both constructors directly.
+
+\ruleblock{API}
+\input{chapters/spec-api/SAndOr}
+
+\subsection{SNot: negation under the closure discipline}
+\label{sec:spec-lang-not}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SNot}]
+  {\varphi\ \mathsf{StatePred}}
+  {\mathsf{SNot}\,\varphi\ \mathsf{StatePred}}
+\end{mathpar}
+
+Negation forms freely --- and concludes nothing else: no rule puts a
+negation in the base stratum, and no compile clause consumes the
+residues that negation normal form cannot resolve.
+
+\emph{Compile.} By negation normal form. Negation is pushed to the
+leaves (De~Morgan, double elimination), where a negated closed atom
+becomes its strict open literal; normal forms have no negation node
+\emph{by type}, so the compile's domain is a grammar in which
+unconsumable residues are unrepresentable, and what survives is
+compiled exactly --- the resolution preserves the region semantics
+on the nose (\texttt{den\_nnf}). The residues that do not survive
+--- a negated path atom at even parity (the strict complement of an
+accumulated-cost event), negated Streett acceptance (Rabin), negated
+bounded until, negated unbounded always --- are absences of rules
+carrying the no-expressible-complement warrant of
+section~\ref{sec:spec-lang-formation}: under the properness
+presupposition the class algebra has no complements to compile to.
+The producer-side typing preflight refuses each residue with a path
+address into the formula tree, and the unbounded-always refusal
+carries its remedy in the message: spell the intent as a
+producer-chosen deadline (\textsc{PDeadline} with the
+\texttt{producerT} flag).
+
+\emph{Witness}: the negation-duality suite and the rewrite layer's
+normal forms; the preflight's refusal geometry is test-pinned in
+both producer languages.
+
+\ruleblock{API}
+\input{chapters/spec-api/SNot}
+
+\section{Path-Row Formers}
+\label{sec:spec-lang-pathf}
+
+This wing is the grid's Path row, whole
+(section~\ref{sec:spec-lang-formation}): the temporal liftings that
+form trajectory events, the run-functional stratum that accumulates
+State-row observables along runs ($\mathsf{PathObservable}$, entered
+after the liftings), and the row's own thresholding arrow
+(\textsc{PAtom}) passing back from run-functionals to events.
+Path predicates ($\mathsf{PathPred}$) denote sets of trajectories ---
+\emph{events}, and an event carries no face of its own: it enters a
+specification only through a cap former (the probability thresholds,
+or indicator accumulation via \textsc{retPath} into the prevision
+square), and the face --- floor or mark --- is declared by the
+consumer (section~\ref{sec:spec-lang-faces}). One event, either
+face, and the sort says which is meant,
+every time. Their
+compile target is the \emph{record} stratum of the semantic universe:
+at the finitary site, a path former reads the set of \emph{occupied
+stages} of a record --- and the site offers two readers of that set,
+the stage graph (the \emph{touch} species) and the support of the
+occupation measure (the \emph{dwell} species), with the record
+coupling condition saying exactly that the dwell reader is contained
+in the touch reader (\texttt{recordCon\_iff\_stages}). That one fact
+organizes the event formers' semantics. Each former's transport between the
+species is read off its \emph{variance} in the occupied-stage set:
+invariance formers are antitone (a touch-certified claim transports
+to the dwell claim), reach formers are monotone (the transport
+flips), and the mixed formers --- until, Streett --- transport in
+\emph{neither} direction, witnessed by explicit coupled separations
+(\texttt{exists\_untilOn\_species\_incomparable},
+\texttt{exists\_streettOn\_species\_incomparable}), so the absence
+of those transports is content, not omission. Polarity dictates the
+judgment face: invariance classes enter on the safety floor (the
+wall, and the landed record walls are the invariance compile's
+floors --- \texttt{touchWall\_eq\_wallOn},
+\texttt{dwellWall\_eq\_wallOn}); reach classes enter on the liveness
+marks (\texttt{markOn}, the mark twin of the wall), and the
+properness demand is the everything-goal instance of the localized
+liveness mark (\texttt{markOn\_univ}): every ``eventually'' claim
+generalizes the bare existence claim by localizing its goal. The
+general record atom carries one safety class and one liveness class,
+and its satisfaction is \emph{safe and proper-into-the-goal}
+(\texttt{coupledSat\_pathAtom\_iff}). At deterministic records ---
+the canonical lift of a stage graph --- the two species coincide
+(\texttt{stages\_uniformLift}) and the compile agrees with the
+trajectory clauses stated at each entry on the nose; the stochastic
+tier keeps only the directed transports. Windows at this stratum are
+natural numbers, for the same reason as the summed-return horizon:
+the finitary record site is tick-indexed and unitless; the
+duration-typed rational readings of the rules below keep their force
+at clocked continuum strata (validated-enclosure consumption), and the
+encoding question is the same one, unchanged.
+
+\subsection{PAlways: invariance}
+\label{sec:spec-lang-always}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PAlways}]
+  {\varphi\ \mathsf{StatePred}}
+  {\mathsf{PAlways}\,\varphi\ \mathsf{PathPred}}
+\end{mathpar}
+
+$\mathsf{G}\,\varphi$: the state formula holds at every time; no
+carrier requirement of its own.
+
+\emph{Compile.} The dwell class over the record site --- records
+whose every occupied stage lies in the argument region
+(\texttt{alwaysOn}); trajectory clause
+$\{\omega : \forall t.\ \omega(t) \in
+\llbracket \varphi \rrbracket\}$ at the deterministic cells. The
+class is closed (\texttt{isClosed\_recordClass\_always}), antitone
+in the occupied-stage set (touch certifies dwell), and enters the
+judgment as a safety floor. The safety battery consumes it
+(invariance and containment rows, chapter~\ref{ch:qtsl-manual}).
+
+\emph{Witness}: every avoid and invariance certificate in the
+corpus.
+
+\ruleblock{API}
+\input{chapters/spec-api/PAlways}
+
+\subsection{PAlwaysT: bounded always}
+\label{sec:spec-lang-alwayst}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PAlwaysT}]
+  {T \in \mathbb{Q} \\ T > 0 \\ \varphi\ \mathsf{StatePred}}
+  {\mathsf{PAlwaysT}(T, \varphi)\ \mathsf{PathPred}}
+\end{mathpar}
+\[
+\mathsf{PAlwaysT}(T,\varphi) \rhd \{\mathsf{duration}\}
+\]
+
+The state formula holds at every time up to the deadline --- the
+claim shape of every validated-enclosure certificate (``the flow
+from the initial box stays in the tube over $[0,T]$''), which is why
+the former exists: this catalogue holds that the spec as stated must
+be the spec certified, and this statement deserved a spelling.
+
+\emph{Compile.} The bounded dwell class: occupied stages within the
+window lie in the region (\texttt{windowAlwaysOn}; window a natural
+number at the tick-indexed stratum, per the wing preamble). The
+class is closed (\texttt{isClosed\_recordClass\_alwaysT}), antitone
+in the
+occupied-stage set and in the window --- the window is an
+approximation source: a longer-window certificate consumes a
+shorter-window claim. Deterministic consumption is immediate
+(enclosure semantics is trajectory-wise); stochastic consumption at
+even parity awaits the over-approximating tower --- the same fence
+as the probability upper bounds
+(section~\ref{sec:spec-lang-falwaysstoch}). Its normal-form dual
+\emph{is} spellable: negated bounded always rewrites to bounded
+reach, so surface path negation over this former passes the
+preflight at both parities.
+
+\emph{Witness for the demand}: the enclosure fixture family
+(flow-tube certificates); the safety-until-deadline worked example;
+the LunarLander funnel holds.
+
+\ruleblock{API}
+\input{chapters/spec-api/PAlwaysT}
+
+\subsection{PDeadline: bounded reach}
+\label{sec:spec-lang-deadline}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PDeadline}]
+  {T \in \mathbb{Q} \\ T > 0 \\ \varphi\ \mathsf{StatePred} \\ b \in \mathbb{B}}
+  {\mathsf{PDeadline}(T, \varphi, b)\ \mathsf{PathPred}}
+\end{mathpar}
+\[
+\mathsf{PDeadline}(T,\varphi,b) \rhd \{\mathsf{duration}\}
+\]
+
+The target region is reached by the deadline. The flag
+$b$ (\texttt{producerT}) marks a producer-chosen horizon standing in
+for an unbounded reach --- a sound under-approximation, carried
+\emph{flagged} in the row so the reader of a certificate knows which
+kind of statement was made (the unbounded primitive is a deliberate
+absence; the derived spelling appears with the fences below).
+
+\emph{Compile.} The d\'ebut (hitting) record class by the deadline:
+some occupied stage within the window lies in the target
+(\texttt{windowReachOn}); trajectory clause
+$\{\omega : \exists t \le T.\ \omega(t) \in
+\llbracket \varphi \rrbracket\}$ at the deterministic cells. The
+class is open (\texttt{isOpen\_recordClass\_deadline}), monotone in
+the occupied-stage set (dwell certifies touch --- the variance
+flip), and enters the judgment on the liveness face. Obligations:
+the deadline-battery kernels (geometric-decay and
+expectation-of-hitting arguments), machine-checked per the Rule
+Catalogue's receipt columns.
+
+\emph{Witness}: reach-by-deadline certificates across the corpus; the
+certified-Gymnasium hitting waves (twenty-eight certificates of the
+quoted shape).
+
+\ruleblock{API}
+\input{chapters/spec-api/PDeadline}
+
+\subsection{PUntil: safety until a deadline}
+\label{sec:spec-lang-until}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PUntil}]
+  {T \in \mathbb{Q} \\ T > 0 \\
+   \varphi_{\mathrm{safe}}\ \mathsf{StatePred} \\
+   \varphi_{\mathrm{tgt}}\ \mathsf{StatePred}}
+  {\mathsf{PUntil}(T, \varphi_{\mathrm{safe}}, \varphi_{\mathrm{tgt}})\ \mathsf{PathPred}}
+\end{mathpar}
+\[
+\mathsf{PUntil}(T,\cdot,\cdot) \rhd \{\mathsf{duration}\}
+\]
+
+Stay safe until reaching the target, by the deadline; trajectory
+clause
+$\{\omega : \exists t \le T.\ \omega(t) \in
+\llbracket \varphi_{\mathrm{tgt}} \rrbracket
+\wedge \forall s < t.\ \omega(s) \in
+\llbracket \varphi_{\mathrm{safe}} \rrbracket\}$.
+
+\emph{Compile.} The hitting-with-dwell record class
+(\texttt{untilOn}): reach the target within the window, occupied
+stages strictly before staying safe. The mixed variance shows up
+everywhere the pure formers were simple: the class transports
+between the species in \emph{neither} direction (witnessed, per the
+wing preamble), and its citizenship is the grammar's first genuinely
+constructible-not-closed-not-open class --- a finite union of
+locally closed pieces by window decomposition
+(\texttt{recordClass\_untilF\_eq},
+\texttt{isConstructibleUnion\_recordClass\_untilF}), landing it
+squarely in the constructible stratum the compile target promises.
+The union-bound kernel that consumes it is machine-checked; negation
+of a bounded until has no sound compile target in this edition and
+is refused by the preflight with a path address.
+
+\emph{Witness}: the until-battery fixtures and the worked
+safety-until-deadline example.
+
+\ruleblock{API}
+\input{chapters/spec-api/PUntil}
+
+\subsection{PDwellStreett and PCrossStreett: acceptance, metered}
+\label{sec:spec-lang-streett}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PairBase}]
+  {\rho\ \mathsf{StatePred} \\ \rho\ \Theta_0 \\ \gamma\ \mathsf{StatePred}}
+  {\mathsf{PairBase}(\rho, \gamma)\ \mathsf{StreettPair}}
+
+\inferrule*[Right=\textsc{PairCmpl}]
+  {\rho\ \mathsf{StatePred} \\ \gamma\ \mathsf{StatePred}}
+  {\mathsf{PairCmpl}(\rho, \gamma)\ \mathsf{StreettPair}}
+\\
+\inferrule*[Right=\textsc{PDwellStreett}]
+  {\pi_i\ \mathsf{StreettPair} \quad (i < n)}
+  {\mathsf{PDwellStreett}(\pi_0, \ldots, \pi_{n-1})\ \mathsf{PathPred}}
+\\
+\inferrule*[Right=\textsc{PCrossStreett}]
+  {\pi_i\ \mathsf{StreettPair} \quad (i < n)}
+  {\mathsf{PCrossStreett}(\pi_0, \ldots, \pi_{n-1})\ \mathsf{PathPred}}
+\end{mathpar}
+
+Streett acceptance~\cite{streett1982} --- for each pair, an
+unbounded request forces an unbounded response --- as \emph{two}
+formers, because ``unbounded'' has two meterings and the record
+lens proves them incomparable: the mixed formers transport between
+the stage-graph reader and the occupation reader in neither
+direction, even on coupled points (the wing preamble's witnessed
+separations). A metering flag would leave one former whose every
+consuming rule and citizenship theorem still cased on the flag with
+the type system enforcing nothing; two formers make the meter part
+of the \emph{event's identity} --- the same move as the polarity
+redesign, one stratum down: metering as former, not annotation.
+$\mathsf{PDwellStreett}$ is occupation metering --- unbounded
+request \emph{occupation} forces unbounded response occupation
+(counting measure at tick strata, duration at clocked strata); you
+dwell on a street. $\mathsf{PCrossStreett}$ is entry-event counting
+--- unboundedly many request \emph{crossings} (fresh contact after
+absence, the countable, payable unit of touching) force unboundedly
+many response crossings; you cross a street. Enter-and-stay
+separates the species even at unit ticks --- occupation diverges
+while the entry counter stops at one --- and the two meterings at
+one pair list are distinct events, refuse-mode disjoint at the row
+stratum. Everything step-metered the catalogue already had is the
+dwell former's unit-tick instance \emph{by identity}: the liveness
+batteries, the acceptance event, and the recurrence sugar migrate
+there whole, and nothing migrates to the cross species, whose
+consuming machinery composes with the crossing-budget family at the
+behavioural tier. Where the species provably coincide ---
+deterministic records, where the two stage readers agree --- either
+former may be formed and the collapse theorem transports.
+
+The pair vocabulary is metering-independent, shared verbatim. The
+two pair constructors are the two request-consumption modes ---
+\emph{parity as constructor choice, never stored data}:
+$\mathsf{PairBase}$
+consumes the request base-exact, whence its $\Theta_0$ premise
+(whose deliberate absence from $\mathsf{PairCmpl}$ is the point);
+$\mathsf{PairCmpl}$ consumes the request through the syntactic
+complement's over-approximation, stored positive. The recurrence and
+persistence operators are definitional instances, not formers:
+$\mathsf{GF}\,\varphi$ is a single dwell pair with a trivially-true
+base-exact request, and $\mathsf{FG}\,\varphi$ is the dwell pair
+whose complement-consumed request firing unboundedly forces the
+impossible response (both appear as derived spellings below). The
+face of an acceptance claim stays at the cap that consumes the
+event --- two meterings by two faces, all four spelled
+compositionally. Negated Streett is Rabin acceptance --- the dual
+judgment, a deliberate absence under either metering.
+
+\emph{Compile.} Two tiers, kept distinct. At the behavioural
+tier the dwell acceptance event lives on the kernel path measure,
+and the quantitative certificate bundle concluding it is
+machine-checked end to end (\texttt{sound\_QStreettBundle},
+composing into the probability-threshold region at entry
+\textsc{SProbGE}); the cross event's infinitary reading is the
+entry-counter family, whose very definedness at continuum strata is
+the crossing-budget machinery's evidence. At the record
+stratum the compile is the per-pair implication over occupied
+stages (\texttt{streettOn}), each former reading its \emph{own}
+species --- the dwell former the occupation support, the cross
+former the stage graph --- as the \emph{occupation shadow} of the
+infinitary acceptance condition, stated as such: a finite record has
+no ``unboundedly often,'' and the pasting between the record tier
+and the kernel path measure is deliberately not claimed here (it is
+the finite-dimensional-distributions stratum, the same fence the
+behavioural tier names). Both record classes are constructible;
+species transport fails in both directions, witnessed --- which is
+the split's warrant, restated as compile fact.
+
+\emph{Witness}: the 219-task liveness suite (specs normalized to
+$\bigwedge_i \mathsf{GF}\,\gamma_i$ --- dwell spellings --- and
+certified against circuit models); the cross former is new with the
+theory revision, its first certificate lane the crossing-budget
+composition.
+
+\ruleblock{API}
+\input{chapters/spec-api/PDwellCrossStreett}
+
+\subsection{The Return stratum}
+\label{sec:spec-lang-returnstratum}
+
+The Observable cell of the Path row: a
+$\mathsf{PathObservable}$ (the sort the earlier edition called
+\textsf{Return}) is a \emph{run-functional} --- what a run is worth,
+packaged as data --- consumed by the expectation, level, and regret
+faces of section~\ref{sec:spec-lang-faces} and thresholded back into
+events by \textsc{PAtom} below. The cell is reached by accumulation
+from State-row material, and the
+theory spells it so: reward \emph{provenance} (channel,
+gate, polynomial view, indicator) is the injection stratum of
+section~\ref{sec:spec-lang-obs}, and \emph{accumulation} is five
+formers over one observable --- the earlier edition's
+provenance-fused constructor roster (\textsf{retChanSum} through
+\textsf{retAvg}) re-founded as injections plus accumulators, at
+unchanged denotations. Beside the accumulators stand the two
+citation formers: \textsc{retPath}, the Path row's indicator arrow,
+and \textsc{retFireCount}, the transition-count functional.
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{poSum}]
+  {n \in \mathbb{N} \\ n \ge 1 \\ o\ \mathsf{StateObservable}}
+  {\mathsf{poSum}(n, o)\ \mathsf{PathObservable}}
+\and
+\inferrule*[Right=\textsc{poInt}]
+  {T \in \mathbb{Q} \\ T > 0 \\ o\ \mathsf{StateObservable}}
+  {\mathsf{poInt}(T, o)\ \mathsf{PathObservable}}
+\\
+\inferrule*[Right=\textsc{poDisc}]
+  {\theta \in \mathbb{Q} \\ \theta > 0 \\ o\ \mathsf{StateObservable}}
+  {\mathsf{poDisc}(o, \theta)\ \mathsf{PathObservable}}
+\and
+\inferrule*[Right=\textsc{poAvg}]
+  {o\ \mathsf{StateObservable}}
+  {\mathsf{poAvg}(o)\ \mathsf{PathObservable}}
+\\
+\inferrule*[Right=\textsc{poSup}]
+  {o\ \mathsf{StateObservable}}
+  {\mathsf{poSup}(o)\ \mathsf{PathObservable}}
+\and
+\inferrule*[Right=\textsc{retPath}]
+  {\psi\ \mathsf{PathPred}}
+  {\mathsf{retPath}(\psi)\ \mathsf{PathObservable}}
+\\
+\inferrule*[Right=\textsc{retFireCount}]
+  {R\ \mathsf{TrList} \\ R \neq \mathsf{nil}}
+  {\mathsf{retFireCount}(R)\ \mathsf{PathObservable}}
+\end{mathpar}
+\[
+\mathsf{poSum} \rhd \mathsf{steps}
+\qquad
+\mathsf{poInt} \rhd \mathsf{duration}
+\]
+
+The two finite-horizon accumulators carry the integrality content
+the mechanization forced, now by \emph{shape}: a discrete sum's
+upper index is a natural number, and the tick-indexed strata that
+consume summed accumulation are unitless --- no clock exists there
+against which a rational horizon could be rounded, which also rules
+out any rounding law at those strata (a system clock would make one
+spec denote different claims per clock). Integrated accumulation
+keeps its free positive rational horizon, which keeps its meaning at
+clocked continuum strata. The encoding decision the earlier edition
+left open is settled the strong way: split constructors with a
+natural-number tick horizon, so a rational tick horizon is
+unrepresentable rather than checked --- and with the horizon split
+carried by the constructors, an integrality side condition has
+nothing left to check.
+
+The remaining accumulators carry no horizon.
+$\mathsf{poDisc}$ is infinite-horizon
+exponential discounting at rate $\theta$: weights $e^{-\theta t}$ on
+the internalized real-time base, under which tick systems embed at
+integer times with weights $e^{-\theta n}$ --- kept exact in the
+log-rational grade, the same abstract-exponential discipline that
+keeps every transcendental out of the exact stratum.
+$\mathsf{poAvg}$ is the long-run average (the Ces\`aro limit); its
+certificate species is the
+gain/bias pair --- a Poisson-equation drift row, the same
+supermartingale-shaped row grammar as everything above.
+$\mathsf{poSup}(o)$ is the pathwise running supremum of the
+observable along the run --- horizon-free, read in the extended-real
+scale, where an infinite supremum makes an upper-bound claim
+\emph{false}, never ill-formed. Its consuming shape is the maximal
+function: $\mathsf{SReturnLE}(B, \mathsf{poSup}(o))$ bounds
+$\mathbb{E}[\sup_t o(x_t)]$ over every admitted law, for which
+Doob's maximal inequality is the natural certificate engine and the
+supermartingale row kit the natural feed --- named with its species,
+its rule rows not yet claimed. Deliberately \emph{not} minted beside
+it: a sup-outside-expectation former --- $\sup_t \mathbb{E}[\cdot]$
+is a forall-$t$ family of marginal-law judgments, not a
+run-functional --- and since
+$\mathbb{E}[\sup] \ge \sup_t \mathbb{E}$ always, the
+per-instant-uniform reading arrives as a free corollary of the
+expressible, stronger form.
+$\mathsf{retPath}(\psi)$ cites a path event as its indicator
+run-functional; temporal claims compile \emph{into} this stratum
+(monitor automaton, product kernel, compiled state-reward gate,
+accumulation), following the value-functions-as-certificates
+route~\cite{abate26b}, under which the reward designs for Streett
+acceptance are state-valued indicators on the product carrier and
+the ordinary value function of a satisfying policy \emph{is},
+affinely, the certificate. The exact deadline table of
+chapter~\ref{ch:qtsl-manual} is the value function of the
+compiled deadline reward --- a reading, not a new obligation --- and
+reinforcement learning becomes a sanctioned \emph{producer} for the
+battery rows: powerful untrusted producers, small trustworthy
+checkers, as everywhere.
+
+$\mathsf{retFireCount}(R)$ is the transition-count functional: the
+total number of firings of the roster's transitions along the run
+--- no horizon, values in $[0, \infty]$, the same extended reading
+as the running supremum on its nonnegative fragment. The roster $R$
+is a positional list of transition citations of the paired subject;
+nonemptiness is formation (an empty roster would be the zero
+functional --- a constant claim in count clothing, and canonical
+form forbids re-spelling), while duplicate-freedom and roster
+membership are pairing-relative demands at the certificate stratum,
+where the subject is in hand. Counting is firing-metered per roster
+member --- deliberately \emph{not} region-entry counting (that is
+\textsc{PCrossStreett}'s device,
+section~\ref{sec:spec-lang-streett}) and deliberately not the
+instant-crossing compensator mass of the Zeno seam: different
+species, not interchangeable. The consuming shape this former
+exists for is the hard count ceiling,
+$\mathsf{SReturnLE}(B, \mathsf{retFireCount}(R))$ --- along every
+admitted law, the total count of roster firings is at most $B$
+(section~\ref{sec:spec-lang-devcount}). The $\ge$ face --- at least
+$n$ events, a genuine liveness claim consuming survival mass --- is
+deliberately absent from this functional: that is throughput
+territory, and it enters at the expectation stratum rather than
+here --- the event-rate envelope family's lower face bounds the
+expected count from below, horizon-parametrically, over the same
+rosters (section~\ref{sec:spec-lang-rate}).
+
+\ruleblock{API}
+\input{chapters/spec-api/PObservable}
+
+\subsection{PAtomLE and PAtomGE: accumulated-cost events}
+\label{sec:spec-lang-patom}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PAtomLE}]
+  {c \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{PAtomLE}(c, R)\ \mathsf{PathPred}}
+\and
+\inferrule*[Right=\textsc{PAtomGE}]
+  {c \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{PAtomGE}(c, R)\ \mathsf{PathPred}}
+\end{mathpar}
+
+The thresholding arrow at the Path row --- the grid's admitted
+square-filler, entered with the theory revision: the \emph{event}
+that the accumulated value lands on the stated side of the
+threshold, the inner clause of
+$\mathbb{P}_{\ge p}[\sum r \le B]$. This is a claim species
+distinct from any expectation bound, and the distinction is the
+grid read column-wise: $\mathsf{SReturnLE}(B, R)$ bounds the
+\emph{prevision} of $R$ --- one number per law, capped at the
+credal body --- while $\mathsf{PAtomLE}(B, R)$ names the set of
+\emph{runs} on which $R$ lands under $B$, an event like any other,
+whose face is then declared by the cap that consumes it (a
+probability threshold, or indicator accumulation via
+\textsc{retPath}). Carrier requirements are inherited, not minted:
+the synthesis reads the run-functional argument
+($\mathsf{PAtomLE}(c, R) \rhd \kappa$ exactly when $R \rhd
+\kappa$).
+
+\emph{Compile.} Owed with the former's first certificate lane ---
+formation and the traversal stratum are landed at the theory
+revision; the record-stratum compile clause and its adequacy cell
+are named obligations, and no battery consumes the event yet.
+
+\emph{Witness for the demand}: the count-ceiling and budget
+families, whose probabilistic faces are exactly
+$\mathbb{P}$-thresholds over accumulated-cost events.
+
+\ruleblock{API}
+\input{chapters/spec-api/PAtom}
+
+\subsection{PNotPath: surface path negation}
+\label{sec:spec-lang-notpath}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{PNotPath}]
+  {\psi\ \mathsf{PathPred}}
+  {\mathsf{PNotPath}\,\psi\ \mathsf{PathPred}}
+\end{mathpar}
+
+Surface-only path negation, resolved by the dualities in negation
+normal form.
+
+\emph{Compile.} By the normal-form dualities --- and the fence table
+is \emph{executable}: normal-form resolution is a total function
+into either a negation-free form or a named refusal, and each row of
+the table is a definitional equation. The one always-spellable dual
+resolves at both parities --- negated bounded always \emph{is}
+bounded reach of the complement
+(\texttt{pathNnf\_notPath\_alwaysT}), and the even parity of a
+bounded reach resolves through double negation
+(\texttt{pathNnf\_notPath\_notPath\_deadline}) --- while the three
+residues refuse with their addresses: negated unbounded always,
+negated until, negated Streett (\texttt{pathNnf\_notPath\_always},
+\texttt{pathNnf\_notPath\_untilF},
+\texttt{pathNnf\_notPath\_streett}). The path-atom formers of the
+theory revision extend the refusal roster at the producer surface: a
+negated path atom at even parity is the strict complement of an
+accumulated-cost event --- a normal-form artifact with no surface
+spelling --- refused with the same path-address geometry, as a
+documented extension of the pinned oracle. One note on the warrants,
+because they differ by stratum: at the record-class level
+the complement of an invariance class \emph{does} exist
+(\texttt{not\_alwaysOn\_iff} --- some occupied stage escapes), so
+the refusal of negated unbounded always is grammar economy --- there
+is no unbounded-reach former to spell the dual, itself a deliberate
+absence --- whereas at the spec-class stratum one level up, where
+the judgment kinds live, the refusals carry the
+no-expressible-complement theorem of
+section~\ref{sec:spec-lang-formation}.
+
+\emph{Witness}: the negation-duality suite; the full-grammar tour
+vector's $\mathsf{PNotPath}(\mathsf{G}_{\le 3}\,\varphi)$ passes the
+preflight at both parities.
+
+\ruleblock{API}
+\input{chapters/spec-api/PNotPath}
+
+\section{Spec-Face Formers}
+\label{sec:spec-lang-faces}
+
+The wing above the grid. Every former here consumes run-valued
+material --- an event, a run-functional, or (for the rate
+envelopes) a transition roster read as a horizon-parametric
+counting process --- reads it against the
+credal body, and concludes into a polarity cap sort, so this wing is
+where a claim first acquires a \emph{face}: the stratification law
+of section~\ref{sec:spec-lang-formation} puts all quantification
+over admitted laws here and nowhere else. Formers concluding
+$\mathsf{ForallSpec}$ are the safety faces --- the bound holds over
+\emph{every} admitted law, compiling to the floor --- and the
+$\mathsf{MayBe}$ and $\mathsf{Mark}$ formers conclude
+$\mathsf{ExistsSpec}$, the possibility faces: \emph{some} admitted
+law (or, for regret, some filler) attains, compiling to a mark. The
+roster is polarity-total --- probability, expectation, and level
+each present both faces, and the regret pair is the same duality
+with the quantifier moved to the filler seat. Two cap formers live
+with their consumers instead of here: the initial-state injection
+\textsc{SInit}, stated with the record it feeds
+(section~\ref{sec:spec-lang-record}), and the attitude pair, which
+mixes envelopes rather than declaring a face and closes the
+judgment-kind inventory (section~\ref{sec:spec-lang-hurwicz}).
+
+\subsection{SProbGE, SProbLE, and the probability marks}
+\label{sec:spec-lang-prob}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SProbGE}]
+  {p \in \mathbb{Q} \\ 0 < p \le 1 \\ \psi\ \mathsf{PathPred}}
+  {\mathsf{SProbGE}(p, \psi)\ \mathsf{ForallSpec}}
+\and
+\inferrule*[Right=\textsc{SProbLE}]
+  {q \in \mathbb{Q} \\ 0 \le q < 1 \\ \psi\ \mathsf{PathPred}}
+  {\mathsf{SProbLE}(q, \psi)\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{SProbMayBeGE}]
+  {p \in \mathbb{Q} \\ 0 < p \le 1 \\ \psi\ \mathsf{PathPred}}
+  {\mathsf{SProbMayBeGE}(p, \psi)\ \mathsf{ExistsSpec}}
+\\
+\inferrule*[Right=\textsc{SProbMayBeLE}]
+  {q \in \mathbb{Q} \\ 0 \le q < 1 \\ \psi\ \mathsf{PathPred}}
+  {\mathsf{SProbMayBeLE}(q, \psi)\ \mathsf{ExistsSpec}}
+\end{mathpar}
+
+One species, four faces. $\mathsf{SProbGE}(p, \psi)$ --- historically
+this stack's only probability former, under the name $\mathsf{SProb}$
+--- asserts that the path event holds with
+probability at least $p$, read as \emph{lower} probability against
+the credal view, over every admitted law --- whence its
+$\mathsf{ForallSpec}$ sort; the initial-state datum enters the
+satisfaction judgment in hypothesis position, not the formula ---
+so one convention serves stochastic kernels, demonic
+branching, and worst-case initial conditions without a case split.
+$\mathsf{SProbLE}(q, \psi)$ is the second orientation \emph{within}
+the species, not a mirror species: the \emph{upper} probability of
+the same compiled event is at most $q$. It is a closed constraint
+whose wall is a citizen of the semantic universe like any other, and
+emphatically \emph{not} the negation of the GE face --- that is the
+strict $\mathsf{P}_{< p}$, which rightly remains a compiler artifact
+(the fences below keep that absence). The $\mathsf{MayBe}$ pair
+carries the \emph{possibility marks}: some admitted law attains the
+stated side of the threshold --- the credal-existential face of the
+atom, a liveness demand entering on the marks rather than the floor.
+
+What the earlier edition advertised as nesting is stated, under the
+grid, at its true stratum: the tower discipline is
+\emph{certificate-mediated}. A child claim is discharged as its own
+satisfaction judgment, and its \emph{certified region} enters the
+parent formula as an ordinary $\mathsf{StatePred}$ atom --- geometry
+with a certificate behind it, not a formula inside a formula.
+Syntactic nesting of cap formers (a probability atom inside another's
+path argument) is not formable --- Path-row formers take
+$\mathsf{StatePred}$ arguments --- and the certified corpus never
+spelled such a term: its one advertised nesting use, the
+reach-then-hold funnel, already routes the child claim through the
+judgment stratum (section~\ref{sec:spec-lang-dfunnel} quotes it).
+The grammar now matches what the tower always did.
+
+The family is a family of \emph{aliases}: an event probability is
+the expectation of an indicator gamble, so orientation for
+orientation
+\[
+\mathsf{SProbGE}(p, \psi) \;=\;
+\mathsf{SReturnGE}(p,\, \mathsf{retPath}\ \psi),
+\]
+and likewise for the LE face and both marks
+(section~\ref{sec:spec-lang-return}). The alias ties are
+definitional-grade denotation lemmas at the mechanized stratum,
+never schema equations: the surface constructors remain distinct
+hash-consed syntax, and the elaboration is computed where consumed.
+
+The interval premises are \emph{canonicity rules, not semantic
+fences} --- four instances of one rule: the vacuous end of either
+orientation re-spells a structural part of the atom, and canonical
+form forbids re-spelling. At $p = 0$ the GE floor (and at $q = 1$
+the LE floor) would compile to the unit atom, which is exactly
+$\mathsf{STrue}$'s compile (\texttt{SpecDnf.modelClass\_top}); at
+$p = 0$ the $\mathsf{MayBeGE}$ mark reads ``some admitted law with
+$\mu(\psi) \ge 0$'' --- the structural properness mark itself
+(\texttt{SpecAtom.top\_mem}), as does the $\mathsf{MayBeLE}$ mark at
+$q = 1$. Bottom-refutes was never carried by threshold positivity:
+the credal-lower reading is vacuous at the zero lift for every
+constraint (\texttt{satCredal\_lower\_singletonC\_zero}), and it is
+the properness presupposition that excludes the bricked system.
+
+\emph{Compile.} The GE face: the region of states from which the
+credal-lower probability of the compiled path event clears the
+threshold --- mechanized for the kernel path measure as
+\texttt{probThresholdSet}, entering the judgment as that region's
+safety atom. Adequacy is \emph{directed}: region inclusion
+transports to class inclusion
+(\texttt{safetyAtom\_modelClass\_mono}, the wing's directed-cell
+template; \texttt{sprobAtom\_modelClass\_mono}), and each consuming
+battery discharges the sound direction --- the Ville~\cite{ville1939}
+and optional-stopping arguments behind the safety, deadline, until,
+and Streett batteries of chapter~\ref{ch:qtsl-manual}, per that
+catalogue's receipt columns. One end-to-end specimen is
+machine-checked at the behavioural tier: a quantitative Streett
+certificate bundle concludes membership in the probability-threshold
+region of the acceptance event
+(\texttt{sprob\_sound\_of\_streettBundle}). No completeness is
+claimed anywhere in this family: a certificate can be arbitrarily
+loose. The LE face enters as the same wall species at the opposite
+orientation --- the checker-anchor restriction theorem already lists
+\emph{both} threshold orientations as closed half-spaces of laws, and
+the negation-fence remark names the orientation pair the sound
+residue of the failed duality. The marks enter on the atom's mark list --- the
+mechanized \texttt{Dip}: a strict undercut somewhere admitted.
+Formation is open on all four faces; \emph{consumption} of the LE
+face at interior $q$ keeps its over-approximating-tower fence
+(section~\ref{sec:spec-lang-fpupper}), while $q = 0$ discharges on
+the exact lane today: an exact backward-induction table is
+simultaneously an under- and over-approximation, so the
+possibilistic prohibition $\overline{P}[\psi] = 0$ --- the semantic
+universe's own behavioural-prohibition face --- is certified by the
+same table read in the super-solution direction. Two compatibility
+facts anchor the credal reading at the precise end: at the
+singleton lift of a nonzero law, the lower reading of an event atom
+is that law's own event probability
+(\texttt{satCredal\_lower\_singletonC\_geC}); and the zero-lift
+vacuity above.
+
+\emph{Witness}: the supermartingale corpus end to end; the
+reach-by-deadline vector quoted below is the certified-Gymnasium
+hitting shape ($\mathbb{P}[\mathrm{goal\ by\ }20] \ge 3/4$); the
+exact-zero avoidance claims of the deterministic corpus spell
+natively on the LE face.
+
+\ruleblock{API}
+\input{chapters/spec-api/SProbGE-LE}
+
+\subsection{SReturnGE, SReturnLE, and the possibility marks}
+\label{sec:spec-lang-return}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SReturnGE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SReturnGE}(B, R)\ \mathsf{ForallSpec}}
+\and
+\inferrule*[Right=\textsc{SReturnLE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SReturnLE}(B, R)\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{SReturnMayBeGE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SReturnMayBeGE}(B, R)\ \mathsf{ExistsSpec}}
+\\
+\inferrule*[Right=\textsc{SReturnMayBeLE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SReturnMayBeLE}(B, R)\ \mathsf{ExistsSpec}}
+\end{mathpar}
+
+The \emph{soft} former: the prevision square at a run-functional. The floors
+read the paired System's credal body at the gamble $R$ ---
+credal-lower expectation at least $B$ (\textsc{GE}), credal-upper
+expectation at most $B$ (\textsc{LE}) --- and the marks are the
+credal-existential faces: some admitted law attains the stated side.
+Nothing on the spec side carries a set of models: under the
+one-universe reading the System's own denotation \emph{is} the
+weighted set, and the spec carries only the pair $(R, B)$. This is
+where minimax weighted expected regret lands without new vocabulary:
+a weighted set of probability measures~\cite{halpern13} is, member
+for member, a set of sub-probability laws ($\alpha\Pr$ for weight
+$\alpha$), i.e.\ a credal body in this universe's own imprecise
+atlas; the sup-normalization convention (some member carries weight
+one) is the properness presupposition; and the weighted expected
+regret of a nonnegative run-functional is the body's upper
+prevision. ``WER
+within $[B_1, B_2]$'' is therefore the two-component record
+$\mathsf{Spec}(\mathsf{SReturnLE}(B_2, R);\
+\mathsf{SReturnMayBeGE}(B_1, R))$
+--- one floor, one mark, the same denotation the earlier edition
+spelled as a state-level conjunction, with the face of each
+component now visible in its sort; no interval sort exists:
+ranges are orientation pairs here as everywhere in this catalogue.
+Bounds are unconstrained rationals --- returns are not
+probabilities, and the vacuous-end canonicity rule is a
+probability-face fact.
+
+\emph{Compile.} Credal-lower/upper expectation rows over the
+declared reward, lifted at the measurable stratum; the
+finite-horizon summed channel form is mechanized as
+\texttt{returnGESet} (natural-number horizon, as the split now
+forces by shape), entering the judgment as that region's safety
+atom, with region monotonicity in reward, horizon, and bound as the
+directed cells (\texttt{returnGESet\_mono\_reward},
+\texttt{returnGEAtom\_modelClass\_mono\_reward}). Adequacy is
+\emph{directed}, certificate to claim, and the two square families
+carrying it are machine-checked at the abstract behavioural tier: a
+geometrically decaying Lyapunov certificate --- drift factor $\beta$
+off the target, barrier $a$ --- yields the expected indicator-return
+bound $1 - \beta^{n}\,(\int L_0)/a$ at horizon $n{+}1$
+(\texttt{returnGE\_sound\_of\_deadline}); and a geometric-drift
+certificate bounds the discounted expected return from above,
+uniformly in the horizon, under the spectral condition
+$\gamma\beta < 1$ (\texttt{discountedReturn\_le\_of\_drift}, with
+\texttt{integral\_le\_pow\_mul} the iterated-drift engine). Both
+squares are proved on an abstract filtered probability space,
+where the certificate's conditional-drift data lives; the
+specialization to the kernel path measure is a separate, named
+stratum --- an obligation this edition names rather than claims ---
+and the transfer from the deadline kernel to the discounted return
+forms climbs the same ladder. The marks enter on the atom's mark
+list (\texttt{Dip}), exactly as the probability marks do; the
+long-run-average battery (gain/bias) is design vocabulary of this
+edition, named with its species and not yet claimed. This family is
+the catalogue's highest-priority former because of what
+it retired: until it existed, expected-return certificates carried
+their claims in header sidecars.
+
+\emph{Witness for the demand}: twenty-five tabular expected-return
+certificates ($\mathbb{E}_\pi[\sum r] \ge B$ --- CliffWalking $-13$
+exactly; Taxi $793/100$; Blackjack
+$-3954908734551683826282634489/13^{26}$, the corpus's own bignum,
+quoted below); the pendulum swing-up worst-case return row ($\ge
+-619.99$ from every default-reset initial state); the Atari circuit
+rows (min-over-lanes return, exact); the LunarLander statistical rows
+(via \textsc{QSatConf} below).
+
+\ruleblock{API}
+\input{chapters/spec-api/SReturnGE-LE}
+
+\subsection{SLevelGE, SLevelLE, and the level marks}
+\label{sec:spec-lang-level}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SLevelGE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable} \\
+   \mathit{thr} \in \mathbb{Q}_{\ge 0} \cup \{\infty\}}
+  {\mathsf{SLevelGE}(B, R, \mathit{thr})\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{SLevelLE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable} \\
+   \mathit{thr} \in \mathbb{Q}_{\ge 0} \cup \{\infty\}}
+  {\mathsf{SLevelLE}(B, R, \mathit{thr})\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{SLevelMayBeGE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable} \\
+   \mathit{thr} \in \mathbb{Q}_{\ge 0} \cup \{\infty\}}
+  {\mathsf{SLevelMayBeGE}(B, R, \mathit{thr})\ \mathsf{ExistsSpec}}
+\\
+\inferrule*[Right=\textsc{SLevelMayBeLE}]
+  {B \in \mathbb{Q} \\ R\ \mathsf{PathObservable} \\
+   \mathit{thr} \in \mathbb{Q}_{\ge 0} \cup \{\infty\}}
+  {\mathsf{SLevelMayBeLE}(B, R, \mathit{thr})\ \mathsf{ExistsSpec}}
+\end{mathpar}
+
+The \emph{hard} former: for every full-mass law whose level of
+inconsistency is finite and at most $\mathit{thr}$, the expected value of $R$ lies on
+the stated side of $B$. The threshold lives in the extended
+nonnegative rationals --- syntactically a two-constructor sum
+(finite bound; infinity), so every consumer's finite/instant case
+split is carried by shape --- and the finiteness clause is one
+uniform formula, not a case split: redundant at finite thresholds,
+it does all the work at $\mathit{thr} = \infty$, where the
+quantifier ranges over the \emph{support}, every behaviour not
+fully refused. That instance is the behavioural-prohibition face of
+the satisfaction judgment itself: take $R$ the indicator of the bad
+event via $\mathsf{retPath}$, $\mathit{thr} = \infty$, $B = 0$ on
+the LE side, and the probe says the upper probability of the bad
+event is zero. At $\mathit{thr} = 0$ the quantifier reads the
+zero-inconsistency core. Every rung of the ladder is a lawful probe; no
+positivity premise exists beyond the threshold's own nonnegativity.
+
+The $\mathsf{MayBe}$ pair completes the family's polarity: \emph{some}
+full-mass admitted law within the level threshold attains the
+stated side of $B$ --- the level stratum's possibility marks, new
+with this edition, read exactly as the probability and expectation
+marks (at $\mathit{thr} = \infty$ the mark asserts attainment by some
+behaviour-law in the support). With them the mark roster of
+section~\ref{sec:spec-lang-formation} is polarity-total: every
+threshold family presents both faces.
+
+Soft and hard are not rivals but the two dualities the semantic
+universe already stratifies. The soft former's single-shot linear
+tests are a complete instrument, by Fenchel--Moreau duality, exactly
+on the convex composition core; level probes recover the whole
+quasiconvex blanket, by Penot--Volle level-set duality --- and the
+gap has a witness: a quantile (value-at-risk) specification has
+every sublevel a half-space, hence is hard-expressible
+tolerance-by-tolerance, and is not convex, hence invisible to the
+soft former alone. The hinge between them has a machine-checked
+ancestor over the retired calculus-tier carrier: there, the
+finite-tilt family converges in order to the wall at the infinite
+endpoint (\texttt{livenessTilt\_top} in the archived
+\texttt{su-functor-legacy} tree, with epi-convergence), which is
+this pair of formers stated at the threshold stratum; its
+restatement over the live semantic universe is owed alongside the
+level compile itself. The hard former's completeness, by contrast,
+is a theorem the live universe already holds: a single instance
+denotes a rational-height gamble row, and finite conjunctions of
+exactly these, closed under directed suprema, generate every
+citizen of the universe
+(\texttt{General.iSup\_gambleRows\_eq\_self}) --- the level probe is
+the universe's own generation species wearing surface syntax, its
+certificate discharge the polynomial-nonnegativity species this
+book's rule catalogue already discharges elsewhere, re-aimed.
+
+\ruleblock{API}
+The mechanized compile remains owed with the tilt-hinge restatement
+above; the producer surface below is landed, all four faces.
+\input{chapters/spec-api/SLevelGE-LE}
+
+\subsection{SRateLE and SRateGE: event-rate envelopes}
+\label{sec:spec-lang-rate}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SRateLE}]
+  {\rho \in \mathbb{Q}_{\ge 0} \\ \sigma \in \mathbb{Q}_{\ge 0} \\
+   R\ \mathsf{TrList} \\ R \neq \mathsf{nil}}
+  {\mathsf{SRateLE}(\rho, \sigma, R)\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{SRateGE}]
+  {\rho \in \mathbb{Q}_{\ge 0} \\ \sigma \in \mathbb{Q}_{\ge 0} \\
+   R\ \mathsf{TrList} \\ R \neq \mathsf{nil}}
+  {\mathsf{SRateGE}(\rho, \sigma, R)\ \mathsf{ForallSpec}}
+\end{mathpar}
+
+The from-init affine count envelope --- the rate axis's first
+expectation-class citizens. Write $N^R_t$ for the number of firings
+of the roster's transitions on $[0, t]$: the same firing-metered
+counting the transition-count functional reads
+(section~\ref{sec:spec-lang-returnstratum}), here horizon-parametric
+rather than whole-run, and consumed directly --- the envelope is a
+family of bounds indexed by the horizon, not a single
+run-functional, which is why these formers take the roster itself.
+$\mathsf{SRateLE}$ claims that along every admitted law the expected
+count respects the envelope at every horizon --- credal-upper
+expectation of $N^R_t$ at most $\rho t + \sigma$ for all $t \ge 0$
+--- and $\mathsf{SRateGE}$, the throughput face, that the
+credal-lower expectation dominates $\rho t - \sigma$. Both faces are
+floors at the $\mathsf{ForallSpec}$ cap: each bounds the whole
+credal body, and the claim direction selects the envelope --- an
+upper count bound reads the upper prevision (the most events any
+compatible resolution produces), a lower bound the lower (the
+fewest). Both are certification pessimism, and rate atoms carry no
+attitude knob: the direction is the whole story. The possibility
+faces are deliberately absent, a recorded choice rather than an
+oversight: a mark-face rate envelope --- \emph{some} admitted law's
+expected counts obey the envelope --- has no certificate row family
+and no consumer, and the mark roster's polarity-totality is a fact
+about the threshold families, which the envelope pair is not one
+of; a later widening stays additive.
+
+The affine-from-init shape is the primitive on purpose. A bare
+long-run limit ($\limsup_t N_t/t \le \rho$) carries zero
+finite-window content --- a consumer sized against it can be
+overwhelmed on any finite horizon --- so the limit reading is a
+corollary of the envelope
+($\overline{E}[N_t]/t \le \rho + \sigma/t$), never the interface
+object. And interval content is carried by \emph{pairs}: a
+two-sided pair at matched rate --- upper $(\rho, \sigma_u)$, lower
+$(\rho, \sigma_l)$ --- yields the interval envelope
+$N_{(s,t]} \le \rho(t - s) + \sigma_u + \sigma_l$ by pathwise
+subtraction, no ergodic machinery, which is why the primitive can
+stay from-init without losing burstiness control: a one-sided
+envelope says nothing about increments; a pair does. The remaining
+free laws are of the same grain: weakening an envelope weakens its
+claim (the upper face is monotone in both parameters; the lower
+face trades them the other way), and disjoint rosters sum ---
+upper envelopes over disjoint rosters conjoin to an upper envelope
+at the summed parameters on the merged roster, pathwise count
+additivity plus subadditivity of the upper prevision --- while the
+converse split is refused: a summed bound cannot be divided
+between rosters without a per-roster certificate, since all the
+mass may ride one of them.
+
+Refusals, each with its reason. No limsup or ergodic primitive
+(the zero-finite-window-content argument above --- and a fortiori
+no almost-sure empirical-rate convergence, a law of large numbers
+needing recurrence structure the vocabulary deliberately does not
+assume). Nothing sharper than the pair-derived interval form:
+equilibrium-rate claims and interval budgets below
+$\sigma_u + \sigma_l$ genuinely need that same ergodic machinery
+--- the fence the occupation-time operators sit behind
+(section~\ref{sec:spec-lang-focc}). Counted events are declared
+transitions only, never predicate crossings: a full-rank diffusion
+crosses a surface infinitely often, so region-entry counting stays
+\textsc{PCrossStreett}'s metered device
+(section~\ref{sec:spec-lang-streett}) --- a different species, not
+interchangeable. No within-roster order content: the envelope
+counts class firings, and per-item ordering or latency stays
+aggregate-invisible by design. No policy-quantified or optimality
+rate claims (``no dispatch achieves a better rate'' is a research
+frontier, not a former): rate judgments are fixed-dispatch or
+demonic, like every judgment in this catalogue. And no attitude
+knob, as above. The
+assume/guarantee half of the rate axis --- rate bounds crossing
+fused boundaries, and the probabilistic token-bucket budget form
+that rides fusion --- remains a catalogued deliberate absence with
+its own registry slot (section~\ref{sec:spec-lang-frate}).
+
+\emph{Compile.} The certificate species is staged beside the
+formers: a supermartingale row kit per face, kin to the drift rows
+everywhere above. The upper face's kit carries a per-cell
+polynomial potential $V$ with interior rows bounding the
+generator's action on $V$ plus the counted transitions' intensity
+by $\rho$ on each mode cell, counted-transition guard rows
+absorbing the unit charge ($V$ after the reset at most $V - 1$),
+un-counted guard rows non-increasing, and nonnegativity on the
+reset closure --- making $V + N^R_t - \rho t$ a supermartingale
+under every compatible law, so the expected count is at most
+$\rho t + V(x)$, envelopes last, with the certified region the
+sublevel $\{V \le \sigma\}$. The lower face mirrors it
+($V + \rho t - N^R_t$; the counted compensator credits the count's
+expected growth), and its potential is the Foster--Lyapunov
+throughput shape: a work-in-progress potential whose forced
+descent pays out completions. A third, structural route concludes
+the upper face from clock structure alone --- race, dwell, and
+instant-budget readings of the landed timing stock, no potential
+synthesized. No exhibit claims a rate battery yet; formed claims
+await theirs, as everywhere in this catalogue.
+
+\emph{Witness for the demand}: the throughput claim of the
+Mini-Fab tutorial (section~\ref{sec:minifab-spec},
+chapter~\ref{ch:qtsl-minifab}) renders as this former's lower
+face; until this family was staged, that chapter could record the
+claim only as an argument beside the vocabulary.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+The theory rows are staged; the producer surface enters with the
+toolkit's next revision, and this entry gains its quoted
+constructions then.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{SRegretLE and SRegretLEMark: seat regret}
+\label{sec:spec-lang-regret}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SRegretLE}]
+  {\varepsilon \in \mathbb{Q} \\ \varepsilon \ge 0 \\
+   \pi\ \mathsf{System} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SRegretLE}(\varepsilon, \pi, R)\ \mathsf{ForallSpec}}
+\\
+\inferrule*[Right=\textsc{SRegretLEMark}]
+  {\varepsilon \in \mathbb{Q} \\ \varepsilon \ge 0 \\
+   R\ \mathsf{PathObservable}}
+  {\mathsf{SRegretLEMark}(\varepsilon, R)\ \mathsf{ExistsSpec}}
+\end{mathpar}
+
+The subject of a regret claim is a \emph{comb}: a composite with
+exactly one seat --- a hole presenting a declared interface, in the
+system side's own vocabulary
+(chapter~\ref{ch:qtsl-mathematical-models}) --- and the comparison
+class is the seat itself: every filler presenting that interface.
+The comparison class is read off the \emph{subject}, never
+re-declared per formula --- re-declaration would double-count it,
+and silent demonic closure of an unfilled hole under an ordinary
+claim is exactly what the pairing-relative demands refuse. Achieved
+and comparison values are credal-\emph{lower} expectations of the
+run-functional on the respective closed composites: residual
+nondeterminism stays demonic on both sides uniformly --- maximin
+regret, deliberately \emph{not} online-learning pathwise regret,
+which needs a shared weather trace no compositional semantics
+supplies. The certificate face carries its reference filler: no
+type-correct filler beats $\pi$ by more than $\varepsilon$, each
+judged by its own guaranteed value. The query face carries none ---
+it is well-formed in total ignorance of the answer, and its
+discharging selection witness \emph{carries} the filler: the
+angelic idiom, in which the witness is the answer. The two faces
+are the floor/mark duality one level up, with the quantifier moved
+from the law seat to the filler seat --- which is why the name is
+\textsc{Mark} and not \textsc{MayBe}: \textsc{MayBe} is the
+law-seat existential, and the two seats have just been separated.
+Regret is one-sided by definition (no GE mirror: a
+``regret at least'' face would be a liveness claim about the seat's
+\emph{spread} --- a different former, deliberately not minted), and
+$\varepsilon = 0$ is lawful and canonical: the exact-optimality
+claim. Pairing-relative demands --- the paired subject carries
+exactly one hole; the certificate face's filler fills it --- mint
+at the certificate stratum, where the pairing is in hand.
+
+\emph{Witness for the demand}: the certified-Gymnasium
+``optimal, exactly'' family --- optimality claims the earlier
+edition could state only as bare return bounds against a known
+optimum; the discharge lanes are named with their species, not yet
+claimed.
+
+\ruleblock{API}
+\input{chapters/spec-api/SRegretLE-Mark}
+
+\section{Derived Spellings}
+\label{sec:spec-lang-derived}
+
+Each entry here is a claim species from the certified corpus with its
+spelling in the grammar above --- the catalogue's evidence that
+\emph{no further former is needed} for it. The helpers add no
+expressive power; where a helper has code, its definition is quoted,
+because the definition \emph{is} the content. Two rows deliberately
+have no code in this wing, and say where their content lives instead.
+Each spelling owes the compile a coherence cell --- the definitional
+rider saying the sugar's class is the spelled form's class. The
+first cells of this one-line class are machine-checked at the record
+site: bounded reach is trivially-safe until
+(\texttt{untilOn\_univ\_safe}), and the recurrence sugar's single
+trivial-request pair degenerates to reachability of the response
+region, conditioned on occupation, with the empty record exhibited
+as the one stage set where the readings part
+(\texttt{streettOn\_singleton\_univ\_iff},
+\texttt{streettOn\_singleton\_univ\_empty}). The remaining
+spellings' riders are named obligations of the same class, to land
+with the compile they annotate.
+
+\subsection{Capture within N steps}
+\label{sec:spec-lang-dcapture}
+
+\ruleblock{Spelling}
+\[
+\mathrm{capture{-}within}(N, \varphi) \;=\;
+\mathsf{P}_{\ge 1}[\mathsf{F}_{\le N}\,\varphi]
+\]
+
+The credal view makes this worst-case over demonic branching and
+initial conditions --- no dedicated former, no worst-case variant.
+\emph{Witness}: the pendulum swing-up row --- capture within 139
+steps from every default-reset initial state.
+
+\ruleblock{API}
+\input{chapters/spec-api/DCapture}
+
+\subsection{Reach-then-hold (the funnel)}
+\label{sec:spec-lang-dfunnel}
+
+\ruleblock{Spelling}
+\[
+\mathrm{reach{-}then{-}hold}(p, T, \chi) \;=\;
+\mathsf{P}_{\ge p}[\mathsf{F}_{\le T}\,\chi]
+\quad\text{where } \chi \text{ is a child claim's certified
+invariance region}
+\]
+
+The outer transit is spelled here; the citation of the child's
+certified region ($\chi$ as a region atom, concluded by a
+$\mathsf{P}_{\ge 1}[\mathsf{G}\,\mathit{band}]$ claim) belongs to
+the judgment stratum --- the tower discipline again. \emph{Witness}: the
+swing-up composition (outer transit into the held upright set); the
+LunarLander attitude funnel.
+
+\ruleblock{API}
+\input{chapters/spec-api/DFunnel}
+
+\subsection{Safety until deadline}
+\label{sec:spec-lang-dsafeuntil}
+
+\ruleblock{Spelling}
+\[
+\mathrm{safety{-}until{-}deadline}(T, \mathit{safe}, \mathit{target})
+\;=\; \mathit{safe}\ \mathsf{U}_{\le T}\ \mathit{target}
+\]
+
+Directly the until former --- or, for a probabilistic core, the
+two-story tower around it. Listed because the species recurs in the
+corpus under this name. \emph{Witness}: the worked example; the
+until-battery fixtures.
+
+\ruleblock{API}
+\input{chapters/spec-api/DSafeUntil}
+
+\subsection{Almost-sure recurrence under demonic input}
+\label{sec:spec-lang-drecur}
+
+\ruleblock{Spelling}
+\[
+\mathrm{recurrence{-}a.s.}(\gamma) \;=\;
+\mathsf{P}_{\ge 1}[\mathsf{GF}\,\gamma],
+\qquad
+\mathsf{GF}\,\gamma \;=\;
+\mathsf{PDwellStreett}\bigl(\mathsf{PairBase}(\mathsf{STrue}, \gamma)\bigr)
+\]
+
+The dwell-metered Streett sugar at the demonic profile (frequently
+is step-frequently at unit ticks): the credal view reads the
+lower probability over the branch set, so almost-sure recurrence
+under an adversarial input needs no game former. \emph{Witness}: the
+219 circuit tasks, whose conjunctions of recurrence goals are built
+by exactly the quoted spelling.
+
+\ruleblock{API}
+\input{chapters/spec-api/DRecur}
+
+\subsection{Min-return over enumerated branches}
+\label{sec:spec-lang-dminret}
+
+\ruleblock{Spelling}
+\[
+\mathrm{min{-}return}(B, R) \;=\;
+\mathsf{SReturnGE}(B, R)
+\quad\text{at the credal reading}
+\]
+
+Lower expectation over a finite branch set \emph{is} the minimum ---
+the spelling is the plain former; the worst-case reading belongs to
+the substrate, not the syntax. \emph{Witness}: the Atari circuit rows
+(per-lane returns, claimed bound equal to the minimum, exact).
+
+\ruleblock{API}
+\input{chapters/spec-api/DMinRet}
+
+\subsection{Worst-case-over-init}
+\label{sec:spec-lang-dwcinit}
+
+\ruleblock{Spelling}
+\[
+\text{any former} \;+\; \text{a demonic initial box on the system side}
+\]
+
+No spec-side helper, by design: worst-case over initial conditions is
+a property of the \emph{pairing}, spelled as a demonic initial box in
+the system's own vocabulary
+(chapter~\ref{ch:qtsl-mathematical-models}) and read through the
+credal view --- the formula layer needs no worst-case former.
+\emph{Witness}: the swing-up rows; the random-ODE
+uniform-over-parameter barrier (parameter box as an initial-box
+axis).
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+Spelled on the system side (a demonic initial box declaration), not
+in this namespace; the credal reading supplies the worst case.
+\apilang{Rust}{---}
+Likewise: a system-side declaration, deliberately without a
+formula-layer twin.
+
+\subsection{Hard event-count envelopes}
+\label{sec:spec-lang-devcount}
+
+\ruleblock{Spelling}
+\[
+\mathrm{count{-}ceiling}(B, R) \;=\;
+\mathsf{SReturnLE}\bigl(B,\, \mathsf{retFireCount}(R)\bigr)
+\]
+
+The count ceiling is the plain expectation former at the
+transition-count functional
+(section~\ref{sec:spec-lang-returnstratum}): along every admitted
+law, the total count of roster firings is at most $B$ --- no new
+grammar, as this section's charter demands. An earlier
+edition of this entry routed the species through the designed
+event-rate envelopes as their $p = 1$ instance; the count spine
+landed first, the rate family's expectation atoms have since been
+staged in their own right (section~\ref{sec:spec-lang-rate}), and
+the probabilistic budget form --- the $p = 1$ route --- remains the
+deliberate absence it was (section~\ref{sec:spec-lang-frate});
+the ceiling stays the plain spelling above either way. \emph{Witness for the
+demand}: structurally bounded resource-sharing net families; the
+plated-transfer discharge that concludes the ceiling is Rule
+Catalogue content.
+
+\ruleblock{API}
+\apilang{TypeScript}{spec.returnLe / retFireCount}
+The ceiling is the plain composition of landed formers,
+\texttt{returnLe(B, retFireCount(R))} --- the transition-count
+injection's producer surface, both languages, lives with the run
+functionals (section~\ref{sec:spec-lang-returnstratum}).
+\apilang{Rust}{mtk\_catalogue::spec::\{ForallSpec::return\_le, PathObservable::fire\_count\}}
+Likewise:
+\texttt{ForallSpec::return\_le(B, PathObservable::fire\_count(R))},
+the empty roster refused at construction and at the decoded-artifact
+preflight alike.
+
+\subsection{Boolean-output atoms}
+\label{sec:spec-lang-dbool}
+
+\ruleblock{Spelling}
+\[
+\mathrm{bool{-}wire{-}set}(i) \;=\; \mathsf{SAtomGE}(1, x_i)
+\qquad
+\mathrm{bool{-}wire{-}clear}(i) \;=\; \mathsf{SAtomLE}(0, x_i)
+\]
+
+The $0/1$ convention on Boolean-valued wires: no Boolean atom former
+exists or is needed. \emph{Witness}: the circuit suite's atoms
+compile to exactly this form; the liveness vector's recurrence goals
+are built over these spellings.
+
+\ruleblock{API}
+\input{chapters/spec-api/DBool}
+
+\section{The Rewrite Layer}
+\label{sec:spec-lang-rewrite}
+
+\subsection{Rewrite chains, concluding spec equivalence}
+\label{sec:spec-lang-rewritelayer}
+
+\ruleblock{Rules}
+
+Eighteen rewrite rules, each a denotation \emph{equality} over
+$\omega$-words, with congruence (rewriting at a position) and chain
+transport (a sequence of rewrites transports satisfaction verbatim,
+in both directions): implication elimination, right distribution,
+double negation, the two De~Morgan laws, negation past
+$\mathsf{F}$/$\mathsf{G}$/$\mathsf{X}$, and the polarity-absorption
+fusion family --- the existential-over-time operators absorb $\vee$
+and the universal-over-time operators absorb $\wedge$. Its charter
+member is the $\mathsf{GF}$-disjunction fusion
+\[
+\mathsf{GF}(\varphi \vee \psi) \;=\;
+\mathsf{GF}\,\varphi \vee \mathsf{GF}\,\psi
+\]
+(infinitely-often of a union is a union of infinitely-oftens, by
+pigeonhole); its siblings are $\mathsf{F}$ of a disjunction,
+$\mathsf{G}$ of a conjunction, $\mathsf{FG}$ of a conjunction, until
+with disjoined targets
+\[
+(\sigma \mathbin{\mathsf{U}} \tau_1) \vee
+(\sigma \mathbin{\mathsf{U}} \tau_2) \;=\;
+\sigma \mathbin{\mathsf{U}} (\tau_1 \vee \tau_2)
+\]
+(the target position is existential), until with conjoined safety
+arguments
+\[
+(\sigma_1 \mathbin{\mathsf{U}} \tau) \wedge
+(\sigma_2 \mathbin{\mathsf{U}} \tau) \;=\;
+(\sigma_1 \wedge \sigma_2) \mathbin{\mathsf{U}} \tau
+\]
+(the safety position is universal), and the bounded-horizon
+($\le T$) siblings of the four fusions that carry a horizon --- the
+$\le T$ decorations carry through the witness arithmetic verbatim, while
+$\mathsf{FG}$ has no bounded row: its settling time is unbounded by
+construction. The absorption boundary is exact, and the fence is
+theorem-backed rather than asserted: the four wrong-polarity fusions
+--- $\mathsf{F}$ of a conjunction, $\mathsf{G}$ of a disjunction,
+and their $\mathsf{GF}$/$\mathsf{FG}$ counterparts --- are
+machine-refuted by explicit $\omega$-word counterexample theorems in
+both provers (\texttt{no\_f\_and\_fusion}, \texttt{no\_g\_or\_fusion},
+\texttt{no\_gf\_and\_fusion}, \texttt{no\_fg\_or\_fusion}). A chain
+is a typed citation: rule, position, direction, step by step; it
+concludes the judgment $\mathsf{QSpecEquiv}(a, b)$ below. The
+concluded judgment is already a row species of the normative
+schema; the chain citation's own row species is owed there, and
+until it lands a chain is a wire artifact of the producer surface.
+
+All eighteen rules are proved in Lean \emph{and} in HOL4, statement
+for statement, with no incomplete proofs; completeness is proven for
+the benchmark liveness fragment --- every spec of that suite's
+grammar reaches the consumable normal form, witnessed mechanically by
+all 219 verbatim specs normalizing and re-validating in an
+independent checker. Carrier genericity varies by rule family: eight of
+the eighteen rules are per-position Boolean and duality laws whose
+equalities hold over any linearly ordered time carrier; the nine
+fusion rules beyond $\mathsf{GF}$ --- five unbounded, four
+bounded-horizon --- are finite-witness manipulations whose equalities
+hold over any unbounded linear time carrier; the
+$\mathsf{GF}$-fusion remains the only pigeonhole rule, needing
+infinitely-often as cofinal occurrence; the next-step duality carries
+the step-structure requirement of its operator, which enters the row
+grammar together with that operator. The machine-checked proofs are
+the $\omega$-word instances; the carrier-generic restatements are
+small named obligations. One further restatement belongs to this
+chapter's own compile, and its ground floor is now machine-checked
+(\texttt{SuFunctor.Universe.SpecRewrite}): soundness at the universe
+means the compiled spec classes of a rule's two sides coincide, and
+that warrant is strictly stronger than denotation equality --- a
+disjunction and an atom of the same denotation compile to different
+classes, because models may hedge
+(\texttt{exists\_denEq\_not\_classEq}, the compiled image of the
+hedging gap) --- so class-level soundness travels by term structure:
+the class semantics is a homomorphism of the normal-form lattice
+(commutation, association, distribution, and --- against the hedging
+intuition --- absorption, each landed as a class equality), and the
+normal-form dualities are sound for the sharper reason that they do
+not move the term at all (\texttt{classEquiv\_of\_nnf\_eq}); the
+obstruction lives at the region-to-class seam and nowhere else. That
+development settles the state stratum. The eighteen temporal rules'
+own class-level restatement, one row up over the path formers'
+compile, remains an obligation this edition names rather than
+claims.
+
+The producer surface \emph{constructs} chains --- it deliberately
+does not apply rewrites. The checker replays the chain; a chain the
+constructor accepts is a well-formed citation, not a verified
+equivalence; an empty chain refuses (reflexivity is not a chain).
+Application code is withheld on purpose while the deadline-fragment
+deductive calculus (bounded-reach/always equivalences over clocked
+classes) remains live research: frozen application rows would re-mint
+the sidecar disease one level up.
+
+Cross-carrier \emph{application} is not a rewrite matter at all: a
+step-structured spec applied to a continuous-time system is expressed
+by composing the system with a sampler mechanism and asserting the
+spec of the sampled composite, with claims related across the pair by
+the simulation-transport rule of chapter~\ref{ch:qtsl-manual} ---
+zero new machinery. The certified LunarLander pair (one value table,
+both tick semantics, jitter priced at a factor $2.66$ in
+ticks-to-funnel) is the landed witness of this pattern.
+
+\emph{Witness}: 219 rewrite-chain artifacts asserting spec
+equivalence for the liveness suite --- the demand that shaped the row
+form quoted below.
+
+\ruleblock{API}
+\input{chapters/spec-api/RewriteLayer}
+
+\section{Deliberate Absences}
+\label{sec:spec-lang-fences}
+
+A catalogue that only listed what exists would invite spelling every
+missing claim species as prose --- the sidecar disease by another
+door. This section records what the formula layer deliberately does
+\emph{not} provide, why, and what would unlock each. In rule form an
+absence is the absence of a formation rule (or of a compile clause
+for a formable term), and several are enforced in code, as
+typing-preflight refusals that name their fence; the negation-residue
+absences additionally carry the no-expressible-complement warrant of
+section~\ref{sec:spec-lang-formation} --- they are theorems about
+the class algebra, not prudence. The admission rule stands: each of
+these gains its former when its first certificate lane arrives, and
+this catalogue is the registry where that admission is recorded.
+
+\subsection{Event-rate assume/guarantee; the probabilistic budget
+form}
+\label{sec:spec-lang-frate}
+
+\ruleblock{Absence}
+
+The expectation-envelope atoms of the rate family are staged
+(section~\ref{sec:spec-lang-rate}); this slot keeps what remains
+absent, which is everything that crosses a fused boundary. Rate
+\emph{assumptions and guarantees} as interface fields --- a
+producer's guaranteed output envelope becoming a fused neighbour's
+assumed input envelope, with the transported bound recomputed by
+the checker as affine arithmetic in $(\rho, \sigma)$ --- wait on
+the event-port vocabulary of the system side and enter with the
+first fused-boundary composite, together with their composition
+rule and its acyclicity oracle. The \emph{probabilistic} budget
+form --- a time-uniform claim that the count never overdraws its
+budget, with probability at least $p$ --- is sugar over a
+token-bucket monitor mechanism fused into every counted firing,
+riding the safety kernel unchanged; it waits on the same fusion
+vocabulary, and the hard $p = 1$ envelope with it. Cyclic rate
+reasoning across a feedback loop is refused even then: naive
+fixpoints are unsound, the sound discharge is induction over time,
+and that rule enters on its own warrant or not at all. None of
+this fences the staged atoms or the count spine --- what this
+absence still fences is boundary-crossing rate reasoning and
+probabilistic budgets, not counts and not expectation envelopes.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+No constructor exists for the boundary-crossing forms; the staged
+atoms carry the family's admission
+(section~\ref{sec:spec-lang-rate}), and this entry is the
+residue's registry slot.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{Interior upper-bound consumption; Rabin; negated
+Streett and until}
+\label{sec:spec-lang-fpupper}
+
+\ruleblock{Absence}
+
+Formation of probability upper bounds is open (\textsc{SProbLE}
+above): the direct $\mathsf{P}_{\le q}$ claim is a closed constraint
+of the same species as the GE face, and fencing its formation as if
+it were a complement over-read the negation fence. What remains
+absent is narrower, and two different things.
+\emph{Consumption} of an upper bound at interior $q$ over an
+under-determined model needs certificate towers that
+\emph{over}-approximate denotations --- the dual of the entire
+under-approximation machinery this stack ships; the exact lane
+discharges the $q = 0$ instance today (the same backward-induction
+table, read in the super-solution direction), and interior $q$ waits
+for the tower. Rabin acceptance (the negation of Streett) and
+path-negated Streett or bounded-until remain genuinely fenced by the
+negation residue: under the properness presupposition no spec class
+has an expressible complement
+(section~\ref{sec:spec-lang-formation}), so there is no class-level
+object for those dual rules to conclude into --- the missing rules
+are missing mathematics. The typing preflight still refuses each
+\emph{negation} residue with a path address (a complemented
+probability is lawful only as a Streett request consumed through
+$\mathsf{PairCmpl}$); the direct LE former needs no refusal, because
+it was never a negation.
+
+\ruleblock{API}
+\apilang{TypeScript}{spec.probLe}
+The LE former constructs (\texttt{probLe}, quoted at its entry); the
+preflight refusals (\texttt{negPathAtomEvenPolarity},
+\texttt{negStreett}, \texttt{negUntil}) remain the surface for the
+negation residues, whose entry points are quoted under \textsc{SNot}.
+\apilang{Rust}{mtk\_catalogue::spec::ForallSpec::prob\_le}
+Likewise (\texttt{Refusal::NegPathAtomEvenPolarity} and kin, with
+formula-path geometry).
+
+\subsection{Stochastic bounded-always at even parity}
+\label{sec:spec-lang-falwaysstoch}
+
+\ruleblock{Absence}
+
+The former constructs today (\textsc{PAlwaysT} above); what is absent
+is stochastic \emph{consumption} at even parity --- the same
+over-approximating tower machinery as the probability upper bounds.
+Deterministic consumption is immediate now; the spellability of the
+statement was the point of drafting the former ahead of its full
+battery.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+The former's constructor is quoted under \textsc{PAlwaysT}; no
+additional surface exists for the fenced consumption.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{Unbounded quantitative reach}
+\label{sec:spec-lang-funbounded}
+
+\ruleblock{Absence}
+\[
+\mathsf{F}\,\varphi \;\leadsto\;
+\mathsf{F}_{\le T}\,\varphi
+\quad\text{at a producer-chosen } T,\ \text{flagged
+\texttt{producerT}}
+\]
+
+No unbounded-reach primitive: the spelling is a producer-chosen
+deadline, sound as an under-approximation and \emph{flagged as such}
+in the row, so a certificate reader can always tell a bounded claim
+made for its own sake from a bounded claim standing in for an
+unbounded one. A complete almost-sure-termination battery is the
+named unlock for the primitive form.
+
+\ruleblock{API}
+\input{chapters/spec-api/FUnbounded}
+
+\subsection{Occupation-time and duration operators}
+\label{sec:spec-lang-focc}
+
+\ruleblock{Absence}
+
+Narrowed by the theory revision: much of what this
+absence used to fence is now spellable compositionally. Integrated
+occupation time is the time integral of a region's indicator
+($\mathsf{poInt}$ over $\mathsf{oInd}$), the long-run occupation
+fraction is its average ($\mathsf{poAvg}$ over $\mathsf{oInd}$),
+and dwell-metered acceptance is a former of its own
+(\textsc{PDwellStreett}). What remains absent is \emph{dedicated}
+sojourn and per-visit-duration operators --- claims about
+individual visits rather than accumulated occupation --- withheld
+pending a kernel theorem: occupation-measure mechanics are the
+natural substrate, and a former without its kernel would be a claim
+nothing can certify. The compositional spellings above share the
+constraint at one remove: their certificate lanes are named, not
+yet claimed.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+The compositional spellings construct on the landed injection and
+accumulator surfaces (quoted at their entries); the dedicated
+operators remain withheld pending the kernel theorem --- nothing
+further to construct.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{Nested path quantification}
+\label{sec:spec-lang-fnest}
+
+\ruleblock{Absence}
+
+The descending grid arrows: path-quantified material re-entering the
+atemporal row as a state label --- $\mathbb{P}_{\ge q}[\psi]$ as a
+state predicate, a value functional as a state observable --- the
+CTL/PCTL nesting style. This is the grid's one deliberate absence
+(section~\ref{sec:spec-lang-formation}), and its warrant has two
+layers. The \emph{raw} formers are fenced by the geometry: a single
+level of re-entry exits the constructible classes (neither face's
+rooted class is a crescent), and the negation fence forbids deriving
+the universal face from the existential one --- raw nesting is not a
+missing feature but a shape the class algebra refuses, and any
+future admission must carry both faces as primitives (the analysis
+is mechanized in the adequacy layer's path-to-state development).
+The \emph{principled} route --- certified-citation formers, the
+tower discipline promoted to a formation rule, Observable column
+first --- is semantically supported (the behavioural tier already
+denotes the descending arrows) and deliberately out of scope for
+this edition: planned for the language's second major revision
+(2026Q4), a scoped fence chosen with the open pathway in full view.
+The certified corpus's nesting needs are served through the judgment
+stratum --- a child claim's certified region cited as a parent's
+$\mathsf{StatePred}$ atom, the tower discipline (entry
+\textsc{SProbGE}) --- so the absence fences only the syntactic
+embedding, which no landed artefact ever spelled.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+No constructor exists, deliberately; the certified-citation former
+family is scheduled with the second major revision.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{Strategy quantification}
+\label{sec:spec-lang-fgame}
+
+\ruleblock{Absence}
+
+Controlled and game forms are absent from the formula layer by
+design: open nondeterminism is absorbed by the credal reading, and
+policy-level quantification is a judgment-layer and system-side
+question (chapter~\ref{ch:qtsl-mathematical-models}, the
+decision-process rows). The formula layer stays closed-system --- a
+strategy quantifier would bind at the wrong stratum.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+No strategy quantifier exists in this namespace, by design.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{Delays}
+\label{sec:spec-lang-fdelay}
+
+\ruleblock{Absence}
+
+Permanently out of the formula layer: a delay is a model-class change
+(history-dependent state), not a formula-class change. If it arrives,
+it arrives as a new mechanism species with its own certificate
+shapes on the system side --- never as a former here.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+Out of scope for the formula layer, permanently.
+\apilang{Rust}{---}
+Likewise.
+
+\section{Judgment Kinds}
+\label{sec:spec-lang-judgments}
+
+A \emph{judgment kind} is a $\vDash$-side sort --- the type a
+certificate's rules conclude into --- and each kind carries its own
+small sub-logic: the premises it takes, the machinery that discharges
+it (\emph{rule}: a rule node concludes it; \emph{oracle}: a
+registry-pinned recompute; \emph{chase}: load-time axioms, in the
+row schema's three modes --- chase proper \emph{derives} rows,
+report-mode axioms state loud constraints, and refuse-mode axioms
+gate admission), and the consumers that cite it. The row schema
+reads this section's inventory as three verbs: a revision
+\emph{states} a satisfaction claim (a system paired with a spec),
+\emph{compiles} it into the two-polarity verdict form (its entry
+below), and \emph{discharges} it through battery and rule-node rows
+a checker replays. Homing these
+at the judgment stratum is a design statement: the formula is about
+the system; these are about the claim's kind and evidence. At the
+semantic universe the satisfaction sort's meaning is the fibre order
+itself (\texttt{SuFunctor.Universe.Sat}: the spec's belief lies
+below the system's), with the properness presupposition carried
+structurally, per section~\ref{sec:spec-lang-target}; the splice of
+the certified checker's acceptance judgment into that order is named
+in the assurance ledger rather than claimed here --- its stated
+prerequisite, the certificate schema's absorption of this chapter's
+redesign, has landed. The citation discipline that every kind below leans on
+--- a premise accepts base-tower proof leaves, or
+concluded-judgment references of a stated kind, or certificate data,
+and never a mixture --- is deliberately not an entry here: it is the
+edge discipline whose warrant is the induction over admitted
+derivations itself, and it renders at the end of
+chapter~\ref{ch:qtsl-manual} as the soundness theorem the kinds
+feed.
+
+Producer-side, every kind below is a versioned wire artifact (a
+literal schema name and version, exact rationals as canonical text,
+unknown fields ignored on read), emitted through the one canonical
+encoder. What is deliberately \emph{not} here, recorded so nobody
+re-adds it: no second sort for interface-indexed satisfaction (see
+the next two entries); no tower-step kind (its content is a region
+satisfaction consumed through a premise field); no mixing-rate kind
+(named open); no attitude judgment kind (the attitude blend is a
+record component that no rule concludes and nothing consumes ---
+the closing entry).
+
+\subsection{QSat: root satisfaction}
+\label{sec:spec-lang-qsat}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{QSat}]
+  {s\ \mathsf{Spec} \\ M\ \mathsf{System} \\
+   \mathrm{states}(M) \simeq \text{wire object of } s}
+  {M \vDash s\ \ \mathsf{Judgment}}
+\end{mathpar}
+
+Root satisfaction, closed \emph{and} interface-indexed: one judgment
+kind for both readings. A spec with no interface row is closed; with
+one, the assumption region reads input wires, the guarantee reads
+output wires, and the spec's interface must equal the system's
+presented interface (an agreement axiom, chase-policed at the
+pairing). The formerly mooted second sort for interface-indexed
+satisfaction is \emph{dissolved}: the closed judgment is the
+empty-interface instance, so one kind suffices and the loader cannot
+be handed a claim whose reading is ambiguous.
+
+Under the properness presupposition a root satisfaction claim
+asserts \emph{safe and proper}: to satisfy anything, first exist.
+The conjunct is the judgment's presupposition, carried by the
+compile target's type (\texttt{SpecAtom.top\_mem}; emitted
+unconditionally, \texttt{elabSpec\_top\_mem}) --- zero syntax cost,
+one nonemptiness discharge per root claim, discharged at use sites,
+with emptiness certificates the optional schema slot. This is the
+spec-side face of the guard whose system-side face reads an
+inconsistent system as satisfying all safety specs and no liveness
+specs (\texttt{top\_notMem\_modelClass}; ex falso inverts
+structurally, never by a rule). Sub-logic: concluded from a
+region-satisfaction row plus exact rational evaluation on the
+initial region (the satisfaction-from-region rule of
+chapter~\ref{ch:qtsl-manual}); transported across wirings with slack
+arithmetic by the assume--guarantee composition rules.
+
+One satisfaction-stratum variant deserves its sentence here,
+because it is certificate machinery and must not be mistaken for
+formula grammar: a \emph{guarded} satisfaction claim conditions the
+guarantee on an initial-region antecedent --- demanded of every
+admitted law whose initial marginal is supported in the cited
+region, with nothing promised off-region. The guard is a predicate
+\emph{on} the subject's initial data, not initial data (the record
+still binds no model), and the class algebra stays
+complement-free: the antecedent is a ground condition on system
+data, never a behaviour class, which is why no implication former
+exists below the cap. Its introduction rule discharges the
+initial-membership hypothesis \emph{into} the claim; its record row
+cites the certificate-side region vocabulary and lives with the
+certificate sections of the normative theory --- the subject strata
+stay certificate-citation-free by the standing deliberate absence
+--- and its introduction and elimination are Rule Catalogue
+content.
+
+\emph{Witness}: every root certificate; the composition chapters'
+worked examples exercise the interface-indexed reading end to end.
+
+\ruleblock{API}
+\input{chapters/spec-api/QSat}
+
+\subsection{Interface-indexed satisfaction, defined}
+\label{sec:spec-lang-vdashi}
+
+\ruleblock{Definition}
+
+For a system $\Sigma$ and an interface spec
+$(I, \alpha, \gamma[, \kappa])$ --- assumptions $\alpha$ on input
+wires, guarantee $\gamma$ on output wires, optional slack $\kappa$
+--- the judgment $\Sigma \vDash_{\mathrm{I}} (I, \alpha, \gamma[,
+\kappa])$ asserts that every behaviour of $\Sigma$ whose inputs
+conform to $\alpha$ delivers $\gamma$ (with margin per $\kappa$ where
+declared); in the stochastic profiles, almost every behaviour, with
+failure measured \emph{within the conforming event}:
+\[
+\forall^{\mu}\omega,\ \omega \in \mathrm{conform} \to \omega \in
+\mathrm{sat};
+\qquad\text{quantitatively}\quad
+\mu(\mathrm{conform} \cap \mathrm{sat}^{c}) \le \varepsilon .
+\]
+Unlike the closed judgment $\mathcal{M} \vDash s$, which quantifies
+unconditionally over all behaviours from the initial region,
+$\vDash_{\mathrm{I}}$ quantifies conditionally --- satisfaction
+relativized to the interface; the closed judgment is its
+empty-interface instance. The subscript is a roman kind-marker, not a
+parameter, following the global-stratum marker $\vDash_D$ (entry
+\textsc{QMorse}).
+
+This reading is defined once, here, and has \emph{no schema sort of
+its own}: its home is $\mathsf{QSat}$ whose spec carries an
+interface; assumptions and slack live on the spec record; interface
+agreement is the pairing's chase axiom. It earns an entry because it
+is a genuinely different satisfaction relation --- conditional, with
+failure measured inside the conforming event --- and because the
+composition rules' conclusions are exactly of this shape. Its
+mechanization status: the sequent substrate for the
+satisfaction judgment carries the properness conjunct as a theorem
+(the pair-sequent development,
+\texttt{SuFunctor.Universe.PairSequent}), and the record-level
+compile carries assumptions as data with their conditional semantics
+deferred fail-closed (section~\ref{sec:spec-lang-spec}); the
+relativized reading stated at the semantic universe is a named
+obligation, not yet claimed.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+Carried by \texttt{judgment.sat} with an interface-carrying spec ---
+deliberately no separate entry point.
+\apilang{Rust}{---}
+Carried by \texttt{QSat} likewise; the dissolved second sort is
+recorded in the module documentation so nobody re-adds it.
+
+\subsection{The compiled verdict form}
+\label{sec:spec-lang-verdictform}
+
+\ruleblock{Definition}
+\[
+\mathsf{QVerdictForm} : [\, \mathrm{floors} : \mathsf{QRegionSat}^{*},\;
+  \mathrm{marks} : \mathsf{QRegionSat}^{*} \,]
+\]
+
+A compiled satisfaction verdict carries its demand atoms in
+\emph{two} lists, and the split is schema content because it is not
+recoverable from the atoms alone: the same constraint species denotes
+differently per face. A \emph{floor} holds over the whole credal
+body; a \emph{mark} asserts that some admitted law attains --- so
+folding the two into one list would erase exactly the distinction
+the denotation reads. Polarity is \emph{declared} at formation ---
+the cap sorts of section~\ref{sec:spec-lang-formation} --- and
+\emph{discharged} here: one home per stratum, connected by the
+compile. No battery
+or region sort carries a polarity flag; the two lists are the
+verdict-side home, with the floors compiled from the
+$\mathsf{ForallSpec}$ components and the marks from the
+$\mathsf{ExistsSpec}$ list plus the unconditional properness mark
+--- attitude components take no part in the form, because a design
+score is not a verdict ---
+and the form's agreement with the declared faces is part of the
+recompute obligation below. The mark list is the verdict's existential
+conjunct, first-class: an \emph{empty} mark list is the all-safety
+claim, true of the zero-mass subject, and a form that derived
+liveness from floor content would silently certify a dead subject
+live --- which is why the record-level compile emits the properness
+mark unconditionally (\texttt{elabSpec\_top\_mem},
+section~\ref{sec:spec-lang-spec}), so a form compiling a root
+specification carries a nonempty mark list. Liveness demands enter
+the mark list as \emph{negation walls}: the demand ``at least $q$''
+enters as the mark of its complement's failure --- the wall/dip pair of
+the compile target (section~\ref{sec:spec-lang-target}), as rows.
+The form is value-like; its attachment to a root claim is a
+zero-or-one relation (a claim with no form is simply not compiled);
+and the agreement between the form and the specification it
+compiles is a \emph{recompute obligation} at the ground seam, never
+a trusted row: the checker re-derives the form from the spec it
+cites.
+
+\emph{Witness}: the staged certificate probes of the normative
+theory's battery; corpus-wide re-emission follows the producer-side
+emitter, which has not landed.
+
+\ruleblock{API}
+\apilang{TypeScript}{---}
+No constructor is exposed: the form is compiled, not authored, and
+no producer-side emission exists yet.
+\apilang{Rust}{---}
+Likewise.
+
+\subsection{QSatConf: the confidence qualifier}
+\label{sec:spec-lang-qsatconf}
+
+\ruleblock{Definition}
+\[
+\mathsf{QSatConf} : [\, \mathrm{sys} : \mathsf{System},\;
+  \mathrm{spec} : \mathsf{Spec},\;
+  \alpha : \Q \,],
+\qquad 0 < \alpha < 1
+\]
+
+The spec holds \emph{up to the evidence's error budget}: the claim is
+backed by a betting-martingale ledger whose wealth crossed
+$1/\alpha$, and soundness is time-uniform --- Ville's
+inequality~\cite{ville1939} for nonnegative supermartingales plus a
+randomized-last-look refinement, both machine-checked in the Lean
+auxiliary tree. This is a \emph{distinct kind}, not a field on
+$\mathsf{QSat}$: confidence-qualified rows are never silently mixed
+with exact or almost-sure rows --- a sort distinction the loader
+cannot blur, rather than a rendering convention. Sub-logic: rule
+(ledger rows in, judgment out); the range demand on $\alpha$ is a
+report-mode constraint at load, both ends strict ($\alpha = 0$
+would claim the exact tier in statistical clothes; $\alpha = 1$
+claims nothing). Ledger emission belongs to the statistical harness
+on the system side; this row is the claim it backs.
+
+\emph{Witness}: the LunarLander statistical rows ---
+$\mathbb{E}[R] \ge 236.577$ at $\alpha = 1/20$ over $10^6$ episodes,
+checked at nanoseconds per obligation; the continuous variant's
+certified floor exceeding the discrete variant's empirical mean.
+
+\ruleblock{API}
+\input{chapters/spec-api/QSatConf}
+
+\subsection{QSpecEquiv: spec equivalence}
+\label{sec:spec-lang-qspecequiv}
+
+\ruleblock{Definition}
+\[
+\mathsf{QSpecEquiv} : [\, a : \mathsf{Spec},\; b : \mathsf{Spec} \,]
+\]
+
+Two specs denote the same property over every behaviour carrier on
+which both are interpretable. The judgment stores \emph{no
+semantics-class field}, deliberately: a stored three-way class enum
+misstates the structure (an $\omega$-word \emph{is} a c\`adl\`ag
+trajectory under the piecewise-constant-at-integer-times embedding,
+so the classes are not disjoint). Instead, \textbf{carrier scope is
+derived, never stored}: it is the carrier-requirement synthesis
+judgment of section~\ref{sec:spec-lang-formation} --- each former's
+$\rhd$ annotation --- with an equivalence judgment's scope the
+intersection of its two sides' requirements. An empty intersection
+is a conformance refusal at the consumer, not a judgment. The
+Return stratum's split horizons are this distinction already
+encoded: tick-summed returns demand steps, integrated returns demand
+duration.
+Sub-logic: concluded by the rewrite layer's chains (rule);
+the derived-requirement computation is part of the producer surface,
+quoted below the tour entries.
+
+\emph{Witness}: the 219 rewrite-chain artifacts of the liveness
+suite, each concluding exactly this judgment.
+
+\ruleblock{API}
+\input{chapters/spec-api/QSpecEquiv}
+
+\subsection{QRegionSat: the workhorse}
+\label{sec:spec-lang-qregionsat}
+
+\ruleblock{Definition}
+\[
+\mathsf{QRegionSat} : [\, \mathrm{formula} : \mathsf{StatePred},\;
+  \mathrm{region} : \mathsf{QRegionAtom} \,]
+\qquad
+\forall x \in R :\ x \vDash_{\mathcal{M}} \varphi
+\]
+with the region-atom vocabulary
+\[
+\mathsf{qraSublevel}(\mathit{fam}, \theta) \;\mid\;
+\mathsf{qraBox}(\mathit{intervals}) \;\mid\;
+\mathsf{qraAffine}\Bigl(\textstyle\sum_i c_i V_i \le \theta\Bigr).
+\]
+
+Every state in the cited region satisfies the formula, with the
+kernel region \emph{under}-approximating the formula's denotation ---
+one orientation suffices, since complement consumption inherits the
+over-approximation for free. The region atoms are how certified
+regions are \emph{cited}: a sublevel set of a certified function
+family, an exact-rational box, or a sublevel of an affine combination
+of certified families. Sub-logic: concluded by the battery rules
+(safety, deadline, until, Streett), basins, union bounds, the NNF
+alias family, and region-combination nodes; battery well-formedness
+policed by oracles; consumed by the tower-citation edge discipline (a
+child's concluded region is a parent's atom) and by
+satisfaction-from-region.
+
+\emph{Witness}: the entire supermartingale corpus; the three quoted
+constructions are the committed vectors for the three atom variants.
+
+\ruleblock{API}
+\input{chapters/spec-api/QRegionSat}
+
+\subsection{QCapSat: the cap-on-region vehicle}
+\label{sec:spec-lang-qcapsat}
+
+\ruleblock{Definition}
+\[
+\mathsf{QCapSat} : [\, \mathrm{cap} : \mathsf{ForallSpec},\;
+  \mathrm{region} : \mathsf{QRegionAtom} \,]
+\qquad
+\forall x \in R :\ x \vDash_{\mathcal{M}} \mathrm{cap}
+\]
+
+A probability cap certified from a region: every state in the cited
+region satisfies the safety-face component, with the region
+\emph{under}-approximating the cap's denotation --- the workhorse's
+orientation, one entry up the formula grid. The kind entered at
+revision event 4 as a deliberately \emph{interim} vehicle: the
+previous edition nested the probability former under the region
+workhorse's state formula, the formation grid makes that shape
+unrepresentable (a cap is a component, never a state predicate), and
+so the cap-discharging rules --- batteries, transports, reach tables
+--- conclude this kind instead. Revision event 6 discharges the
+interim framing. The normative theory stores those conclusions as
+attributes of the battery proof nodes themselves and ties caps to
+spec components by keying each satisfaction claim to the component's
+own entity row: \texttt{qsat\_warrant} relates the claim to a
+\texttt{QForallSat} row carrying the component and its region. The
+producer's rule rows are re-staged against that seam --- warrants
+are emitted entity-keyed, under a versioned species binding that
+refuses pre-revision closures at the seam, loudly, at derivation
+time. What no producer emits yet is the compiled verdict form
+(section~\ref{sec:spec-lang-verdictform} records the same absence),
+so this kind remains the typed conclusion the cap-discharging rules
+place on the wire.
+
+\emph{Witness}: the committed vector (the quoted construction, both
+languages byte-identical); the battery conclusions across the corpus
+exercise the same shape.
+
+\ruleblock{API}
+\input{chapters/spec-api/QCapSat}
+
+\subsection{QInvScope: invariance with scope}
+\label{sec:spec-lang-qinvscope}
+
+\ruleblock{Definition}
+\[
+\mathsf{QInvScope} : [\, \mathrm{region} : \mathsf{QRegionAtom},\;
+  \mathrm{init} : \mathsf{QRegionAtom} \,]
+\qquad
+S \text{ forward-invariant} \wedge X_0 \subseteq S
+\]
+
+The region is forward-invariant and contains the initial set.
+Sub-logic: concluded by the block-invariance rule (strictly
+facet-inward cone rows plus containment) and its lattice alias;
+consumed by basins, by battery scope-warrant fields, and by the
+aggregate-scope kind's invariance route below.
+\emph{Witness}: the invariance rows across the corpus; the
+Morse-stratum discharge kits cite it wherever a block's scope must be
+warranted.
+
+\ruleblock{API}
+\input{chapters/spec-api/QInvScope}
+
+\subsection{QMorse: the global stratum}
+\label{sec:spec-lang-qmorse}
+
+\ruleblock{Definition}
+\[
+\mathsf{QMorse} : [\, \mathrm{graph} : \mathsf{MorseGraph},\;
+  \rho : \mathsf{VertexRegion}^{*},\;
+  \mathrm{arena} : \mathsf{Arena} \,]
+\qquad
+\mathcal{M} \vDash_D \mathsf{Morse}(G, \rho)
+\]
+
+Non-initialized, whole-system qualitative structure: a certified
+Morse graph with per-vertex readout regions. It is listed in this
+catalogue because a complete spec-language inventory must say where
+the non-formula-shaped claims live: the formula language and the
+global stratum share the region vocabulary and nothing else, and the
+$D$ subscript marks the different satisfaction relation. The row
+asserts the graph and readouts against a declared \emph{arena} ---
+the grid complex the claim is read on; a discharged claim's arena
+\emph{is} its lattice's, tied by a stated equation between
+hash-consed values (the tie is deliberately syntactic --- semantic
+region equality is geometry the certificate does not owe).
+Acyclicity is the checker's to
+confirm, never this row's to assert, and the payload refuses
+out-of-range edge endpoints and vertex indices with the geometry
+named. Sub-logic: the Morse discharge and product rules of
+chapter~\ref{ch:qtsl-manual}, which carry the deepest mechanized
+ledger in the stack.
+
+\emph{Witness}: the Morse-graph certificate family across the
+corpus, up to certified graphs at the several-hundred-node scale.
+
+\ruleblock{API}
+\input{chapters/spec-api/QMorse}
+
+\subsection{QWireCert: wiring certification}
+\label{sec:spec-lang-qwirecert}
+
+\ruleblock{Definition}
+\[
+\mathsf{QWireCert} : [\, w : \mathsf{Wiring},\;
+  \mathrm{premises} : \mathsf{Spec}^{*},\;
+  \mathrm{out} : \mathsf{Spec},\;
+  \kappa : \mathsf{Slack} \,]
+\]
+
+The wiring $w$ is certified for $(\mathit{spec}_i) \Rightarrow
+\mathit{spec}_{\mathrm{out}}$ with slack $\kappa$ in the
+$\mathcal{K}^0_\infty$ class. The premise list is positional
+against the wiring's inner-system order; lockstep with a consuming
+composition node's components is record-level conformance. Sub-logic: discharged from proof
+leaves for the two condition families of the composition calculus
+(mechanism certification; wiring-lens
+certification)~\cite{capuccimyers2026}, per region;
+$\mathcal{K}_\infty$-membership rows are proof-dischargeable;
+consumed by the wire-composition rule. The class membership and slack
+algebra are proven; the payload here freezes the API shape while the
+row's upstream schema staging follows the system-side work --- stated
+so the reader knows which part is mathematics and which part is
+plumbing.
+
+\emph{Witness}: the assume--guarantee worked examples of
+chapter~\ref{ch:qtsl-manual}.
+
+\ruleblock{API}
+\input{chapters/spec-api/QWireCert}
+
+\subsection{QDist: distance judgments}
+\label{sec:spec-lang-qdist}
+
+\ruleblock{Definition}
+\[
+\mathsf{QDist}[d](A, B) \le \varepsilon
+\qquad
+d : \text{a declared distance functor (registry entry)},\;
+\varepsilon \in \Q_{\ge 0}
+\]
+
+The declared distance functor --- a registry entry naming subject
+sort, symmetry flag, licensed rules, and observable meaning ---
+between two subjects (system manifests, distribution snapshots, or
+definite descriptions with their well-formedness licenses) is at most
+exact-rational $\varepsilon$. Judgment-primary by design: triangle,
+weakening, and symmetry-per-flag are judgment-level admissibles,
+while the discharge rules are their own catalogue entries ---
+coupling-witnessed drift, contraction-witnessed fixed-point balls,
+and the transport cells that degrade a judgment across an approximate
+simulation with the $n\varepsilon$ compounding law made explicit.
+\emph{Schema status}: chartered design --- this kind's row species
+is not yet part of the normative row schema
+(\path{theories/Qtsl.geolog}); it enters with its discharge lanes,
+and until then the entry stands as the registry slot for the
+demand.
+
+\emph{Witness}: the coupling and contraction fixture families; the
+finite-kernel transport tier.
+
+\ruleblock{API}
+\input{chapters/spec-api/QDist}
+
+\subsection{\texorpdfstring{The existence family: QZeroExists, QEquilibriumExists,\protect\\ QFixedPointExists}{The existence family: QZeroExists, QEquilibriumExists, QFixedPointExists}}
+\label{sec:spec-lang-qexists}
+
+\ruleblock{Definition}
+\[
+\mathsf{QZeroExists} : [\, g : \mathsf{Poly}^{m},\;
+  \mathrm{cell} : \mathsf{QRegionAtom} \,]
+\qquad
+\exists x \in \mathrm{cell} :\ g(x) = 0
+\]
+with the equilibrium and fixed-point members reading the same shape
+over a drift field and a map ($g = F - \mathrm{id}$, tied by an
+elaboration recompute downstream).
+
+Poincar\'e--Miranda member claims: a zero, an equilibrium, a fixed
+point, \emph{in a cell}. Existence only --- nothing in this family
+concludes uniqueness, count, or non-existence; that refusal boundary
+is the family's design. In this edition the cell is a box atom and
+the subject is equidimensional ($m$ components over an
+$m$-dimensional cell), refused otherwise with the geometry named.
+Sub-logic: the shared face-sign battery (rule + pinned oracle), and
+a derived rule reading an inward invariance box as an equilibrium
+witness.
+
+\emph{Witness}: the face-sign battery fixtures; the equilibrium
+readouts of the Morse-stratum examples.
+
+\ruleblock{API}
+\input{chapters/spec-api/QExists}
+
+\subsection{QSim: exact simulation}
+\label{sec:spec-lang-qsim}
+
+\ruleblock{Definition}
+\[
+\mathsf{QSim} : [\, \mathrm{src} : \mathsf{System},\;
+  \mathrm{dst} : \mathsf{System},\;
+  \sigma : (\N \times \mathsf{Mode} \times \mathsf{Poly})^{*} \,]
+\qquad
+\sigma : S \to S' \text{ an exact simulation map}
+\]
+
+The refinement preorder, one-sided by design: $\sigma$ carries the
+finer system onto the coarser, and simulations compose. The map is
+stored as flat (coordinate, mode, polynomial) triples --- one
+polynomial per destination coordinate per source mode, the mode
+cited as an entity rather than by name string, so a piece citing a
+nonexistent mode is unrepresentable rather than a silent key
+mismatch. The producer payload carries the same content
+mode-indexed --- the outer list ranges over the source's modes, each
+inner list is that mode's destination coordinates --- matching the
+transport builder's convention, refusing an empty mode roster and
+empty per-mode maps. Sub-logic:
+discharge at the strict tier (compatibility squares as proof leaves
+plus a mode-coverage walk) and the kernel tier (intertwining of
+kernels, machine-checked at its pushforward lemma); consumed by the
+simulation-transport rule, whose simulation premise is an ordinary
+premise of this kind --- no hypothesis asterisk. The approximate
+$(\sigma, \varepsilon)$ class deliberately concludes
+$\mathsf{QDist}$, never this kind: exactness is what makes transport
+lossless, and blurring the two sorts would launder approximation
+through an exact-looking judgment.
+
+\emph{Witness}: the simulation-transport worked examples; the
+LunarLander tick-semantics pair is carried by this transport.
+
+\ruleblock{API}
+\input{chapters/spec-api/QSim}
+
+\subsection{QFlatEq: flattening}
+\label{sec:spec-lang-qflateq}
+
+\ruleblock{Definition}
+\[
+\mathsf{QFlatEq} : [\, \mathrm{sys} : \mathsf{System},\;
+  \mathrm{flat} : \mathsf{Manifest} \,]
+\qquad
+\mathrm{flat} = \mathrm{flatten}(\mathrm{sys})
+\]
+
+The monolithic manifest is the flattening of the composite.
+Sub-logic: one oracle-shaped discharge (the substitution and
+guard-product recompute, registry-pinned, refusing loudly when
+unpinned), with the shared-carrier and binary-wiring confinements as
+refusal boundaries --- completeness costs, never soundness
+hypotheses: what the oracle cannot flatten it refuses to speak about,
+rather than asserting under an assumption. Consumed by the
+flattening substitution rule. The measurable-tier witness (the
+parallel-composition law) is machine-checked.
+
+\emph{Witness}: the flattening fixtures of the composition suite.
+
+\ruleblock{API}
+\input{chapters/spec-api/QFlatEq}
+
+\subsection{QAggScope: aggregate scope}
+\label{sec:spec-lang-qaggscope}
+
+\ruleblock{Definition}
+\[
+\mathsf{QAggScope} : [\, N : \mathsf{System},\;
+  \mathrm{aggdim} : \N,\;
+  K : \mathsf{PolytopeRow}^{*},\;
+  \mathrm{stop} : \{\mathsf{reachable}, \mathsf{stopped}\} \,]
+\]
+
+The aggregate image of every in-scope reachable marking of the net
+$N$ lies in the polytope $K$, under the declared scope semantics.
+Reachability is composition-unstable (so not chase) and semantic (so
+not oracle) --- which is why this is a judgment kind with
+rule discharge: the three confinement routes (cite an invariance-scope
+row; exit-guard structure, by oracle walk over guard rows; stopped
+semantics, by declared flag with a conformance tie) each conclude it,
+alongside P-invariant conservation certificates ($y \cdot C = 0$,
+exact-rational, witness carried) and capacity rows. Consumed by the
+aggregation-reduction rule as an ordinary premise. \emph{Schema
+status}: designed, not yet rows --- the aggregation-reduction
+node's row kits are in the normative schema; the scope kind's own
+row species joins them when its rows land.
+
+\emph{Witness}: the structurally bounded net families of the
+aggregation suite.
+
+\ruleblock{API}
+\input{chapters/spec-api/QAggScope}
+
+\subsection{QStateFinite: a classification judgment}
+\label{sec:spec-lang-qstatefinite}
+
+\ruleblock{Definition}
+\[
+\mathsf{QStateFinite} : [\, \mathrm{sys} : \mathsf{System} \,]
+\qquad
+\text{the subject's state type is finite}
+\]
+
+A \emph{classification} judgment: a class membership of the rule's
+subject, not a per-application fact. Sub-logic: chase-derivable by
+structural refinement over the state-type formers (enumerations are
+finite; finite products of finite factors are finite; nesting
+inherits; the tensor former derives nothing, a deliberate negative),
+with a decidable oracle as fallback. Consumed where a discharge rule
+needs finiteness as a premise (the coupling-drift finite tier), which
+retires a side-condition asterisk into an ordinary premise; a future
+countable-tier proof targets a weaker classification, display
+untouched. \emph{Schema status}: designed, not yet rows in the
+normative schema; the classification enters with its
+chase-refinement family.
+
+\emph{Witness}: the finite-tier coupling fixtures.
+
+\ruleblock{API}
+\input{chapters/spec-api/QStateFinite}
+
+\subsection{QLinGrowth: a growth-class judgment}
+\label{sec:spec-lang-qlingrowth}
+
+\ruleblock{Definition}
+\[
+\mathsf{QLinGrowth} : [\, f : \mathsf{Poly}^{*},\;
+  a, b : \Q_{\ge 0},\;
+  \mathrm{scope} : \mathsf{Box} \,]
+\qquad
+\lVert f(x) \rVert \le a \lVert x \rVert + b \ \text{on the scope}
+\]
+
+Membership in the linear-growth class with the \emph{constants
+carried in the judgment}, so downstream cells consume $(a, b)$
+arithmetically rather than a membership bit. The kind is load-bearing
+because the fence it polices is provably sharp: the transport law it
+feeds is \emph{false} outside the fragment (the $n\varepsilon$
+compounding of the distance-transport cell is sharp without a
+contraction row), so growth control must arrive as evidence, not
+assumption. Sub-logic: certificate-carrying --- affine-envelope and
+Bernstein rows discharge it for polynomial drifts; composition and
+weakening admissibles do constant arithmetic.
+
+\emph{Witness}: the distance-transport pushforward cells' premise
+rows.
+
+\ruleblock{API}
+\input{chapters/spec-api/QLinGrowth}
+
+\subsection{The attitude blend: SHurwiczGE and SHurwiczLE (not a
+judgment kind)}
+\label{sec:spec-lang-hurwicz}
+
+\ruleblock{Formation}
+\begin{mathpar}
+\inferrule*[Right=\textsc{SHurwiczGE}]
+  {\alpha \in \mathbb{Q} \\ 0 \le \alpha \le 1 \\
+   B \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SHurwiczGE}(\alpha, B, R)\ \mathsf{AttitudeSpec}}
+\\
+\inferrule*[Right=\textsc{SHurwiczLE}]
+  {\alpha \in \mathbb{Q} \\ 0 \le \alpha \le 1 \\
+   B \in \mathbb{Q} \\ R\ \mathsf{PathObservable}}
+  {\mathsf{SHurwiczLE}(\alpha, B, R)\ \mathsf{AttitudeSpec}}
+\end{mathpar}
+
+Certification is pessimism; design exploration wants the other end
+too, and occasionally a weighted blend --- the Hurwicz
+optimism--pessimism criterion, transposed. Where the credal reading
+leaves a \emph{set} of values at a run-functional, the blend mixes
+the two envelope readings with a declared attitude weight:
+$\alpha = 0$ is the pure worst case ($\mathsf{SReturnGE}$'s floor
+face, exactly), $\alpha = 1$ the pure best case
+($\mathsf{SReturnMayBeGE}$'s witness face, exactly), and an interior
+$\alpha$ mixes the two envelopes \emph{arithmetically} into one
+scalar before thresholding, in checker-recomputed rational
+arithmetic. The pair therefore fits \emph{neither} cap face, which
+is why it has its own sort instead of a mis-declared face --- and
+the contrast with the record deserves its precise statement,
+because a specification is not envelope-pure either. A
+specification is \emph{polarized}: every component carries a
+declared face, so its compiled verdict is truth-functional over
+per-component single-envelope discharges, monotone
+separately-per-slot with fixed sign, and verdict-mixing commutes
+with composition. The interior blend's scalar has no sign in the
+refinement order --- it mixes a quantity that shrinks under new
+admitted laws with one that grows --- and it fails the
+marginal-extension tower property and equivalence with any single
+envelope bound (exact-rational countermodels are kernel-checked,
+both faces). In one line: \textbf{a Spec mixes verdicts; an
+attitude mixes envelopes} --- and envelope-mixing is root-only,
+which is exactly where the record does its own mixing anyway.
+
+Root-only-ness is now \emph{type-level} --- the fence-to-type
+upgrade of the theory revision: the pair concludes its own small
+cap sort, whose only consumer is the record's score slot
+(\texttt{spec\_score}, section~\ref{sec:spec-lang-record}) --- no
+connective, path former, or atom takes an $\mathsf{AttitudeSpec}$
+argument, so occurrence below a root is unrepresentable rather than
+oracle-rejected, and the earlier edition's whole-tree typing clause
+for this former is retired. What has \emph{not} changed is the
+judgment-side exclusion, and it is the design: no rule concludes an
+attitude claim and no judgment sort exists for one --- admitting
+the interior blend into the derivation calculus would break the
+citation discipline everything else preserves. Evaluation
+decomposes into the two extreme passes --- one floor certificate,
+one witness certificate --- mixed once at the root, and a verdict
+renders as a \emph{design score}, never a guarantee. Nothing is
+lost at the endpoints: a nested blend at $\alpha \in \{0, 1\}$ has
+its canonical spelling in the sibling formers.
+
+\emph{Witness}: the attitude fixtures of the producer surface; the
+credal-stratum examples of the semantic universe chapter
+(chapter~\ref{ch:qtsl-semantic-universe}, the section on agreement
+and the attitude operator).
+
+\ruleblock{API}
+\input{chapters/spec-api/SHurwiczGE-LE}
+
+\addtocontents{toc}{\protect\setcounter{tocdepth}{2}}

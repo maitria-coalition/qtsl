@@ -1,0 +1,30 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+theory Routes {
+
+  Node : Set;
+
+  // Asserted: a direct hop exists.
+  Edge : [src: Node, tgt: Node] -> Prop;
+
+  // Derived: some chain of hops exists. Rows appear exactly when the
+  // axioms force them — never asserted directly.
+  Path : [src: Node, tgt: Node] -> Prop;
+
+  // `chase` marks a derivation rule: the axiom FIRES, creating rows.
+  // (`report` marks a constraint: violations are judged, nothing is
+  // created; an unmarked axiom defaults to report — the least-
+  // dangerous reading, so derivation is always an explicit choice.)
+  chase ax/path/edge : forall a : Node, b : Node.
+    [src: a, tgt: b] Edge |- [src: a, tgt: b] Path;
+
+  chase ax/path/trans : forall a : Node, b : Node, c : Node.
+    [src: a, tgt: b] Path, [src: b, tgt: c] Edge
+    |- [src: a, tgt: c] Path;
+
+  // A denial: this network is required loop-free. A commit that lands
+  // a cycle is not rejected — the violated denial is REPORTED as a
+  // judgement, and repair is a further ordinary commit.
+  report ax/no/loop : forall a : Node.
+    [src: a, tgt: a] Path |- false;
+}
+\end{Verbatim}

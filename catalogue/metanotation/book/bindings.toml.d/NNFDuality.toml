@@ -1,0 +1,34 @@
+# bindings.toml.d/NNFDuality.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'NNFDuality'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "compl_ge_atom"
+sha256 = "8b565198f450cbea9399e72ac8eeccf2454c87984bc7494453d3a4dd36b2f8fa"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "compl_gt_atom"
+sha256 = "2088b741cd7bcede34d1c1a6504fc324a9b9afe055884ec6ff76f2bf82e23d8e"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "compl_le_atom"
+sha256 = "0c6b4dbd60df54e64596031edf4bd675bcb80511479bfe2d901347e99f458905"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "compl_lt_atom"
+sha256 = "9efda0cb369c5291821efc75a7a19d0156edf7b04ad1b78052dd5e19f301a27c"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "denot_nnfAux"
+sha256 = "64d6b6383fd1247360423b24060b97fdc8cb5293744de21f5a45be672ca68ef7"
+
+[[correspondence]]
+entry = "NNFDuality"
+steele_sha256 = "df122a3d0214a5f7a7a4b42d6bdb84cdf36914b31f644ad883ee9795f1a50172"
+statements_sha256 = "96e205c9427ff5ec2824baded75dc978959944a01b67d5601a796cc76e0715fe"
+prose_sha256 = "7f2f49e56c4105b3d321bb0e9c98c94ace268aca2f6c0e42a45a8a7217e42d41"
+

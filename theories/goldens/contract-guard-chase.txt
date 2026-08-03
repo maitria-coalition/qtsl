@@ -1,0 +1,33 @@
+sorts:
+  PrimApp — 5 elements (5 seeded)
+  HAggKind — 5 elements (5 seeded)
+relations:
+  hagSumR — 1 row (1 seeded, 0 derived)
+    [out: fsk] hagSumR
+  hagMaxR — 1 row (1 seeded, 0 derived)
+    [out: fmk] hagMaxR
+  hagMinR — 1 row (1 seeded, 0 derived)
+    [out: fnk] hagMinR
+  hagConjPowR — 1 row (1 seeded, 0 derived)
+    [out: fpk] hagConjPowR
+  hagConjExpR — 1 row (1 seeded, 0 derived)
+    [out: fek] hagConjExpR
+  contract_semiring — 5 rows (5 seeded, 0 derived)
+    [app: fea, kind: fek] contract_semiring
+    [app: fma, kind: fmk] contract_semiring
+    [app: fna, kind: fnk] contract_semiring
+    [app: fpa, kind: fpk] contract_semiring
+    [app: fsa, kind: fsk] contract_semiring
+  qtsl_contract_param [side-condition] — 0 rows (0 seeded, 0 derived)
+  qtsl_contract_cell [side-condition] — 0 rows (0 seeded, 0 derived)
+judgements (10):
+  choice pending: ax/wf/contract_param_pow at [a: fpa, k: fpk] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  choice pending: ax/wf/contract_param_exp at [a: fea, k: fek] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  choice pending: ax/wf/contract_cell at [a: fma, k: fmk] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  choice pending: ax/wf/contract_cell at [a: fna, k: fnk] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  choice pending: ax/wf/contract_cell at [a: fea, k: fek] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  choice pending: ax/wf/contract_cell at [a: fpa, k: fpk] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  choice pending: ax/wf/contract_cell at [a: fsa, k: fsk] — a menu of 1 repair; the engine picks nothing (menus are data for an agent)
+  denial violated: ax/fence/contract_max_refused at [a: fma, k: fmk]
+  denial violated: ax/fence/contract_min_refused at [a: fna, k: fnk]
+  denial violated: ax/fence/contract_exp_refused at [a: fea, k: fek]

@@ -1,0 +1,5 @@
+# Stopping times, optional stopping, upcrossings and martingale
+# convergence. Depends only on the HOL4 distribution's src/probability
+# stack.
+all: qtsl_stopTheory.uo qtsl_upxTheory.uo
+.PHONY: all

@@ -1,0 +1,31 @@
+\apilang{TypeScript}{spec.derived.minReturnOverBranches}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+minReturnOverBranches(lo: QLike, ret: PathObservable): ForallSpec
+\end{tssrc}
+\apiprov{definition --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+/** Min-return over enumerated branches — `SReturnGE` at the credal
+ * stratum (lower expectation over a finite branch set = the
+ * minimum); the spelling is the plain former. */
+minReturnOverBranches(lo: QLike, ret: PathObservable): ForallSpec {
+  return returnGe(lo, ret);
+},
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::min\_return\_over\_branches}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn min_return_over_branches(lo: WitRat, ret: PathObservable) -> ForallSpec
+\end{rustsrc}
+\apiprov{definition --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+/// Wing C: min-return over enumerated branches — `SReturnGE` at the
+/// credal stratum (lower expectation over a finite branch set = the
+/// minimum); the *spelling* is the plain former over the given run
+/// functional, the credal reading is the substrate's. Witness: the
+/// Atari circuit rows (per-lane returns, claimed bound = the
+/// minimum).
+pub fn min_return_over_branches(lo: WitRat, ret: PathObservable) -> ForallSpec {
+    ForallSpec::return_ge(lo, ret)
+}
+\end{rustsrc}

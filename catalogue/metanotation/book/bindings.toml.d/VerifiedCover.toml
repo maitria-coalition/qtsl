@@ -1,0 +1,19 @@
+# bindings.toml.d/VerifiedCover.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'VerifiedCover'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "verifiedCover_components_sound"
+sha256 = "410e05039c46fe2ca8befafd966d2c04cdab30dd1080a333f7f50d00ed4b5bc5"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "verifiedCover_sound"
+sha256 = "f233d633313f7cd75b7d37f4a1d9e4bbacd4a7d31b0128c83eeeb32e52be9f20"
+
+[[correspondence]]
+entry = "VerifiedCover"
+steele_sha256 = "df828ea7b01cf359dc47fc74e4f0c1c2f017a18482df28e098c72b6dc39feb85"
+statements_sha256 = "d6d96c4df934fbfd3f8cdc6fe47ad4ecc98842488c1752a261d44c4cfb4c88f6"
+prose_sha256 = "b0a25e96b44b5b2696abd7c743faa0f7ac9bc99b78098031f063c8d8c193f9f6"
+

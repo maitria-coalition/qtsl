@@ -1,0 +1,266 @@
+\chapter{Hypernets: Markov Kernels}
+\label{ch:qtsl-markov-kernels}
+
+\noindent\draftmark\medskip
+
+\Bookref{ch:qtsl-hypernets}{The hypernet chapter} fixed a
+deterministic calculus: ten primitive boxes, one evaluator, one
+canonical serialization, one content digest. Stochastic models need
+kernels: a diffusion with jumps needs a jump law, a stochastic
+Petri-style transition needs a firing law, and a Markov chain simply
+\emph{is} its transition kernel. This chapter is about how the
+toolkit says ``Markov kernel'' without adding a primitive. A
+\emph{Markov-kernel hypernet} is an ordinary well-formed hypernet
+together with a designated roster of \emph{noise ports}: inputs read as
+fresh uniform draws on $[0,1]$. Its denotation is the Markov kernel
+obtained by pushing the uniform reference measure forward through the
+deterministic semantics --- every kernel is presented by an explicit
+deterministic dilation with its ancilla exposed. Randomness enters at
+the interface, never at a box; the wire format, the evaluator, and the
+digest scheme never learn that the extension exists. A reader who only
+wants to know which named distributions the toolkit provides can go
+straight to the coverage dashboard (section~\ref{sec:exp-dist}).
+
+\section{Kernels as dilations}
+\label{sec:mk-dilation}
+
+Three consequences of this reading come essentially for free. \emph{Normalization is a
+theorem, not a constraint}: every box is total and the reference
+measure is a probability, so nothing expressible at this level loses
+mass. \emph{Discard is marginalization}: deleting an output wire
+marginalizes the kernel. \emph{Copy is sharing, never resampling}:
+fan-out of a noise-derived value is an explicit copy row --- both
+consumers see one realization --- while an independent resample is a
+second noise port, so the two are different graphs with different
+digests. The last point is a central subtlety of the probabilistic
+string-diagram literature (tossing a coin and copying the outcome is
+not tossing two coins~\cite{fritzliang22,bonchi26b}), and the
+linearity discipline of the deterministic calculus settles it
+structurally, with no new axioms;
+Figure~\ref{fig:mk-copy-resample} draws the two graphs.
+
+All three consequences are machine-checked in the toolkit's Lean
+tree at the finite-outcome stratum, where a stage is a measurable
+outcome map from the noise cube $[0,1]^{N}$ to a finite value set.
+Total mass one is the theorem \texttt{sum\_noiseDenotFun}; pushing
+the denotation forward along a projection is
+\texttt{noiseDenot\_comp}, with discard as the special case that
+forgets a coordinate. For
+composition, the law runs in the positive direction and in the
+negative one: with disjoint noise rosters, a sequential composite
+denotes the Kleisli composite of the stage denotations
+(\texttt{noiseDenot\_seqComp}), while a shared roster provably
+departs from that composite (\texttt{copy\_ne\_kleisli}), so the
+disjointness hypothesis is content rather than bookkeeping. All of
+these live in the namespace \texttt{SuFunctor.Stochastic},
+sorry-free.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.94cm,y=0.82cm,
+  box/.style={draw=accentdeep, fill=accent!50, rounded corners=1pt,
+    font=\footnotesize\ttfamily, inner sep=2.5pt, minimum height=4.2mm},
+  pbox/.style={draw=NoteGray, fill=NoteGray!12, rounded corners=1pt,
+    font=\footnotesize\ttfamily, inner sep=2.5pt, minimum height=4.2mm},
+  wire/.style={-, line width=0.5pt, draw=black!75},
+  port/.style={font=\small\itshape, inner sep=1pt},
+  plab/.style={font=\scriptsize, inner sep=1pt, text=black!75}]
+\node[port] (u) at (0, 0.75) {$u$};
+\node[pbox] (cp) at (1.8, 0.75) {copy$_2$};
+\node[box] (f1) at (3.6, 1.5) {$f$};
+\node[box] (g1) at (3.6, 0)   {$g$};
+\node[port] (o1) at (4.9, 1.5) {$y_1$};
+\node[port] (o2) at (4.9, 0)   {$y_2$};
+\draw[wire] (u) -- (cp);
+\draw[wire] (cp.east) to[out=35,in=180] (f1.west);
+\draw[wire] (cp.east) to[out=-35,in=180] (g1.west);
+\draw[wire] (f1) -- (o1);
+\draw[wire] (g1) -- (o2);
+\node[plab, anchor=north] at (2.6, -0.85) {one draw, shared};
+\begin{scope}[xshift=7.2cm]
+\node[port] (v1) at (0, 1.5) {$u_1$};
+\node[port] (v2) at (0, 0)   {$u_2$};
+\node[box] (f2) at (1.8, 1.5) {$f$};
+\node[box] (g2) at (1.8, 0)   {$g$};
+\node[port] (p1) at (3.1, 1.5) {$y_1$};
+\node[port] (p2) at (3.1, 0)   {$y_2$};
+\draw[wire] (v1) -- (f2);
+\draw[wire] (v2) -- (g2);
+\draw[wire] (f2) -- (p1);
+\draw[wire] (g2) -- (p2);
+\node[plab, anchor=north] at (1.55, -0.85) {two independent draws};
+\end{scope}
+\end{tikzpicture}
+\caption{Copy is sharing, never resampling. Fanning a noise port out
+through an explicit copy (left) hands both consumers one realization;
+an independent redraw is a second noise port (right). The two are
+different graphs with different digests, and their denotations
+provably differ (\texttt{copy\_ne\_kleisli}).}
+\label{fig:mk-copy-resample}
+\end{figure}
+
+The evaluator never samples: given
+noise values as ordinary rational inputs, the exact evaluator runs
+unchanged. Simulation is the evaluator plus an external random-number
+driver; certificates consume the kernel's polynomial data and the
+reference measure, never samples.
+
+\section{Jump structure: mass, intensity, thinning}
+\label{sec:mk-jump}
+
+Continuous time asks for more than normalized kernels. Jump structure
+contributes a jump measure and a killing rate to a process's extended
+generator~\cite{davis-1993,ethier-kurtz-1986}, and what must be
+tracked is \emph{mass}: rates scale it, killing removes it, and
+staying put carries it without moving. The kernel vocabulary for
+this tier is a small generator language over normalized
+kernels --- jump, stay, kill, scale, superposition, and the empty
+generator --- in which every term carries a rational
+\emph{intensity majorant}, computed by the typing derivation: scale
+multiplies it, superposition adds it.
+State-dependent intensities $\lambda(x)$ recover from a scalar
+majorant $\Lambda$ by thinning: run the clock at rate $\Lambda$ and,
+at each ring, branch to the real jump with probability
+$\lambda(x)/\Lambda$, staying put otherwise.
+
+Killing is deliberately
+distinct from the mass-preserving discard, and stay is deliberately
+distinct from zero: a stay contributes nothing to the generator but
+carries mass in the grading, which is what thinning and simulation
+budgets need to see.
+
+This vocabulary is machine-checked too --- at the finite-state
+stratum, in the same sorry-free module family as the dilation
+theorems. Every
+term elaborates, by structural induction, to a \emph{thinning normal
+form} (\texttt{ThinningForm}): a majorant together with one
+normalized kernel into the state space extended by two tagged
+outcomes, stay and kill. A sub-stochastic mass deficit is therefore
+unrepresentable rather than merely discouraged. The elaboration
+cannot emit sub-mass, and the declared intensity distributes exactly
+over the named channels (\texttt{elaborate\_mass\_partition}, with
+\texttt{outflow\_le\_intensity} giving the majorant its meaning).
+Elaboration itself preserves the extended generator
+(\texttt{generator\_elaborate}). The normal form is deliberately
+non-unique, and its two semantics-preserving moves are themselves
+theorems: a majorant may be inflated with the slack paid to stay
+(\texttt{generator\_dilate}), and self-jump mass may be reclassified
+as stay (\texttt{generator\_absorbDiagonal}) --- killing mass may
+not, which is the kill/stay separation made mechanical. Composition
+is machine-checked at the same stratum (module
+\texttt{SuFunctor.Stochastic.JumpAlgebra}): the normal forms carry
+the term vocabulary's composite algebra --- superposition,
+thinning-scale, coordinate extension, and parallel interleaving, with
+the intensity majorants as its grading --- and elaboration is a
+homomorphism of that graded algebra, definitionally for the module
+operations (\texttt{elaborate\_superpose} and its kin close by
+\texttt{rfl}) and in the thinning quotient for interleaving
+(\texttt{generator\_elaborate\_interleave}); sequential composition
+of jump kernels is no part of this tier's algebra by design ---
+successive jumps compose through time, and the Kleisli law for
+discrete steps is section~\ref{sec:mk-dilation}'s. The same
+tagged form recovers the jump-diffusion generator of
+\bookref{ch:qtsl-mathematical-models}{the modelling chapter}. That
+chapter's legacy encoding reads a reset mixture's mass deficit as
+killing, in Davis's convention; rewriting each deficit into an
+explicit kill outcome leaves the legacy transfer increment
+unchanged, and the full generator is recovered with nothing
+sub-stochastic remaining (\texttt{generator\_eq\_stepMix}). Every
+well-typed term thus declares a finite intensity majorant, the same
+bounded-intensity condition the non-Zeno arguments elsewhere in this
+book compose with.
+
+One consumer is worth naming here: the supervisors of the composition
+inventory (section~\ref{sec:cp-supervise}) are ordinary jump-only
+Systems --- policy memory is marking, and a policy update's
+stochastic content is a firing kernel of this tier --- so control
+through enablement adds no kernel vocabulary of its own.
+
+\section{Packaged generators}
+\label{sec:mk-packaged}
+
+Two families of packaged generators round out the vocabulary, both in
+the packaged-symbol discipline of
+\bookref{ch:qtsl-hypernets}{the hypernet chapter} (a definitional
+expansion, a projection lemma, and a candidacy rule --- never a new
+box).\footnote{Two senses of \emph{generator} meet in this chapter:
+the analyst's (section~\ref{sec:mk-jump} presents extended
+generators) and the algebraist's (a packaged generator is a named
+symbol with a definitional expansion). The word is inherited from
+both literatures; the toolkit keeps the senses apart by type.} \emph{Distribution generators} name the classical laws: each is
+an alias for a certified piecewise-polynomial quantile table applied
+to a noise port, carrying an explicit accuracy budget, so that a model
+that draws from a named distribution elaborates into the same hypernet
+language every other certificate in this book speaks.
+Section~\ref{sec:exp-dist} is their coverage dashboard. The
+\emph{stochastic-matrix generator} covers the finite-state case
+directly: a kernel between finite-extent wires given by an explicit
+tensor of transition probabilities, whose key conformance obligation
+is row-stochasticity --- mass one from each source state --- making
+finite Markov chains and the jump chains of continuous-time models
+first-class citizens rather than encodings.
+
+A status note, in the spirit of the preview note at the front of this
+volume. The deterministic substrate is
+\bookref{ch:qtsl-hypernets}{the hypernet chapter}'s and is shipped.
+The denotational core of the noise-port reading ---
+normalization, discard as marginalization, the Kleisli composition
+law and its shared-roster failure --- is machine-checked at the
+finite-outcome stratum (section~\ref{sec:mk-dilation}), and the jump
+vocabulary's semantics --- the intensity grading, the thinning
+normal form, its soundness, and the thinning-quotient moves --- are
+machine-checked at the finite-state stratum
+(section~\ref{sec:mk-jump}). The kernel-language \emph{surface} has
+meanwhile settled: the certificate theory
+(\path{theories/Qtsl.geolog}) carries it as normative schema. A
+kernel citation there names its hypernet by digest together with its
+noise roster and three tagged outcome channels: next, stay, and
+\emph{cemetery}, the wire format's name for the kill outcome. With
+every unit of mass explicitly named by one of the three channels, a
+sub-stochastic deficit is unrepresentable, and a pure kill is a
+weight-one cemetery branch.
+
+A transition carries a \emph{clock} with
+three wings, and the wing decides when the kernel is consulted. A
+\emph{racing} clock declares its intensity majorant. At a finite
+majorant, its polynomial presentation elaborates definitionally into
+the thinning normal form of section~\ref{sec:mk-jump}; the infinite
+majorant instead marks the instant-fire boundary case, contributing
+no generator term. A \emph{demonic} clock has no timing law
+--- whether and when its kernel is consulted belongs to a scheduler
+over which every judgment quantifies --- but carries a strictly
+positive dwell floor in the system definition: the scheduler may fire
+the transition only after that much contiguous dwell inside its guard
+region. A row with floor $d$ therefore fires at most $T/d + 1$ times
+by horizon $T$ under every resolution, and the demonic wing cannot
+produce Zeno behaviour at all. An untimed Petri net transcribes with
+unit dwell floors: the transcription is its \emph{discrete-time
+unfolding}, embedded in the continuous-time frame. It is faithful
+for ordering-and-counting properties, which are all an untimed net
+ever asserted. A
+\emph{forced} clock fires at exactly its declared positive dwell of
+contiguous in-guard time: deterministic delay, completing the triple
+--- exponential, immediate, deterministic --- from which
+deterministic and stochastic Petri nets are built, so watchdogs,
+timeouts, and protocol timers are native rows rather than encodings.
+Preemption is by guard reset (whatever fires first wins, and the
+forced clock resets with its guard). A same-instant tie between
+two forced transitions resolves through the demonic scheduler's
+seat: the classical deterministic-net literature needs an ad-hoc
+tie-breaking convention exactly where an imprecise-probability
+semantics has a seat already waiting. With both dwell floors
+strictly positive, the one syntactically visible source of Zeno
+behaviour in the vocabulary is an unbounded chain of instant
+firings --- precisely what the crossing-budget certificates price.
+
+The stochastic-matrix generator is
+carried with row-stochasticity among its named conformance
+obligations. The certified quantile tables behind the dashboard's
+certified rows exist today as test-suite artefacts, and the dashboard
+section states, row by row, what each status rests on and what would
+move it. This chapter still owes the settled surface its
+presentation: a coming revision states it at the deterministic
+calculus's level of rigour, with its soundness against the semantic
+universe, and a section on firing kernels alongside.
+
+\input{sections/distributions}

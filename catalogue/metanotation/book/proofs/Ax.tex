@@ -1,0 +1,91 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof
+at Putnam-exam-solution detail. This section also fixes the semantic
+setting shared by the seven structural sections (\rulename{Ax},
+\rulename{Weaken}, \rulename{Cut}, $\wedge$I, $\wedge$E, $\vee$I,
+$\vee$E); the later six abbreviate it as ``the \rulename{Ax} setting''.}
+
+\textbf{Setting (shared by the structural sections).}\enspace Fix a
+hypernet $H$ --- the ambient computation graph: typed wires, each
+declaring a tensor shape and a dtype, and primitive applications
+connecting them. A \emph{valuation} $\sigma$ assigns each typed wire a
+tensor of values from its declared value set; $\sigma$ is
+\emph{admissible} when every primitive application in $H$ satisfies its
+semantic relation. A formula holds at $\sigma$ by structural recursion:
+an atom $t_1 \bowtie t_2$ holds when both terms evaluate --- exact
+rational arithmetic, wires read whole, evaluation failing on untyped
+wires, on shape-incompatible arithmetic, and on any $\pm\infty$-valued
+wire mention --- to tensors compared entrywise under $\bowtie$ (a rank-0
+side broadcasts; incompatible shapes never hold); a region atom holds
+when its term evaluates to a rational point of the named region;
+$\Phi_1 \wedge \Phi_2$ holds when both conjuncts hold, $\Phi_1 \vee
+\Phi_2$ when at least one disjunct holds, $\top$ always, $\bot$ never. A
+sequent $\Phi \vdash \Psi$ is \emph{semantically valid} over $H$ when
+every admissible $\sigma$ satisfying $\Phi$ satisfies $\Psi$.
+
+Two facts frame all seven structural proofs. First, formulas are
+\emph{ordered trees}: $\wedge$ and $\vee$ are binary constructors, and
+every side condition of a structural rule is an identity of trees,
+checked structurally --- no normalization, no reassociation, no
+commuting. Wherever a proof below ``rewrites by'' a payload field, it is
+replacing a formula by itself. Second, none of the seven proofs consumes
+admissibility: each threads it, unexamined, to its sub-derivations, so
+the structural fragment is sound over \emph{arbitrary} valuations, and
+the admissibility hypothesis rides along only because the validity
+statement quantifies over it. Where a counterexample is claimed in these
+sections, read it over the one-wire hypernet ($w$ rational, rank-0, no
+applications): there every valuation is admissible, so an unsound
+conclusion genuinely falsifies.
+
+\textbf{Claim (\texttt{sound\_ax}).}\enspace The payload certifies one
+equality, $\mathrm{pre} = \mathrm{post}$ (\texttt{preEqPost}); under it
+the premise-free rule concluding $\Phi \vdash \Phi$ is sound.
+
+\begin{bthm}[soundness of \rulename{Ax}]\label{thm:ax-sound}
+If $\mathrm{seq.pre} = \mathrm{seq.post}$, then $\mathrm{seq}$ is
+semantically valid over every hypernet.
+\end{bthm}
+\begin{proof}
+One step. Let $\sigma$ be an admissible valuation with $\sigma \models
+\mathrm{seq.pre}$. The certified equality says $\mathrm{seq.post}$
+\emph{is} $\mathrm{seq.pre}$ --- the same tree, not merely an equivalent
+formula --- so $\sigma \models \mathrm{seq.post}$.
+\end{proof}
+
+\begin{bremark}[the one hypothesis is everything]\label{rem:ax-hyp}
+\rulename{Ax} has no premises, so the payload equality is its entire
+content. Drop \texttt{preEqPost} and the degenerate rule concludes an
+arbitrary sequent; the sharpest instance is $\top \vdash \bot$ ---
+every valuation satisfies the premise and none the conclusion.
+\end{bremark}
+
+\begin{bremark}[identity is free; reflexivity is not]\label{rem:ax-typing}
+\rulename{Ax} carries no well-typedness side conditions, and this is
+correct rather than an oversight: $\Phi \vdash \Phi$ is valid even when
+$\Phi$ mentions untyped wires or atoms that can never evaluate, because
+satisfaction --- whatever it turns out to be --- sits on both sides of
+the turnstile. Contrast \rulename{EqRefl}, which concludes the
+\emph{atom} $t = t$ under an arbitrary premise and does need shape and
+finiteness fields: an atom is a claim about evaluation, and an ill-typed
+$t$ never evaluates, so there the conclusion can fail at valuations the
+premise never constrained. \rulename{Ax} never crosses that line because
+it introduces no content.
+\end{bremark}
+
+\begin{bremark}[structural identity, not logical equivalence]
+The checker compares the two formula trees node for node.
+$\Phi \vdash \Phi'$ for a logically equivalent but differently shaped
+$\Phi'$ --- $B \wedge A$ against $A \wedge B$, say --- is \emph{not} an
+\rulename{Ax} instance; where needed it is re-derived through $\wedge$E
+and $\wedge$I. In the lattice reading of the structural fragment
+(developed at the $\vee$E section), \rulename{Ax} is reflexivity of the
+entailment order --- the Gentzen-style leaf \cite{gentzen1935},
+discharged semantically rather than by proof search.
+\end{bremark}
+
+\begin{anchors}
+Theorem \ref{thm:ax-sound} & \texttt{sound\_ax}; payload \texttt{PAxData} (field \texttt{preEqPost}); wired as \texttt{RuleData.ax} into \texttt{ProofObject.sound}\\
+ordered-tree formula grammar & \texttt{Formula} (constructors \texttt{and}/\texttt{or}); satisfaction \texttt{Formula.holds}\\
+validity statement & \texttt{Sequent.semanticallyValid}\\
+lattice reading & \texttt{M3.le\_refl} (the $\vee$E section's countermodel kit)\\
+\end{anchors}

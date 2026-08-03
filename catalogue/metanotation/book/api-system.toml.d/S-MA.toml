@@ -1,0 +1,24 @@
+# api-system.toml.d/S-MA.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-MA"
+entity = "model type"
+
+[api.ts]
+handle = "system.markovAutomaton"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_ma", "marker:ts_sig_magen"]
+snippet_file = "ts/tests/magen-native.test.ts"
+snippet = "marker:ts_ma"
+note = '''The quoted construction is the committed \texttt{relay-2s1i} cross-language byte-identity vector's presentation, whose thinned closure the kit tests pin in closed form on both surfaces; the kit's Rust face is \texttt{mtk\_catalogue::system::ma\_gen\_kit}.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::MarkovAutomaton::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_ma"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "marker:ma_happy"

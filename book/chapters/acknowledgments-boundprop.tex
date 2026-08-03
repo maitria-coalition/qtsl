@@ -1,0 +1,29 @@
+
+\item \textbf{Neural-network bound propagation}. The two-sided affine
+  envelope of a network is this community's workhorse, and the
+  calculus adopts it exactly as found, with the trust story inverted:
+  their methods \emph{find} envelopes; our rules only ever
+  \emph{check} one, six rational inequalities at a time. We wish to
+  acknowledge in particular
+  \begin{itemize}
+    \item R\"udiger Ehlers, whose triangle relaxation of ReLU is
+      where the family's envelopes begin \cite{ehlers2017};
+    \item Eric Wong and J. Zico Kolter, whose convex outer
+      adversarial polytope is the relaxation's dual rendering
+      \cite{wongkolter2018};
+    \item Huan Zhang, Tsui-Wei Weng, Pin-Yu Chen, Cho-Jui Hsieh, and
+      Luca Daniel, whose CROWN chooses the envelope's slopes
+      adaptively --- the shape our calculus replays in \mbox{exact}
+      arithmetic \cite{zhang2018crown};
+    \item Kaidi Xu, Zhouxing Shi, and their coauthors, whose
+      auto\_LiRPA framework unified the family and gave the
+      \rulename{LiRPA} rule its name \cite{xu2020lirpa};
+    \item Gagandeep Singh, Timon Gehr, Markus P\"uschel, and Martin
+      Vechev, whose DeepPoly carried the same envelopes into an
+      abstract domain \cite{singh2019deeppoly};
+    \item Guy Katz, Clark Barrett, David L. Dill, Kyle Julian, and
+      Mykel J. Kochenderfer, whose Reluplex opened the complete
+      case-analysis route our split rule prices, and whose ACAS~Xu
+      benchmark the toolkit's network importer compiles whole, all
+      forty-five networks of it \cite{katz2017reluplex}.
+  \end{itemize}

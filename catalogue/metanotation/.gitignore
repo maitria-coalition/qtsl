@@ -1,0 +1,10 @@
+target/
+out/*
+!out/BL-rules-diff.pdf
+!out/BL-rules-diff-print.pdf
+!out/BL-rule-book.pdf
+!out/BL-rule-book-Syzygy.pdf
+!out/BL-rule-book-PConstExact.pdf
+!out/BL-rule-book-SmallGain.pdf
+!out/BL-QTSL-rules.pdf
+!out/BL-QTSL-rules-print.pdf

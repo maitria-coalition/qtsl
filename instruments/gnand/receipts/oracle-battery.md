@@ -1,0 +1,46 @@
+# oracle battery -- deadline-free rows, exhaustive n<=3 + random phase
+
+- **EQ-G2** (G-conjunction split, both directions): CONFIRMED (no countermodel)
+- **EQ-G3** (idempotence, both directions): CONFIRMED (no countermodel)
+- **EQ-G4** (quasi-reflexivity with the D disjunct): CONFIRMED (no countermodel)
+- **EQ-G4-noD** (T without D: dead-state witness proves the disjunct necessary): countermodel found as expected: CX(state=0, lhs>rhs, Model(n=1, edges=[], stay=[], val={'a': []}, live=[]))
+- **EQ-G5a** (vacuity: D below any AG): CONFIRMED (no countermodel)
+- **EQ-G5b** (vacuity: D below any ASt): CONFIRMED (no countermodel)
+- **EQ-G6** (liveness invariance): CONFIRMED (no countermodel)
+- **EQ-G6-conv** (converse fails at dead states): countermodel found as expected: CX(state=0, lhs>rhs, Model(n=1, edges=[], stay=[], val={'a': []}, live=[]))
+- **EQ-G7** (disjunction half): CONFIRMED (no countermodel)
+- **EQ-G7-conv** (two-trajectory split witness): countermodel found as expected: CX(state=1, lhs>rhs, Model(n=2, edges=[(1, 0)], stay=[0], val={'a': [0], 'b': [1]}, live=[0, 1]))
+- **EQ-S1** (pair multiset invariance (permute+dup)): CONFIRMED (no countermodel)
+- **EQ-S2** (bundle split, both directions): CONFIRMED (no countermodel)
+- **EQ-S3** (request-disjunction split, both directions): CONFIRMED (no countermodel)
+- **EQ-S4** (pair monotonicity instance: request shrink + response grow): CONFIRMED (no countermodel)
+- **EQ-S5a** (bot-request pair drops): CONFIRMED (no countermodel)
+- **EQ-S5b** (top-response pair drops): CONFIRMED (no countermodel)
+- **EQ-S5c** (empty bundle is top): CONFIRMED (no countermodel)
+- **EQ-S6** (response-conjunction half): CONFIRMED (no countermodel)
+- **EQ-S6-conv** (alternation witness): countermodel found as expected: CX(state=0, lhs>rhs, Model(n=2, edges=[(0, 1), (1, 0)], stay=[], val={'a': [0], 'b': [0], 'c': [1]}, live=[0, 1]))
+- **EQ-S7** (invariant relativization of responses, both directions): CONFIRMED (no countermodel)
+- **EQ-S7r** (invariant relativization of requests, both directions): CONFIRMED (no countermodel)
+- **EQ-S8** (self-fulfilling request drops (oracle-corpus discovery)): CONFIRMED (no countermodel)
+- **EQ-S8-tight** (the response must be the request-recurred one: (AGFa, a&b) pair is NOT free): countermodel found as expected: CX(state=0, rhs>lhs, Model(n=1, edges=[], stay=[0], val={'a': [0], 'b': []}, live=[0]))
+- **EQ-S9** (Streett obligations are reachability-invariant: ASt(P) == AG[ASt(P)] (fusion ->; B1+vacuity <-)): CONFIRMED (no countermodel)
+- **EQ-S9-tight** (recurrence is not invariance: cycle witness expected): countermodel found as expected: CX(state=1, lhs>rhs, Model(n=2, edges=[(1, 0)], stay=[0], val={'a': [0]}, live=[0, 1]))
+- **EQ-S10** (fixpoint collapse: recurrently visiting a St-guaranteeing region == St (tail ->; S9+S11 chain <-)): CONFIRMED (no countermodel)
+- **EQ-S11** (G-to-Streett bridge: invariant response satisfies any pair (derivable from EQ-S7+EQ-S5; confirmed semantically here)): CONFIRMED (no countermodel)
+- **EQ-S11-conv** (bridge converse fails: satisfying a pair without invariance): countermodel found as expected: CX(state=0, lhs>rhs, Model(n=1, edges=[], stay=[0], val={'a': [], 'b': []}, live=[0]))
+- **EQ-S12** (falsum pair collapses the whole bundle to deadness: ASt[(T,F)::R] == D (tail never votes)): CONFIRMED (no countermodel)
+- **EQ-S13** (eventuality absorption: AGF(a | AGF a) == AGF a (Park-induction shadow; B2 tail argument)): CONFIRMED (no countermodel)
+- **EQ-S14** (pair reflexivity: a reflexive pair drops from any bundle (pathwise Cof tautology; NEW basis material)): CONFIRMED (no countermodel)
+- **EQ-S15** (the Streett cut: (a,c|b) and (b,c) yield (a,c) (pathwise pigeonhole + second pair; NEW basis material)): CONFIRMED (no countermodel)
+- **EQ-S15-conv** (cut converse control: (a,c) does not yield the (b,c) premise): countermodel found as expected: CX(state=0, lhs>rhs, Model(n=1, edges=[], stay=[0], val={'a': [], 'b': [0], 'c': []}, live=[0]))
+- **EQ-S13r** (relativized eventuality absorption: (a, b|ASt[(a,b)]) == (a,b); rho=T instance is EQ-S13): CONFIRMED (no countermodel)
+- **EQ-S13r-wrongreq** (request ASt[(a,b)] with response b is NOT free (contrast EQ-S8): conditional pairs need not self-deliver): countermodel found as expected: CX(state=0, lhs>rhs, Model(n=1, edges=[], stay=[0], val={'a': [], 'b': []}, live=[0]))
+- **GATE** (request gating AG[a->b] <= ASt[(a,b)] (derived: S14 + S4 + S7req; the canonical constructions lean on it)): CONFIRMED (no countermodel)
+
+## class-flag necessity demos (Gamma-filtered)
+- **EQ-C1-cd** (component invariance needs continuity: jump witness expected): countermodel found as expected: CX(state=1, lhs>rhs, Model(n=2, edges=[(1, 0)], stay=[0], val={'a': [1], 'b': [0]}, live=[0, 1]))
+
+## metamorphic self-checks
+- pair permutation/duplication invariance: CONFIRMED on all rounds
+
+battery overall: PASS

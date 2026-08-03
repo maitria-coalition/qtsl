@@ -1,0 +1,22 @@
+# api.toml.d/RootEval.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "RootEval"
+note = '''Two entry points share the row type --- the box form (quoted) and the sublevel form (\texttt{root\_eval\_sublevel} / \texttt{rootEvalSublevel}); the corpus constructs both.'''
+
+[api.ts]
+handle = "rules.qtslCore.rootEvalBox"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn rootEvalBox", "interface RootEvalBoxArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_root_eval_box.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::root_eval_box"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/arith.rs"
+sig = ["fn root_eval_box"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_root_eval_box"

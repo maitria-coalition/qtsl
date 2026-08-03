@@ -1,0 +1,29 @@
+# bindings.toml.d/QUntilBattery.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QUntilBattery'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "measure_firstBad_le"
+sha256 = "4d8667a765959f020885d329fc441b48adcf24051413648921739849569254be"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "measure_missTarget_le"
+sha256 = "78469b446f40c42adc4e983ffc967d716ec479b6015ede4d821ddcd168b203df"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "sound_QUntilBattery"
+sha256 = "7b3a2a01e8503c705cc3f524863b312dabd564fc3c2d2f923f4c7407f0c4d811"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "sound_QUntilBattery_firstHit"
+sha256 = "6408f6a2c73338c4cfbd5baa31831ba389a7f12e8ac242702bfa25d747f3f99d"
+
+[[correspondence]]
+entry = "QUntilBattery"
+steele_sha256 = "8af97d997ff8bce7e88047dc9fb9348cfb3bd16e731ed9c6fec5609631b6dc92"
+statements_sha256 = "abff6486f7f70e7abba89f4aa13a18130a91854fa4cf755a528cdd28d2e76645"
+prose_sha256 = "1ebe583d85e41924d3109e91074f9e480893bff876e7b9686aedeba5c3d8c9ba"
+

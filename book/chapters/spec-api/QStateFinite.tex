@@ -1,0 +1,21 @@
+\apilang{TypeScript}{judgment.stateFinite}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function stateFinite(args: { sys: SysRef }): Result<
+  Artifact,
+  JudgmentRefusal
+>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(j.stateFinite({ sys: j.sysRef("sys-a") })),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QStateFinite::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(sys: SysRef) -> Self
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let fin = QStateFinite::new(SysRef("sys-a".into()));
+\end{rustsrc}

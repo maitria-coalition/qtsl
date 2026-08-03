@@ -1,0 +1,94 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting (valuations, partial
+evaluation, elementwise-under-broadcast atom semantics) as fixed in the
+\rulename{EqElim} section.}
+
+\textbf{Claim} (\texttt{sound\_eqRefl}).\enspace The payload supplies a
+term $t$ and two checked typing conditions: $\bshape_H(t)$ is
+\emph{defined} (some shape $s$), and every free wire of $t$ is typed at a
+\emph{finite} (non-extended) dtype. Then $\Phi \vdash t = t$ is
+semantically valid for an \emph{arbitrary} premise $\Phi$ --- the rule is
+premise-free, and $\Phi$ rides along unread (a fact true in the empty
+context is true under any premise). Indeed the proof below never reads
+$\Phi$, the admissibility of $\sigma$, or the premise-satisfaction
+hypothesis at all: the conclusion holds at \emph{every} valuation.
+
+That anything must be checked here at all is the point of the section.
+Equality atoms are evaluation-level facts (\rulename{EqElim} setting), so
+``$t = t$'' is not free: it asserts that $t$ \emph{evaluates} --- and
+evaluation is partial.
+
+\begin{blemma}[totality under the typing pack]\label{lem:eqrefl-total}
+If $\bshape_H(t) = s$ and every free wire of $t$ is finitely typed, then
+at every valuation $\sigma$ the evaluation $\mathrm{ev}_\sigma(t)$ is
+defined, with shape $s$.
+\end{blemma}
+\begin{proof}
+Structural induction on $t$. A wire read succeeds because the wire's
+declared dtype is finite: the valuation's entries lie in the dtype's
+value set, which for a finite dtype contains no $\pm\infty$, so the
+whole-tensor rational read succeeds, at the declared shape. A constant
+evaluates to its rank-0 tensor. For a compound term, the induction
+hypotheses give defined operands whose shapes are, by the definition of
+$\bshape$, either equal or joinable through rank-0 broadcast --- exactly
+the domain on which the elementwise operations are total; the result
+lands at the join. A projection's rank-1-and-in-range gates are part of
+$\bshape$'s definedness, so the projected read is in range.
+(\texttt{Term.evalQ\_defined\_of\_bshape\_fin}.)
+\end{proof}
+
+\begin{blemma}[reflexivity lifts]\label{lem:eqrefl-lift}
+For any tensor $A$, the elementwise-under-broadcast equality relation
+holds between $A$ and $A$.
+\end{blemma}
+\begin{proof}
+The shapes are equal, so the relation reads the entry list zipped against
+itself: every pair on the diagonal is $(x, x)$.
+(\texttt{QTensor.rel2\_refl}.)
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{EqRefl}]\label{thm:eqrefl-sound}
+Under the payload's typing conditions, $\Phi \vdash t = t$ is
+semantically valid for every $\Phi$.
+\end{bthm}
+\begin{proof}
+Fix $\sigma$. Lemma~\ref{lem:eqrefl-total} gives
+$\mathrm{ev}_\sigma(t) = A$ for some tensor $A$;
+Lemma~\ref{lem:eqrefl-lift} closes the atom with both sides read as $A$.
+\end{proof}
+
+\begin{bremark}[why each typing condition is essential]
+\label{rem:eqrefl-cex}
+Drop the finite-wires condition: let $w$ be a wire of an
+\emph{extended} dtype (its value set admits $+\infty$), and let $\sigma$
+assign it a tensor with an infinite entry --- admissible, since nothing
+constrains a bare wire. The rational read of $w$ fails, $t := w$ does not
+evaluate, and the atom $w = w$ is \emph{false} at $\sigma$; with
+$\Phi := \top$ the sequent $\top \vdash w = w$ is refuted. Drop
+shape-definedness: take $t := w_1 + w_2$ with $w_1$ of shape $[2]$ and
+$w_2$ of shape $[3]$, both finite --- every wire reads, but the
+elementwise sum refuses the incompatible shapes, $t$ never evaluates, and
+$\vdash t = t$ is again false everywhere. In both cases the un-gated rule
+would assert an invalid sequent under a satisfiable (indeed empty)
+premise --- in the first case the conclusion fails at the exhibited
+valuation (a finite assignment would satisfy it); in the second it is
+unsatisfiable outright. The typing pack is exactly the semantic price of
+equality-by-evaluation; it is the same field family that repairs
+\rulename{Norm}, there compounded with canonical-form equality.
+\end{bremark}
+
+\begin{bremark}[taxonomy note]\label{rem:eqrefl-tax}
+Wherever \rulename{Norm} applies, \rulename{EqRefl} is its diagonal
+($t_1 = t_2 = t$, canonical forms trivially equal). It is nonetheless
+kept primitive: the development's frozen minimal fragment (\texttt{v0} in
+the sources) excludes the polynomial engine outright, and the equational
+kit must stand without it.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:eqrefl-total} & \texttt{Term.evalQ\_defined\_of\_bshape\_fin}; payload fields \texttt{tyDef}, \texttt{fin}\\
+finite-wire reads succeed & \texttt{Hypernet.Valuation.wireQ\_isSome}\\
+Lemma \ref{lem:eqrefl-lift} & \texttt{QTensor.rel2\_refl}\\
+Theorem \ref{thm:eqrefl-sound} & \texttt{sound\_eqRefl}; wired as core \texttt{RuleData.eqRefl} into \texttt{ProofObject.sound}\\
+typing predicates & \texttt{Term.bshape}, \texttt{Term.finWires} (Core/Catalogue)\\
+\end{anchors}

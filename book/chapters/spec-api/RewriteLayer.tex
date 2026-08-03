@@ -1,0 +1,54 @@
+\apilang{TypeScript}{spec.rewriteChain}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function rewriteChain(
+  a: SpecRef,
+  b: SpecRef,
+  steps: ReadonlyArray<RewriteStep>,
+): Result<Artifact, SpecRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const art = s.unwrap(
+  s.rewriteChain(j.specRef("spec-as-stated"), j.specRef("spec-normal-form"), [
+    {
+      rule: "implicationElim",
+      at: [{ kind: "specForall", i: 0 }],
+      dir: "forward",
+    },
+    {
+      rule: "gfDisjunctionFusion",
+      at: [{ kind: "specForall", i: 0 }, { kind: "andArg", i: 1 }],
+      dir: "forward",
+    },
+  ]),
+);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::rewrite::RewriteChainV0::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/rewrite.rs}}
+\begin{rustsrc}
+pub fn new(a: SpecRef, b: SpecRef, steps: Vec<RewriteStep>) -> Result<Self, Refusal>
+
+pub fn concludes(&self) -> QSpecEquiv
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let chain = RewriteChainV0::new(
+    SpecRef("spec-as-stated".into()),
+    SpecRef("spec-normal-form".into()),
+    vec![
+        RewriteStep {
+            rule: RewriteRule::ImplicationElim,
+            at: FormulaPath(vec![Step::SpecForall(0)]),
+            dir: Direction::Forward,
+        },
+        RewriteStep {
+            rule: RewriteRule::GfDisjunctionFusion,
+            at: FormulaPath(vec![Step::SpecForall(0), Step::AndArg(1)]),
+            dir: Direction::Forward,
+        },
+    ],
+)
+.unwrap();
+let concluded = chain.concludes();
+\end{rustsrc}

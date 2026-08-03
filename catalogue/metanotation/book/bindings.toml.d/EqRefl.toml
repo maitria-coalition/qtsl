@@ -1,0 +1,39 @@
+# bindings.toml.d/EqRefl.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'EqRefl'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PEqReflData"
+sha256 = "e1f52e09ff407de3a75e259cd4af905a8e5e14d329b92806e50cf5eb9edfd43a"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Term.bshape"
+sha256 = "a9d465ac3461f1316bbc6c6bbea6926eb45db42ab6df088ba1c82ca3842f1025"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Term.finWires"
+sha256 = "5254a29c92522fd7cb7cd37bb4e871854ddc034308bb39f582a98dc981684a5f"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "QTensor.rel2_refl"
+sha256 = "af12f2d3c4b210a5b9691c8f100c863946dcad230a1b2f1e7354982012afd3bf"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "Term.evalQ_defined_of_bshape_fin"
+sha256 = "ac9a36cb8a717d2e1142f8e755c64da25ad0a2622d103e4e1f05fccd4e4688ba"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_eqRefl"
+sha256 = "ecd3e49824abbcd0bfa4643c9f35aac196e5bee6aaa2b570c4915bb3423b168b"
+
+[[correspondence]]
+entry = "EqRefl"
+steele_sha256 = "74a879275be4a846b9605b8883164981428540db8ac1dc17cf9e61f38025d067"
+statements_sha256 = "f967e88cb1ed1469fa76ae5e92c85e5f5469d5259f5d4e4b765fdf7d428ae30b"
+prose_sha256 = "de638cdb0eb49dff9fcfdcca79aa94418fcf124056127a931c927c536c24545d"
+

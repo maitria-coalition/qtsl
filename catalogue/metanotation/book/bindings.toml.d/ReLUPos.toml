@@ -1,0 +1,14 @@
+# bindings.toml.d/ReLUPos.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'ReLUPos'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_reluPos"
+sha256 = "e5506ffd3f926f297eff3ca43aec060925800269a06b3de63a7ab69c3a1d4580"
+
+[[correspondence]]
+entry = "ReLUPos"
+steele_sha256 = "6263c6b074bfbdeb8814d813559bd727a4954ea3d6efc4a846e302ba91f28779"
+statements_sha256 = "7a95531506bd12efde587519b9197d00c4dd22016ba7fcfe148562e02d7473ca"
+prose_sha256 = "5b918f4bb983e13ccf2c0e33ce75c46dc99374c95f10a49f74b615511196d2b2"
+

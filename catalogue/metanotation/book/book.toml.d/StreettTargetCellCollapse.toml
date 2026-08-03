@@ -1,0 +1,84 @@
+# StreettTargetCellCollapse (T9c): alias — the ranking-guard row collapses
+# to a nonneg row under the zero-on-target convention.
+
+[[rule]]
+id = "StreettTargetCellCollapse"
+source = "../QTSL-rules.toml"
+row = "StreettTargetCellCollapse (T9c)"
+proof = "book/proofs/StreettTargetCellCollapse.tex"
+alias_target = "QStreettBundle"
+commentary = '''
+\rulename{StreettTargetCellCollapse} is a row-level economy inside the
+Streett bundle kit (the source catalogue labels it T9c): when a guard
+transition\textquotesingle s reset lands inside a region where the
+ranking certificate is identically zero --- the bundle\textquotesingle s
+zero-on-target-cells convention --- the ranking-guard row
+$W_i \circ g \le W_i$ on the guard slab \emph{is} the nonnegativity row
+$W_i \ge 0$ on that slab, because the left side is literally zero
+there. One row rewrites to one row, so the rule is an alias: a producer
+that has already discharged the nonneg row simply cites it where the
+guard row was owed, and emits nothing new. What the checker recomputes
+is the licensing side-condition: the containment of the reset image in
+the zero region ($g(\mathrm{slab}) \subseteq T$, with $W_i \equiv 0$ on
+$T$) is a recomputed geometric check, never a trusted annotation ---
+which is also why the collapse cannot be abused: on a slab whose resets
+leave the zero region, the side-condition fails and the full guard row
+is owed as usual.
+
+Mechanization state, plainly: the bound statement below is the one-line
+witness \texttt{ranking\_guard\_collapse} (module
+\texttt{QtslAux.QStreett}) --- under the zero-on-target
+convention and the recomputed containment, the guard row follows from
+the nonneg row on the slab, which is the entirety of the
+rule\textquotesingle s semantic claim (pure state-space set algebra: no
+kernel, no profile, no probability enters, so no profile residue
+attaches and the entry carries no conditional flag). The payload-level
+unpack still awaits the bundle sort\textquotesingle s staging, per the
+batch template (\rulename{StreettDegenerate} section, Recipe 1).
+'''
+note = '''
+Tier flag, carried honestly from the source catalogue: the rule is
+tiered alias (one row to one row), but its licensing side-condition is a
+recomputed containment --- if side-condition weight is ever ruled
+heavier than the alias criterion intends, the rule re-tiers admissible
+with machinery unchanged. Flagged, not forced.
+'''
+correspondence = '''
+One bound statement, and the display\textquotesingle s
+``one row to one row'' is its literal shape:
+\texttt{ranking\_guard\_collapse} concludes \texttt{∀ y ∈ slab, 0 ≤ W
+y → W (g y) ≤ W y} --- the nonneg row as the antecedent, the
+ranking-guard row as the consequent, per point of the slab. The two
+licensing conditions map as: $W_i \equiv 0$ on target cells
+$\mapsto$ \texttt{hzero : ∀ y ∈ T, W y = 0} (the G5 convention as a
+hypothesis), and the recomputed containment $g(\mathrm{slab})
+\subseteq T$ $\mapsto$ \texttt{himg : ∀ y ∈ slab, g y ∈ T} ---
+consumed as a hypothesis, recomputed checker-side, which is the
+tier-ambiguity flag\textquotesingle s exact locus rendered as a
+binder. Width note: the statement is one line over arbitrary sets
+and an arbitrary reset map \texttt{g : S → S} --- no slab geometry,
+no polynomiality of $W$, no guard structure --- strictly wider than
+the displayed instance, safe direction; the failure branch the
+display names (resets leaving the zero region owe the full guard
+row) is representable precisely as \texttt{himg} failing, whereupon
+the theorem offers nothing --- refusal-shaped, as it should be.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QStreett"
+src = "../../lean/qtsl-aux/QtslAux/QStreett.lean"
+decls = ["ranking_guard_collapse"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}: the rule rewrites one
+premise row of an (unstaged) bundle kit into another \emph{before}
+emission --- no wire object ever contains a collapse node, and the
+surviving row is an ordinary base-calculus sequent the base checker
+already covers. The HOL statement that would matter is the
+bundle\textquotesingle s own, absent for the reasons given in that
+section. Checked against the HOL sources: the \texttt{qtsl\_catalogue}
+theory carries nothing Streett-shaped.
+'''

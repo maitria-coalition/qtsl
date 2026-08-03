@@ -1,0 +1,185 @@
+
+\sourcenote{Genre: core rule (tier 1). Scope, stated loudly: the
+semantic core (the aggregate-space reduction) is proven, and the
+row-warrant families are proven at their stated scopes ---
+nonnegativity and moment rows for every bag, coupling rows under their
+colour-scope premise, while count upper bounds and place-invariant
+rows enter as certified in-scope reachability facts, not bagwise
+identities; the marking-space compile itself
+--- producing the aggregate map and its rows from a net --- is checker
+and compiler recomputation, outside these statements. Every hypothesis
+is used and remarked on.}
+
+\textbf{Setting and claim.}\enspace The state of a coloured net is a
+\emph{marking}: for each place $P$, a finite multiset of colours drawn
+from a compact rational box $B_P \subset \R^{n_P}$ --- so the state
+space is a disjoint sum, over count vectors, of symmetric powers, with
+variable dimension and a mandatory exchangeability quotient (a
+``function of the state'' that reads token identities is not a function
+on the quotient at all). The certificate language works in
+\emph{aggregate coordinates}: counts $k_P = \#P$ and pooled features
+$s^P_j = \sum_{t : P} \phi_j(c_t)$ for a finite dictionary
+$\Phi = \{\phi_j\}$ of polynomials. An obligation arrives as
+``for every in-scope marking $x$:
+$G\bigl(\vec{s}(x), \vec{k}(x)\bigr) \leq 0$'' with $G$ polynomial. The
+rule replaces marking quantification by one polynomial sequent over a
+polytope $K$ in aggregate space, whose hypothesis rows are the
+containment certificate. The claim (\texttt{aggReduce} + the row
+warrants): the reduction is sound, and every row family below may be
+added to $K$'s description without ever cutting a reachable aggregate
+point.
+
+\begin{blemma}[queries, counts, and the contraction form]
+\label{lem:qar-query}
+For a bag $m$ of colours and $f : \text{colour} \to \R$, write
+$\langle m, f \rangle = \sum_{c \in m} f(c)$ (with multiplicity). Then
+$\langle m, \mathbf{1} \rangle = \#m$, and
+$\langle m, f \rangle = \sum_{c \in \mathrm{supp}(m)}
+\mathrm{count}_m(c) \cdot f(c)$ --- the count tensor contracted against
+$f$ along the colour axis.
+\end{blemma}
+\begin{proof}
+Both are fibre decompositions of a finite sum: group the terms of
+$\sum_{c \in m} f(c)$ by value of $c$. Counts and pools are thus the
+$f \equiv 1$ and coordinate-projection instances of one observable
+class, and every axis of the contraction is either summed out (colour)
+or an output (the query index) --- there is no un-read axis, which is
+why aggregate dimension is set by the dictionary, never by the marking.
+\end{proof}
+
+\begin{blemma}[coupling rows are valid for every bag]\label{lem:qar-couple}
+If $l \leq f(c) \leq u$ for every colour $c$ occurring in $m$, then
+\[
+l \cdot \#m \;\leq\; \langle m, f \rangle \;\leq\; u \cdot \#m .
+\]
+\end{blemma}
+\begin{proof}
+A sum of $\#m$ terms, each in $[l, u]$ (induction on the bag). In use,
+$[l, u]$ is a certified enclosure of $\phi_j$ on the colour box $B_P$
+--- polynomial-enclosure machinery the calculus already owns --- so the
+row couples the pool wire to the count wire. Two remarks. The bounds
+hypothesis quantifies over colours \emph{in the bag}: the row is
+therefore only as good as the guarantee that tokens stay in $B_P$ ---
+the scope premise of Remark~\ref{rem:qar-box}. And the degenerate case
+is essential: at $k_P = 0$ the two inequalities pin $s^P_j = 0$ ---
+emptiness is polytope geometry, not a case split.
+\end{proof}
+
+\begin{blemma}[count rows]\label{lem:qar-count}
+$0 \leq \#m$ always; and $\#m \leq M$ for any certified marking bound
+$M$. Linear conservation laws of the uncoloured skeleton (place
+invariants \cite{murata1989}) are further valid count rows.
+\end{blemma}
+\begin{proof}
+Cardinalities are nonnegative integers; the bound and the invariants
+are reachability facts of the net, consumed as hypotheses (they are
+certified upstream --- the box-discharge side-condition class ---
+never re-proven per obligation). Integer-valuedness of $k_P$ is what
+the counting closure discipline (\rulename{CountAtomRounding})
+exploits at complemented count atoms.
+\end{proof}
+
+\begin{blemma}[moment rows are valid for every bag]\label{lem:qar-moment}
+For every bag $m$ and every $f$:
+$\langle m, f \rangle^2 \leq \#m \cdot \langle m, f^2 \rangle$.
+\end{blemma}
+\begin{proof}
+Cauchy--Schwarz over the counting measure on the bag:
+$\bigl(\sum_{c \in m} 1 \cdot f(c)\bigr)^2 \leq
+\bigl(\sum_{c \in m} 1^2\bigr)\bigl(\sum_{c \in m} f(c)^2\bigr)$.
+Instantiated at monomial features this is the family
+$(s^P_\alpha)^2 \leq k_P\, s^P_{2\alpha}$ --- optional tightenings:
+each one added shrinks the relaxation $K$, and by this lemma never
+below the reachable image.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{QAggReduce}]\label{thm:qar-sound}
+Let $\mathrm{agg}$ be the aggregate map
+$x \mapsto (\vec{s}(x), \vec{k}(x))$, let
+$K$ satisfy $\mathrm{agg}(x) \in K$ for every in-scope $x$, and suppose
+the sequent $G \leq 0$ holds on $K$. Then
+$G(\mathrm{agg}(x)) \leq 0$ for every in-scope $x$.
+\end{bthm}
+\begin{proof}
+Evaluation: $\mathrm{agg}(x) \in K$ and $G \leq 0$ on $K$. That the
+proof is one line \emph{is} the honest size of the semantic core ---
+the entire content of a \rulename{QAggReduce} node is the containment
+certificate for $K$, which Lemmas
+\ref{lem:qar-couple}--\ref{lem:qar-moment} assemble from rows each
+valid at every reachable marking: a conjunction of per-marking-valid
+constraints contains the whole reachable aggregate image, so the single
+polynomial sequent over $K$ (discharged by the hypothesis-carrying
+cone machinery of the base calculus) covers every in-scope marking at
+once. Obligation count and dimension are independent of the marking
+bound, which enters only as a constant in Lemma~\ref{lem:qar-count}'s
+rows --- the reason this rule exists instead of a mode explosion over
+marking shapes.
+\end{proof}
+
+\begin{bremark}[the box-discharge scope premise]\label{rem:qar-box}
+Lemma~\ref{lem:qar-couple}'s hypothesis --- every occurring colour in
+$B_P$ --- is a claim about the \emph{process}, and with nondegenerate
+diffusion a process exits every compact box with positive probability.
+An enclosure row quantified over states the process leaves is
+unsoundness, not incompleteness; so the box must be \emph{discharged},
+by one of three named routes: model box exit as a forced transition
+(the boundary becomes part of the model), prove invariance of the box
+(vanishing diffusion at the boundary plus inward drift --- polynomial,
+box-supported conditions landing in the existing row machinery), or
+certify the process stopped at exit, carrying the exit event in the
+specification's probability budget. Which route is a per-model
+declaration; that \emph{some} route is declared is a side condition of
+the rule. Dropping it admits the counterexample: a drift row verified
+on $B_P$ says nothing at the first token that leaves, and the
+concluded obligation can be false on reachable states.
+\end{bremark}
+
+\begin{bremark}[what the relaxation costs, and what it never costs]
+\label{rem:qar-gap}
+$K$ over-approximates the reachable aggregate image --- not every
+polytope point is a realizable marking. The cost is
+\emph{completeness}: a true obligation may fail on a spurious point of
+$K$ and the sequent then refuses; it is never soundness, by
+Theorem~\ref{thm:qar-sound}. The row menu is the dial: integer
+rounding at count atoms, conservation laws, and moment rows each cut
+spurious regions. The worked drain example is the sharpest small
+witness: its interior row is \emph{infeasible} over the real-relaxed
+off-target scope $k > 0$ (it evaluates to $+\tfrac14$ at
+$k = \tfrac12$, $s_2 = 0$, a point no reachable marking occupies) and
+discharges, with an exact linear-multiplier witness, once
+\rulename{CountAtomRounding} tightens the scope to $k \geq 1$ ---
+the tightening menu earning its keep on the first toy. Conversely a
+row \emph{not} valid for every bag (a naively-cleared mean at
+$k = 0$, say) would cut reachable points and break
+Theorem~\ref{thm:qar-sound}'s containment hypothesis --- validity-for-
+every-bag is the admission criterion for the menu, and each lemma
+above is exactly that check.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The aggregate coordinates are the classical multisymmetric power sums:
+per fixed shape, polarized power sums generate the full invariant
+algebra in characteristic $0$ \cite{weyl1939}, which locates the
+dictionary's expressiveness ceiling (generation degree grows with the
+shape --- a resolution bound, priced as completeness, never claimed
+away). Degree-one certificates in counts alone recover classical
+place-invariant analysis \cite{murata1989}. Semantically, pools are
+commutative-monoid folds along the tokens-to-places classifying map,
+with the multiset as the universal aggregate every other one factors
+through \cite{spivak2021agg} --- exchangeability and
+factoring-through-the-free-commutative-monoid are the same statement
+from two sides. The identically-named ``coupling rows'' of the
+relational tier (\rulename{QCoupleDrift}) are probability couplings
+over a product of chains; the rows here are deterministic pool--count
+arithmetic within one marking. Same word, disjoint mathematics,
+deliberately uncited in both directions.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qar-query} & \texttt{query}; \texttt{query\_const\_one}; \texttt{query\_count}\\
+Lemma \ref{lem:qar-couple} & \texttt{coupling\_row} (degenerate pin at $k = 0$: its two halves)\\
+Lemma \ref{lem:qar-count} & \texttt{count\_row\_nonneg}; \texttt{count\_row\_le}\\
+Lemma \ref{lem:qar-moment} & \texttt{moment\_row}\\
+Theorem \ref{thm:qar-sound} & \texttt{aggReduce}\\
+integrality at count atoms & \rulename{CountAtomRounding} section (\texttt{countAtomRounding\_sound}/\texttt{\_eq})\\
+\end{anchors}

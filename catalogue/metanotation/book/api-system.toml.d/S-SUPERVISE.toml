@@ -1,0 +1,11 @@
+# api-system.toml.d/S-SUPERVISE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-SUPERVISE"
+entity = "composition pattern"
+ts_absent = '''As for Rust: enters with the event-port interface stratum.'''
+rust_absent = '''None yet, and the absence is a sequencing decision rather than a gap: supervision is a packaged pattern over fusion (event-triggered policy wakes) and enabling arcs (the gating), so its producer surface is sequenced behind the event-port interface stratum rather than built ahead of it. The pattern's semantic tier is already mechanized in the toolkit's Lean tree --- the gating lemmas, the arc-separation census, and the supervised micro-instance with its cascade controls (module \texttt{SuFunctor.Adequacy.StochasticPetriSupervise}, over the statics square and both dynamics faces of the stochastic-Petri development) --- so the builder, when it lands, arrives to a fixed semantic target.'''

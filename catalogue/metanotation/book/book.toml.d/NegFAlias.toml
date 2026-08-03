@@ -1,0 +1,104 @@
+# NegFAlias (T15): alias — a negated bounded-eventually discharged by the
+# unbounded safety kernel. Steele cell exists in the roster.
+
+[[rule]]
+id = "NegFAlias"
+source = "../QTSL-rules.toml"
+row = "NegFAlias (T15)"
+proof = "book/proofs/NegFAlias.tex"
+alias_target = "QSafetyBattery"
+commentary = '''
+\rulename{NegFAlias} discharges a negated deadline: to certify, with
+probability at least $p$, that $\varphi$ does \emph{not} occur within
+horizon $T$ ($\neg\mathsf{F}_{\le T}\,\varphi$), it suffices to certify
+the \emph{unbounded} safety claim --- $\varphi$ never occurs at all ---
+over the same region, and the alias rewrites the one judgement into the
+other: the child is a satisfaction judgement for
+always-not-$\varphi$, the conclusion the negated-deadline judgement,
+region verbatim. It is an alias to the safety battery
+(\rulename{QSafetyBattery}): one node to one node, and the entire
+mathematical content is a two-line denotation inclusion --- a path on
+which $\varphi$ never holds certainly does not reach $\varphi$ within
+$T$, and not-reaching-within-$T$ \emph{is} the bounded-always of the
+negation. The rewrite is choice-free (no producer parameter beyond the
+horizon already present in the goal), and the checker recomputes
+nothing new: the child is an ordinary safety-battery conclusion.
+
+The rule is deliberately lossy in one direction --- the unbounded claim
+is strictly stronger than the bounded one --- which is the honest price
+of reusing the safety kernel with no horizon bookkeeping. A producer
+who needs the sharp bounded claim (because $\varphi$ \emph{does} occur
+eventually, only late) uses the deadline machinery instead; this alias
+serves the common case where the avoidance is permanent.
+
+Mechanization state, plainly: the bound statements below are the two
+lines, as priced. \texttt{negF\_denot\_subset} (module
+\texttt{QtslAux.QtslAliases}) is the denotation inclusion
+--- a path on which $\varphi$ never holds does not reach $\varphi$
+within $T$ --- pure path-set algebra, axiom-free (the kernel certifies
+it depends on no axioms at all); and \texttt{sound\_NegFAlias} is the
+alias\textquotesingle s transport: a lower bound on the unbounded
+safety event (the target\textquotesingle s conclusion shape, with
+$\mathrm{sat} := \neg\varphi$) is a lower bound on the
+negated-deadline event, for \emph{any} measure on path space ---
+profile-generic, so the discrete-kernel and GSHS records read it
+alike, and the entry carries no conditional flag.
+'''
+note = '''
+Two flags travel with the row, both from the source catalogue. Tier
+(flagged, not forced): alias as sorted, but if the folded denotation
+inclusion must itself be a rule application, the tier moves to
+admissible --- machinery unchanged either way. And the mirror is a
+deliberate hole: there is no dual rule discharging a negated
+\emph{always} by a bounded operator, because the conclusion it would
+need ($\mathsf{F}\varphi$ unbounded) is structurally unrepresentable in
+the spec grammar --- the unbounded-eventually constructor was excluded
+by testable-negative design, unbounded eventuality surviving only as a
+producer-choice provenance flag on deadlines. The pair must never be
+ported as one duality entry: one side is a statable choice-free alias,
+the other hides a horizon choice and a metatheory line inside the
+deadline battery.
+'''
+correspondence = '''
+The displayed rewrite --- child
+$\mathsf{QRegionSat}(\mathsf{SProb}(p, \mathsf{PAlways}(\mathsf{SNot}\,
+\varphi)), R)$ concluding
+$\mathsf{SProb}(p, \mathsf{PNotPath}(\mathsf{PDeadline}(T, \varphi,
+\mathrm{false})))$ --- $\mapsto$ the two-statement chain:
+\texttt{negF\_denot\_subset} (the denotation inclusion \texttt{\{ω |
+∀ n, ¬ sat (ω n)\} ⊆ \{ω | ¬ ∃ k ≤ T, sat (ω k)\}} --- pure path-set
+algebra, axiom-free, no measure, no measurability) and
+\texttt{sound\_NegFAlias}, its transport: a lower bound \texttt{b ≤
+μ} on the unbounded-safety event is a lower bound on the
+negated-deadline event, for \emph{any} measure on path space ---
+profile-generic by binder shape (\texttt{μ : Measure (ℕ → S)}
+arbitrary), the \rulename{QUnionBound} pattern; discrete-kernel and
+GSHS records alike are instances. The
+display\textquotesingle s choice-freeness is a binder fact: no
+producer parameter appears beyond the horizon \texttt{T} already in
+the goal. Width note: the child\textquotesingle s
+$\mathsf{SProb}$ shape enters only as the abstract bound \texttt{b ≤
+μ \{…\}} --- the certified transport is wider than the displayed
+probabilistic judgement (any \texttt{ENNReal} bound transports), safe
+direction; paths are step-indexed (\texttt{ℕ → S}), the deadline
+read discretely, as at \rulename{TaylorBound}.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslAliases"
+src = "../../lean/qtsl-aux/QtslAux/QtslAliases.lean"
+decls = ["negF_denot_subset", "sound_NegFAlias"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}: the alias unpacks to a
+single safety-battery node before emission --- the wire never carries a
+negated-deadline node, so the HOL statement that would verify the
+discharged certificate is the safety battery\textquotesingle s own
+(absent today: the satisfaction stratum has no HOL artefact, per that
+section). Checked against the HOL sources: the \texttt{qtsl\_catalogue}
+theory is the base-calculus checker cone and carries no spec-surface
+path operators.
+'''

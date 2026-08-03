@@ -1,0 +1,45 @@
+\chapter{The Lean Cone}
+\label{app:lean-cone}
+
+
+Throughout this book, claims that lean on a mechanized result cite
+the result by its Lean name, set in typewriter face. This appendix
+collects those citations into one place: for every cited declaration,
+it reproduces the declaration's statement from the \path{lean/}
+trees of \path{maitria-coalition/qtsl}, with its file and line. We call this set the \emph{Lean cone} of the book: the set
+of mechanized results the book's prose binds to, closed under
+nothing --- what you see is what the text actually cites, re-derived
+from the sources on every build, so the listing cannot drift from
+the tree it describes.
+
+A word on how to read the entries. Statements are reproduced at
+signature level: a theorem up to its proof, a definition up to its
+body, a structure up to its fields (an ellipsis marks the elision),
+and long source lines re-wrapped to the measure of the page.
+Each entry is shown in the namespace where it lives, and surrounding
+context (\texttt{open} and \texttt{variable} declarations,
+notation) lives in the cited file, so an entry here reads as a
+faithful excerpt rather than a self-contained module. To verify an
+entry, clone the repository and run \texttt{lake build} inside the
+relevant Lake package under \path{lean/} (for example
+\path{lean/qtsl} or \path{lean/su-functor}); the toolchain is pinned
+by each package's \path{lean-toolchain} file, and a build that
+succeeds has kernel-checked every statement listed here, since none
+of the trees admits \texttt{sorry}.
+
+Two boundaries of the cone, so that its edges are as legible as its
+contents. First, the Rule Catalogue displays a Lean or HOL4
+statement beside each rule already, extracted from the mechanized
+rule sources and hash-bound at emission; this appendix lists the
+catalogue's citations that resolve into the \path{lean/} trees of
+this repository and defers to the catalogue's own apparatus for its
+rule-source and HOL4 layers. Second, module citations (a dotted
+name denoting a whole file or directory of results) are listed per
+chapter without statements; the module's file is the reference.
+
+The listing follows the book's chapter order, and each declaration
+appears once, under the first chapter that cites it; later chapters
+that cite the same result say so in a closing line rather than
+repeating the statement.
+
+\input{generated/lean-cone}

@@ -1,0 +1,27 @@
+\chapter{Rule Catalogue}
+\label{ch:qtsl-manual}
+
+This chapter is the reference manual of the proof theory, and it is
+generated, not written: it incorporates the literate rule catalogue in
+full, emitted mechanically from the same sources the calculus is built
+from --- the hand-authored rule cells, the Lean~4 development
+(statements extracted by declaration name and bound by hash at
+emission), the verifier-receipt store, the HOL4 development,
+and the per-rule proof files. Every rule of the proof theory has its
+section: statement in Steele's metanotation, its producer API in
+TypeScript and Rust, commentary, mechanized realizations, receipts,
+and a proof at textbook detail; the coverage dashboard up front is the
+catalogue's honest map of what the assurance edifice does and does not
+yet cover. Bernstein Logic appears here as what it has become in the
+finished design: the core fragment of one catalogue, not a separate
+system.
+
+Inside this chapter the catalogue keeps its own conventions: one rule
+per entry, each starting on a fresh page, under stable catalogue rule
+numbers (indices of the roster,
+not section numbers --- they also appear as PDF bookmarks), its own
+references at the end, and the page geometry it was designed at.
+
+\newgeometry{left=22mm,right=18mm,top=20mm,bottom=22mm}
+\input{chapters/qtsl-rule-catalogue}
+\restoregeometry

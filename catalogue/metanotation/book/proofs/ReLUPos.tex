@@ -1,0 +1,90 @@
+
+\sourcenote{Genre: admissible rule (tier 2). The family machinery ---
+the packaged node, the linkage, the two-case semantic fact, and its
+conservativity warrant --- is stated in the \rulename{LiRPA} section's
+family template and is not restated here.}
+
+\begin{brecipe}[the \rulename{ReLU-Pos} instance]\label{rec:relupos-instance}
+The node, and its intended rewrite over the family's sign-split fact:
+\[
+\inferrule*[Right=\rulename{ReLU-Pos}]{
+  \mathcal{T} \rhd \Phi \vdash h \geq 0 \\
+  \ReLU_{\{h\}\to\{y\}} \in H
+}{
+  \Phi \vdash y = h
+}
+\qquad\rightsquigarrow\qquad
+\text{case analysis on }
+(h \leq 0 \wedge y = 0) \vee (0 \leq h \wedge y = h).
+\]
+The \emph{active} branch discharges cleanly: its context carries the
+conjunct $y = h$, which \rulename{Ax} and $\wedge$E extract --- the
+goal verbatim. The \emph{boundary} branch does not: its context
+carries $h \leq 0$ and $y = 0$, the premise supplies $h \geq 0$, and
+the goal $y = h$ now needs the antisymmetry fact $h = 0$ --- which, as
+Remark~\ref{rem:relupos-antisym} shows, no catalogue derivation
+provides. The rewrite therefore does \emph{not} fully discharge into
+catalogue nodes; like \rulename{PConstExact}, the rule is admissible
+by reduction to verified machinery: the shipped warrant is the direct
+lemma \texttt{sound\_reluPos}, in which the boundary case is a single
+antisymmetry step in the model ($p \leq 0$ from the case, $0 \leq p$
+from the premise, so $p = 0$ and the two cases agree).
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:relupos-sound}
+Suppose the linkage holds and the premise sequent --- same premise
+formula, conclusion the atom $h \geq 0$ --- is semantically valid.
+Then the sequent concluding $y = h$ is semantically valid.
+\end{bprop}
+\begin{proof}
+Fix an admissible valuation $\sigma$ satisfying $\Phi$. The premise
+eliminates entrywise: every entry $p$ of the preactivation tensor
+satisfies $0 \leq p$. The linkage extraction
+(\texttt{reluLinked\_facts}) gives the output tensor at the same
+shape and, per entry, either $p \leq 0 \wedge y = 0$ or $0 \leq p
+\wedge y = p$. In the second case $y = p$ is the goal entry. In the
+first, $p \leq 0$ meets the premise's $0 \leq p$, so $p = 0$
+(antisymmetry --- the model step the catalogue lacks) and $y = 0 = p$.
+The conclusion atom is the entrywise equality of the two tensors at
+their shared shape. That is \texttt{sound\_reluPos}, step for step.
+\end{proof}
+
+\begin{bremark}[the kink case has no catalogue derivation]
+\label{rem:relupos-antisym}
+The claim in Recipe~\ref{rec:relupos-instance} is an enumeration over
+the catalogue's equality-capable conclusions. \rulename{Norm} and
+\rulename{EqRefl} conclude only canonical-form identities ($h$ and $0$
+are not canonically equal); \rulename{EqSym}, \rulename{EqElim}, and
+\rulename{ArithAtom} at the $=$ comparator only \emph{transport}
+equalities already proven; this family and the cell rules conclude
+equalities only over their packaged applications' ports; the
+combination rules (\rulename{Farkas}, \rulename{Syzygy},
+\rulename{PBound}, \rulename{BernCone} with an order predicate)
+conclude order atoms, never $=$; and \rulename{BernCone}'s degenerate
+conic-predicate route would need a region atom pinning $h$ to the
+single point $0$, which no rule derives --- region atoms denote
+regions of positive-dimensional simplices. So $h \leq 0 \wedge h \geq
+0 \vdash h = 0$ has no derivation, and the boundary branch cannot
+discharge into nodes. This is not a defect to repair but a fact about
+where the calculus keeps its arithmetic: order antisymmetry lives in
+the verified model step, one line of \texttt{sound\_reluPos}, rather
+than in a rule every certificate would pay wire format for.
+\end{bremark}
+
+\begin{bremark}[what the premise is for]
+Without $\Phi \vdash h \geq 0$ the rule is false at any entry with $h
+< 0$: there the node's semantics forces $y = 0 \neq h$. The premise is
+consumed \emph{entrywise} --- a tensor-shaped preactivation must be
+proven nonnegative in every entry, which is what a rank-$0$ constant
+against a tensor atom asserts. No side condition excludes the boundary
+$h = 0$, and none is needed: the two semantic cases agree there, which
+is exactly the antisymmetry step above.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:relupos-instance} warrant & \texttt{sound\_reluPos}\\
+family linkage extraction & \texttt{reluLinked\_facts} (see the \rulename{LiRPA} section)\\
+entrywise premise elimination & \texttt{QTensor.rel2\_const\_right\_elim}\\
+the kink antisymmetry & the \texttt{le\_antisymm} step inside \texttt{sound\_reluPos}\\
+payload structure & \texttt{PReLUPosData} (premise proof, two wires, linkage)\\
+\end{anchors}

@@ -1,0 +1,44 @@
+# bindings.toml.d/BernCone.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'BernCone'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Term.asCoordPoly?"
+sha256 = "7dfcac2859a70d2126e6278f87d0b308ffab7f565aa7144947581cd76387d67f"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "Term.asCoordPolyIdx?"
+sha256 = "b803caeb6a2126518d3fbf7b5d95e31475d9d128e1c5657ef05511d9fdf7b08b"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "allForwardDiffBernCoeffsSatisfyP"
+sha256 = "3920940b0908bd06933d294d215aae657fcac29b5fe0513ee886215f29a7cf63"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "bernConeCoeffCheck"
+sha256 = "867d08a650ec85add587ae1fcd670caf31016cda99d63be0fdbf4c03bbbfcf3b"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "satisfiesPredQ"
+sha256 = "107a514bd8b99739ca4120bbe8db3041a9ae59664bcc13af4a957bc1fa694e81"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_bernCone"
+sha256 = "0fb96f35345a43047642f00f400e9828404a19733ab472e5d9f72a8ebd73db0e"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_bernCone_empty"
+sha256 = "8a30ffad3bbe30adf1b12cf6d7979a82893868391ceeab02707440a618953e7e"
+
+[[correspondence]]
+entry = "BernCone"
+steele_sha256 = "a65c8e1b4abcd1adc6fef2057e4276d9207c228247a3c0a98d5582041ac0b3b7"
+statements_sha256 = "69c84d43f5986ba3995f02bdcf58e65d6847d7a2f3af7821433cf6a75a161b25"
+prose_sha256 = "a448cbd2f0f7ee31ce21f8d5c9b2d6be02e0cc70a2ba3055a8b880512894d3d9"
+

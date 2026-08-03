@@ -1,0 +1,26 @@
+# api-system.toml.d/S-EVENTPORT.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-EVENTPORT"
+entity = "composition pattern"
+note = '''The fusion primitive's producer surface: a fusion row names capability legs (bag edges across a composite's components, read legs included) that fire as one joint jump, with the event's one firing law under the single-home discipline --- exactly one active leg (its edge's own law times the jump) xor a row-resident law over all-passive legs; both double-home and all-passive-lawless declarations refuse at build, along with leg resolution, membership (active-never-optional; a row-law fusion keeps a mandatory leg), and the delay basis (selection blocks per consuming/read leg, within-leg slot-exchange symmetry). The packaged patterns over fusion --- resource pools, dispatch, event-rate atoms --- remain design-tense and carry no API here.'''
+
+[api.ts]
+handle = "compose.composite / system.composite (fusions)"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_fusion"]
+snippet_file = "ts/tests/compose-native.test.ts"
+snippet = "marker:ts_fusion"
+note = '''\texttt{bagStation} and \texttt{mono} are the conformance corpus's shared fixtures, defined beside the quoted lines; the quoted construction's emitted bytes are the committed \texttt{compose\_fusion} golden vector, byte-identical across both language surfaces.'''
+
+[api.rust]
+handle = "mtk_catalogue::compose::CompositeBuilder::fuse"
+sig_file = "crates/mtk-catalogue/src/system/compose.rs"
+sig = ["marker:fusion_row"]
+snippet_file = "crates/mtk-catalogue/tests/compose_builders.rs"
+snippet = "marker:fusion_happy"
+note = '''\texttt{bag\_station} and \texttt{mono} are the corpus's shared fixtures (\texttt{tests/compose\_common}); \texttt{FusionLeg}/\texttt{FusionLaw} and the membership column are declared beside the quoted row type, and the builder verb (\texttt{fuse}) runs the well-formedness gates at \texttt{build}.'''

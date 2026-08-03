@@ -1,0 +1,22 @@
+\apilang{TypeScript}{spec.until}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function until(t: QLike, safe: StatePred, target: StatePred): PathPred
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const untilPart = s.probGe(Q.of(9, 10), s.until(5n, band, s.polyGe(2n, x1)));
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::PathPred::until}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn until(t: WitRat, safe: StatePred, target: StatePred) -> Result<PathPred, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let until_part = ForallSpec::prob_ge(
+    q(9, 10),
+    PathPred::until(q(5, 1), band.clone(), StatePred::poly_ge(q(2, 1), x1())).unwrap(),
+)
+.unwrap();
+\end{rustsrc}

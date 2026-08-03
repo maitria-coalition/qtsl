@@ -1,0 +1,111 @@
+[[rule]]
+id = "TaylorBound"
+source = "../QTSL-rules.toml"
+row = "TaylorBound (T7)"
+proof = "book/proofs/TaylorBound.tex"
+alias_target = "PConstExact"
+commentary = '''
+\rulename{TaylorBound} supplies the deadline battery\textquotesingle s
+rational surrogate for a transcendental bound. The deadline
+rule\textquotesingle s soundness argument wants $q \le e^{\theta T}$
+for a producer-chosen rational $q$, with decay rate
+$\theta \in \Q_{>0}$ and horizon $T \in \Q_{\ge 0}$ from its payload:
+its concluded sublevel region $\{V \le (1-p)\,q\}$ grows with $q$, so
+the producer wants the sharpest $q$ the arithmetic affords. No checker
+doing exact rational arithmetic can evaluate $e^{\theta T}$, and none
+needs to: the certificate posts the single wire-free comparison
+$q \le \sum_{k \le n} (\theta T)^k / k!$ --- a finite sum of
+rationals, checked in exact $\Q$ --- and the consuming lemma carries
+the enclosure $\sum_{k \le n} (\theta T)^k / k! \le e^{\theta T}$
+(nonnegative Taylor remainder at nonnegative argument), so
+$q \le e^{\theta T}$ follows without the checker ever knowing $e$
+exists. A producer picks the truncation order $n$ and any convenient
+$q$ at or below the partial sum.
+
+What the checker recomputes is the target rule\textquotesingle s
+entire check: exact closed evaluation of one comparison. No
+certificate ever carries a \rulename{TaylorBound} node --- no sort
+exists and none is needed; the producer emits the ground-fact row
+directly, and this row is the catalogue-level name for that
+elaboration.
+
+What would break without each hypothesis: with rounded rather than
+exact evaluation, $q$ could creep above the true partial sum and the
+surrogate above $e^{\theta T}$; without wire-freedom the
+``constant'' could depend on state and the enclosure is meaningless;
+and the sign condition $\theta T \ge 0$ is essential in the
+consuming lemma --- at negative arguments the Taylor remainder
+alternates in sign and the enclosure direction fails (the proof
+section carries the counterexample).
+'''
+note = '''
+Deliberately \emph{not} aliased onto the interval-enclosure rule:
+that would import witness-bracket machinery for a metatheory
+one-liner, and the enclosure rule today lives only in a separate
+reference-checker implementation besides. The seam this rule
+instantiates is a design invariant of the whole extension page:
+transcendental facts live in soundness lemmas (the Lean-side deadline
+lemma consumes the standard library\textquotesingle s
+partial-sum-below-exponential fact), arithmetic lives in the checker.
+Mechanization state, plainly: the bound statements below are the
+enclosure and its exact-$\Q$ face. \texttt{taylorLeaf\_le\_exp}
+(module \texttt{QtslAux.QtslAliases}) is the enclosure step
+--- $q$ at or below the truncated sum is below $e^{x}$ at nonnegative
+argument, the nonnegative Taylor remainder --- and
+\texttt{taylorLeaf\_rat\_le\_exp} is the row end to end: the wire-free
+comparison exactly as the checker replays it, in $\Q$, with the
+$(\theta, T)$ payload shape, concluding $q \le e^{\theta T}$. The
+consuming site is \texttt{sound\_QDeadlineBattery}\textquotesingle s
+$hq$ premise (the target\textquotesingle s entry), whose internal
+enclosure step these statements name as a rule-level fact. The sign
+condition $0 \le \theta T$ is a stated hypothesis, exactly as
+essential as the commentary\textquotesingle s counterexample says
+it is. No profile enters; the entry carries no conditional flag. The
+target\textquotesingle s comparator exclusion ($\neq$ inadmissible)
+travels with the alias to any port.
+'''
+correspondence = '''
+The displayed wire-free comparison $q \le \sum_{k \le n}
+(\theta T)^k / k!$ standing in for $q \le e^{\theta T}$ $\mapsto$ the
+bound pair: \texttt{taylorLeaf\_le\_exp} (the enclosure step ---
+partial sum below \texttt{Real.exp} at nonnegative argument, the
+nonneg-remainder citation) and \texttt{taylorLeaf\_rat\_le\_exp}, the
+end-to-end exact-$\Q$ face: \texttt{qq θ : ℚ}, \texttt{T n : ℕ},
+hypothesis the exact-$\Q$ partial-sum comparison the checker replays,
+conclusion \texttt{(qq : ℝ) ≤ Real.exp (θ * T)} --- the
+display\textquotesingle s ``the checker never needs to know $e$
+exists'' as a binder fact: $e$ appears in the goal alone, never in a
+hypothesis. The sign condition $\mapsto$ \texttt{hθ : 0 ≤ θ}
+(essential --- the alternating-remainder counterexample in the
+proof section is why the binder exists); the truncation order
+\texttt{n} is producer-chosen, unconstrained. Width note: the
+consuming site (\texttt{sound\_QDeadlineBattery}\textquotesingle s
+\texttt{hq} premise) is cited, not bound here --- correct
+package-boundary behaviour, the deadline battery\textquotesingle s own
+entry carries it; and the horizon enters as \texttt{T : ℕ} where the
+display\textquotesingle s deadline payload carries rational time ---
+the discrete-horizon reading, matching the battery\textquotesingle s
+step-indexed profile.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslAliases"
+src = "../../lean/qtsl-aux/QtslAux/QtslAliases.lean"
+decls = ["taylorLeaf_le_exp", "taylorLeaf_rat_le_exp"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}, not by backlog: the
+wire format never carries a \rulename{TaylorBound} node (no sort
+exists and none is needed --- the producer emits the ground-fact
+comparison row directly), so no wire certificate a HOL checker reads
+could ever contain one; HOL coverage for this rule \emph{is} the
+target rule\textquotesingle s. Today even that statement is not
+writable: the HOL4 development (theory \texttt{qtsl\_catalogue}, the
+base catalogue\textquotesingle s check-function cone) predates
+\rulename{PConstExact}, whose wire tag is unallocated --- see that
+rule\textquotesingle s section for the honest state of the
+target\textquotesingle s own box.
+'''

@@ -1,0 +1,361 @@
+// Generator-plane chase fixtures: one instance block per former that
+// carries generator content, each exercising the generator stratum's
+// chased walks against that former's vocabulary IN THE THEORY FILES
+// (the transposed carriage's spelling: transposed relations keep
+// function names; unary functions take the synthesized `arg` field,
+// record constructors their declared fields, each with the minted
+// `out`; ground fields the retired transcript erased are seeded as
+// abstract elements of their sorts). Instance blocks in one file
+// chase jointly in one model, so element names are unique per block.
+//
+// What these fixtures pin: the spine walks (MonoRow/SlotRow), the
+// role-support admission walk, the Transition former's
+// per-attachment demands, the scale view's mass-one demand, and each
+// former's own admission demands. Coefficient/exponent CONTENT, role
+// constructor keys, and GenEntry/GenRow evaluation are value-plane
+// material: verified by the exact-Q batteries (crates/geolog-bl-cert
+// tests), never faked into the chase.
+
+// ---- StochMat (the discrete one-step former; DTMC-class content).
+// The three admission demands derive per matrix.
+instance GenDtmc : Qtsl {
+  gm : StochMat;
+}
+
+// ---- Mode (the continuous plane: drift and diffusion slots).
+// Roles address the mode's drift/diffusion polynomial slots. Each
+// declared support row admits its role into the support discipline.
+instance GenModePlane : Qtsl {
+  gmo : Mode;
+  grd, grf : PolyRole;
+  gsld, gslf : SlotList;
+
+  [role: grd, support: gsld] RoleSupport;
+  [role: grf, support: gslf] RoleSupport;
+}
+
+// ---- Transition x scale view (the jump plane, polynomial
+// presentation). One attached transition whose scale view carries
+// the rate polynomial (the spine head) and reset mixture; the rate
+// polynomial's two-link spine drives the MonoRow/SlotRow walks; rate
+// and reset roles ride the support walk.
+instance GenTransitionScale : Qtsl {
+  gs : System;
+  gt : Transition;
+  gbl : StepBranchList;
+  gsv : ScaleView;
+  gp0, gp1, gp2 : Poly;
+  gpe : Shape;
+  gpc : Q;
+  grr, gre : PolyRole;
+  gslr, gsle : SlotList;
+
+  [sys: gs, tr: gt] sys_transition;
+  [mix: gbl, rate: gp2, out: gsv] mkScaleView;
+  [expts: gpe, coeff: gpc, tail: gp0, out: gp1] pTerm;
+  [expts: gpe, coeff: gpc, tail: gp1, out: gp2] pTerm;
+  [role: grr, support: gslr] RoleSupport;
+  [role: gre, support: gsle] RoleSupport;
+
+  // event 5: the scale view ATTACHES to the race row — the rate-cap
+  // demand derives per (system, transition); the majorant element
+  // is race-formed (abstract here — the instant refusal is
+  // refuse-tier, census-fenced).
+  gsk : TrClock;
+  gsm : EnnRat;
+  [tr: gt, scale: gsv] tr_scale;
+  [arg: gt, out: gsk] Transition/clock;
+  [majorant: gsm, out: gsk] tkRace;
+}
+
+// ---- Event-5 additions: the carved wing's gate, the rate-cap
+// absence half, the marks node (walk + guard elimination
+// end-to-end), the carve spine's gate conformance, the NN leaf
+// species' conclusion-form chains, the semiring cell's demand pair
+// (+ the param absence half on the sum cell), and the drift-moment
+// tie node's walk.
+
+instance GenCarvedGate : Qtsl {
+  cgs : System;
+  cgt : Transition;
+  cgg : HypernetRef;
+
+  [sys: cgs, tr: cgt] sys_transition;
+  [tr: cgt, gate: cgg] tr_dwell_gate;
+}
+
+// The rate cap must NOT derive for a scale view on a clock that is
+// not race-formed (a bare clock row — no tkRace image — is exactly
+// "not race-formed" for the cap demand's premise).
+instance GenRateCapAbsence : Qtsl {
+  rns : System;
+  rnt : Transition;
+  rbl : StepBranchList;
+  rnp : Poly;
+  rnv : ScaleView;
+  rnk : TrClock;
+
+  [sys: rns, tr: rnt] sys_transition;
+  [mix: rbl, rate: rnp, out: rnv] mkScaleView;
+  [tr: rnt, scale: rnv] tr_scale;
+  [arg: rnt, out: rnk] Transition/clock;
+}
+
+instance GenMarksNode : Qtsl {
+  mkw : QWireComposeMarks;
+  mkl, mkt : QSatList;
+  mkq : QSat;
+  mky : System;
+  mksp : Spec;
+  mkg : QRegionAtom;
+
+  [arg: mkw, out: mkl] QWireComposeMarks/components;
+  [head: mkq, tail: mkt, out: mkl] qsatCons;
+  [arg: mkq, out: mky] QSat/sys;
+  [arg: mkq, out: mksp] QSat/spec;
+  [spec: mksp, region: mkg] spec_guard;
+}
+
+instance GenCarveSpine : Qtsl {
+  cvl, cvt : QCarveList;
+  cvw : PortPath;
+  cvg : HypernetRef;
+
+  [wire: cvw, gate: cvg, tail: cvt, out: cvl] qcvCons;
+}
+
+instance GenNNLeaf : Qtsl {
+  lrp : PLiRPA;
+  lap : PrimApp;
+  lpl, lph, lpr : Proof;
+  ljl, ljh, ljr : Judgment;
+  lfl, lfh, lfr : Formula;
+
+  [arg: lrp, out: lap] PLiRPA/app;
+  [arg: lrp, out: lpl] PLiRPA/premLo;
+  [arg: lrp, out: lph] PLiRPA/premHi;
+  [arg: lrp, out: lpr] PLiRPA/proof;
+  [arg: lpl, out: ljl] Proof/concludes;
+  [arg: lph, out: ljh] Proof/concludes;
+  [arg: lpr, out: ljr] Proof/concludes;
+  [arg: ljl, out: lfl] Judgment/post;
+  [arg: ljh, out: lfh] Judgment/post;
+  [arg: ljr, out: lfr] Judgment/post;
+
+  rpp : PReLUPos;
+  rap : PrimApp;
+  rpm, rpr : Proof;
+  rjm, rjr : Judgment;
+  rfm, rfr : Formula;
+
+  [arg: rpp, out: rap] PReLUPos/app;
+  [arg: rpp, out: rpm] PReLUPos/premise;
+  [arg: rpp, out: rpr] PReLUPos/proof;
+  [arg: rpm, out: rjm] Proof/concludes;
+  [arg: rpr, out: rjr] Proof/concludes;
+  [arg: rjm, out: rfm] Judgment/post;
+  [arg: rjr, out: rfr] Judgment/post;
+}
+
+instance GenContractCell : Qtsl {
+  cap, cpp : PrimApp;
+  cks, ckp : HAggKind;
+  cqs, cqp : Q;
+
+  // cks carries NO hag* constructor image: the stand-in for a
+  // non-conjugated kind cell (asserting a second sum-formed element
+  // would functionality-merge it with the plated fixture's hks and
+  // rename that instance's rows). The param demand must fire on the
+  // pow-formed cell only. At the full theory the pow cell is LAWFUL
+  // since event 5.1 (the transport guard,
+  // ax/qtsl/contract_semiring_transport_only — its not-equality
+  // premises are chase-undecidable against labelled nulls, so the
+  // guard judges rather than fires on the file path; max/min/exp
+  // denials stay banked executable at cwa/ContractGuardChase.geolog).
+  [out: ckp] hagConjPow;
+  [app: cap, kind: cks, param: cqs] contract_semiring;
+  [app: cpp, kind: ckp, param: cqp] contract_semiring;
+}
+
+instance GenIntBound : Qtsl {
+  qib : QIntBoundFromSW;
+}
+
+// ---- Transition x kernel citation (the jump plane, native
+// presentation). The citation's admission demand derives per
+// citation; the attachment demands derive per (system, transition).
+// The tr_kernel association itself is refuse-tier vocabulary
+// (content exclusivity) — carried here by adjacency.
+instance GenTransitionKernel : Qtsl {
+  gks : System;
+  gkt : Transition;
+  gkc : KernelCite;
+
+  [sys: gks, tr: gkt] sys_transition;
+}
+
+// ---- The composed jump-diffusion demo (the per-former pipeline's
+// pilot case: Mode plane + Transition former on one system — drift
+// role beside rate and reset roles, two polynomial spines, every
+// demand co-derived in one model).
+instance GenJumpDiffusion : Qtsl {
+  gjs : System;
+  gjm : Mode;
+  gjt : Transition;
+  gjbl : StepBranchList;
+  gjsv : ScaleView;
+  gjp0, gjp1 : Poly;
+  gjq0, gjq1 : Poly;
+  gjpe : Shape;
+  gjpc : Q;
+  gjrd, gjrr, gjre : PolyRole;
+  gjsd, gjsr, gjse : SlotList;
+
+  [sys: gjs, tr: gjt] sys_transition;
+  [mix: gjbl, rate: gjp1, out: gjsv] mkScaleView;
+  [expts: gjpe, coeff: gjpc, tail: gjp0, out: gjp1] pTerm;
+  [expts: gjpe, coeff: gjpc, tail: gjq0, out: gjq1] pTerm;
+  [role: gjrd, support: gjsd] RoleSupport;
+  [role: gjrr, support: gjsr] RoleSupport;
+  [role: gjre, support: gjse] RoleSupport;
+}
+
+// ---- CondTable (the conditional-table species sibling; discrete
+// kernel content at the PGM row-home). Its mass demand derives per
+// table. (CondWire.geolog rides this battery's closure for exactly
+// this block.)
+instance GenCondTable : CondWire {
+  gct : CondTable;
+}
+
+// ---- The three-plane crossing-budget fixture (clock + budget
+// delta). One system, three attached transitions — instant (race at
+// the infinite majorant), spontaneous (race at a finite majorant),
+// and a NON-RACE row (a clock with no race image: fbd witnesses
+// that any clock failing the race-at-infinity join acquires no seam
+// obligation; the real wing separation is the main theory's
+// wing-disjointness + totality rows, census-fenced) — under one
+// budget with a one-mode witness roster and a claim-side
+// attachment. The seam demand must derive for the instant row ONLY:
+// the spontaneous row's cost lives in the budget constant, and
+// non-race clocks have no instant crossings to count.
+instance GenCrossBudget : Qtsl {
+  fbs : System;
+  fbm : Mode;
+  fbb : CrossBudget;
+  fbw : Poly;
+  fbt, fbp, fbd : Transition;
+  fkf, fkp, fkd : TrClock;
+  fei, fef : EnnRat;
+  fbq : QSat;
+  fbn : Nat;
+
+  [arg: fbb, out: fbs] CrossBudget/sys;
+  [cb: fbb, mode: fbm, w: fbw] cb_witness;
+  [sat: fbq, pos: fbn, cb: fbb] qsat_zeno_budget;
+
+  [sys: fbs, tr: fbt] sys_transition;
+  [sys: fbs, tr: fbp] sys_transition;
+  [sys: fbs, tr: fbd] sys_transition;
+
+  [arg: fbt, out: fkf] Transition/clock;
+  [majorant: fei, out: fkf] tkRace;
+  [out: fei] enInf;
+
+  [arg: fbp, out: fkp] Transition/clock;
+  [majorant: fef, out: fkp] tkRace;
+
+  [arg: fbd, out: fkd] Transition/clock;
+}
+
+// ---- The nonbase refinement, event-4 generators: negation, and
+// atoms over non-polynomial observables (a channel atom and an
+// indicator atom — two of the six atom-nonbase rows). The bare
+// observable fhk carries NO injection row: it models the oPoly
+// injection, so its atom fhj must stay base (the absence check in
+// the battery). The gate injection exercises the single-locus
+// gate-conformance demand.
+instance GenNonbase : Qtsl {
+  fha, fhb : StatePred;
+  fhf, fhg, fhh, fhj : StatePred;
+  fho, fhi, fhk : StateObservable;
+  fhn : Nat;
+  fhq, fhr, fhs : Q;
+  fgg : HypernetRef;
+  fgo : StateObservable;
+
+  [arg: fha, out: fhf] SNot;
+  [chan: fhn, out: fho] oChan;
+  [c: fhq, o: fho, out: fhg] SAtomLE;
+  [arg: fhb, out: fhi] oInd;
+  [c: fhr, o: fhi, out: fhh] SAtomGE;
+  [c: fhs, o: fhk, out: fhj] SAtomLE;
+  [gate: fgg, out: fgo] oGate;
+}
+
+// ---- The plated transfer-tie walk demands (event 4): premise-free
+// per-entity, the QDeadlineTable pattern.
+instance GenFoldTies : Qtsl {
+  qpn : QPAlwaysFromFold;
+  qfn : QFireBoundFromFold;
+}
+
+// ---- The positive base-membership demands (review F-2): a base-exact
+// pair request and a specification assumption each demand the
+// fail-closed positive check at the ground seam.
+instance GenBaseDemand : Qtsl {
+  gpb : StreettPair;
+  gbr, gbb, gba : StatePred;
+  gbs : Spec;
+
+  [req: gbr, resp: gbb, out: gpb] PairBase;
+  [spec: gbs, assume: gba] spec_assume;
+}
+
+// ---- The angelic-selection fixture (the positional witness). One
+// witness with a warranted mark and a two-cell cover — one dwell
+// cell, one relay cell. The per-witness demands (reach, cover) and
+// the per-cell unconditional demands (enabled, closed) derive for
+// every row; the species demands are KIND-CASED and must split:
+// ratecap derives for the dwell cell ONLY, relay for the relay cell
+// ONLY (the disjointness half is the absence checks in the
+// battery); the attach conformance derives per warrant row.
+instance GenAngelicSel : Qtsl {
+  asw : ASelWitness;
+  asm : QRegionSat;
+  asd, asr : ASelCell;
+  akd, akr : ASelKind;
+
+  [out: akd] askDwell;
+  [out: akr] askRelay;
+
+  [arg: asd, out: akd] ASelCell/kind;
+  [arg: asr, out: akr] ASelCell/kind;
+
+  [mark: asm, wit: asw] asel_warrant;
+}
+
+// ---- The plated-row fixture (HPlate, the two-station toy's
+// chase-visible face: kind-lattice derivations + the
+// transfer-theorem demands; the load-reject and the strict lower
+// bounds are refuse/report tier — census-fenced at the theory
+// surface, and the full toy's arithmetic is evaluator-tier cargo).
+// One sum kind, one max kind; a gap-rowed certificate (hpc, one gap
+// footprint row) and a rowless certificate (hpc2): the sum cell
+// derives gap-capability and the max cell idempotence — the absence
+// checks assert the lattice does not smear — and the lower-bound
+// demand mints for the GAP-ROWED certificate only (the ranking-use
+// narrowing's absence half is hpc2).
+instance GenHPlate : Qtsl {
+  hpc, hpc2 : HCert;
+  hpr : HFootprintRow;
+  hpg : HRowPolarity;
+  hks, hkm : HAggKind;
+
+  [out: hks] hagSum;
+  [out: hkm] hagMax;
+
+  [out: hpg] hrpGap;
+  [arg: hpr, out: hpc] HFootprintRow/cert;
+  [arg: hpr, out: hpg] HFootprintRow/polarity;
+}

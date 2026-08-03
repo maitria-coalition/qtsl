@@ -1,0 +1,56 @@
+\apilang{TypeScript}{spec.levelGe / levelLe / levelMayBeGe / levelMayBeLe}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function levelGe(lo: QLike, ret: PathObservable, thr: EnnRat): ForallSpec
+
+export function levelLe(hi: QLike, ret: PathObservable, thr: EnnRat): ForallSpec
+
+export function levelMayBeGe(
+  lo: QLike,
+  ret: PathObservable,
+  thr: EnnRat,
+): ExistsSpec
+
+export function levelMayBeLe(
+  hi: QLike,
+  ret: PathObservable,
+  thr: EnnRat,
+): ExistsSpec
+
+export function ennFin(q: QLike): EnnRat
+
+export function ennInf(): EnnRat
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const levelLo = s.levelGe(Q.of(1, 2), s.poAvg(s.oChan(0)), s.ennFin(3n));
+const levelHi = s.levelLe(Q.of(7, 2), s.poSup(s.oPoly(x1)), s.ennInf());
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::ForallSpec::\{level\_ge, level\_le\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn level_ge(lo: WitRat, ret: PathObservable, thr: EnnRat) -> ForallSpec
+
+pub fn level_le(hi: WitRat, ret: PathObservable, thr: EnnRat) -> ForallSpec
+
+pub fn level_may_be_ge(lo: WitRat, ret: PathObservable, thr: EnnRat) -> ExistsSpec
+
+pub fn level_may_be_le(hi: WitRat, ret: PathObservable, thr: EnnRat) -> ExistsSpec
+
+pub fn fin(q: WitRat) -> Result<EnnRat, Refusal>
+
+pub fn inf() -> EnnRat
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let level_lo = ForallSpec::level_ge(
+    q(1, 2),
+    PathObservable::avg(StateObservable::chan(0)),
+    EnnRat::fin(q(3, 1)).unwrap(),
+);
+let level_hi = ForallSpec::level_le(
+    q(7, 2),
+    PathObservable::sup(StateObservable::poly(x1())),
+    EnnRat::inf(),
+);
+\end{rustsrc}

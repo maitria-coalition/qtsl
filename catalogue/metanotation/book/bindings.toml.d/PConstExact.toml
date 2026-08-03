@@ -1,0 +1,14 @@
+# bindings.toml.d/PConstExact.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'PConstExact'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_pConstExact"
+sha256 = "719720e1b39ae6d1e657eda6aba524d73b6655495e3744ffa3a861ebcdf0801a"
+
+[[correspondence]]
+entry = "PConstExact"
+steele_sha256 = "db171d368e18a4bbb1f492c601b30fc9429905d1bdd4413e1bcc55f58217ac65"
+statements_sha256 = "972d92fc0a1bd7d9bd9de9ec38f2f7e6948f24aeb2b6ff4eb661211c826205fb"
+prose_sha256 = "b80e79767e6d152f714228f6b251fcc90aa3ee7dcdbbaaf9657484a1f245a414"
+

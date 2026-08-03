@@ -1,0 +1,24 @@
+# bindings.toml.d/SmallGain.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'SmallGain'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Composition"
+decl = "SmallGainStep"
+sha256 = "b992b3797ff665f5d3bedbbaa988f2eaaac77625fcfc24b96b5d607dd592e3a4"
+
+[[statement]]
+module = "Qtsl.Composition"
+decl = "sound_smallGain"
+sha256 = "873ffafd6c167ceef304b95a91ff22ecf7d5ed450b020b96f1bf4af13bb25fc8"
+
+[[statement]]
+module = "Qtsl.Composition"
+decl = "toSyzygy"
+sha256 = "c74e70141ec8c20d457bfe25f1d7ed16439bddfe8b3669a4a1e9380a153a3b55"
+
+[[correspondence]]
+entry = "SmallGain"
+steele_sha256 = "50f806701300ec5b5bdd78935ebaf52fd9732593e4225a4687d3bc28d09ce79c"
+statements_sha256 = "ed2abb413dc952863299dc9612fa3377b6cf7a5d98aaca67349b98d6bac1c6b4"
+prose_sha256 = "be83d186ab8bca9fe3c19e51ba589fc82bec18f5291b3d147686ae9d487ba11b"
+

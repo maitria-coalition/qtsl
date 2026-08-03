@@ -1,0 +1,191 @@
+
+\sourcenote{Genre: core rule (tier 1). Scope, stated loudly: the
+finite-kernel tier --- finite state spaces, distribution evolution,
+total-variation entries of the registry. The Lipschitz-pushforward
+cells for Wasserstein entries, the description-subject cells, and the
+per-cell composition-coherence squares are named successors, not
+claimed. Every hypothesis is used and remarked on.}
+
+\textbf{Setting and claim.}\enspace A \emph{fine} chain (states
+$\alpha$, kernel $K$, initial law $\mu_0$), a \emph{coarse} chain
+(states $\beta$, kernel $Q$), and a readout map
+$\pi : \alpha \to \beta$. Write $\pi_{\#}$ for pushforward,
+$\mathrm{law}_K(n)$ for the time-$n$ law, and
+$\mathrm{TV}(p, q) = \tfrac12 \sum_l |p(l) - q(l)|$. The witness comes
+in two grades: \emph{exact intertwining} --- every kernel row pushes
+exactly, $\pi_{\#} K(s, \cdot) = Q(\pi(s), \cdot)$ --- and
+\emph{$\varepsilon$-intertwining} ---
+$\mathrm{TV}\bigl(\pi_{\#} K(s, \cdot),\ Q(\pi(s), \cdot)\bigr) \leq
+\varepsilon$ for every $s$. The transport matrix's built cells, which
+are the claims proved below: \textbf{(strict $\times$ exact)} laws
+transport unchanged at every horizon, so any judgement about the coarse
+law pulls back with zero degradation
+(\texttt{strict\_cell\_exact}); \textbf{(distance $\times$ strict
+witness)} a total-variation distance judgement moves along any readout
+map unchanged (\texttt{sound\_QDistSelfTransport});
+\textbf{(strict $\times$ $\varepsilon$-witness --- the degrading
+cell)} what transports is a \emph{distance} judgement:
+$\mathrm{TV}\bigl(\pi_{\#}\mathrm{law}_K(n),\
+\mathrm{law}_Q(n)\bigr) \leq n\,\varepsilon$ at declared horizon $n$
+(\texttt{sound\_QDistTransport\_eps}); and witnesses compose with
+$\varepsilon_1 + \varepsilon_2$ (\texttt{epsPushKernel\_comp}).
+
+\begin{blemma}[data processing: pushforward is TV-nonexpansive]
+\label{lem:qdt-dpi}
+For any map $\pi$ and any $p, q$:
+$\mathrm{TV}(\pi_{\#} p, \pi_{\#} q) \leq \mathrm{TV}(p, q)$.
+\end{blemma}
+\begin{proof}
+Per label $b$, $|\sum_{\pi(s) = b} (p - q)(s)| \leq
+\sum_{\pi(s) = b} |p - q|(s)$; summing over $b$ regroups the right side
+into $\sum_s |p - q|(s)$. Merging states can only cancel differences,
+never create them \cite[Ch.~4]{levinperes2017}. This lemma \emph{is}
+the (distance $\times$ strict-witness) cell: a certified
+$\mathrm{TV} \leq \varepsilon$ on the fine side transports to the
+coarse side unchanged --- the registry reading of total variation as a
+Lipschitz-$1$ entry under pushforward.
+\end{proof}
+
+\begin{blemma}[the coarse operator cannot amplify]\label{lem:qdt-markov}
+If $Q$ is row-stochastic with nonnegative entries, then
+$\mathrm{TV}(\mathrm{step}_Q\, p,\ \mathrm{step}_Q\, q) \leq
+\mathrm{TV}(p, q)$.
+\end{blemma}
+\begin{proof}
+$|\mathrm{step}_Q(p - q)(t)| \leq \sum_s |p - q|(s)\, Q(s, t)$ by the
+triangle inequality and $Q \geq 0$; summing over $t$ and swapping sums,
+the inner $\sum_t Q(s, t) = 1$ leaves $\sum_s |p - q|(s)$. Both
+hypotheses on $Q$ are consumed: nonnegativity to pull the absolute
+value through, unit row sums to collapse the mass.
+\end{proof}
+
+\begin{blemma}[one-step defect]\label{lem:qdt-defect}
+Let $\mu$ be a probability law and let the $\varepsilon$-intertwining
+rows hold. Then
+$\mathrm{TV}\bigl(\pi_{\#}(\mathrm{step}_K \mu),\
+\mathrm{step}_Q(\pi_{\#}\mu)\bigr) \leq \varepsilon$.
+\end{blemma}
+\begin{proof}
+Both sides are $\mu$-mixtures of per-state rows:
+$\pi_{\#}(\mathrm{step}_K \mu) = \sum_s \mu(s)\,
+\pi_{\#}K(s, \cdot)$ and $\mathrm{step}_Q(\pi_{\#}\mu) =
+\sum_s \mu(s)\, Q(\pi(s), \cdot)$ (the second by regrouping the coarse
+step over the fibres of $\pi$). Total variation is jointly convex ---
+a mixture of pairs is bounded by the mixture of pairwise distances ---
+so the defect is at most $\sum_s \mu(s) \cdot \varepsilon =
+\varepsilon$, using that $\mu$ is nonnegative with total mass $1$.
+\end{proof}
+
+\begin{bthm}[the degrading cell: horizon-compounded transport]
+\label{thm:qdt-eps}
+With $K, Q$ row-stochastic, $\mu_0$ a probability law, and the
+$\varepsilon$-intertwining rows: for every $n$,
+\[
+\mathrm{TV}\bigl(\pi_{\#}\,\mathrm{law}_K(n),\ \mathrm{law}_Q(n)\bigr)
+\;\leq\; n\, \varepsilon,
+\]
+where the coarse chain starts from $\pi_{\#}\mu_0$.
+\end{bthm}
+\begin{proof}
+Induction on $n$; the base is $\mathrm{TV}(x, x) = 0$. Step, by the
+triangle inequality through the hybrid term
+$\mathrm{step}_Q\bigl(\pi_{\#}\,\mathrm{law}_K(n)\bigr)$:
+\[
+\mathrm{TV}\bigl(\pi_{\#}\,\mathrm{law}_K(n{+}1),\ \mathrm{law}_Q(n{+}1)\bigr)
+\;\leq\;
+\underbrace{\mathrm{TV}\bigl(\pi_{\#}\mathrm{step}_K\,\mathrm{law}_K(n),\
+\mathrm{step}_Q\,\pi_{\#}\mathrm{law}_K(n)\bigr)}_{\leq\ \varepsilon
+\ \text{(Lemma \ref{lem:qdt-defect}, at the time-}n\text{ law)}}
+\;+\;
+\underbrace{\mathrm{TV}\bigl(\mathrm{step}_Q\,\pi_{\#}\mathrm{law}_K(n),\
+\mathrm{step}_Q\,\mathrm{law}_Q(n)\bigr)}_{\leq\ n \varepsilon
+\ \text{(Lemma \ref{lem:qdt-markov} + induction)}} .
+\]
+The compounding law is thus \emph{proved}, not guessed: one fresh
+defect per step, prior error never amplified. A strict judgement does
+NOT transport along an $\varepsilon$-witness; what transports is a
+distance judgement with $\varepsilon$ inherited and horizon-compounded
+--- precisely this cell.
+\end{proof}
+
+\begin{bprop}[witness composition]\label{prop:qdt-comp}
+If $\sigma_1 = (\pi_1, \varepsilon_1)$ intertwines $K_1$ with $K_2$ and
+$\sigma_2 = (\pi_2, \varepsilon_2)$ intertwines $K_2$ with $K_3$, then
+$\pi_2 \circ \pi_1$ is an $(\varepsilon_1 + \varepsilon_2)$-witness
+from $K_1$ to $K_3$.
+\end{bprop}
+\begin{proof}
+At any state $s$, triangle through the mid-tier row
+$\pi_{2\#} K_2(\pi_1(s), \cdot)$: the first leg is
+$\mathrm{TV}\bigl(\pi_{2\#}\pi_{1\#}K_1(s,\cdot),\
+\pi_{2\#}K_2(\pi_1 s, \cdot)\bigr) \leq \varepsilon_1$ by
+Lemma~\ref{lem:qdt-dpi} applied to $\sigma_1$'s row defect; the second
+leg is $\sigma_2$'s row at $\pi_1(s)$. Plain addition records the honest
+\emph{upper bound} at this tier --- $\varepsilon_1 + \varepsilon_2$ is
+what the triangle gives, with no minimality claim: data processing can
+gain slack (a constant second projection has composite defect $0$
+whatever $\varepsilon_1$ was).
+\end{proof}
+
+\begin{bprop}[the strict column is the $\varepsilon = 0$ instantiation]
+\label{prop:qdt-strict}
+Exact intertwining holds iff the rows are $0$-intertwining; under it,
+$\pi_{\#}\,\mathrm{law}_K(n) = \mathrm{law}_Q(n)$ for every $n$, and
+every judgement about the coarse law pulls back with zero degradation.
+\end{bprop}
+\begin{proof}
+($\Rightarrow$) equal rows have distance $0$. ($\Leftarrow$)
+$\mathrm{TV}(p, q) \leq 0$ forces $p = q$ entrywise (a sum of absolute
+values is zero only if each vanishes). The exact law transport is then
+the marginal-process induction (the \rulename{QCoupleDrift} section's
+Lemma on marginal processes, re-exported), or equivalently
+Theorem~\ref{thm:qdt-eps} at $\varepsilon = 0$.
+\end{proof}
+
+\begin{bremark}[why each hypothesis is needed]\label{rem:qdt-omit}
+\emph{Row-stochasticity of $Q$} (Lemma~\ref{lem:qdt-markov}): a
+non-stochastic coarse operator amplifies --- with $Q = 2\,\mathrm{Id}$
+each step doubles any existing difference and the telescoping
+collapses; with signed entries the absolute value cannot be pulled
+through. \emph{$\mu$ a probability law}
+(Lemma~\ref{lem:qdt-defect}): mixture convexity needs nonnegative
+weights of total mass one --- weights summing to $2$ double the
+defect. \emph{The declared horizon}: the linear rate is sharp without
+further rows --- on a two-state fine chain whose pushed row leaks mass
+$\varepsilon$ toward one label each step, against a static coarse
+chain, the distance grows by exactly $\varepsilon$ per step until
+saturation --- so the $\varepsilon$-cell \emph{refuses} unbounded
+horizons rather than extrapolating; a contraction row is the named
+mechanism that would buy a uniform-in-$n$ bound, and it is a different
+certificate. \emph{Per-row quantification} of the intertwining: a
+defect bound only at states charged by $\mu_0$ fails at later times,
+since the law spreads --- the rows are quantified over all states
+precisely so Lemma~\ref{lem:qdt-defect} applies at \emph{every}
+time-$n$ law.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The degrading cell is the kernel-tier, exact-arithmetic face of
+approximate simulation with quantitative degradation
+\cite{girardpappas2007}: there, an $\varepsilon$-approximate
+(bi)simulation transports properties up to a metric slack; here the
+slack is total variation, the systems are finite kernels, and the
+horizon-compounding law is proved from mixture convexity plus data
+processing. Behavioural pseudometrics for probabilistic systems
+\cite{desharnais2004} are the semantic tradition the distance-judgement
+registry discretizes; the coupling toolkit is classical
+\cite{lindvall1992,levinperes2017}. The matrix framing --- judgement
+class $\times$ witness class, one lemma and one refusal condition per
+cell --- is the rule's own contribution: it makes ``what survives
+transport along a defective witness'' a typed question with a proved
+answer per cell, instead of a convention.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qdt-dpi} & \texttt{tvDist\_push\_le}; cell form \texttt{sound\_QDistSelfTransport}\\
+Lemma \ref{lem:qdt-markov} & \texttt{tvDist\_step\_le}\\
+Lemma \ref{lem:qdt-defect} & \texttt{EpsPushKernel}; \texttt{push\_step\_defect}\\
+Theorem \ref{thm:qdt-eps} & \texttt{sound\_QDistTransport\_eps} (triangle: \texttt{tvDist\_triangle})\\
+Proposition \ref{prop:qdt-comp} & \texttt{epsPushKernel\_comp}; \texttt{push\_comp}\\
+Proposition \ref{prop:qdt-strict} & \texttt{pushKernel\_iff\_eps\_zero}; \texttt{eq\_of\_tvDist\_le\_zero}; \texttt{strict\_cell\_exact}\\
+\end{anchors}

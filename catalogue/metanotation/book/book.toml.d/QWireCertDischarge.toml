@@ -1,0 +1,142 @@
+[[rule]]
+id = "QWireCertDischarge"
+source = "../QTSL-rules.toml"
+row = "QWireCertDischarge"
+conditional = true
+proof = "book/proofs/QWireCertDischarge.tex"
+commentary = '''
+\rulename{QWireCertDischarge} is the wiring-certificate
+judgement\textquotesingle s own discharge: it assembles a
+$\mathsf{QWireCert}$ --- the license \rulename{QAGCompose} consumes
+--- entirely from inherited BL sequent leaves. Two condition families
+are checked per declared region: the \emph{assumption leg} of the lens
+square (delivered upstream guarantees, degraded by at most the slack
+$\kappa$, imply the downstream assumption through the wiring map) and
+the \emph{guarantee leg} (the upstream guarantee dominates the
+composite\textquotesingle s output reading). For polynomial data both
+are pointwise implications --- ordinary sequents the base calculus
+already checks. Three further arithmetic rows certify the
+slack\textquotesingle s class membership,
+$\kappa \in \mathcal{K}^0_\infty$: the constant coefficient is zero
+(closed evaluation), the derivative is nonnegative on the ray (a
+derivative-nonnegativity row), and the leading coefficient is positive
+at positive degree.
+
+What the cited theorems warrant --- and the scope of this
+entry\textquotesingle s conditional check: that the three row families
+genuinely certify class membership (a polynomial passing them is zero
+at zero, monotone on $[0, \infty)$, and unbounded), and that the class
+supports the composition rule\textquotesingle s slack algebra ---
+slacks are closed under pointwise sum, closed under composition, the
+two-slack contract chain composes to the summed slack, and the
+guarantee legs chain along a cascade. That algebra is the
+quantitative content of \textquotedblleft compose by lens composition
+and by addition of the slacks\textquotedblright.
+
+Each membership row is essential for the algebra. Drop zero-at-zero
+and a constant slack certifies a square that degrades even exact
+guarantee delivery --- and the nonnegativity that anchors the additive
+algebra (a class slack is nonnegative on the ray \emph{because} it is
+zero at zero and monotone) fails with it. Drop monotonicity and
+composition of slacks fails outright: the outer slack of a two-lens
+cascade need no longer bound the chained degradation, since a
+non-monotone $\kappa_1$ can reward a worse input. Drop unboundedness
+and the class is not closed under the composition either --- and the
+published reading of $\kappa$ as a reusable comparison-function-style
+gain is lost. The proof section walks each closure with the field it
+consumes.
+'''
+note = '''
+Core-as-glue: the rule is leaf assembly, and the semantic content of
+what a wiring certificate \emph{buys} lives one row up, in
+\rulename{QAGCompose}\textquotesingle s semantic reading. The
+non-strict monotone reading of the class follows the
+catalogue\textquotesingle s own row roster (a derivative-nonnegativity
+row certifies monotone, not strictly increasing); the zero slack is
+thereby not a member --- a slack-free square is a square with the
+$\kappa$-term absent, not with $\kappa = 0$. The square leaves are
+shipped main-package sequent machinery, cited rather than re-bound
+here.
+'''
+correspondence = '''
+The displayed conclusion $\mathsf{QWireCert}(w, (\mathit{spec}_i)
+\Rightarrow \mathit{spec}_{\mathrm{out}}, \kappa)$ is concluded by
+\emph{no} bound statement --- deliberately: the square leaves are
+shipped sequent machinery cited as witness prose, and what this
+bound set certifies is the
+\emph{semantic warrant behind the arithmetic rows} plus the class
+algebra the rule\textquotesingle s composition claims lean on. The
+class itself is bound by display: \texttt{IsClassK0Inf} =
+zero-at-zero + \texttt{MonotoneOn κ (Ici 0)} + \texttt{Tendsto κ
+atTop atTop} --- $\mathcal{K}^0_\infty$ as the catalogue reads it,
+non-strict monotone (the note\textquotesingle s ruling, visible in
+the field type).
+\begin{itemize}
+\item the three membership rows $\mapsto$
+  \texttt{polynomial\_discharge}, one hypothesis per row per field:
+  closed evaluation $\mapsto$ \texttt{p.coeff 0 = 0} $\Rightarrow$
+  \texttt{zero\_at\_zero}; derivative-nonnegativity on the ray
+  $\mapsto$ \texttt{hderiv} $\Rightarrow$ \texttt{mono} (through the
+  mean-value machinery \texttt{monotoneOn\_of\_deriv\_nonneg});
+  leading-coefficient row $\mapsto$ \texttt{0 < p.degree} +
+  \texttt{0 ≤ p.leadingCoeff} $\Rightarrow$ \texttt{unbounded}. The
+  displayed row asks only $\mathrm{lead}(\kappa) \ge 0$ and so does
+  the statement --- nonstrict suffices because a degree-witnessing
+  leading coefficient is nonzero by definition; the
+  commentary\textquotesingle s ``positive'' is the derived fact, not
+  an extra demand.
+\item ``slacks add, lenses compose'' $\mapsto$
+  \texttt{slack\_triangle} (two contract inequalities chain to the
+  summed slack, stated pointwise over an arbitrary carrier --- the
+  per-region reading is the carrier choice) and
+  \texttt{guarantee\_leg\_comp} (the $\kappa$-free guarantee leg
+  chains along a cascade). Disclosure, exactly as bound: the class
+  \emph{closure} lemmas \texttt{IsClassK0Inf.add} and
+  \texttt{IsClassK0Inf.comp} exist in the module (verified by read)
+  and carry the commentary\textquotesingle s closure claims (sum,
+  composition), but are NOT in this entry\textquotesingle s
+  bound set --- a named bind-set gap; until a re-bind adopts them,
+  the hash-certified algebra is the triangle + the guarantee leg.
+\item polynomiality of $\kappa$ $\mapsto$ \texttt{p : Polynomial ℝ}
+  in the discharge theorem only; the class and its algebra are stated
+  for arbitrary \texttt{ℝ → ℝ} functions --- wider than the
+  display\textquotesingle s polynomial slacks, safe direction.
+\end{itemize}
+Width note: the assumption legs and guarantee legs of the display
+(the two CM condition families, per region) appear in the bound set
+only through their compositional shadows (\texttt{slack\_triangle},
+\texttt{guarantee\_leg\_comp}); their per-region discharge is
+inherited BL sequents, main package, outside this page\textquotesingle s
+bindings --- the package-boundary rule, stated in the module header.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslCompose.WireCertDischarge"
+src = "../../lean/qtsl-aux/QtslAux/QtslCompose/WireCertDischarge.lean"
+decls = ["polynomial_discharge", "slack_triangle", "guarantee_leg_comp"]
+full_decls = ["IsClassK0Inf"]
+intro = '''
+\textbf{The slack class, bound by display.}\enspace
+\texttt{IsClassK0Inf} is the catalogue\textquotesingle s
+$\mathcal{K}^0_\infty$: zero at zero, monotone on the nonnegative ray,
+unbounded at infinity. Its closure theorems (\texttt{add} --- slacks
+add; \texttt{comp} --- lenses compose) are proven in the same module
+inside the class namespace; \texttt{polynomial\_discharge} maps the
+three checked row families onto the three fields, and
+\texttt{slack\_triangle}/\texttt{guarantee\_leg\_comp} are the
+quantitative and guarantee-side composition faces.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The satisfaction-judgement extension postdates the HOL4 port entirely:
+the ported cone is the base calculus\textquotesingle s check-function
+surface (theory \texttt{qtsl\_catalogue}), and no extension-theory
+definition exists in the HOL development --- in particular nothing
+shaped like a wiring-certificate discharge. The rule\textquotesingle s
+sequent \emph{leaves} would already be expressible in the ported
+vocabulary, but the judgement they assemble would not; the box waits on
+a HOL port of the satisfaction stratum.
+'''

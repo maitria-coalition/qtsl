@@ -1,0 +1,52 @@
+\apilang{TypeScript}{spec.hurwiczGe / hurwiczLe}
+\apiprov{signature --- \texttt{ts/src/judgment.ts + ts/src/spec.ts}}
+\begin{tssrc}
+export function hurwiczGe(
+  alpha: QLike,
+  lo: QLike,
+  ret: PathObservable,
+): AttitudeSpec
+
+export function hurwiczLe(
+  alpha: QLike,
+  hi: QLike,
+  ret: PathObservable,
+): AttitudeSpec
+
+export function hurwiczQuery(args: {
+  alpha: QLike;
+  root: SpecRef;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const hurwicz = s.hurwiczGe(Q.of(1, 3), 2n, s.poSum(11, s.oChan(1)));
+\end{tssrc}
+\apiprov{The root-level query row (\texttt{judgment.hurwiczQuery}) remains beside the component formers as the judgment-tour vehicle for the blend.}
+\apilang{Rust}{mtk\_catalogue::spec::AttitudeSpec::\{hurwicz\_ge, hurwicz\_le\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs + crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn hurwicz_ge(
+    alpha: WitRat,
+    lo: WitRat,
+    ret: PathObservable,
+) -> Result<AttitudeSpec, Refusal>
+
+pub fn hurwicz_le(
+    alpha: WitRat,
+    hi: WitRat,
+    ret: PathObservable,
+) -> Result<AttitudeSpec, Refusal>
+
+pub fn new(alpha: WitRat, root: SpecRef) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let hurwicz = AttitudeSpec::hurwicz_ge(
+    q(1, 3),
+    q(2, 1),
+    PathObservable::sum(11, StateObservable::chan(1)).unwrap(),
+)
+.unwrap();
+\end{rustsrc}
+\apiprov{The root-level query row (\texttt{HurwiczQueryV0}) remains beside the component formers as the judgment-tour vehicle for the blend.}

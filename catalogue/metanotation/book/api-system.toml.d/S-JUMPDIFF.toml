@@ -1,0 +1,23 @@
+# api-system.toml.d/S-JUMPDIFF.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-JUMPDIFF"
+entity = "model type"
+
+[api.ts]
+handle = "system.jumpDiffusion"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_jumpdiff", "marker:ts_sig_jdgen"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "fn-body:buildJumpdiff"
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::JumpDiffusion::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_jumpdiff"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "fn-body:jump_diffusion_happy"

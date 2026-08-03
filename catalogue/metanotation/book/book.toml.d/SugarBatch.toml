@@ -1,0 +1,123 @@
+# SugarBatch: the three sugar rules of the spec surface (SugarAvoid /
+# SugarGF / SugarFG), one row — they share one implementation mechanism.
+# Steele cell exists in the roster (no staging file for this row).
+
+[[rule]]
+id = "SugarBatch"
+source = "../QTSL-rules.toml"
+row = "SugarBatch (T10)"
+proof = "book/proofs/SugarBatch.tex"
+commentary = '''
+\rulename{SugarBatch} is, for the purposes of the logic, three rules
+--- \rulename{SugarAvoid}, \rulename{SugarGF}, \rulename{SugarFG} ---
+each concluding a formula of the classical temporal surface from the
+judgement its expansion certifies. \rulename{SugarGF} concludes
+$\mathsf{GF}\,\varphi$ from the degenerate Streett formula
+$\mathsf{Streett}((\top, \varphi))$ (recurrence is the degenerate
+Streett pair --- the \rulename{StreettDegenerate} section);
+\rulename{SugarFG} concludes $\mathsf{FG}\,\neg\beta$ from the Streett
+formula $\mathsf{Streett}((\beta, \bot))$ (with an unsatisfiable
+response, the pair condition says exactly that $\beta$-states occur
+only finitely often --- eventual permanent avoidance); and
+\rulename{SugarAvoid} concludes $\mathsf{avoid}\,\beta$ from the safety
+formula $\mathsf{G}\,\neg\beta$ (avoidance is safety of the negation
+--- exact, the negation being ruled in by the \rulename{NNFDuality}
+atom swaps). Each rule is warranted by a definitional equation ---
+$\mathsf{avoid}\,\beta := \mathsf{G}\neg\beta$, $\mathsf{GF}\varphi :=
+\mathsf{Streett}((\top, \varphi))$, $\mathsf{FG}\neg\beta :=
+\mathsf{Streett}((\beta, \bot))$ --- so each premise and its conclusion
+denote the same path event; the displays put each rule in the certify
+direction (what a producer holds above the line, what the
+specification says below), and the equalities make all three
+invertible. The displays sit at the satisfaction level where the
+target rules conclude; being path-event equalities, the same
+replacement is licensed at any formula depth, and the surface enacts
+it at every position at once. The three rules share one row because
+they share one implementation mechanism --- definitional expansion:
+sugar constructors build their expansions rather than new node kinds,
+so nothing downstream --- typing, compilation, checking --- ever sees
+a sugar node, premise and conclusion are one object in every
+representation after parsing, and no checker recomputation exists for
+this row at all. There is no single alias target --- each rule names
+its own --- so no alias-for header is claimed; the proof gives the
+three filled-in applications side by side.
+
+Mechanization state, plainly: there are no separate soundness lemmas
+here --- the three equations are definitions --- but the identities
+the rules ride on are machine-checked, as path-event identities
+in the exact shapes the target rules conclude (module
+\texttt{QtslAux.QtslAliases}):
+\texttt{sugarAvoid\_denot} (\rulename{SugarAvoid}) --- avoidance
+\emph{is} safety of the negation, proof \texttt{rfl}, axiom-free
+(definitional exactness, certified as such by the kernel);
+\texttt{sugarGF\_denot} (\rulename{SugarGF}) --- the
+per-pair Streett event at the trivially-true request \emph{is} the
+recurrence event (the pair-degeneration identity, the
+\rulename{StreettDegenerate} section\textquotesingle s concluded
+shape); \texttt{sugarFG\_denot} (\rulename{SugarFG}) --- the per-pair
+Streett event at an
+unsatisfiable response \emph{is} eventual permanent avoidance (the
+finitely-often reading). The witness that the surface really does
+build expansions rather than new nodes remains the reference
+implementation\textquotesingle s concrete-syntax canonicality test
+battery --- an implementation property, not a semantic claim, so it
+stays a test rather than a theorem. No profile enters; the entry
+carries no conditional flag.
+'''
+note = '''
+The three rules are also the compatibility layer to the classical
+temporal-logic surface: $\mathsf{GF}$/$\mathsf{FG}$ specifications
+translate to the Streett-primitive kernel without automaton products,
+which is the practical payoff of B\"uchi acceptance being a one-pair
+Streett condition.
+'''
+correspondence = '''
+Three rules, three path-event identities, each stated in its target
+rule\textquotesingle s concluded shape --- which is what makes them
+consumable as rewrites rather than mere facts:
+\texttt{sugarAvoid\_denot} (\rulename{SugarAvoid};
+$\mathrm{avoid}\,\beta := \mathsf{G}\neg
+\beta$) is \texttt{rfl} --- definitional at the set level, the
+strongest possible fidelity, with the negation-atom step ruled in by
+the \rulename{NNFDuality} swaps;
+\texttt{sugarGF\_denot} (\rulename{SugarGF}; $\mathsf{GF}\varphi :=
+\mathsf{Streett}((\top, \varphi))$) certifies the pair event at
+request \texttt{Set.univ} $\leftrightarrow$ the bare recurrence event
+--- exactly the per-pair form of
+\texttt{sound\_StreettDegenerate}\textquotesingle s conclusion, so the
+rule lands on \rulename{StreettDegenerate}\textquotesingle s bound
+statement with only the one-pair family instantiation;
+\texttt{sugarFG\_denot}
+(\rulename{SugarFG};
+$\mathsf{FG}\neg\beta := \mathsf{Streett}((\beta, \bot))$) certifies
+the pair event at response $\emptyset$ $\leftrightarrow$ eventual
+permanent avoidance (\texttt{∀ᶠ}), the finitely-often reading. Width
+note: the displayed rules sit at the satisfaction level
+($\mathcal{M} \vDash_{R} \mathsf{P}_{\ge p}[\cdot]$) while all three
+identities are per-path equivalences over arbitrary state types ---
+no measure enters, so the identities transport under every
+profile\textquotesingle s path measure by congruence --- the only step
+the identities leave to the profile semantics; the remaining
+displayed claim (the staged surface \emph{builds} the expansions
+rather than minting node kinds) is a property of the concrete-syntax
+canonicality battery --- a test, not a theorem, deliberately outside
+this bound set, exactly as the roster witness says.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslAliases"
+src = "../../lean/qtsl-aux/QtslAux/QtslAliases.lean"
+decls = ["sugarAvoid_denot", "sugarGF_denot", "sugarFG_denot"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}, in the strongest form
+this batch has: the sugars are definitional constructors that build
+their expansions at the surface --- no sugar node exists in any
+representation downstream of parsing, wire format included, so there is
+no artefact for any checker port to be about. Checked against the HOL
+sources: the \texttt{qtsl\_catalogue} theory carries no spec-surface
+grammar.
+'''

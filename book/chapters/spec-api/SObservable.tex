@@ -1,0 +1,32 @@
+\apilang{TypeScript}{spec.oChan / oGate / oPoly / oInd}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function oChan(chan: number): StateObservable
+
+export function oGate(digest: string, role?: string): StateObservable
+
+export function oPoly(p: Poly): StateObservable
+
+export function oInd(arg: StatePred): StateObservable
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const indAtom = s.atomGe(1n, s.oInd(band));
+const chanObs = s.oChan(1);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::StateObservable::\{chan, gate, poly, ind\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn chan(chan: u64) -> StateObservable
+
+pub fn gate(gate: HypernetRef) -> StateObservable
+
+pub fn poly(poly: Poly) -> StateObservable
+
+pub fn ind(arg: StatePred) -> StateObservable
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let ind_atom = StatePred::atom_ge(q(1, 1), StateObservable::ind(band.clone()));
+let chan_obs = StateObservable::chan(1);
+\end{rustsrc}

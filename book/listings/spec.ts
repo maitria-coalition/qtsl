@@ -1,0 +1,27 @@
+// spec.ts — state the FrozenLake claim species as a specification.
+import { spec } from "@maitria/mtk";
+
+// One observable (width 1); the goal region is { x >= 15 }.
+const x = spec.unwrap(spec.polyVar(0, 1));
+const goal = spec.polyGe(15, x);
+
+// P_{>= 815/19683} [ F_{<=10} goal ] — reach the goal within 10 steps:
+// a safety-face component (SProbGE) in the record's forall list.
+const phi = spec.probGe("815/19683", spec.deadline(10, goal));
+
+const record = spec.unwrap(spec.build({ name: "reach-goal-by-10", forall: [phi] }));
+const artifact = spec.unwrap(spec.encode(record));
+console.log(artifact.schema, "-", artifact.bytes.length, "bytes");
+
+// Round-trip: decoded data is data — re-validate before trusting it.
+const back = spec.unwrap(spec.decode(artifact.bytes));
+console.log("decoded:", back.spec.name, "v =", back.v);
+
+// Now ask for probability 3/2 and let the preflight refuse.
+const bad = spec.probGe("3/2", spec.deadline(10, goal));
+const r = spec.preflightForall(bad);
+if (!r.ok) {
+  console.log("refused:", r.refusal.kind);
+  if (r.refusal.kind === "probRange")
+    console.log(`  at ${r.refusal.at.text}: p = ${r.refusal.p}, outside (0, 1]`);
+}

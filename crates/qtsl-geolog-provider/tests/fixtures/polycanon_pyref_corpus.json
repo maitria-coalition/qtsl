@@ -1,0 +1,1382 @@
+[
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     0,
+     0,
+     3
+    ],
+    -3,
+    4
+   ],
+   [
+    [
+     2,
+     1,
+     2
+    ],
+    2,
+    3
+   ],
+   [
+    [
+     2,
+     3,
+     0
+    ],
+    5,
+    4
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #0"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     1
+    ],
+    -4,
+    1
+   ],
+   [
+    [
+     2
+    ],
+    -1,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #1"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     3,
+     3,
+     1
+    ],
+    -2,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #2"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     2,
+     1,
+     0
+    ],
+    3,
+    4
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #3"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     2,
+     2,
+     0
+    ],
+    2,
+    3
+   ],
+   [
+    [
+     3,
+     1,
+     3
+    ],
+    1,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #4"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     0,
+     1,
+     3
+    ],
+    -5,
+    4
+   ],
+   [
+    [
+     0,
+     2,
+     3
+    ],
+    -3,
+    1
+   ],
+   [
+    [
+     3,
+     2,
+     2
+    ],
+    -2,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #5"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     2
+    ],
+    3,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #6"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     0
+    ],
+    -13,
+    12
+   ],
+   [
+    [
+     1
+    ],
+    -3,
+    1
+   ],
+   [
+    [
+     3
+    ],
+    1,
+    3
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #7"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     3,
+     0
+    ],
+    -4,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #8"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     1,
+     1
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     2,
+     0
+    ],
+    2,
+    3
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #9"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     2,
+     3,
+     3
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     3,
+     1,
+     0
+    ],
+    1,
+    2
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #10"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     0,
+     2,
+     2
+    ],
+    -2,
+    1
+   ],
+   [
+    [
+     2,
+     0,
+     2
+    ],
+    -3,
+    1
+   ],
+   [
+    [
+     2,
+     2,
+     0
+    ],
+    1,
+    3
+   ],
+   [
+    [
+     3,
+     2,
+     3
+    ],
+    5,
+    4
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #11"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     1,
+     1,
+     2
+    ],
+    -1,
+    1
+   ],
+   [
+    [
+     1,
+     2,
+     1
+    ],
+    1,
+    2
+   ],
+   [
+    [
+     2,
+     1,
+     0
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     2,
+     1,
+     2
+    ],
+    -2,
+    1
+   ],
+   [
+    [
+     2,
+     2,
+     2
+    ],
+    -3,
+    1
+   ],
+   [
+    [
+     2,
+     3,
+     3
+    ],
+    -4,
+    3
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #12"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     2,
+     2,
+     1
+    ],
+    -1,
+    2
+   ],
+   [
+    [
+     3,
+     2,
+     3
+    ],
+    -5,
+    4
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #13"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     0,
+     1
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     1,
+     1
+    ],
+    -2,
+    3
+   ],
+   [
+    [
+     2,
+     2
+    ],
+    -5,
+    2
+   ],
+   [
+    [
+     3,
+     3
+    ],
+    1,
+    2
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #14"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     0,
+     0
+    ],
+    5,
+    2
+   ],
+   [
+    [
+     0,
+     2
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     1,
+     1
+    ],
+    -4,
+    3
+   ],
+   [
+    [
+     2,
+     0
+    ],
+    -1,
+    2
+   ],
+   [
+    [
+     2,
+     1
+    ],
+    4,
+    3
+   ]
+  ],
+  "verdict": true,
+  "note": "sympy-canonicalized random poly #15"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     2,
+     0
+    ],
+    0,
+    1
+   ],
+   [
+    [
+     3,
+     2
+    ],
+    5,
+    2
+   ],
+   [
+    [
+     3,
+     0
+    ],
+    -4,
+    1
+   ],
+   [
+    [
+     1,
+     0
+    ],
+    -4,
+    3
+   ],
+   [
+    [
+     1,
+     2
+    ],
+    -1,
+    2
+   ],
+   [
+    [
+     0,
+     0
+    ],
+    -1,
+    3
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #0"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     3
+    ],
+    -5,
+    3
+   ],
+   [
+    [
+     1
+    ],
+    -5,
+    2
+   ],
+   [
+    [
+     1
+    ],
+    4,
+    1
+   ],
+   [
+    [
+     0
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     3
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     3
+    ],
+    1,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #1"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     2,
+     2,
+     0
+    ],
+    0,
+    1
+   ],
+   [
+    [
+     3,
+     2,
+     3
+    ],
+    3,
+    1
+   ],
+   [
+    [
+     1,
+     0,
+     3
+    ],
+    1,
+    3
+   ],
+   [
+    [
+     0,
+     0,
+     3
+    ],
+    -2,
+    3
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #2"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     0
+    ],
+    4,
+    3
+   ],
+   [
+    [
+     2
+    ],
+    -1,
+    2
+   ],
+   [
+    [
+     1
+    ],
+    4,
+    1
+   ],
+   [
+    [
+     2
+    ],
+    -2,
+    1
+   ],
+   [
+    [
+     3
+    ],
+    1,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #3"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     3
+    ],
+    5,
+    4
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #4"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     2,
+     1
+    ],
+    -3,
+    2
+   ],
+   [
+    [
+     3,
+     3
+    ],
+    4,
+    3
+   ],
+   [
+    [
+     1,
+     3
+    ],
+    3,
+    2
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #5"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     1,
+     0,
+     3
+    ],
+    1,
+    2
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #6"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     2,
+     3
+    ],
+    -1,
+    4
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #7"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     3,
+     3,
+     0
+    ],
+    2,
+    1
+   ],
+   [
+    [
+     3,
+     1,
+     0
+    ],
+    5,
+    2
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #8"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     0,
+     2
+    ],
+    3,
+    1
+   ],
+   [
+    [
+     1,
+     3
+    ],
+    -1,
+    3
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #9"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     0,
+     1,
+     1
+    ],
+    -1,
+    4
+   ],
+   [
+    [
+     3,
+     2,
+     1
+    ],
+    -1,
+    3
+   ],
+   [
+    [
+     1,
+     0,
+     2
+    ],
+    -5,
+    4
+   ],
+   [
+    [
+     0,
+     0,
+     2
+    ],
+    -3,
+    2
+   ],
+   [
+    [
+     3,
+     0,
+     0
+    ],
+    0,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #10"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     2,
+     0
+    ],
+    -2,
+    1
+   ],
+   [
+    [
+     2,
+     1
+    ],
+    5,
+    1
+   ],
+   [
+    [
+     0,
+     1
+    ],
+    2,
+    3
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #11"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     3,
+     0
+    ],
+    5,
+    3
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #12"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     2
+    ],
+    2,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #13"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     2
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     3
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     0
+    ],
+    1,
+    3
+   ]
+  ],
+  "verdict": false,
+  "note": "raw random term list #14"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     0
+    ],
+    -4,
+    3
+   ],
+   [
+    [
+     1
+    ],
+    -2,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "raw random term list #15"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     1,
+     0
+    ],
+    -9,
+    2
+   ],
+   [
+    [
+     0,
+     3
+    ],
+    -5,
+    4
+   ],
+   [
+    [
+     1,
+     1
+    ],
+    -1,
+    1
+   ],
+   [
+    [
+     3,
+     2
+    ],
+    5,
+    4
+   ]
+  ],
+  "verdict": false,
+  "note": "adjacent swap"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     1
+    ],
+    4,
+    3
+   ],
+   [
+    [
+     3
+    ],
+    -1,
+    4
+   ],
+   [
+    [
+     3
+    ],
+    0,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "appended zero-coeff term"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     0
+    ],
+    3,
+    2
+   ],
+   [
+    [
+     1
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     1
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     3
+    ],
+    -1,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "split coefficient (duplicate monomial)"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     0,
+     0,
+     1
+    ],
+    -3,
+    4
+   ],
+   [
+    [
+     0,
+     1,
+     1
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     1,
+     3,
+     1
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     3,
+     0,
+     0
+    ],
+    5,
+    2
+   ]
+  ],
+  "verdict": true,
+  "note": "identity perturbation (control)"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     2,
+     2
+    ],
+    -3,
+    1
+   ],
+   [
+    [
+     0,
+     0
+    ],
+    -7,
+    6
+   ],
+   [
+    [
+     3,
+     3
+    ],
+    -1,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "adjacent swap"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     0,
+     3,
+     0
+    ],
+    -3,
+    4
+   ],
+   [
+    [
+     1,
+     2,
+     1
+    ],
+    -2,
+    1
+   ],
+   [
+    [
+     1,
+     3,
+     3
+    ],
+    4,
+    3
+   ],
+   [
+    [
+     1,
+     3,
+     3
+    ],
+    0,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "appended zero-coeff term"
+ },
+ {
+  "nvars": 3,
+  "terms": [
+   [
+    [
+     1,
+     0,
+     1
+    ],
+    -1,
+    1
+   ],
+   [
+    [
+     1,
+     2,
+     1
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     2,
+     1,
+     1
+    ],
+    -3,
+    2
+   ],
+   [
+    [
+     2,
+     1,
+     2
+    ],
+    -5,
+    4
+   ],
+   [
+    [
+     2,
+     1,
+     2
+    ],
+    -5,
+    4
+   ],
+   [
+    [
+     3,
+     0,
+     1
+    ],
+    5,
+    4
+   ]
+  ],
+  "verdict": false,
+  "note": "split coefficient (duplicate monomial)"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     0
+    ],
+    -11,
+    3
+   ],
+   [
+    [
+     2
+    ],
+    2,
+    1
+   ]
+  ],
+  "verdict": true,
+  "note": "identity perturbation (control)"
+ },
+ {
+  "nvars": 1,
+  "terms": [
+   [
+    [
+     2
+    ],
+    -7,
+    6
+   ]
+  ],
+  "verdict": true,
+  "note": "identity perturbation (control)"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     0,
+     2
+    ],
+    2,
+    1
+   ],
+   [
+    [
+     0,
+     3
+    ],
+    1,
+    1
+   ],
+   [
+    [
+     1,
+     2
+    ],
+    4,
+    1
+   ],
+   [
+    [
+     3,
+     2
+    ],
+    3,
+    4
+   ],
+   [
+    [
+     0,
+     3
+    ],
+    0,
+    1
+   ]
+  ],
+  "verdict": false,
+  "note": "appended zero-coeff term"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     0,
+     0
+    ],
+    -1,
+    2
+   ],
+   [
+    [
+     0,
+     0
+    ],
+    -1,
+    2
+   ],
+   [
+    [
+     0,
+     1
+    ],
+    1,
+    2
+   ],
+   [
+    [
+     1,
+     2
+    ],
+    -19,
+    12
+   ]
+  ],
+  "verdict": false,
+  "note": "split coefficient (duplicate monomial)"
+ },
+ {
+  "nvars": 2,
+  "terms": [
+   [
+    [
+     0,
+     1
+    ],
+    5,
+    2
+   ],
+   [
+    [
+     2,
+     2
+    ],
+    1,
+    2
+   ],
+   [
+    [
+     2,
+     3
+    ],
+    5,
+    4
+   ],
+   [
+    [
+     3,
+     2
+    ],
+    -3,
+    2
+   ]
+  ],
+  "verdict": true,
+  "note": "identity perturbation (control)"
+ }
+]

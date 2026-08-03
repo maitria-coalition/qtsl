@@ -1,0 +1,166 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. An alias
+owes the book five artefacts: the verified 1$\to$1 unpack, the filled-in
+application of the target rule, the payload-transport table, the exact
+algebraic identity that makes the respelling correct, and the soundness
+corollary through the target rule's lemma. All five follow --- and this
+alias is the tier taxonomy's \emph{canonical} case, the one the
+tier was named for: the unpack is the identity.}
+
+\begin{brecipe}[the alias template]\label{rec:pb-template}
+An alias rule $A$ is warranted by a verified function
+$\mathrm{unpack} : \mathrm{Step}_A \to \mathrm{Step}_T$ into the payload
+of a \emph{single} target node $T$ (core or admissible), such that the
+$A$-node and its image conclude the same sequent from the same premises:
+one node $\to$ one node, payload transported, nothing derived. Soundness
+is then a corollary, $\mathrm{sound}_A = \mathrm{sound}_T \circ
+\mathrm{unpack}$. The wire format may carry $A$ as a compact register of
+its own (this rule: an affine coefficient-row spelling, tag pending
+allocation) or never carry it at all (producers elaborating before
+emission, as the \rulename{SmallGain} section records); either way the
+checker's obligations are the target's, reached through the unpack.
+\end{brecipe}
+
+\begin{brecipe}[the verified unpack --- the identity transport]
+\label{rec:pb-unpack}
+\rulename{PBound}'s payload carries components, combination term,
+conclusion term, and the bookkeeping fields \emph{verbatim} as the
+target's payload does, including the conclusion-form selector. The
+unpack is therefore not a computation but a re-labelling: the verified
+object is the direct specialization
+\[
+\mathrm{sound}_{\rulename{PBound}}
+\;=\;
+\mathrm{sound}_{\rulename{Syzygy}}
+\ \text{\upshape applied to the same fields, re-assembled as the
+target's step}
+\]
+--- in the sources, the body of \texttt{sound\_pBound} \emph{is} one
+application of \texttt{sound\_syzygy} to the step built from
+\rulename{PBound}'s own fields. Where \rulename{SmallGain}'s unpack
+computes a weighting, this one computes nothing; that is the tier-3
+boundary case made flesh, and it is why the alias relation here is
+$1 \to 1$ at the level of \emph{readings} too
+(Recipe~\ref{rec:pb-transport}).
+\end{brecipe}
+
+\begin{brecipe}[the filled-in application]\label{rec:pb-filled}
+Under the identity transport the \rulename{PBound} node \emph{is} the
+following application of the target rule (compare the rule display in
+the \rulename{Syzygy} section, field for field):
+\begin{mathpar}
+\inferrule*[Right=\rulename{Syzygy}]{
+  \bigl\{\Phi_i \vdash e_i \leq 0\bigr\}_{i=1}^{n} \\
+  \bigl\{g_k = 0\bigr\}_k \ \text{sub-conjuncts of } \Phi \\\\
+  \lambda_i \in \Q_{\geq 0} \\
+  \nu_k \in \Q \\
+  c \;\equiv\; \textstyle\sum_i \lambda_i e_i + \sum_k \nu_k g_k
+  \ \text{(exact canonical polynomial)}
+}{
+  \Phi \vdash \Psi
+}
+\end{mathpar}
+where $\Psi$ is whichever reading of $c \leq 0$ the shared selector
+declares: \emph{(Z$\leq$)} $c \leq 0$ itself; \emph{(G)} $e \geq 0$
+where $c = -e$; \emph{(L$\leq$)} $l \leq r$ where $c = l - r$.
+Discharging the target's obligations at this instance is immediate ---
+they are \emph{the same obligations on the same data}: entry decoding,
+nonnegative weights, entry-sourcing (component conclusions and premise
+equality sub-conjuncts, both polarities on equalities), the exact fold
+identity, premise containment, conclusion shape/finiteness, and the
+positive-size wire conditions on premise, conclusion, and component
+conclusions. \rulename{PBound}'s catalogued statement restricts the
+$e_i$ to \emph{affine} entries; nothing above consults that restriction
+(Remark~\ref{rem:pb-affine}).
+\end{brecipe}
+
+\begin{brecipe}[payload transport --- field for field]
+\label{rec:pb-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{\rulename{PBound} payload} & \textbf{target (\rulename{Syzygy}) payload}\\
+\midrule
+\texttt{components} & \texttt{components} (verbatim)\\
+\texttt{combination} & \texttt{combination} (verbatim)\\
+\texttt{conclusion} & \texttt{conclusion} (verbatim)\\
+\texttt{denBoundLog2} & \texttt{denBoundLog2} (verbatim; witness-side claim, zero proof-theoretic weight)\\
+\texttt{preContains} & \texttt{preContains} (verbatim)\\
+\texttt{conclShape, conclFin} & \texttt{conclShape, conclFin} (verbatim)\\
+\texttt{wiresPos, compPostWiresPos} & \texttt{wiresPos, compPostWiresPos} (verbatim)\\
+\texttt{valid} & \texttt{valid} (the same exact-combination proposition)\\
+\texttt{postForm} & \texttt{postForm} (the same three-reading selector)\\
+\end{tabular}
+\end{center}
+Every row is the identity --- including the last: since the target rule
+itself carries the three-reading conclusion selector, the alias
+inherits all readings with no residue, and the transport is $1 \to 1$
+at reading level, not merely at node level.
+\end{brecipe}
+
+\begin{bprop}[the exactness identity]\label{prop:pb-exact}
+The respelling is exact definitionally: the unpacked node's combination
+identity is \emph{the same} exact canonical-polynomial identity
+$c \equiv \sum_i \lambda_i e_i + \sum_k \nu_k g_k$, unchanged. What
+remains to make the three readings correct is the fact that they are
+one exact $\Q$ identity re-presented under a sign flip --- per entry,
+$-e(\sigma) \leq 0 \iff e(\sigma) \geq 0$ and
+$l(\sigma) - r(\sigma) \leq 0 \iff l(\sigma) \leq r(\sigma)$ --- which
+is the target rule's reading-transport lemma, proven once in the
+\rulename{Syzygy} section and \emph{not} re-justified here.
+\end{bprop}
+\begin{proof}
+The first claim is reflexivity of the transported field. The second is
+the cited lemma (the ordered-field axioms negate-and-flip and
+add-to-both-sides, packaged as the ge-bridge ring lemma); the alias
+contributes no polarity argument of its own, which is what keeps the
+$1 \to 1$ relation clean.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:pb-sound}
+If every component sequent is semantically valid, then under the
+payload's checked hypotheses the sequent $\Phi \vdash \Psi$ is
+semantically valid, for every reading $\Psi$ the selector admits.
+\end{bprop}
+\begin{proof}
+\texttt{sound\_pBound} $=$ \texttt{sound\_syzygy} at the transported
+(identical) payload data, fed the same component validities. There is
+no other content --- the alias genre working as intended.
+\end{proof}
+
+\begin{bremark}[why the rule exists at all]\label{rem:pb-why}
+Semantically the alias adds nothing to its target; its existence is
+pragmatic, twice over. \emph{Register}: affine entries admit a compact
+coefficient-row wire spelling, and bound nodes are the bulk commodity
+of produced certificates --- the compact register is worth a tag.
+\emph{Readings at the seams}: the (G) reading makes a nonnegativity
+premise (as \rulename{ReLU-Pos} demands, $h \geq 0$) reachable
+directly from bound facts --- the once-contemplated standalone
+$\geq$-bridge rule dissolved into the conclusion selector instead ---
+and the (L$\leq$) reading hands interval-shaped consumers
+(\rulename{LiRPA}'s endpoint premises) their literal atom with no
+\rulename{ArithAtom} re-arrangement node in between. Producers get the
+convenient conclusion shape; the kernel keeps exactly one combination
+argument.
+\end{bremark}
+
+\begin{bremark}[the affine restriction is register, not soundness]
+\label{rem:pb-affine}
+The catalogued statement's ``affine entries'' names the wire register
+the rule is priced for, and is not a checked side condition: the
+combination replay is degree-blind, and the soundness argument
+(Proposition~\ref{prop:pb-sound}) never consults linearity. A
+higher-degree entry simply belongs to the target rule's own spelling.
+Publishing the restriction in the rule head, while the checker enforces
+only what soundness needs, mirrors the \rulename{Farkas} page's
+linearity note --- the register tells producers what the format prices;
+the checker tells them what truth requires.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:pb-unpack} unpack (identity transport) & \texttt{sound\_pBound}'s body: one application of \texttt{sound\_syzygy} to the step assembled from \rulename{PBound}'s fields (\texttt{PBoundData} $=$ the target's fields verbatim)\\
+Recipe \ref{rec:pb-filled} obligations & \texttt{syzygyCombinationValid} and the target's bookkeeping fields, unchanged\\
+Recipe \ref{rec:pb-transport} reading selector & \texttt{syzygyConclusionForm} (shared, not duplicated)\\
+Proposition \ref{prop:pb-exact} reading transport & \texttt{holds\_of\_syzygyConclusionForm} (proven in the \rulename{Syzygy} section)\\
+Proposition \ref{prop:pb-sound} & \texttt{sound\_pBound} (a \texttt{sound\_syzygy} specialization)\\
+wire placement & \texttt{RuleTag.pBound}; tag allocation deferred --- the emit path refuses the rule until the payload-window allocation\\
+\end{anchors}

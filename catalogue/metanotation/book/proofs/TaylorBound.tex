@@ -1,0 +1,154 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. The
+five artefacts an alias owes the book: the 1$\to$1 unpack, the filled-in
+target application, the payload-transport table, the exactness identity,
+and the soundness corollary through the target\textquotesingle s lemma.
+All five follow, with one honest asymmetry marked where it occurs: this
+rule\textquotesingle s exactness identity is not a ring identity but an
+\emph{enclosure} --- the Taylor-remainder inequality --- and it lives in
+the consuming lemma, never in the checker. Mechanization state: the
+target\textquotesingle s lemma is kernel-verified; the alias-level
+semantic content --- the enclosure and its exact-$\Q$ face --- is
+mechanized and bound in the entry; the payload-level elaborator slot
+is marked below.}
+
+\begin{brecipe}[the template instance --- no node sort, by design]
+\label{rec:tb-template}
+The deadline rule (\rulename{QDeadlineBattery}) wants the fact
+$q \le e^{\theta T}$ for a producer-chosen rational surrogate $q$, with
+decay rate $\theta \in \Q_{> 0}$ and horizon $T \in \Q_{\ge 0}$ from its
+payload: its concluded sublevel region $\{V \le (1-p)\,q\}$ grows with
+$q$, so the producer wants the sharpest $q$ the arithmetic affords. No
+checker doing exact rational arithmetic can evaluate $e^{\theta T}$, and
+none needs to: the certificate posts the single wire-free comparison
+\[
+q \;\le\; \textstyle\sum_{k \le n} (\theta T)^k / k!
+\]
+for a producer-chosen truncation order $n$ --- a finite sum of
+rationals, one closed comparison --- and the consuming lemma carries the
+enclosure to $e^{\theta T}$ (Proposition~\ref{prop:tb-enclosure}). The
+unpack image is a single \rulename{PConstExact} node; indeed no
+\rulename{TaylorBound} node sort exists and none is needed --- the
+producer emits the ground-fact row directly, and this rule is the
+catalogue-level name for that elaboration. One node $\to$ one node,
+nothing derived.
+\end{brecipe}
+
+\begin{brecipe}[the filled-in application]\label{rec:tb-filled}
+\begin{mathpar}
+\inferrule*[Right=\rulename{PConstExact}]{
+  \mathrm{evalClosed}\Bigl(\,q \le \textstyle\sum_{k \le n} (\theta T)^k / k!\,\Bigr) = \mathsf{true}
+}{
+  \Phi \vdash q \le \textstyle\sum_{k \le n} (\theta T)^k / k!
+}
+\end{mathpar}
+with arbitrary premise $\Phi$, as the target licenses (the rule is
+premise-free). Both sides are closed rational terms --- the sum is
+finite, every summand exact --- so the target\textquotesingle s verified
+evaluator decides the comparison in exact $\Q$, and the comparator
+($\le$) lies inside the target\textquotesingle s admissible comparator
+set.
+\end{brecipe}
+
+\begin{brecipe}[payload transport --- field for field]\label{rec:tb-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{\rulename{TaylorBound} data} & \textbf{\rulename{PConstExact} payload}\\
+\midrule
+$q$ \textnormal{(the rational surrogate)} & left side of the comparison\\
+$\theta, T, n$ \textnormal{(rate, horizon, order)} & the right side $\textstyle\sum_{k \le n} (\theta T)^k/k!$, expanded producer-side\\
+comparator & $\le$ (inside the admissible set)\\
+\textnormal{wire-freedom} & implied, not declared: the evaluator returns $\mathsf{none}$ on any wire\\
+\end{tabular}
+\end{center}
+The checker sees one closed comparison and nothing else; $\theta$, $T$,
+and $n$ survive only through the value of the right-hand term. The
+transcendental target $e^{\theta T}$ appears in \emph{no} field --- that
+is the point.
+\end{brecipe}
+
+\begin{bprop}[the enclosure --- the exactness identity, honest form]
+\label{prop:tb-enclosure}
+For $\theta T \ge 0$ and any $n$,
+\[
+\textstyle\sum_{k \le n} (\theta T)^k / k! \;\le\; e^{\theta T},
+\qquad\text{hence}\qquad
+q \le \textstyle\sum_{k \le n} (\theta T)^k / k! \;\Longrightarrow\; q \le e^{\theta T}.
+\]
+\end{bprop}
+\begin{proof}
+Two lines, though of a different species than a ring identity: at
+$x := \theta T \ge 0$ every term of the exponential series is
+nonnegative, so each partial sum is dominated by the limit --- in the
+classical Taylor form, $e^{x} = \sum_{k \le n} x^k/k! + R_n$ with the
+Lagrange remainder $R_n = e^{\xi} x^{n+1}/(n+1)! \ge 0$ for some
+$\xi \in [0, x]$ \cite{rudin1976}. The sign condition is essential:
+at negative arguments the remainder alternates and the enclosure
+direction fails ($n = 0$, $x = -1$: the partial sum is $1 >
+e^{-1}$) --- the deadline rule' s typing ($\theta > 0$,
+$T \ge 0$) is what entitles the lemma to the inequality. Unlike the
+base-calculus exemplar alias, whose two-line identity is checked by the
+kernel as exact polynomial arithmetic, this identity is consumed
+\emph{inside the deadline rule\textquotesingle s soundness lemma} (the
+Lean side consumes the standard library\textquotesingle s
+partial-sum-below-exponential fact,
+\texttt{Real.sum\_le\_exp\_of\_nonneg}, there) and never reaches the
+checker: the checker\textquotesingle s whole obligation is the exact
+rational comparison of Recipe~\ref{rec:tb-filled}. The checker never
+needs to know $e$ exists.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:tb-sound}
+If the posted comparison checks and $\theta T \ge 0$ (the sign
+hypothesis of Proposition~\ref{prop:tb-enclosure}), then
+$q \le e^{\theta T}$, which is the fact the deadline
+rule\textquotesingle s lemma consumes.
+\end{bprop}
+\begin{proof}
+\texttt{sound\_pConstExact} (the target\textquotesingle s
+kernel-verified lemma, quoted in the \rulename{PConstExact} section)
+turns the $\mathsf{true}$ evaluation into the validity of
+$q \le \sum_{k \le n} (\theta T)^k/k!$ at every valuation;
+Proposition~\ref{prop:tb-enclosure} extends to $e^{\theta T}$ inside
+the consuming lemma. There is no other content --- the alias genre
+working as intended.
+\end{proof}
+
+\absentbox{payload-level elaborator pending schema staging}{The
+\emph{semantic} content of the respelling is now mechanized and bound
+in the entry: \texttt{taylorLeaf\_le\_exp} is
+Proposition~\ref{prop:tb-enclosure}\textquotesingle s enclosure step,
+and \texttt{taylorLeaf\_rat\_le\_exp} is
+Proposition~\ref{prop:tb-sound}\textquotesingle s exact-$\Q$ face end
+to end. What remains unmechanized is the payload-level elaborator ---
+taking $(q, \theta, T, n)$ to the one \rulename{PConstExact} payload
+of Recipe~\ref{rec:tb-transport}, factoring through
+\texttt{sound\_pConstExact} --- which awaits the extension certificate
+schema\textquotesingle s staging, per the batch template.}
+
+\begin{bremark}[deliberately not an enclosure-rule alias]
+The calculus also has interval-enclosure machinery with witness
+brackets. Respelling this leaf onto it was considered and declined:
+that would import witness-bracket payload for a metatheory one-liner,
+and the enclosure rule today lives only in a separate
+reference-checker implementation besides. The seam this rule
+instantiates is a design invariant of the whole extension page:
+transcendental facts live in soundness lemmas, arithmetic lives in the
+checker.
+\end{bremark}
+
+\begin{bremark}[the inherited comparator confinement]
+\rulename{PConstExact} excludes one comparator ($\neq$) from its
+admissible set, for reasons of a second soundness invariant unpacked in
+that rule\textquotesingle s section. This leaf uses $\le$ only ---
+comfortably inside --- but any port or mechanization of this rule must
+\emph{preserve} the exclusion rather than re-derive the comparator set
+from the semantic lemma alone; the flag travels with the alias.
+\end{bremark}
+
+\begin{anchors}
+target lemma (Prop.~\ref{prop:tb-sound}) & \texttt{sound\_pConstExact}; \texttt{Formula.holds\_of\_evalClosed\_true} (quoted in the \rulename{PConstExact} section)\\
+wire-freedom implied at the leaf & \texttt{Formula.evalClosed} ($\mathsf{none}$ on any wire; same section)\\
+the enclosure, mechanized where consumed & \texttt{Real.sum\_le\_exp\_of\_nonneg} inside the deadline lemma \texttt{sound\_QDeadlineBattery} (see that rule\textquotesingle s entry)\\
+the enclosure + exact-$\Q$ face, rule-level & \texttt{taylorLeaf\_le\_exp}, \texttt{taylorLeaf\_rat\_le\_exp} (bound in the entry); payload-level elaborator pending schema staging (the amber box)\\
+\end{anchors}

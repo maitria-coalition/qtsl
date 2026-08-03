@@ -1,0 +1,113 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template; the
+batch's shared template is Recipe 1 of the \rulename{StreettDegenerate}
+section.}
+
+\begin{brecipe}[the filled-in application --- one pair, normalized]
+\label{rec:rnnf-filled}
+Fix a Streett pair $(\rho, \varphi)$ inside a \rulename{QStreettBundle}
+node, with $\rho$ complement-typed. Write $\mathrm{nnf}$ for the
+negation-normal-form pass on the propositional skeleton (atoms,
+$\neg$, $\wedge$, $\vee$): negations pushed inward by the
+\rulename{NNFDuality} rewrites until only literals remain. The rewrite
+is
+\[
+\bigl(\mathrm{cmpl}\,\rho,\ \varphi\bigr)
+\quad\rightsquigarrow\quad
+\bigl(\mathrm{cmpl}\,\bigl(\mathrm{elimNeg}(\mathrm{nnf}(\rho))\bigr),\ \varphi\bigr)
+\]
+--- the body normalized, the complement tag \emph{retained}: per the
+source discipline the complement applies at the consumption boundary
+(the complement-request rule), never as a literal. After the rewrite
+every literal of the request body is positive (atom-swapped where it
+was negative), and the pair is in exactly the input shape the
+bundle and the complement-request rule expect. One pair to one pair,
+inside one node: the alias shape.
+\end{brecipe}
+
+\begin{brecipe}[payload transport]\label{rec:rnnf-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{un-normalized pair} & \textbf{normalized pair}\\
+\midrule
+request body $\rho$ ($\mathrm{cmpl}$ tag retained) & $\mathrm{elimNeg}(\mathrm{nnf}(\rho))$, negative literals eliminated through dual atoms\\
+response formula, certificates, rows & verbatim\\
+polarity bookkeeping & the polarity theorem (Proposition~\ref{prop:rnnf-polarity}); nothing stored\\
+\end{tabular}
+\end{center}
+Unpack-function slot: no verified payload function in this edition (batch template); the
+structural mechanization exists (the normalizer and its theorems, named
+below; not hash-bound in this edition).
+\end{brecipe}
+
+\begin{bprop}[the exactness identity --- denotation preservation]
+\label{prop:rnnf-exact}
+$[\![\mathrm{nnf}(\rho)]\!] = [\![\rho]\!]$, and eliminating negative
+literals through dual atoms preserves the denotation.
+\end{bprop}
+\begin{proof}
+Induction on $\rho$, with the \rulename{NNFDuality} equalities as the
+cases --- double negation and De Morgan drive the recursion, the atom
+swaps close the leaves. The elimination step substitutes, for each
+negative literal, the dual atom denoting the complement; equality is
+preserved literal by literal. (Machine-checked: \texttt{denot\_nnf} and
+\texttt{denot\_elimNeg}; the eliminated form has no negative literals at
+all, \texttt{negLits\_elimNeg}. Binding pending.) Complements of equal
+sets are equal, so the retained $\mathrm{cmpl}$ tag's
+consumption-boundary denotation $S \smallsetminus [\![\rho]\!]$ is
+preserved as well --- the rewrite itself never discharges the
+complement.
+\end{proof}
+
+\begin{bprop}[the polarity theorem]\label{prop:rnnf-polarity}
+The surviving negative literals of $\mathrm{nnf}(\rho)$ are exactly the
+atom occurrences of $\rho$ at odd polarity (an odd number of enclosing
+negations). Consequently the normal form is free of negated occurrences
+of a given atom class if and only if the input has no odd-polarity
+occurrence of that class.
+\end{bprop}
+\begin{proof}
+Strengthen to the polarity-indexed pass (normalizing $\rho$ or
+$\neg\rho$ according to a polarity bit) and induct: at an atom the bit
+decides the literal's sign; at a negation the bit flips; at $\wedge$ and
+$\vee$ the bit distributes (De Morgan swapping the connective when
+negative). The negative-literal set on one side and the odd-polarity
+occurrence set on the other satisfy the same recursion. The rejection
+face is a rewrite of the same equality. (Machine-checked:
+\texttt{negLits\_nnf}, via the auxiliary \texttt{negLits\_nnfAux}, and
+\texttt{nnf\_no\_negLit\_iff}; negation-freedom of the output holds by
+\emph{type} --- the normal-form grammar has no negation constructor.
+Binding pending.)
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:rnnf-sound}
+A bundle node whose pair is normalized concludes identically to the
+un-normalized node: through \rulename{QStreettBundle} directly for
+base-typed requests, and through the \rulename{StreettCmplRequest}
+weakening for the consumed complement --- with
+Proposition~\ref{prop:rnnf-exact} guaranteeing both nodes constrain the
+same regions.
+\end{bprop}
+\begin{proof}
+Immediate from Proposition~\ref{prop:rnnf-exact} and the target rules'
+theorems; the alias adds no semantic content of its own.
+\end{proof}
+
+\begin{bremark}[what the polarity theorem is protecting]
+The typing discipline rejects negated probability literals at even
+surface polarity --- a negated lower bound is an upper bound, and the
+certificate calculus deliberately has no rule concluding probability
+upper bounds through this pass. The theorem makes the rejection
+\emph{stable under normalization}: no sequence of dualities can
+manufacture or hide a rejected literal, so the check may run on the
+surface formula once, before normalization, with the same verdict. A
+guard that had to chase literals through rewrites would be a moving
+target; a polarity count is not.
+\end{bremark}
+
+\begin{anchors}
+normalizer, negation-freedom by type & \texttt{Form.nnf}, \texttt{NForm} (\texttt{QtslAux.NNFDuality}; machine-checked, not hash-bound in this edition)\\
+Proposition \ref{prop:rnnf-exact} & \texttt{denot\_nnf}, \texttt{denot\_elimNeg}, \texttt{negLits\_elimNeg} (same module, not hash-bound in this edition)\\
+Proposition \ref{prop:rnnf-polarity} & \texttt{negLits\_nnf}, \texttt{nnf\_no\_negLit\_iff} (same module, not hash-bound in this edition)\\
+Proposition \ref{prop:rnnf-sound} targets & the \rulename{QStreettBundle} and \rulename{StreettCmplRequest} sections\\
+\end{anchors}

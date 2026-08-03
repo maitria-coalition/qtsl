@@ -1,0 +1,330 @@
+
+\sourcenote{Genre: core rule (tier 1), with a per-profile tier split
+derived from the presentation. The coverage is deliberately
+conditional: this section proves the cells the mechanization proves,
+names the bridge hypotheses under which they apply, and states what
+remains open --- never claiming past the mechanized grid.}
+
+\textbf{Setting and claim.}\enspace A \emph{system} is a structured
+presentation: finitely many \emph{mechanisms} (primitive dynamics
+declarations --- drift, diffusion, jump, and guard--reset field
+families over typed wires), plus \emph{wirings} (variable
+identifications) carrying a \emph{causality certificate} --- a rank
+function strictly increasing along wires, so a directed cycle is
+unrepresentable in the assembled structure. Each mechanism's
+\emph{doctrine profile} is derived from which field families are
+populated: drift only $=$ ODE; $+$diffusion $=$ SDE; $+$real-time
+jumps $=$ general stochastic hybrid (GSHS); counter-time jumps only
+$=$ discrete kernel. An interface-indexed satisfaction judgement
+$\mathsf{QSatI}(\Sigma, (I, \alpha, \gamma[, \kappa]))$ asserts: every
+behaviour of $\Sigma$ whose input trajectory satisfies the assumption
+$\alpha$ pointwise delivers the guarantee $\gamma$ (with quantitative
+margin per the slack $\kappa$ where declared). A wiring certificate
+$\mathsf{QWireCert}(w, (\mathit{spec}_i) \Rightarrow
+\mathit{spec}_{\mathrm{out}}, \kappa)$ asserts the lens square
+\cite{capuccimyers2026}: delivered upstream guarantees, degraded by at
+most $\kappa$, imply downstream assumptions through $w$, and the
+output spec reads off the delivered guarantees (the square's discharge
+is \rulename{QWireCertDischarge}'s business). The rule: from
+$\mathsf{QSatI}(\Sigma_i, \mathit{spec}_i)$ for $i = 1, \dots, n$ and
+the wiring certificate, conclude
+$\mathsf{QSatI}(\mathsf{SysWire}(w, [\Sigma_1, \ldots, \Sigma_n]),
+\mathit{spec}_{\mathrm{out}})$.
+
+The warrant factors as
+$\mathrm{sound} = \text{(T)} \circ \text{(S)}$: \emph{transport
+arithmetic} --- that composite obligation \emph{rows} follow from
+component rows plus wiring rows --- which is profile-generic exact
+polynomial arithmetic; and the \emph{semantic reading} --- that the
+checked row family implies the behavioural claim --- which is
+per-profile, and is where the tier split and every open cell live.
+
+\begin{blemma}[transport is profile-silent]\label{lem:qag-transport}
+With residuals $e_i := \mathcal{L}_i V_i + \alpha_i - \sigma_i$ and
+membership rows $m_1 := \lambda\sigma_2 - (1{-}\theta)\alpha_1$,
+$m_2 := \sigma_1 - \lambda(1{-}\theta)\alpha_2$,
+\[
+e_1 + \lambda e_2 + m_1 + m_2
+\;=\;
+\mathcal{L}(V_1 + \lambda V_2) + \theta\,(\alpha_1 + \lambda\alpha_2),
+\]
+an identity of polynomials --- the cross-supplies cancel by
+construction of the multipliers. More generally, for nonnegative
+certificate weights $\lambda_i$ and free-sign wiring multipliers
+$\nu_k$: if each $e_i \leq 0$ and each wiring identity $g_k = 0$ holds
+on the operating region, then
+$\sum_i \lambda_i e_i + \sum_k \nu_k g_k \leq 0$ there.
+\end{blemma}
+\begin{proof}
+The displayed identity is a two-line expansion; the only property of
+the obligation operator $\mathcal{L}$ it consumes is \emph{linearity
+over the wiring} --- which every profile's operator has:
+$\nabla(\cdot) \cdot f$ for ODE, one-step conditional expectation
+minus identity for kernels, and the extended generator's interior
+terms for GSHS. The pointwise fold is
+\texttt{admissible\_constructs}: each $\lambda_i e_i \leq 0$
+(nonnegative times nonpositive), each $\nu_k g_k = 0$ regardless of
+sign, finite sums of nonpositives are nonpositive. At the sequent
+layer this is the \rulename{Promise}/\rulename{Syzygy} machinery, and
+the small-gain instance is exactly the $(1, \lambda, 1, 1)$-weighted
+\rulename{Syzygy} node --- which is why the split of
+Remark~\ref{rem:qag-tier} can define ``admissible'' as
+\emph{syntactically constructible}: the composite certificate for the
+non-stochastic profiles \emph{is} $\sum_i \lambda_i V_i$, and its row
+is this lemma. The break in uniformity, wherever it appears below, is
+never here: GSHS forced jumps contribute boundary rows, not
+$\mathcal{L}$-terms, so part of the composite obligation family
+bypasses linearity entirely and must be handled semantically.
+\end{proof}
+
+\begin{blemma}[conformance propagation --- the acyclic engine]
+\label{lem:qag-conform}
+Let a system presentation $S$ have $n$ components, and work in the
+composite behaviour space. Write $\mathrm{conform}_j$ for the event
+that component $j$'s inputs conform to $\alpha_j$, $\mathrm{sat}_j$
+for delivery of $\gamma_j$, and $\mathrm{ext}$ for external-input
+conformance. Suppose the wiring squares transport, pointwise:
+$\mathrm{ext} \cap \bigcap_{i \in \mathrm{upstream}(j)} \mathrm{sat}_i
+\subseteq \mathrm{conform}_j$ for every $j$. If at a behaviour $\omega
+\in \mathrm{ext}$ every component delivers on conformance
+($\omega \in \mathrm{conform}_j \Rightarrow \omega \in
+\mathrm{sat}_j$), then every component delivers at $\omega$.
+\end{blemma}
+\begin{proof}
+Strong induction on the causality rank (\texttt{sat\_of\_conform}):
+if every component of rank $< N$ delivers, then for $j$ of rank $< N{+}1$
+all of $j$'s upstream components have strictly smaller rank (the
+causality certificate), hence deliver; the wiring square then puts
+$\omega \in \mathrm{conform}_j$, and the per-component implication
+closes. The causality certificate is precisely what makes the
+induction well-founded, and its necessity is a two-component
+counterexample: components in a cycle, each delivering \emph{only if}
+the other does, satisfy every wiring square while both fail --- the
+implication chain has no base case. That failure is the classical
+unsoundness of naive circular assume--guarantee
+\cite{abadilamport1993, mcmillan1999}; this calculus fences it
+structurally (cycles unrepresentable here) and readmits feedback only
+through the guarded small-gain cells of
+Lemma~\ref{lem:qag-feedback}, where the well-foundedness device is the
+$\theta$-margin.
+\end{proof}
+
+\begin{blemma}[failure decomposition and slack composition]
+\label{lem:qag-union}
+Under Lemma~\ref{lem:qag-conform}'s wiring hypothesis, a composite
+failure under conforming external inputs localizes at some component
+that failed \emph{while conforming}:
+\[
+\mathrm{ext} \cap \Bigl(\bigcap_j \mathrm{sat}_j\Bigr)^{\mathsf{c}}
+\;\subseteq\;
+\bigcup_j \bigl(\mathrm{conform}_j \cap \mathrm{sat}_j^{\mathsf{c}}\bigr),
+\]
+hence for any measure with per-component conforming-failure bounds
+$\mu(\mathrm{conform}_j \cap \mathrm{sat}_j^{\mathsf{c}}) \leq
+\varepsilon_j$, the composite fails with mass at most
+$\sum_j \varepsilon_j$ --- the $\sum_j (1 - p_j)$ display, at any $n$.
+\end{blemma}
+\begin{proof}
+Pick a \emph{rank-minimal} failing component $j_m$ (finitely many
+components; the failing set is nonempty). Every upstream component of
+$j_m$ has strictly smaller rank, hence delivers (minimality), so the
+wiring square puts $\omega \in \mathrm{conform}_{j_m}$: a conforming
+failure (\texttt{fail\_subset}). Monotonicity and finite subadditivity
+of the measure close (\texttt{fail\_bound}; read at an output spec,
+\texttt{fail\_bound\_out}). The per-component event
+$\mathrm{conform}_j \cap \mathrm{sat}_j^{\mathsf{c}}$ --- not bare
+failure --- is forced: component $j$'s certificate priced failure
+\emph{only under conforming inputs}; charging it for
+non-conforming failures would demand a guarantee nobody certified,
+and the rank-minimality argument is exactly what shows the composite
+never needs one.
+\end{proof}
+
+\begin{blemma}[the stochastic-hybrid cells: series, parallel,
+feedback sum-form]\label{lem:qag-feedback}
+Over the composite execution law of a GSHS composite, with component
+certificates entering as nonnegative supermartingales along the
+(stopped) joint jump skeleton, with barrier values on their bad sets
+and violation-witness inclusions:
+\emph{(i, series)} the conditioning tower composes --- qualitatively,
+delivery a.e.\ on conforming inputs chains through the wiring square;
+quantitatively, an upstream success mass $\geq p_1$ and a downstream
+conditional success probability $\geq p_2$ given the upstream
+$\sigma$-algebra compose to composite success mass
+$\geq p_2 \cdot p_1$ (strictly stronger than the union-bound shape);
+and the certified pipeline bounds the composite conforming-failure
+mass by $\int Y_1(0) / a_1 + \int Y_2(0) / a_2$ through the maximal
+inequality.
+\emph{(ii, parallel)} for nonnegative weights, the weighted sum
+$\sum_i \lambda_i V_i$ of supermartingales w.r.t.\ one (joint)
+filtration is a supermartingale --- the semantic face of the syzygy
+weights --- and the composite avoid bound follows through the same
+maximal inequality.
+\emph{(iii, feedback, sum-form)} for two components in feedback whose
+certificates satisfy, along the \emph{joint} skeleton, the
+between-jumps conditional decrease (pre-jump value plus integrated
+assumption-minus-supply increment conditionally below the current
+value) and \emph{non-expansive} jump accounting (post-jump value a.e.\
+at most pre-jump value), with the integrated membership rows of the
+small-gain pair at $\lambda, \theta \geq 0$: the composite
+$W = V_1 + \lambda V_2$ is a nonnegative supermartingale for the
+joint-skeleton filtration, with the $\theta$-margin banked by the
+compensated process, and the composite avoid bound follows.
+\end{blemma}
+\begin{proof}
+(i) is \texttt{AGCompose.Series}: the qualitative form is an a.e.\
+implication chain through the pointwise wiring square
+(\texttt{qualitative}); the product form integrates the downstream
+conditional bound over the upstream event --- the set-integral of the
+conditional expectation of the indicator over an upstream-measurable
+set is the joint mass (\texttt{tower\_step}, \texttt{tower}); the
+certified form (\texttt{certified}) converts each certificate to a
+failure bound via the maximal inequality for nonnegative
+supermartingales (Ville's inequality, mechanized in the accompanying
+development) and composes by the failure decomposition. Exogeneity is
+where acyclicity earns its keep semantically: in a cascade each
+component's input process is measurable w.r.t.\ upstream trajectories,
+so the component's certificate argument runs pathwise in its input.
+
+(ii) is \texttt{AGCompose.Parallel}: induction on the finite index
+set, scalar-multiple and sum closure of supermartingales
+(\texttt{supermartingale\_weighted\_sum}), then the barrier argument
+as in (i) (\texttt{certified}, \texttt{certified\_pair}).
+
+(iii) is the file quoted above (\texttt{SumFormFeedback}): folding
+jump non-expansion into the between-jumps decrease gives the
+per-component skeleton step; the weighted combination of the two steps
+cancels the cross-supplies \emph{under conditional expectation} ---
+Lemma~\ref{lem:qag-transport} run pointwise inside the conditional ---
+leaving the $\theta$-weighted assumption margin (\texttt{drift});
+nonnegativity and the supermartingale property assemble
+(\texttt{supermartingale}), and the avoid bound is the maximal
+inequality again (\texttt{avoid\_bound}, with the continuous-time
+reading conditional on the d\'ebut-sampling inclusion,
+\texttt{debut\_avoid\_bound}). Two hypotheses deserve their remark.
+\emph{The joint skeleton is not a convenience}: in feedback no
+component's input is exogenous --- the jump chain interleaves both
+components' guard hits, each component's between-jumps argument is
+valid only between \emph{joint} jumps, and forced jumps, having no
+intensity, enter only through the jump-accounting field at those
+times. \emph{Non-expansion is the sum-form's essential wall}: only
+$\lambda, \theta \geq 0$ and the non-expansive accounting are consumed
+--- no dwell-time or schedule hypothesis appears anywhere in the
+descent, which is a checkable structural fact about the statements ---
+and the rule-level ranges $\lambda > 0$, $\theta \in (0,1)$ are
+well-formedness backing the published guard-modulus reading, not
+soundness needs.
+\end{proof}
+
+\begin{bthm}[the $n$-ary acyclic assembly]\label{thm:qag-nary}
+Let $S$ be an acyclic system presentation with wiring squares
+transporting pointwise as in Lemma~\ref{lem:qag-conform}. If each
+component delivers a.e.\ on conformance, the composite delivers its
+output spec a.e.\ on external conformance
+(\texttt{QtslCompose.qualitative}); and with per-component
+conforming-failure bounds $\varepsilon_j$, the composite output-spec
+failure mass is at most $\sum_j \varepsilon_j$
+(\texttt{fail\_bound\_out}) --- at any $n$, by
+Lemmas~\ref{lem:qag-conform} and~\ref{lem:qag-union}.
+\end{bthm}
+\begin{proof}
+Immediate from the two lemmas: the a.e.\ form collects the countable
+family of per-component a.e.\ implications, applies the pointwise
+propagation on the common full-measure set, and reads the output spec
+off the delivered guarantees; the probabilistic form is the failure
+decomposition plus subadditivity. The per-profile content enters
+entirely through the \emph{bridge hypotheses} --- that the
+component-certificate events and their bounds exist over the composite
+law is the per-profile discharge of Lemma~\ref{lem:qag-feedback} (GSHS
+acyclic cells) or its lighter analogues; this theorem is the
+profile-generic event algebra on top.
+\end{proof}
+
+\begin{bremark}[the tier split, derived --- never a stored tag]
+\label{rem:qag-tier}
+The rule node's tier is a function of the presentation
+(\texttt{System.qagTier}): \emph{admissible} iff every mechanism's
+derived profile admits a syntactically constructible composite
+certificate --- proven equivalent to ``every mechanism derives ODE or
+discrete'' (\texttt{qagTier\_admissible\_iff}) --- and \emph{core} iff
+some mechanism is stochastic (\texttt{qagTier\_core\_iff}). On the
+admissible face the node unpacks: the composite certificate is
+$\sum_i \lambda_i V_i$ (Lemma~\ref{lem:qag-transport}), transported at
+the sequent layer by the \rulename{Promise}/\rulename{Syzygy}
+machinery, and the rule adds no semantic content. On the core face no
+unpacking exists --- the warrant \emph{is}
+Lemmas~\ref{lem:qag-conform}--\ref{lem:qag-feedback} --- which is the
+taxonomy's definition of core applied honestly, one rule node either
+way. Deriving the tier from field-family population (rather than
+storing a system-level tag) is forced by mixed composites: a
+sampled-data plant-plus-controller would be ill-typed across its own
+components under any stored per-system tag.
+\end{bremark}
+
+\begin{bremark}[what is \emph{not} proven --- the open cells, loud]
+\label{rem:qag-gaps}
+The conditional mark on this rule's dashboard row warrants exactly the
+cells above, and the honest remainder is:
+\emph{(a)} the deterministic-ODE row's semantic reading is at
+statement level (its literature anchor is the certified-lens
+composition theorem \cite{capuccimyers2026}; the classical comparison
+argument is standard but not yet written in-house);
+\emph{(b)} the discrete-kernel row's assembly is stated, not yet
+assembled (its ingredients --- the maximal inequality and optional
+stopping over the trajectory kernel --- are in place);
+\emph{(c)} feedback in \emph{gauge-form} --- jumps that expand the
+certificate ($V(g(x)) \leq c\,V(x)$, $c > 1$), repaid by flow decay
+under schedule hypotheses --- is partial: the gauge-then-sum reduction
+and the machine-checked max-form piecewise-deterministic instance are
+shipped sorry-free, while the finite-index price of the diffusion term
+and the admissible-window pinch remain open research; sum-form
+composites provably do not cover this regime, which is exactly why the
+core tier exists. Non-expansive-reset models live entirely in
+Lemma~\ref{lem:qag-feedback}(iii), so nothing below gates on (c);
+\emph{(d)} the mixed sampled-data row is stated, not proven ---
+deterministic throughout, the natural first boundary-row exercise;
+\emph{(e)} undirected stochastic wire sharing (common noise) is
+\emph{fenced}, not missing: stochastic components sharing a wire need
+one determining side, and for fenced models no discharge of the
+joint-filtration hypothesis exists --- the lemmas are correctly
+unusable there;
+\emph{(f)} the $n$-ary \emph{product-form} (tower) composition is
+binary only --- its $n$-ary form needs a filtration chain along the
+wiring order and is real further work;
+\emph{(g)} the judgement sorts the rule concludes into are not yet
+staged in the certificate schema, so no end-to-end checkable
+certificate exercises the rule yet. Each bridge hypothesis
+(the interface layers carrying a component certificate onto the
+composite law) is a named hypothesis discharged per model class ---
+parameters, never silent assumptions.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The acyclic discipline is the composing-specifications tradition
+\cite{abadilamport1993}, with circularity readmitted only under a
+well-foundedness device \cite{mcmillan1999} --- here the
+$\theta$-margin of the small-gain pair, whose Lyapunov formulation
+descends from the nonlinear small-gain theorems
+\cite{jiangteelpraly1994, jiangmareelswang1996}. The parallel cell is
+compositional dissipativity \cite{willems1972, moylanhill1978} run at
+the satisfaction layer --- the weighted-sum supermartingale is the
+stochastic face of the storage-function sum. The wiring square, its
+slack algebra, and the certified-lens composition law are
+\cite{capuccimyers2026}. What the mechanized grid adds over all of
+these is the certificate form: exact-arithmetic transport rows plus
+per-profile semantic lemmas with their hypotheses reified as checkable
+data, rather than a metatheorem quantified over models nobody
+replays.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qag-transport}: cancellation, pointwise fold & \texttt{admissible\_constructs}; sequent layer \texttt{sound\_promise}, \texttt{sound\_syzygy}, \texttt{sound\_smallGain} (main package)\\
+Lemma \ref{lem:qag-conform}: rank induction & \texttt{sat\_of\_conform}; \texttt{System} (fields \texttt{rank}, \texttt{causality})\\
+Lemma \ref{lem:qag-union}: rank-minimal localization, union bound & \texttt{fail\_subset}, \texttt{fail\_bound}, \texttt{fail\_bound\_out}\\
+Lemma \ref{lem:qag-feedback}(i): series & \texttt{AGCompose.Series.qualitative}, \texttt{tower\_step}, \texttt{tower}, \texttt{fail\_bound}, \texttt{certified}\\
+Lemma \ref{lem:qag-feedback}(ii): parallel & \texttt{AGCompose.Parallel.supermartingale\_weighted\_sum}, \texttt{certified}, \texttt{certified\_pair}\\
+Lemma \ref{lem:qag-feedback}(iii): feedback sum-form & \texttt{SkeletonCertificate} (fields \texttt{dynkin}, \texttt{jump\_nonexpansive}), \texttt{SkeletonCertificate.step}, \texttt{SumFormFeedback.drift}, \texttt{supermartingale}, \texttt{avoid\_bound}, \texttt{debut\_avoid\_bound}, \texttt{compensated\_supermartingale}, \texttt{margin\_budget}\\
+gauge-form partial (max-form instance) & \texttt{sound\_GSHS\_safety\_barrier} (MaxFormPDMP)\\
+Theorem \ref{thm:qag-nary} & \texttt{QtslCompose.qualitative}, \texttt{fail\_bound\_out}\\
+Remark \ref{rem:qag-tier}: derived split & \texttt{System.qagTier}, \texttt{qagTier\_admissible\_iff}, \texttt{qagTier\_core\_iff}; \texttt{ChartShape.profile}\\
+\end{anchors}

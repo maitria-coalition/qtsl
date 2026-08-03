@@ -1,0 +1,23 @@
+# api-system.toml.d/S-RODE.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-RODE"
+entity = "model type"
+
+[api.ts]
+handle = "system.rode"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_rode", "marker:ts_sig_rodegen"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "marker:ts_rode"
+[api.rust]
+handle = "mtk_catalogue::system::presets::Rode::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_rode"]
+snippet_file = "crates/mtk-catalogue/tests/common/mod.rs"
+snippet = "fn-body:rode"
+note = '''The construction is the committed \texttt{damped-oscillator} golden vector (fixture \texttt{rode} — the parameter family's first golden bytes: drift over the product index space \(\mathit{state} +\!\!+ \mathit{params}\), damping boxed \(\theta \in [1/4, 1]\)), and it doubles as the generator kit's closed-form control (\(\mathcal{A}(x^2+v^2) = -2\theta v^2\) — one polynomial in state \(\times\) parameter is the whole \(\forall\theta\) row family); the kit's Rust face is \texttt{mtk\_catalogue::system::rode\_gen\_kit}.'''

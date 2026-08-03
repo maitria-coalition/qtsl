@@ -1,0 +1,232 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. This section additionally carries the \emph{family template}
+for the five ReLU rules (\rulename{LiRPA}, \rulename{ReLU-Pos},
+\rulename{ReLU-Neg}, \rulename{ReLU-NN}, \rulename{ReLU-Above}): the
+packaged-node machinery they share is stated once here, and the four
+sibling sections instantiate it by reference.}
+
+\begin{brecipe}[the ReLU family template]\label{rec:relu-template}
+The general admissible template --- one rule node rewrites to a
+derivation fragment over core and previously-justified rules with the
+same conclusion --- is stated in full in the \rulename{PConstExact}
+section; the five ReLU rules are its instances over one shared
+semantic fact. The realized term grammar has no $\ReLU$ symbol:
+$\ReLU$ is a \emph{packaged hypernet primitive}, an application
+$\ReLU_{\{h\}\to\{y\}} \in H$ with preactivation (input) wire $h$ and
+output wire $y$. Every family rule cites it through one side
+condition, the \emph{linkage} $\mathrm{reluLinked}(H, h, y)$: the
+hypernet's application list contains a packaged ReLU at exactly these
+ports, of positive total size --- a single decidable port lookup, not a
+pattern-match over composites. The packaged node's semantic contract
+is the elementwise two-case fact: under every admissible valuation,
+at every entry $i$ of the node's (shared) tensor shape,
+\[
+\bigl(h_i \leq 0 \;\wedge\; y_i = 0\bigr)
+\;\vee\;
+\bigl(0 \leq h_i \;\wedge\; y_i = h_i\bigr).
+\]
+Three remarks fix what the template means and what it does not.
+
+\emph{(i) The rewrite shape.} Each family node rewrites to a case
+analysis over this disjunction: the sign-split fact enters the branch
+contexts (context-carrying $\vee$E --- the disjunction arrives as a
+sub-conjunct of the premise; see the $\vee$E section's note), equality
+transport (\rulename{EqElim}) carries the branch equality $y = 0$ or
+$y = h$ through the goal, and \rulename{ArithAtom}/\rulename{Norm}
+plumbing normalizes atom orientations. Where a branch discharges fully
+into catalogue nodes the instance recipe displays the derivation
+(\rulename{ReLU-NN} and \rulename{ReLU-Above}); where it does not ---
+the boundary branches of \rulename{ReLU-Pos}/\rulename{ReLU-Neg} need
+an antisymmetry step no catalogue rule provides --- the instance says
+so and the rule is admissible by \emph{reduction to verified
+machinery}, the honest tier note the \rulename{PConstExact} section
+established.
+
+\emph{(ii) The conservativity warrant.} The two-case fact is proven,
+never axiomatized. The packaged node carries the development's
+conservative-extension obligations: a definitional expansion into core
+primitives (a copy, the sign-split cell complex $\Sigma^{\pm}$, an
+indicator cast, and an exact rank-0 contraction ---
+\texttt{reluExpH}), a typing rule derivable from the expansion's, and
+the projection theorem \texttt{relu\_projection}: \emph{both
+directions}, the two-case relation is exactly the expansion's
+model-level facts existentially projected onto the external ports, at
+the canonical single-entry instance. The boundary point $h = 0$ rides
+the one-hot cell semantics: both cells of $\Sigma^{\pm}$ admit it, and
+every admissible choice forces $y = 0$. Scope, stated loudly:
+applications of total size other than one currently have \emph{no}
+core expansion (a recorded packing gap); the five rules consume only
+the per-entry relation, which is what the canonical instance
+certifies.
+
+\emph{(iii) The shipped verified objects.} Per the catalogue's
+convention, each family rule ships a direct soundness lemma factoring
+through already-verified machinery rather than a derivation object:
+\texttt{reluLinked\_facts} converts the linkage, under any admissible
+valuation, into (a) tensors at both ports, (b) one shared shape of
+positive entry count, and (c) the per-entry two-case relation; each
+rule's lemma is then an entrywise case analysis. The positive-size
+gate inside the linkage is deliberate hygiene: a size-zero node's
+comparison atoms hold vacuously, and vacuous surface must not be
+citable --- the general lesson of the \rulename{Farkas} rule's
+zero-size counterexample, enforced here at the source.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{LiRPA} instance --- subdivide at the kink]
+\label{rec:lirpa-instance}
+The node, with its premise subtrees and side conditions:
+\[
+\inferrule*[Right=\rulename{LiRPA}]{
+  \mathcal{T}_a \rhd \Phi \vdash a \leq h \\
+  \mathcal{T}_b \rhd \Phi \vdash h \leq b \\
+  \ReLU_{\{h\}\to\{y\}} \in H \\
+  a < 0 \\ 0 < b \\\\
+  \alpha a + \beta \leq 0 \\ \beta \leq 0 \\ \alpha b + \beta \leq b \\
+  0 \leq \gamma a + \delta \\ 0 \leq \delta \\ b \leq \gamma b + \delta
+}{
+  \Phi \vdash (\alpha h + \beta) \leq y \;\wedge\; y \leq (\gamma h + \delta)
+}
+\]
+rewrites to a two-branch case analysis at the kink,
+\[
+\inferrule*[Right=cases]{
+  \mathcal{D}_{-} \rhd \Phi \wedge (h \leq 0) \vdash
+    (\alpha h + \beta) \leq y \,\wedge\, y \leq (\gamma h + \delta) \\
+  \mathcal{D}_{+} \rhd \Phi \wedge (0 \leq h) \vdash
+    (\alpha h + \beta) \leq y \,\wedge\, y \leq (\gamma h + \delta)
+}{
+  \Phi \vdash (\alpha h + \beta) \leq y \;\wedge\; y \leq (\gamma h + \delta)
+}
+\]
+where the case split is the box subdivision $[a, b] = [a, 0] \cup
+[0, b]$ (region atoms enter from the order atoms via
+\rulename{ConvIntro}; the cover is the one \rulename{Subdivide}
+checks), and the branches discharge as follows. In $\mathcal{D}_{-}$,
+the branch context proves $h \leq 0$, so \rulename{ReLU-Neg} yields
+$y = 0$; the two envelope atoms then reduce, through \rulename{EqElim}
+along $y = 0$, to degree-$1$ bound facts on $[a, 0]$ --- $\alpha h +
+\beta \leq 0$ and $0 \leq \gamma h + \delta$ --- whose degree-$1$
+Bernstein certificates on that cell are \emph{exactly} the checkpoint
+conditions at $a$ and at $0$ (\rulename{BernCone} at $d = 1$; on a
+$1$-simplex the degree-$1$ Bernstein coefficients of an affine gap
+polynomial are its two endpoint values). Dually in $\mathcal{D}_{+}$:
+\rulename{ReLU-Pos} yields $y = h$, and the envelope atoms reduce to
+degree-$1$ facts on $[0, b]$ --- $\alpha h + \beta \leq h$ and $h \leq
+\gamma h + \delta$ --- whose Bernstein certificates are the checkpoint
+conditions at $0$ and at $b$. The six side conditions are thus the six
+distinct endpoint values of the four affine gap polynomials, the kink
+checkpoints $\beta \leq 0$ and $0 \leq \delta$ each shared between
+their line's two cells. \rulename{ArithAtom}, \rulename{Norm}, and
+\rulename{Cut} supply the atom-normalization and stitching plumbing
+throughout (the \rulename{ReLU-Above} section walks a chain of this
+kind in full).
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:lirpa-sound}
+Suppose the linkage holds, the two premise sequents are semantically
+valid with a common premise formula, and the eight arithmetic side
+conditions hold. Then the conclusion sequent --- the pinned conjunction
+$(\alpha h + \beta) \leq y \wedge y \leq (\gamma h + \delta)$ over the
+same premise --- is semantically valid.
+\end{bprop}
+\begin{proof}
+Fix an admissible valuation $\sigma$ satisfying $\Phi$. The premises,
+instantiated at $\sigma$, eliminate to entrywise bounds: every entry
+$p$ of the preactivation tensor satisfies $a \leq p \leq b$ (a
+rank-$0$ constant against a tensor compares against every entry). The
+linkage extraction (\texttt{reluLinked\_facts}) gives the output
+tensor at the same shape and, per entry, either $p \leq 0 \wedge y =
+0$ or $0 \leq p \wedge y = p$. Fix an entry and take the cases.
+
+\emph{Inactive case} ($p \leq 0$, $y = 0$; here $p \in [a, 0]$).
+Lower line: $\alpha p + \beta \leq 0 = y$ by two-endpoint
+interpolation on $[a, 0]$ --- the affine function $\alpha({\cdot}) +
+\beta$ is $\leq 0$ at $a$ (checkpoint $\alpha a + \beta \leq 0$) and
+at $0$ (checkpoint $\beta \leq 0$), hence on all of $[a, 0]$
+(\texttt{lirpa\_lower\_neg}; the verified proof is an explicit product
+certificate: nonnegative products such as $(-p)\cdot(-(\alpha a +
+\beta))$ and $(p - a)\cdot(-\beta)$ sum against the strict product
+$(-a)\cdot(\alpha p + \beta) > 0$ of the assumed violation). Upper
+line: $y = 0 \leq \gamma p + \delta$ likewise from the checkpoints at
+$a$ and $0$ (\texttt{lirpa\_upper\_neg}).
+
+\emph{Active case} ($0 \leq p$, $y = p$; here $p \in [0, b]$). Lower
+line: $\alpha p + \beta \leq p = y$ by interpolation on $[0, b]$ from
+the checkpoints $\beta \leq 0$ and $\alpha b + \beta \leq b$
+(\texttt{lirpa\_lower\_pos}). Upper line: $y = p \leq \gamma p +
+\delta$ from $0 \leq \delta$ and $b \leq \gamma b + \delta$
+(\texttt{lirpa\_upper\_pos}).
+
+The conclusion's two atoms evaluate entrywise at the shared shape (the
+affine terms evaluate to $\beta + \alpha\,p$ and $\delta + \gamma\,p$
+per entry --- \texttt{affineWireTerm\_evalQ}), so the four cases
+assemble into the conjunction. That is \texttt{sound\_lirpa}, whose
+structure the paragraph mirrors step for step.
+\end{proof}
+
+\begin{bremark}[three checkpoints suffice]\label{rem:lirpa-checkpoints}
+Because $\ReLU$ is affine on each side of $0$ and $a < 0 < b$, an
+affine line bounds it on $[a, b]$ \emph{iff} it bounds it at the three
+points $a$, $0$, $b$ --- the six side conditions are precisely these
+six facts (two lines $\times$ three checkpoints), and equivalently the
+degree-$1$ Bernstein certificates of Recipe~\ref{rec:lirpa-instance}.
+A producer can therefore emit the tightest certifiable envelope for
+its chosen slopes by solving three scalar inequalities per line ---
+nothing about the rule rewards loose coefficients.
+\end{bremark}
+
+\begin{bremark}[what the strict straddle buys]\label{rem:lirpa-strict}
+With $a < 0 < b$ the checkpoint conditions read, verbatim, ``the line
+is on the correct side of $\ReLU$ at $a$, $0$, and $b$'' ($\ReLU(a) =
+0$ needs $a \leq 0$; $\ReLU(b) = b$ needs $0 \leq b$). Semantic
+soundness would in fact survive relaxing the strictness: whatever the
+signs of $a \leq b$, the six conditions pin the lower line beneath
+$\ReLU$ on $[\min(a,0), \max(b,0)] \supseteq [a,b]$ --- at $a$ because
+$\alpha a + \beta \leq 0 \leq \ReLU(a)$ holds unconditionally, and on
+each of $[\min(a,0), 0]$, $[0, \max(b,0)]$ by the same endpoint
+interpolation; for the upper line the interval containment does the
+work (the checks at $0$ and $b$ dominate $\ReLU$ on $[0, \max(b,0)]$,
+the checks at $a$ and $0$ dominate it on $[\min(a,0), 0]$). The
+rule as adopted nevertheless demands the strict straddle, and reasonably:
+it pins \rulename{LiRPA} to the genuinely unstable case --- a stable
+neuron rides \rulename{ReLU-Pos} or \rulename{ReLU-Neg}
+\emph{exactly}, losing nothing to a relaxation --- it keeps both
+interpolation cells nondegenerate, and it is consumed as stated by the
+verified interpolation lemmas, whose contradiction products multiply
+by $-a$ and $b$.
+\end{bremark}
+
+\begin{bremark}[the conclusion is built, not audited]
+The conclusion formula is pinned syntactically
+(\texttt{lirpaConclusionForm}): it \emph{is} the conjunction of the
+two comparison atoms over the affine terms
+$\texttt{affineWireTerm}\,\beta\,\alpha\,h$ and
+$\texttt{affineWireTerm}\,\delta\,\gamma\,h$, constructed from the
+payload coefficients --- the producer supplies no conclusion shape.
+A payload field that the checker rebuilds rather than reads is one
+the payload cannot mis-declare (the \rulename{PConstExact} section's
+closedness observation, in conclusion-shape form): no ``equivalent''
+respelling can smuggle in a different wire, comparator, or shape.
+\end{bremark}
+
+\begin{anchors}
+family linkage extraction & \texttt{reluLinked\_facts}\\
+checkpoint interpolation, lower line & \texttt{lirpa\_lower\_neg}, \texttt{lirpa\_lower\_pos}\\
+checkpoint interpolation, upper line & \texttt{lirpa\_upper\_neg}, \texttt{lirpa\_upper\_pos}\\
+affine conclusion evaluation & \texttt{affineWireTerm\_evalQ}\\
+rule warrant (Proposition \ref{prop:lirpa-sound}) & \texttt{sound\_lirpa}\\
+linkage side condition & \texttt{reluLinked}; \texttt{PrimApp.isReluAt} (the positive-size gate)\\
+pinned conclusion & \texttt{lirpaConclusionForm}; \texttt{affineWireTerm}\\
+packaged-node conservativity & \texttt{relu\_projection} over \texttt{reluExpH} (canonical single-entry instance)\\
+\end{anchors}
+
+\sourcenote{Literature: the two-sided affine relaxation of ReLU is the
+verification community's workhorse --- the triangle
+relaxation~\cite{ehlers2017}, its dual/convex-outer
+form~\cite{wongkolter2018}, CROWN's adaptive slope
+choice~\cite{zhang2018crown}, DeepPoly's abstract-domain
+rendering~\cite{singh2019deeppoly}, and the LiRPA framework that named
+the family~\cite{xu2020lirpa}. This rule is the checker-side
+certificate form: the cited works \emph{find} envelopes; the rule only
+ever \emph{checks} one, at six rational inequalities.}

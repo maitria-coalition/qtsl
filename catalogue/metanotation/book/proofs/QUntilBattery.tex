@@ -1,0 +1,185 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The general admissible template (one node $\to$ a derivation
+fragment over core and previously-justified rules, applied leaf-first)
+is stated with \rulename{PConstExact} and not restated here; this
+section gives the rule\textquotesingle s instance. The verified
+theorems quoted above warrant the rule at the \textbf{discrete-kernel
+profile}; the profile remark at the end states what remains a
+hypothesis beyond it.}
+
+\begin{brecipe}[the \rulename{QUntilBattery} rewrite]\label{rec:qutb}
+A \rulename{QUntilBattery} node carries: an avoid certificate $V_a$ with
+its rows (drift off $A \cup R$, floor \emph{on $A$ only}, nonneg), a
+deadline certificate $V_d$ with its rows (decay factor $\beta$ off
+$A \cup R$, global off-target floor, nonneg, bound), the shared side
+conditions (hull; fail-closed at the composite exit set $A \cup R$), the
+rate tie $\beta^{T} \le c$, and the threshold row
+$V_a(x) + c\,V_d(x) \le 1 - p$ on the concluded affine region. Here $A$
+over-approximates the falsity set of the safe-side formula $\varphi_s$
+and $R$ under-approximates the truth set of the target $\varphi$. The
+node rewrites to a derivation fragment over three constituents:
+\[
+\inferrule*[Right=\rulename{QUntilBattery}]{
+  \text{$V_a$ rows} \\ \text{$V_d$ rows} \\ \beta^{T} \le c \\
+  V_a + c\,V_d \le 1 - p \ \text{on the region}
+}{\mathcal{M} \vDash_{\{V_a + c V_d \le 1 - p\}}
+  \mathsf{P}_{\ge p}[\varphi_s\, \mathsf{U}_{\le T}\, \varphi]}
+\;\rightsquigarrow\;
+\begin{array}{l}
+\text{(i) a \emph{T5 slice}: the battery pattern
+  (\rulename{QSafetyBattery}, Prop.~\ref{prop:qsb-pattern})}\\
+\quad\text{at the composite stop set
+  $\mathit{Stop} := (A \cup R) \cup D^{\mathrm{c}}$, certificate $V_a$;}\\
+\text{(ii) a \emph{T6 slice}: the deadline miss bound
+  (\rulename{QDeadlineBattery}, Lem.~\ref{lem:qdb-tail} via
+  Thm.~\ref{thm:qdb-hit})}\\
+\quad\text{at target $A \cup R$, certificate $V_d$;}\\
+\text{(iii) one \rulename{QUnionBound} node on the d\'ebut
+  decomposition (Lem.~\ref{lem:qub-debut}).}
+\end{array}
+\]
+Honesty note, in the \rulename{PConstExact} tradition: the two slices
+are consumed through their \emph{verified slice lemmas}, not by literal
+re-application of full battery nodes --- the T5
+slice\textquotesingle s floor family is deliberately weaker than a full
+safety node\textquotesingle s (floor on the bad-exit set only; see
+Remark~\ref{rem:qutb-floors}), and the T6 slice is consumed in
+complemented (miss-bound) form. The shipped verified object is therefore
+the assembled soundness lemma, whose Lean structure \emph{is} this
+rewrite: it consumes the deadline theorem as a black box, applies the
+union bound once, and re-proves neither battery.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant, first-hit form]\label{prop:qutb-firsthit}
+On the substrate of the shared preamble, suppose: the $V_a$ rows ---
+drift off $A \cup R$ within $D$, floor $V_a \ge 1$ on $A \cap \bar{D}$,
+nonneg on $\bar{D}$; the $V_d$ rows --- decay
+$\int V_d\,dK\,y \le \beta V_d(y)$ off $A \cup R$ within $D$, floor
+$V_d \ge 1$ on $\bar{D} \smallsetminus (A \cup R)$, nonneg and bound $M$
+on $\bar{D}$; hull and fail-closed side conditions at exit set
+$A \cup R$; $\beta \ge 0$ and the rate tie $\beta^{T} \le c$. Then for
+every $x \in D$ with $V_a(x) + c\, V_d(x) \le 1 - p$,
+\[
+\Pr_x\bigl[\exists n \le T,\ \omega_n \in R \ \wedge\
+\forall j < n,\ \omega_j \notin \mathit{Stop}\bigr] \;\ge\; p,
+\qquad \mathit{Stop} = (A \cup R) \cup D^{\mathrm{c}} .
+\]
+\end{bprop}
+\begin{proof}
+Three bounds, then arithmetic.
+\emph{(i, the T5 slice.)} Clamp $V_a$ as in the safety battery, with the
+floor forced only off $D \cup R$ (the certificate is silent on the
+target). The stopped process at $\mathit{Stop}$ is a nonnegative
+supermartingale, $\ge 1$ whenever a \emph{first} $\mathit{Stop}$-visit
+presents a bad state (a state of
+$\mathit{Stop} \smallsetminus R$ --- on $A$ by the floor row, off $D$ by
+the forced clamp); Ville\textquotesingle s inequality gives
+\[
+E_1 := \bigl\{\text{some first } \mathit{Stop}\text{-visit is bad}\bigr\},
+\qquad \Pr_x[E_1] \le V_a(x).
+\]
+The floor is asked on the bad states only, and $R$-membership is never
+consulted --- which is exactly what lets a success cost no $V_a$-budget.
+\emph{(ii, the T6 slice.)} The deadline battery\textquotesingle s miss
+bound at target $A \cup R$, consumed as a black box and weakened from
+missing $A \cup R$ to missing the larger $\mathit{Stop}$:
+\[
+E_2 := \bigl\{\forall k \le T,\ \omega_k \notin \mathit{Stop}\bigr\},
+\qquad \Pr_x[E_2] \le \beta^{T} V_d(x) \le c\, V_d(x),
+\]
+the last step by the rate tie and $V_d(x) \ge 0$.
+\emph{(iii, the glue.)} The d\'ebut decomposition
+(Lemma~\ref{lem:qub-debut}) at $(\mathit{Stop}, R, T)$ says the
+complement of the concluded first-hit event is contained in
+$E_1 \cup E_2$; one \rulename{QUnionBound} application
+(Theorem~\ref{thm:qub-sound}, real-valued form) gives
+$\Pr_x[\text{fail}] \le V_a(x) + c\,V_d(x) \le 1 - p$. Complement.
+\end{proof}
+
+\begin{bprop}[soundness of \rulename{QUntilBattery}]\label{prop:qutb-sound}
+With the two formula ties --- $A$ over-approximating where $\varphi_s$
+fails, $R$ under-approximating where $\varphi$ holds --- the first-hit
+event weakens to the truth of the bounded-until formula along the path:
+for $x$ in the affine region,
+$\Pr_x[\exists n \le T,\ \mathrm{sat}(\omega_n) \wedge
+\forall j < n,\ \mathrm{sat}_s(\omega_j)] \ge p$ --- the concluded
+judgement
+$\mathcal{M} \vDash_{\{V_a + c V_d \le 1-p\}}
+\mathsf{P}_{\ge p}[\varphi_s\,\mathsf{U}_{\le T}\,\varphi]$.
+\end{bprop}
+\begin{proof}
+On the first-hit event: the landing state is in $R$, hence satisfies
+$\varphi$; every earlier state avoided $\mathit{Stop} \supseteq A$,
+hence satisfies $\varphi_s$ by the contrapositive of the safe-side tie.
+Monotonicity of the (outer) measure; neither satisfaction predicate is
+required measurable.
+\end{proof}
+
+\begin{bremark}[two floors doing different work]\label{rem:qutb-floors}
+$V_a$\textquotesingle s floor is on $A$ only: the avoid certificate is
+silent on the target region, so a successful landing costs no
+certificate budget --- the rule does not charge for winning. Demand the
+floor on $R$ too and the concluded region shrinks pointlessly: every
+reachable success state would need $V_a \ge 1$, pushing
+$V_a(x) + c V_d(x)$ past any useful threshold. $V_d$\textquotesingle s
+floor is global off the target, exactly as its parent deadline battery
+requires --- weaken \emph{it} and Remark~\ref{rem:qdb-floor}\textquotesingle s
+counterexample (the frozen chain certified to arrive) imports verbatim.
+The asymmetry is not an optimization; it is the two
+slices\textquotesingle{} different jobs made visible in their price
+lists.
+\end{bremark}
+
+\begin{bremark}[fail-closed, and the rate tie]\label{rem:qutb-failclosed}
+$D^{\mathrm{c}}$ joins the stop set on the \emph{bad} side: leaving the
+modelled domain before reaching the target counts as failure, while an
+$R$-landing succeeds wherever it lands (the target tie is global). Drop
+the rate tie $\beta^{T} \le c$ and step (ii)\textquotesingle s budget
+transfer fails --- the affine atom would under-budget the miss mass by
+exactly the gap $\beta^{T} V_d(x) > c\, V_d(x)$. The catalogued instance
+$c = q^{-1}$ with $0 < q \le e^{\theta T}$, $\beta = e^{-\theta}$
+satisfies the tie, and at this profile the whole certificate is exact rational
+arithmetic --- no transcendental leaf anywhere; one becomes available
+through the deadline battery\textquotesingle s Taylor-leaf pattern
+(Prop.~\ref{prop:qdb-catalogue}) when $\theta$-rates are wanted.
+\end{bremark}
+
+\begin{bremark}[tier, argued]\label{rem:qutb-tier}
+Admissible, not alias: three premise sub-derivations (two battery
+slices and a union bound), not a respelling of one. And deliberately
+not monolithic core: a third self-contained soundness lemma would
+duplicate two batteries\textquotesingle{} arguments line by line ---
+the assembled proof instead consumes the deadline theorem as a black
+box and the union bound as one application, which is this
+catalogue\textquotesingle s admissibility discipline enforced at the
+Lean level. The concluded region is the affine atom with rows
+$[(1, V_a), (c, V_d)]$ and threshold $1 - p$ --- the
+region-vocabulary generalization whose $k = 1$ case is the ordinary
+sublevel atom.
+\end{bremark}
+
+\begin{bremark}[\textbf{profile} --- what is proven, what is filed]
+\label{rem:qutb-profile}
+Proven: the discrete-kernel profile, sorry-free
+(\texttt{sound\_QUntilBattery\_firstHit},
+\texttt{sound\_QUntilBattery}), with both slice lemmas and the union
+bound as named constituents. \emph{Not} proven: the continuous-time
+transport, which inherits \emph{both}
+parents\textquotesingle{} filed residues (the safety
+slice\textquotesingle s stopping theory and the deadline
+slice\textquotesingle s discounted transport) plus its own composite
+stop set. The conditional mark on the dashboard row records this; the
+recipe above is profile-independent in \emph{shape}, and its
+constituents\textquotesingle{} warrants are what the transport must
+supply.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:qutb}, slice (i) & \texttt{measure\_firstBad\_le} (Ville via \texttt{Supermartingale.ville\_ineq} on the stopped process; floor asked on the bad-exit set only)\\
+Recipe \ref{rec:qutb}, slice (ii) & \texttt{measure\_missTarget\_le} (black-boxing \texttt{sound\_QDeadline\_hit}, complemented once)\\
+Recipe \ref{rec:qutb}, glue (iii) & \texttt{sound\_QUnionBound\_ofReal} on \texttt{compl\_firstExit\_subset}\\
+Proposition \ref{prop:qutb-firsthit}: the assembly & \texttt{sound\_QUntilBattery\_firstHit}\\
+Proposition \ref{prop:qutb-sound}: formula ties & \texttt{sound\_QUntilBattery}\\
+the concluded affine atom & region rows $[(1, V_a), (c, V_d)]$, threshold $1-p$; rate-tie hypothesis \texttt{hc} : $\beta^{T} \le c$\\
+\end{anchors}

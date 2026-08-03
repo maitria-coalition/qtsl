@@ -1,0 +1,264 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof at
+Putnam-exam-solution detail. Every hypothesis of the rule is used below and
+remarked on, with the counterexample its removal admits where one exists;
+the formal-anchor table maps each step to the Lean declaration that
+carries it.}
+
+\textbf{Setting and claim.}\enspace Fix a hypernet $H$. A valuation
+$\sigma$ assigns each wire a rational tensor of its declared shape; a
+sequent $\Phi \vdash \Psi$ is semantically valid when every admissible
+$\sigma$ satisfying $\Phi$ satisfies $\Psi$, with comparison atoms read
+per-entry. A region atom $x \in \mathcal{R}(\Delta, S)$, for
+$\Delta = \mathrm{conv}(V_0, \dots, V_n)$ an $n$-simplex and
+$S \subsetneq \{0, \dots, n\}$ a proper set of \emph{extended} vertices,
+holds at $\sigma$ when the evaluated point admits barycentric weights
+$\lambda_v$ with $\sum_v \lambda_v = 1$, $\lambda_v \geq 0$ at core
+vertices $v \notin S$, and $\lambda_v \leq 0$ at $v \in S$ --- the closed
+simplex when $S = \emptyset$, and the unbounded set extending beyond the
+faces opposite $S$ otherwise. The rule's payload supplies the region
+premise $\Phi \vdash x \in \mathcal{R}(\Delta, S)$, a polynomial term $p$
+of degree $\leq d$, a predicate $P$ from the accepted grammar (a finite
+conjunction of scalar hole-atoms $s \cdot \square \bowtie c$, $s > 0$,
+$\bowtie \in \{\leq, \geq, =\}$), the checked wire tie \texttt{polyTie},
+the predicate-shape clause ($P$ conic when $S \neq \emptyset$; convex
+suffices when $S = \emptyset$), and the checked coefficient condition:
+every forward-difference Bernstein coefficient of $p$ over
+$\mathcal{R}(\Delta, S)$, recomputed exactly, satisfies $P$. The claim
+(\texttt{sound\_bernCone}): the composite sequent
+$\Phi \vdash P(p(x))$ is then semantically valid.
+
+\begin{blemma}[Bernstein form on the closed simplex]\label{lem:bc-bern}
+Let $p$ be a polynomial of degree $\leq d$ on $\R^n$ with degree-$d$
+Bernstein coefficients $(b_\alpha)_{|\alpha| = d}$ on $\Delta$, so that
+$p(x) = \sum_{|\alpha| = d} b_\alpha\, B^d_\alpha(\lambda)$ with
+$B^d_\alpha(\lambda) = \binom{d}{\alpha} \lambda^\alpha$ in the
+barycentric coordinates $\lambda$ of $x$. For $x \in \Delta$ (all
+$\lambda_v \geq 0$),
+\[
+B^d_\alpha(\lambda) \geq 0
+\qquad\text{and}\qquad
+\sum_{|\alpha| = d} B^d_\alpha(\lambda)
+  = \Bigl(\sum_v \lambda_v\Bigr)^{\!d} = 1,
+\]
+so $p(x)$ is a \emph{convex combination} of the coefficients $b_\alpha$.
+\end{blemma}
+\begin{proof}
+Nonnegativity is termwise ($\lambda^\alpha \geq 0$); the partition of
+unity is the multinomial theorem applied to
+$(\lambda_0 + \dots + \lambda_n)^d = 1^d$. The representation itself is
+the classical change to the Bernstein basis
+\cite{bernstein1912,farouki2012}; the checker \emph{computes} the
+$b_\alpha$ from $p$'s canonical monomial form by exact forward
+differencing over $\Q$, so the representation is an identity of exact
+rational data, not an approximation. That Bernstein coefficients
+enclose the range of $p$ on $\Delta$ --- the reading of this lemma used
+below --- is the sound (easy) direction of \cite{cargoshisha1966}.
+\end{proof}
+
+\begin{blemma}[accepted predicates are convex]\label{lem:bc-convex}
+Let $P$ be accepted by the predicate classifier. Then its satisfaction
+set $\{ v \in \Q : \mathrm{satisfiesPredQ}(P, v) \}$ is convex.
+\end{blemma}
+\begin{proof}
+Each accepted atom orients (possibly by mirroring) to
+$s \cdot v \bowtie c$ with $s > 0$ and
+$\bowtie \in \{\leq, \geq, =\}$; its satisfaction set is a closed ray or
+a point --- an interval either way --- and division by the positive $s$
+does not disturb this. A conjunction intersects finitely many intervals.
+Strict comparators and $\neq$ are \emph{refused} by the classifier ---
+closed-world conservatism that can lose completeness but never
+soundness; the refusal is a checker verdict, not a soundness case.
+\end{proof}
+
+\begin{blemma}[the univariate ray identity]\label{lem:bc-star}
+Let $d \geq 0$ and let $b_0, \dots, b_d$ be the degree-$d$ Bernstein
+coefficients of $p$ on the segment $[V_a, V_b]$, indexed by the
+multiplicity of $V_b$. Let $x$ lie on the extension ray beyond $V_b$:
+in barycentric coordinates $x = \lambda_a V_a + \lambda_b V_b$ with
+$\lambda_a = -u \leq 0$, $\lambda_b = 1 + u$, $u \geq 0$. Then, with
+$(\Delta b)_i := b_{i+1} - b_i$ the forward difference,
+\[
+p(x) \;=\; \sum_{j=0}^{d} \binom{d}{j}\, u^{j}\, (\Delta^{j} b)_{d-j},
+\tag{$\star$}
+\]
+a combination of the certified table values $(\Delta^{j} b)_{d-j}$ with
+\emph{nonnegative} weights $\binom{d}{j} u^{j}$, the $j = 0$ weight
+being $1$.
+\end{blemma}
+\begin{proof}
+Substitute $\lambda_a = -u$, $\lambda_b = 1 + u$ into the Bernstein
+form and expand $(1+u)^i$ binomially:
+\[
+p(x) = \sum_{i=0}^{d} \binom{d}{i} b_i\, (-u)^{d-i} (1+u)^{i}
+     = \sum_{i=0}^{d} \sum_{k=0}^{i} \binom{d}{i} \binom{i}{k}
+       (-1)^{d-i}\, b_i\, u^{d-i+k}.
+\]
+Collect the coefficient of $u^{j}$: setting $i = d - j + m$ with
+$m = 0, \dots, j$, it is
+$\sum_{m=0}^{j} \binom{d}{d-j+m} \binom{d-j+m}{m} (-1)^{j-m}
+b_{d-j+m}$. The product of binomials telescopes,
+\[
+\binom{d}{d-j+m} \binom{d-j+m}{m}
+  = \frac{d!}{(j-m)!\, m!\, (d-j)!}
+  = \binom{d}{j} \binom{j}{m},
+\]
+so the coefficient of $u^{j}$ is
+$\binom{d}{j} \sum_{m=0}^{j} \binom{j}{m} (-1)^{j-m} b_{d-j+m}
+ = \binom{d}{j} (\Delta^{j} b)_{d-j}$, which is $(\star)$. (Degree-$1$
+sanity check: $p(x) = b_1 + u\,(b_1 - b_0)$, matching
+$(1+u)\,b_1 - u\,b_0$ directly.) The values $(\Delta^{j} b)_{d-j}$ are
+exactly the rows the checker's forward-difference table certifies on
+this fragment: the $j$-th difference of the coefficient sequence,
+anchored at the core vertex.
+\end{proof}
+
+\begin{blemma}[conic transfer]\label{lem:bc-conic}
+Let $P$ be accepted with the conic classification (every atom's
+constant is $0$). Then its satisfaction set contains $0$, and is closed
+under nonnegative scaling and under finite nonnegative combinations.
+\end{blemma}
+\begin{proof}
+Each conic atom reads $s \cdot v \bowtie 0$, satisfied at $v = 0$ and
+preserved under $v \mapsto t v$ for $t \geq 0$; conjunction preserves
+both facts. Closure under addition follows from convexity
+(Lemma~\ref{lem:bc-convex}) plus scaling:
+$v + w = 2 \cdot \tfrac{1}{2}(v + w)$; induction extends to finite
+nonnegative combinations.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{BernCone}]\label{thm:bc-sound}
+Under the payload's checked hypotheses, if the region premise is
+semantically valid, then so is $\Phi \vdash P(p(x))$.
+\end{bthm}
+\begin{proof}
+Fix an admissible $\sigma \models \Phi$; the region premise yields
+barycentric weights for the evaluated point of $x$ as in the Setting.
+The conclusion formula is, by the checked \texttt{postApply}, the
+predicate $P$ with the polynomial term substituted for its hole, so it
+suffices to establish $\mathrm{satisfiesPredQ}(P, \cdot)$ at the
+evaluated value(s) of $p$ --- per-entry, when $p$ is tensor-shaped.
+
+\emph{Step 1 (the polynomial reads one point).} The wire tie
+\texttt{polyTie} says $p$ is closed, or mentions exactly the region
+wire $w$ with $x = w$. In the second case the region premise pins
+$\sigma$'s read of $w$ to a point of $\mathcal{R}(\Delta, S)$; in the
+first, no wire is read at all and $p$'s value is its closed constant.
+
+\emph{Step 2 (rational weights).} The model's barycentric weights are
+\emph{real}; the kernel computes over $\Q$. The weights solve a linear
+system with rational data (the vertex coordinates and the evaluated
+point), so a nonnegative real solution can be traded for a nonnegative
+rational one, and the exact kernel consumes the rational weights. This
+step is invisible in informal treatments and essential in the
+mechanization.
+
+\emph{Step 3 (case $S = \emptyset$: the convex kernel).} By
+Lemma~\ref{lem:bc-bern}, $p$'s value is a convex combination of the
+certified coefficients; every coefficient satisfies $P$ (the checked
+table sweep); by Lemma~\ref{lem:bc-convex} satisfaction transfers to
+the combination. On this case the checker admits both translation
+routes --- the idx-free single-wire form and the multivariate
+projection-indexed form with all indices in range --- and the per-entry
+evaluation lemma carries the scalar argument to every entry of a
+tensor-shaped value.
+
+\emph{Step 4 (case $S \neq \emptyset$).} The checker's scope guard
+confines accepted certificates to two shapes. \emph{(4a: constant
+canonical form, any dimension.)} If $p$'s canonical polynomial has no
+variables, its value everywhere is the constant --- the zero-order
+forward-difference row is that constant, certified directly.
+\emph{(4b: single-wire polynomial over a 1-dimensional region.)} A
+proper nonempty extension set on a 1-simplex extends exactly one of the
+two vertices, and $\mathcal{R}(\Delta, S)$ is the closed ray from the
+core vertex; Lemma~\ref{lem:bc-star} writes $p$'s value as a
+nonnegative combination of the certified table values with the $j = 0$
+weight equal to $1$, and Lemma~\ref{lem:bc-conic} transfers
+satisfaction through the combination. Everything else is
+\emph{refused} by the guard, so no further case exists for soundness
+to cover.
+
+\emph{Step 5 (read off).} In each case
+$\mathrm{satisfiesPredQ}(P, \cdot)$ holds at the evaluated value; the
+substitution reading turns this into
+$\sigma \models P(p(x))$.
+\end{proof}
+
+\begin{bremark}[why \texttt{polyTie} is not decoration]
+\label{rem:bc-polytie}
+Nothing else ties the checked polynomial to the wire the premise
+constrains. Without the field, take the satisfiable premise
+$w_0 \in \mathcal{R}(\mathrm{conv}(1,2), \emptyset)$ and the polynomial
+$p = w_1$ over a \emph{different} wire: the translation remaps the
+single-variable canonical form onto the region coordinate, the
+certified coefficients are $\{1, 2\}$ --- both satisfying
+$\square \geq 1$ --- and the rule would conclude
+$\Phi \vdash w_1 \geq 1$, false at any valuation reading
+$\sigma(w_1) = 0$. Closed polynomials need no tie: their value reads no
+wire.
+\end{bremark}
+
+\begin{bremark}[why conic, not merely convex, on rays]
+\label{rem:bc-conic-needed}
+The predicate-shape clause is two-sided because the two region shapes
+transfer differently: convex combinations
+(Lemma~\ref{lem:bc-bern}) on the closed simplex, conic combinations
+with unbounded weights ($\star$) on a ray. A convex-but-not-conic
+predicate fails on the ray, by hand: take $d = 1$,
+$\Delta = \mathrm{conv}(0, 1)$ with the vertex at $0$ extended (the
+region is the ray $[1, \infty)$), $p(t) = 1 - t$, and
+$P = (\square \geq -1)$. The certified table is
+$\{\,b_1,\ (\Delta b)_0\,\} = \{\,0,\ -1\,\}$, every value satisfying
+$P$; yet at $u = 2$ (the point $t = 3$), $(\star)$ gives
+$p = b_1 + 2(b_1 - b_0) = -2 < -1$. The classifier refuses exactly
+this: an atom with nonzero constant classifies non-conic, and the
+$S \neq \emptyset$ clause then rejects the certificate. Conversely, at
+$S = \emptyset$ demanding conic would be needless strength --- the rule
+carries the license (any accepted convex predicate) in the premise
+itself rather than in surrounding prose.
+\end{bremark}
+
+\begin{bremark}[the scope guard is part of the theorem]
+\label{rem:bc-guard}
+The checker refuses non-constant idx-free polynomials over regions of
+dimension $\neq 1$, and multivariate projection-indexed polynomials
+whenever $S \neq \emptyset$. Soundness is stated and proven for every
+certificate the checker \emph{accepts}; the guard makes the unproven
+territory unrepresentable rather than discouraged. The fully general
+multivariate ray identity (the arbitrary-shape analogue of
+Lemma~\ref{lem:bc-star}) remains open in the development and becomes
+essential only if the guard lifts --- the two must move together.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The rule is the certificate form of Bernstein-coefficient range
+enclosure: coefficients bound the range on the simplex
+\cite{cargoshisha1966}, enclosures converge under degree elevation and
+subdivision \cite{garloff1986} --- which is why \rulename{Subdivide} is
+this rule's completeness partner --- and the basis itself goes back to
+\cite{bernstein1912}, surveyed in \cite{farouki2012}. With polynomial
+atoms and positivity certificates the rule sits beside the
+Krivine--Handelman family \cite{krivine1964,handelman1988}: as
+everywhere in this calculus, only the trivial (sound) direction is
+claimed or needed --- no Positivstellensatz completeness enters the
+kernel. The forward-difference computation of the coefficient table is
+the classical finite-difference reading of the Bernstein form; the
+subdivision algorithms of \cite{decasteljau1959,laneriesenfeld1980}
+operate on the same data one rule over.
+\end{bremark}
+
+\begin{anchors}
+Setting: region atoms as masked barycentric membership & \texttt{MaskRegion}; \texttt{Formula.holds} (\texttt{inRegion} case)\\
+Lemma \ref{lem:bc-bern} + Step 3 kernel & the $S = \emptyset$ convex kernel consumed by \texttt{sound\_bernCone\_empty}; per-entry carry \texttt{Term.evalQ\_brRead}\\
+Step 2 rational weights & \texttt{maskRegion\_rat\_weights}; \texttt{ConvexRat.exists\_nonneg\_rat\_solution}\\
+Lemma \ref{lem:bc-convex} & \texttt{classifyPred}, \texttt{satisfiesPredQ\_convex}\\
+Lemma \ref{lem:bc-star} (univariate $(\star)$) & \texttt{QArith.fdBernstein\_sound\_dim1}\\
+Step 4a constant corner & \texttt{QArith.fdBernstein\_sound\_const}\\
+Lemma \ref{lem:bc-conic} & \texttt{satisfiesPredQ\_conic\_zero}, \texttt{satisfiesPredQ\_conic\_scale}\\
+coefficient recomputation (the checked table) & \texttt{bernConeCoeffCheck}, \texttt{allForwardDiffBernCoeffsSatisfyP}, \texttt{QArith.fdBernstein}, \texttt{QArith.gridAll}\\
+coordinate translation + index gate & \texttt{Term.asCoordPoly?}, \texttt{Term.asCoordPolyIdx?}, \texttt{Term.idxBounded}\\
+Step 1 wire tie & payload field \texttt{polyTie}\\
+Step 5 conclusion reading & \texttt{applyPredicateToTerm}, \texttt{holds\_substHole\_of\_satisfies}\\
+Theorem \ref{thm:bc-sound} & \texttt{sound\_bernCone} (case split onto \texttt{sound\_bernCone\_empty}); wired as core \texttt{RuleData.bernCone} into \texttt{ProofObject.sound}\\
+open residue (Remark \ref{rem:bc-guard}) & \texttt{ConeLemma.StarIdentity} (general shapes; not consulted by the current guard)\\
+\end{anchors}

@@ -1,0 +1,21 @@
+# api.toml.d/Subdivide.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "Subdivide"
+
+[api.ts]
+handle = "bl.Builder.subdivide"
+sig_file = "ts/src/bl.ts"
+sig = ["fn subdivide"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:subdivide"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::subdivide"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn subdivide"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:subdivide"

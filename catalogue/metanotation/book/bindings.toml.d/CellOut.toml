@@ -1,0 +1,44 @@
+# bindings.toml.d/CellOut.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'CellOut'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PCellOutData"
+sha256 = "3f1f66657535e0ba3eaa6cf5669b5866ca13346dc01f946cd5339332944d6a98"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellOutWitnessBuild"
+sha256 = "6b13666259471552c3e85dc2b16d3be0a7752ef5f2be46f1f6d4a1bbdb1cddf9"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellOutWitnessForm"
+sha256 = "48c93df550aa02a9a057029f6cfd854da792528730f2a2ef7c168503b1d76e74"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellOutZeroBuild"
+sha256 = "d2ce3abe2c07348697d77593c592962a32a66e4db6af760bbe4fbb09fe731f9b"
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "cellOutZeroForm"
+sha256 = "003c29ee5c91e996f0e8a857826929229bb25733d11914431e3d01f0c4af007d"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "cellOutWitnessBuild_spec"
+sha256 = "0a85177e521d9eeb9308c17d6b2e47c47cad3992445ee38a848a8f523477f2f2"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_cellOut"
+sha256 = "8be1091a85cf439c7cf0a019a58a815118e8acfb55e42233a8d7f7659bdd560c"
+
+[[correspondence]]
+entry = "CellOut"
+steele_sha256 = "61942415898a3a4abc42512aa0ce5c1d29bc16f85f35070b67affe0dd2705dd1"
+statements_sha256 = "b2f8cb7410593d975d5d75d0b58d8ba7e9327593069b3021549cf2c8d4b7c1a3"
+prose_sha256 = "6e4c99358a316df31d48e93dd48ee1722320a418bf4d88bfb9bd2523b6743aa3"
+

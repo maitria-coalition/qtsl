@@ -1,0 +1,203 @@
+[[rule]]
+id = "BernCone"
+source = "../BL-rules.toml"
+row = "BernCone"
+proof = "book/proofs/BernCone.tex"
+commentary = '''
+\rulename{BernCone} is the calculus\textquotesingle s arithmetic-closure
+primitive: from a \emph{geometric} fact (a wire value lies in a region)
+it derives an \emph{analytic} one of unbounded degree (a polynomial of
+that value satisfies a predicate) --- where the conversion rules exchange
+region atoms with their defining affine sign conditions,
+\rulename{BernCone} is the rule that concludes something new. From a proven region membership
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$ and a degree-$d$ polynomial
+term $p$, it concludes $\Phi \vdash P(p(x))$ for any predicate $P$ of the
+accepted grammar, provided every certified Bernstein coefficient of $p$
+over the region satisfies $P$. A producer reaches for it wherever a
+Lyapunov decrease, an invariant bound, or an output enclosure must be
+established over a whole region rather than at sample points: choose a
+degree, optionally subdivide (\rulename{Subdivide} is the completeness
+partner --- enclosures converge under degree elevation and subdivision),
+and emit the payload.
+
+What the checker recomputes, given the payload (simplex, extension set,
+degree, polynomial term, predicate): that the extension set is tied to
+the premise\textquotesingle s simplex and the simplex is
+full-dimensional; that the polynomial term translates into the
+region\textquotesingle s ambient coordinates (two routes: an idx-free
+single-wire canonical form, or the projection-indexed coordinate form);
+and then --- the heart --- \emph{every} forward-difference Bernstein
+coefficient of the translated polynomial over the region, by exact
+$\Q$ arithmetic, testing each against the predicate. No coefficient
+tensors ride the wire: the certificate names the polynomial and the
+region, and the checker rebuilds the entire coefficient table itself
+(the recompute pattern), so a forged table is unrepresentable rather
+than detected.
+
+Each hypothesis is essential. Drop the wire tie
+(\texttt{polyTie}) and a certificate could prove its region fact about
+one wire while running the coefficient check on a polynomial over a
+different one --- concluding a bound about a value the premise never
+constrained. Drop the predicate-shape clause and a convex-but-not-conic
+predicate falsely transfers along an extension ray (the proof section
+computes a two-line counterexample: certified coefficients $\{0, -1\}$
+both satisfy $\square \geq -1$, yet the polynomial dips to $-2$ on the
+ray). Drop the coefficient recomputation and the conclusion is unrelated
+to the polynomial. Drop the simplex tie or full-dimensionality and the
+barycentric reading of the premise breaks. The checker\textquotesingle s
+own scope guard (constant canonical forms at any dimension; coordinate
+polynomials only over 1-dimensional regions when the extension set is
+nonempty) is part of the soundness story: everything beyond the proven
+fragment is refused, never accepted on faith.
+'''
+note = '''
+Predicates enter through a deliberately closed-world grammar: finite
+conjunctions of scalar hole-atoms $s \cdot \square \bowtie c$ with
+$s > 0$ and $\bowtie \in \{\leq, \geq, =\}$, classified for convexity
+(always) and conicity ($c = 0$ throughout). Comparators outside the
+grammar are refused --- conservatism that can lose completeness, never
+soundness. The elementwise atom semantics batch the conclusion: a
+tensor-shaped polynomial term gives per-entry predicate application for
+free.
+'''
+comparator = '''
+\badge{BadgeGreen}{comparator: fixture DemoBernCone} the
+three-implementation comparator harness (compiled machine code,
+kernel-reduction probes, and the compiler-IR interpreter, all executing
+the same elaborated checker functions) carries the worked
+example\textquotesingle s certificate --- an \rulename{Ax}
+$\to$ $\wedge$E $\to$ \rulename{BernCone} chain at $S = \emptyset$ ---
+as its fixture \texttt{DemoBernCone}. The suite passes only when all
+three paths return identical verdicts on it, and the kernel path probes
+two-sided (reporting its own verdict rather than confirming the compiled
+one), so a false green would require the same wrong answer from
+execution stacks that share nothing below the elaborated definitions.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}. The general statement is \texttt{sound\_bernCone};
+\texttt{sound\_bernCone\_empty} (certified alongside) is its
+$S = \emptyset$ specialization, through which the general proof routes
+that case.
+\begin{itemize}
+\item $x \mapsto$ \texttt{termX : Term}; $\Delta \mapsto$
+  \texttt{simplex}; $S \mapsto$ \texttt{S : ExtensionSet}; $d \mapsto$
+  \texttt{degree : Nat}; $p \mapsto$ \texttt{polynomial : Term}; $P
+  \mapsto$ \texttt{predicate : Formula} (the hole-atom grammar of the
+  note, its hole a designated wire).
+\item the region premise $\Phi \vdash x \in \mathcal{R}(\Delta, S)$
+  $\mapsto$ \texttt{ih} with \texttt{hregionPost} $:$
+  \texttt{regionPremise.post = .inRegion termX simplex S}; $\Phi$
+  shared via \texttt{hpre}.
+\item the wire-tie premise $\wires(p) = \emptyset \vee (x = w \wedge
+  \wires(p) \subseteq \{w\})$ $\mapsto$ \texttt{hpolyTie}, the same
+  disjunction verbatim --- note \texttt{termX = Term.var w}: the
+  display\textquotesingle s ``$x = w$\textquotesingle\textquotesingle{}
+  means the region term literally \emph{is} that wire.
+\item the two-clause predicate premise $\mapsto$ \texttt{hpredShape}
+  $:$ the conjunction of ($S$ nonempty $\to$ conic) and ($S$ empty
+  $\to$ convex), by the decidable predicate classifiers.
+\item the displayed coefficient sweep $\mapsto$ \texttt{hcoeff} $:$
+  \texttt{allForwardDiffBernCoeffsSatisfyP simplex S degree polynomial
+  predicate} --- one name whose meaning this book binds by displaying
+  its definition chain in full (the intro above); the
+  display\textquotesingle s first premise line (simplex tie,
+  full-dimensionality) has no Lean binder of its own because the
+  checker\textquotesingle s gates certify it: \emph{absorbed}, as
+  \rulename{PConstExact}\textquotesingle s closedness is.
+\item conclusion $\Phi \vdash P(p(x))$ $\mapsto$ the goal under
+  \texttt{hpostApply} $:$ \texttt{applyPredicateToTerm predicate
+  polynomial seq.post} --- the conclusion is the syntactic
+  substitution of the polynomial term into the
+  predicate\textquotesingle s hole; the ``at
+  $x$\textquotesingle\textquotesingle{} lives in the wire tie, not in
+  a separate application node.
+\end{itemize}
+Width note, two-sided and honest: the statement is \emph{proven} at
+every hypernet, sequent, and payload --- but \texttt{hcoeff} is
+satisfiable only inside the checker\textquotesingle s scope guard
+(constant canonical forms at any dimension; non-constant forms over
+1-dimensional regions; multivariate coordinate forms at $S = \emptyset$
+only), so the certified reach of the displayed rule is that fragment,
+by refusal outside it --- narrower in effect, never by unverified
+acceptance. Conversely nothing in either statement is wider than the
+display: every hypothesis is consumed, and the display\textquotesingle
+s own two-clause predicate license is carried exactly.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_bernCone_empty", "sound_bernCone"]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "satisfiesPredQ",
+  "Term.asCoordPolyIdx?",
+  "Term.asCoordPoly?",
+  "bernConeCoeffCheck",
+  "allForwardDiffBernCoeffsSatisfyP",
+]
+intro = '''
+\textbf{What the coefficient side-condition means --- and what it does
+not.}\enspace The rule\textquotesingle s main premise appears in the
+payload as the single name \texttt{allForwardDiffBernCoeffsSatisfyP}, so
+this book binds its meaning by displaying the definition chain in full,
+from the checker sources. Reading the chain: \texttt{satisfiesPredQ}
+substitutes a candidate rational for the designated predicate-hole wire
+and runs the \emph{closed} formula evaluator --- the predicate is judged
+at a concrete value, by exact $\Q$ arithmetic, never at a wire.
+\texttt{Term.asCoordPoly?} translates the polynomial term into the
+region\textquotesingle s ambient coordinates, by one of two routes: an
+idx-free term goes through its wire-keyed canonical polynomial (at most
+one wire, remapped to coordinate 0), and a projection-indexed term maps
+each projection $w[j]$ to coordinate variable $j$.
+\texttt{bernConeCoeffCheck} then gates (simplex tie,
+full-dimensionality, and the scope guard: non-constant idx-free
+polynomials only over 1-dimensional regions; multivariate coordinate
+forms only at $S = \emptyset$ with all projection indices in range),
+computes the full forward-difference Bernstein coefficient table of the
+translated polynomial over the masked vertex list, and sweeps every
+grid entry through the predicate.
+
+What a skeptical reader should confirm by eye in the definitions below:
+the conclusion formula never enters the check --- only the polynomial,
+the region data, and the predicate do (the conclusion is pinned
+separately, as the syntactic substitution of the polynomial into the
+predicate\textquotesingle s hole); nothing in the chain reads a
+valuation, so the check cannot covertly assume anything about wire
+values; and every \texttt{false} branch of the guards is a refusal ---
+the fragment boundary (dimension, extension set, index range) fails
+closed. Semantic truth is established only in \texttt{sound\_bernCone},
+from the region premise\textquotesingle s validity.
+'''
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = ["Definition bernConeCoeffCheck_def", "Definition bernConeIntvCheck_def"]
+receipt = '''
+\texttt{hol-strict} CLEAN over the ported checker chain: theory
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host, scripts
+sha-matched verbatim to the sources cited here (git blob
+\texttt{c6ffee9c\ldots}). The ported receipt table replays the
+\rulename{BernCone} rows of the Lean development\textquotesingle s own
+receipt battery: the worked-example accept
+(\texttt{bernConeCoeffCheck} at $S = \emptyset$, degree 1) plus four
+mutant rejections (tightened goal, wrong dynamics sign, degree lie,
+sub-dimensional simplex) and the nonconvex-predicate rejection.
+Downstream, the same chain carries the checker to a CakeML binary with
+the \texttt{machine\_code\_sound} tag (theory
+\texttt{qtslCertProofARM8}). \texttt{bernConeIntvCheck} is the ported
+companion of a since-retired validated-numerics rule variant; its
+round-down-then-check strategy is destined to fold into the BernCone
+checker as an internal fast path (evaluation strategy, not proof
+content), and the ported definition with its three receipt rows
+(exact-dyadic accept, rounded-bound accept, non-representable-bound
+reject) is retained as that branch\textquotesingle s reference.
+'''

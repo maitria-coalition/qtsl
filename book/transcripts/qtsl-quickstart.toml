@@ -1,0 +1,182 @@
+# Transcripts for the QTSL Quick Start chapter.
+#
+# One bash session in a sandbox mirroring the chapter's documented
+# side-by-side clone layout (mtk / qtsl / qtsl-experiments); the corpus
+# artefacts and the reference checker are the real checkouts, linked
+# read-only, and everything written lands in the sandbox. The TypeScript
+# listing is the committed file at listings/quickstart.ts — the same
+# bytes the chapter prints are the bytes that run.
+
+timeout = 900
+
+inputs = [
+  "book:listings/quickstart.ts",
+  "mtk:crates",
+  "mtk:Cargo.lock",
+  "mtk:ts/src",
+  "mtk:ts/package.json",
+  "qtsl:checkers/supermartingales",
+  "qtsl-experiments:supermartingales/out/sec3/certs/faulty_uniform/bound.rows.txt",
+  "qtsl-experiments:supermartingales/out/sec3/mutants/faulty_uniform/M1_false_bound.rows.txt",
+  "qtsl-experiments:gymnasium/out/frozenlake-4x4/exact_T10.cbor",
+]
+
+[session]
+env = { PATH = "{mtk}/ts/node_modules/.bin:{ENV:PATH}" }
+setup = [
+  "npm init -y >/dev/null",
+  "npm install --no-audit --no-fund --loglevel=error {mtk}/ts >/dev/null",
+]
+
+[[mount]]
+tool = "mtk"
+src = "target/release/gymdp"
+dest = "mtk/target/release/gymdp"
+
+[[mount]]
+tool = "qtsl"
+src = "checkers/supermartingales"
+dest = "qtsl/checkers/supermartingales"
+
+[[mount]]
+tool = "qtsl-experiments"
+src = "supermartingales/out/sec3/certs/faulty_uniform/bound.rows.txt"
+dest = "qtsl-experiments/supermartingales/out/sec3/certs/faulty_uniform/bound.rows.txt"
+
+[[mount]]
+tool = "qtsl-experiments"
+src = "supermartingales/out/sec3/mutants/faulty_uniform/M1_false_bound.rows.txt"
+dest = "qtsl-experiments/supermartingales/out/sec3/mutants/faulty_uniform/M1_false_bound.rows.txt"
+
+[[mount]]
+tool = "qtsl-experiments"
+src = "gymnasium/out/frozenlake-4x4/exact_T10.cbor"
+dest = "qtsl-experiments/gymnasium/out/frozenlake-4x4/exact_T10.cbor"
+
+[[mount]]
+tool = "book"
+src = "listings/quickstart.ts"
+dest = "quickstart.ts"
+mode = "copy"
+
+# ---------------------------------------------------------------- produce
+
+[[fragment]]
+name = "produce"
+kind = "run"
+# wall-clock spans: real timings from a real run, but a re-run's noise in
+# them is not content — churn on timing-only differences is suppressed
+volatile = ['\[[0-9.]+s( total)?\]']
+prose-assert = [
+  'exact T=100 bound = 0\.7441903',
+  '\(9 certs, 0 compared, 0 mismatched\)',
+  # "byte for byte, the artefact committed in the experiments repository"
+  '^CORPUS_BYTES=identical$',
+  '^SHA256=66040e596ece30efcb1e500350396477f6e4f56d9af1b8f2896c30bece2fc391',
+]
+
+  [[fragment.step]]
+  run = "mtk/target/release/gymdp produce --out out --only frozenlake-4x4"
+
+  [[fragment.step]]
+  run = "cmp -s out/frozenlake-4x4/exact_T10.cbor qtsl-experiments/gymnasium/out/frozenlake-4x4/exact_T10.cbor && echo CORPUS_BYTES=identical"
+  show-cmd = false
+  show-out = false
+
+  [[fragment.step]]
+  run = "sha256sum out/frozenlake-4x4/exact_T10.cbor | sed 's/^/SHA256=/'"
+  show-cmd = false
+  show-out = false
+
+# ---------------------------------------------------------------- break one
+
+[[fragment]]
+name = "break-rows"
+kind = "run"
+prose-assert = ['q:16524448999/8406920828251']
+
+  [[fragment.step]]
+  run = "cd qtsl-experiments/supermartingales/out/sec3"
+
+  [[fragment.step]]
+  run = "sed -n '62p' certs/faulty_uniform/bound.rows.txt"
+
+[[fragment]]
+name = "break-check"
+kind = "run"
+prose-assert = [
+  '^ACCEPT certs/faulty_uniform/bound\.rows\.txt proof_nodes=3$',
+  '^REJECT mutants/faulty_uniform/M1_false_bound\.rows\.txt berncone\.coeff$',
+]
+
+  [[fragment.step]]
+  run = "CHK=../../../../qtsl/checkers/supermartingales"
+
+  [[fragment.step]]
+  run = "node --experimental-strip-types $CHK/check_rows.ts --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt certs/faulty_uniform/bound.rows.txt mutants/faulty_uniform/M1_false_bound.rows.txt"
+  display = '''$ node --experimental-strip-types $CHK/check_rows.ts \
+    --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt \
+    certs/faulty_uniform/bound.rows.txt mutants/faulty_uniform/M1_false_bound.rows.txt'''
+  expect-exit = 1
+
+[[fragment]]
+name = "break-mutant"
+kind = "run"
+prose-assert = [
+  '^REJECT my_broken\.rows\.txt berncone\.coeff$',
+  '^PATTERN_COUNT=1$',      # the 448999/ pattern is unique (sed hits one spot)
+  # sound-direction control (not printed): numerator -1 -> ACCEPT — the
+  # "slack is real, and the checker is not grading effort" sentence
+  '^ACCEPT ctrl_sound\.rows\.txt proof_nodes=3$',
+]
+
+  [[fragment.step]]
+  run = "sed 's|448999/|449000/|' certs/faulty_uniform/bound.rows.txt > my_broken.rows.txt"
+
+  [[fragment.step]]
+  run = "node --experimental-strip-types $CHK/check_rows.ts --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt my_broken.rows.txt"
+  display = '''$ node --experimental-strip-types $CHK/check_rows.ts \
+    --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt \
+    my_broken.rows.txt'''
+  expect-exit = 1
+
+  [[fragment.step]]
+  run = "grep -c '448999/' certs/faulty_uniform/bound.rows.txt | sed 's/^/PATTERN_COUNT=/'"
+  show-cmd = false
+  show-out = false
+
+  [[fragment.step]]
+  run = "sed 's|448999/|448998/|' certs/faulty_uniform/bound.rows.txt > ctrl_sound.rows.txt && node --experimental-strip-types $CHK/check_rows.ts --stack $CHK/theories/BLstack.rows.txt --cert $CHK/theories/BLCert.rows.txt ctrl_sound.rows.txt"
+  show-cmd = false
+  show-out = false
+
+# --------------------------------------------------- the loop in TypeScript
+
+[[fragment]]
+name = "ts-src"
+kind = "file"
+source = "book:listings/quickstart.ts"
+
+[[fragment]]
+name = "ts-run"
+kind = "run"
+prose-assert = [
+  '^claim: 815/19683$',
+  '^wrote exact_T10\.cbor: 2511 bytes$',
+  '^wrote mutant_table_raised\.cbor: 2509 bytes$',
+  # "byte-identical ... the same sha256, all three ways"
+  '^TS_CORPUS_BYTES=identical$',
+]
+
+  [[fragment.step]]
+  run = 'cd "$TRANSCRIPT_ROOT"'
+  show-cmd = false
+  show-out = false
+
+  [[fragment.step]]
+  run = "npx tsx quickstart.ts"
+
+  [[fragment.step]]
+  run = "cmp -s exact_T10.cbor qtsl-experiments/gymnasium/out/frozenlake-4x4/exact_T10.cbor && echo TS_CORPUS_BYTES=identical"
+  show-cmd = false
+  show-out = false

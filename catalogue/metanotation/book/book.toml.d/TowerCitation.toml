@@ -1,0 +1,92 @@
+[[rule]]
+id = "TowerCitation"
+source = "../QTSL-rules.toml"
+row = "TowerCitation"
+proof = "book/proofs/TowerCitation.tex"
+# conditional: the warrant is mechanized at certificate-object level (the
+# acceptance module, batch M1f), and the per-rule lemmas it composes enter
+# as a hypothesis by the discipline's nature — the residues are named in
+# the proof section's closing remark (R1 schema identification, R2 E2
+# erasure faithfulness, R3 admittedness-as-totality).
+conditional = true
+commentary = '''
+\rulename{TowerCitation} is the edge discipline every rule of the
+extension page obeys, and the only entry in the book\textquotesingle s
+fourth category: not core, admissible, or alias --- an edge discipline
+(glue). What it licenses: a concluded child judgement
+$\mathcal{M} \vDash_R \varphi_{\mathrm{child}}$ makes $R$ usable as a
+region atom in any parent row\textquotesingle s scope or target --- a
+nested probability operator compiles its child first and cites the
+child\textquotesingle s concluded region as the sublevel atom
+$\{V_{\mathrm{child}} \le 1 - p\}$. It concludes nothing itself: the
+license is an edge between rows of one certificate, never a node.
+
+Its content is three conformance obligations on derivation edges, and
+together they are what turns the page\textquotesingle s per-rule
+\emph{relative} soundness lemmas --- each proved on the hypothesis
+that the base calculus is sound --- into an unconditional verdict
+about a whole certificate. E1, edge typing: premise fields are
+satisfaction-judgement kinds or inherited base-proof leaves,
+exclusively, never raw rule rows --- this makes the soundness
+induction\textquotesingle s case analysis exhaustive. E2, data/edge
+separation: certificate-data references (a shared certificate family,
+a lattice object) are not derivation edges --- shared data can neither
+smuggle a cycle past the acyclicity check nor impose ordering the
+derivation structure does not have. E3, the admittedness + acyclicity
+pass over the certificate\textquotesingle s own citation graph --- run
+by the loader as conformance, deliberately not stated as an axiom ---
+makes the induction well-founded.
+
+What would break without each: without E1 an edge could cite an object
+no soundness lemma accounts for; without E2 a data reference could
+hide or force ordering; without E3 the induction has no floor --- a
+cyclic certificate would pass every local check while proving nothing
+(two rows each citing the other\textquotesingle s conclusion discharge
+all per-row obligations and warrant neither).
+'''
+note = '''
+The soundness face: at every consumption site the citation is used in
+the sound direction --- positive citations pass the region exactly (a
+subset of the true denotation), complement citations swap orientation
+and over-approximate the violation set, the conservative direction
+where regions appear negatively; the proof section states this once,
+and each consuming rule\textquotesingle s lemma owns its own
+operator\textquotesingle s monotonicity. The category is honest
+bookkeeping, not a demotion: the three tiers all predicate on a
+conclusion, and this discipline has none --- it is the induction step
+the tiers\textquotesingle{} lemmas plug into, and burying it in
+front-matter prose would make the one obligation the whole
+page\textquotesingle s soundness story leans on invisible.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Acceptance"
+src = "../../lean/qtsl-aux/QtslAux/Acceptance.lean"
+intro = '''
+The acceptance module\textquotesingle s first brick (the discipline
+mechanized at exactly the certificate-object level the recipes state
+it). The certificate shape binds by display --- the four definitions
+ARE the E1/E2 typing claims --- and the theorems bind as statements:
+the E3 bridge, the induction template in well-founded and
+finite-acyclic forms with root corollary, and the consumption-site
+transport pair. The induction theorem proper
+(\texttt{towerCitation\_sound\_of\_wf}) closes under no axioms at all.
+'''
+full_decls = ["Row", "Row.cited", "Row.holds", "cites", "Acyclic"]
+decls = ["acyclic_wellFounded", "towerCitation_sound_of_wf", "towerCitation_sound", "towerCitation_root", "citePos_sound", "citeCmpl_subset", "citeCmpl_sound"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope by structure: there is no rule statement to port --- the
+discipline concludes nothing and has no check function of its own. Its
+one checkable obligation, the admittedness + acyclicity pass, is
+certificate-loader conformance, which would arrive with a HOL-side
+extension-theory loader as conformance code, not as a rule check.
+Independently, the HOL4 development\textquotesingle s object today is
+the base calculus\textquotesingle s wire-format checker (theory
+\texttt{qtsl\_catalogue}, the base catalogue\textquotesingle s
+check-function cone); no extension-theory HOL development exists for
+such a pass to live in.
+'''

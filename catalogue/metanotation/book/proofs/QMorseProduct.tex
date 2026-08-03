@@ -1,0 +1,215 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof
+at Putnam-exam-solution detail, mechanized \emph{in full}: the
+accompanying development proves the product construction, the factoring
+lemmas, the witness transport, and the soundness theorem with no
+interface hypotheses (contrast the \rulename{QMorseDischarge} ledger;
+within the Morse family only \rulename{QBasin} shares this fully-proved
+status). This section was written first, as the mechanization's
+specification --- the lemma chain below fixed the interface in advance,
+and the formal-anchor table now maps each step to the declaration that
+carries it. The readout-transport theorem of the fence remark is
+deliberately \emph{not} mechanized: it warrants the canonicity of the
+certificate-route composite readout, not the witness-level entailment
+proved here, and remains at literature strength.}
+
+\textbf{Setting and claim.}\enspace Let $\varphi_1, \varphi_2$ be
+forward semiflows on Hausdorff metric state spaces $X_1, X_2$, with
+compact forward-invariant arenas $D_1, D_2$. The \emph{product
+semiflow} $\varphi_1 \times \varphi_2$ on $X_1 \times X_2$ (with the
+max metric) flows coordinate-wise:
+$\Phi_t(x_1, x_2) = (\Phi^1_t x_1, \Phi^2_t x_2)$; the semiflow laws
+hold coordinate-wise. The rule: from
+$\mathcal{M}_1 \vDash_{D_1} \mathsf{Morse}(G_1, \rho_1)$ and
+$\mathcal{M}_2 \vDash_{D_2} \mathsf{Morse}(G_2, \rho_2)$, with
+disjoint variable sets, conclude
+\[
+\mathcal{M}_1 \times \mathcal{M}_2 \ \vDash_{D_1 \times D_2}\
+\mathsf{Morse}\big(G_1 \times G_2,\ \rho_1 \times \rho_2\big),
+\]
+where $G_1 \times G_2$ presents the product order
+($(v_1, v_2) \geq (w_1, w_2)$ iff $v_i \geq w_i$ in both coordinates)
+and $(\rho_1 \times \rho_2)(v_1, v_2) := \rho_1(v_1) \times
+\rho_2(v_2)$.
+
+\begin{blemma}[orbits, limit sets, and chains factor]
+\label{lem:qmp-factor}
+\emph{(i)} $\gamma = (\gamma_1, \gamma_2)$ is a complete orbit of
+$\varphi_1 \times \varphi_2$ iff each $\gamma_i$ is a complete orbit
+of $\varphi_i$.
+\emph{(ii)} $\omega(\gamma) \subseteq \omega(\gamma_1) \times
+\omega(\gamma_2)$, and likewise for $\alpha$.
+\emph{(iii)} the projection of an $(\varepsilon, T)$-chain inside
+$D_1 \times D_2$ is an $(\varepsilon, T)$-chain inside $D_i$; hence a
+point chain-recurrent in $D_1 \times D_2$ has both coordinates
+chain-recurrent in their arenas.
+\end{blemma}
+\begin{proof}
+(i) is the coordinate-wise flow law read in both directions. (ii):
+$\gamma([T, \infty)) \subseteq \gamma_1([T,\infty)) \times
+\gamma_2([T,\infty))$; closure of a product is the product of
+closures; and an intersection of product sets is the product of the
+intersections --- pointwise, $(x_1, x_2)$ lies in every
+$A_T \times B_T$ iff each $x_i$ lies in every factor set. (iii): under
+the max metric, factor distance is $\leq$ product distance, so a
+single chain step projects to a chain step (jump points project into
+$D_i$, durations are unchanged), and concatenations project to
+concatenations.
+\end{proof}
+
+\begin{blemma}[witness transport]\label{lem:qmp-transport}
+Let $\{M_1(v)\}_{v \in V(G_1)}$ and $\{M_2(w)\}_{w \in V(G_2)}$
+witness the factor judgements. Then the product family
+\[
+M(v, w) \;:=\; M_1(v) \times M_2(w),
+\]
+indexed by the product order, witnesses the product judgement.
+\end{blemma}
+\begin{proof}
+Six clauses.
+
+\emph{Compactness}: a product of two compact sets is compact.
+
+\emph{Invariance}: forward invariance holds coordinate-wise; and a
+point $(x_1, x_2)$ of the product rides the pairing of the factor
+witnesses' complete orbits through $x_1$ and $x_2$
+(Lemma~\ref{lem:qmp-factor}(i)), which stays inside the product set.
+
+\emph{Location}: $M_1(v) \times M_2(w) \subseteq \rho_1(v) \times
+\rho_2(w)$, the product of the factor locations.
+
+\emph{Disjointness}: if $(v, w) \neq (v', w')$ they differ in some
+coordinate, say $v \neq v'$; then $M_1(v) \cap M_1(v') = \emptyset$
+makes the products disjoint regardless of the other coordinate.
+
+\emph{Cover}: let $(x_1, x_2)$ be chain-recurrent in $D_1 \times D_2$.
+By Lemma~\ref{lem:qmp-factor}(iii) each $x_i$ is chain-recurrent in
+$D_i$, hence covered by its factor family: $x_1 \in M_1(v)$,
+$x_2 \in M_2(w)$ for some $v, w$; so
+$(x_1, x_2) \in M(v, w)$.
+
+\emph{Order}: let $\gamma = (\gamma_1, \gamma_2)$ be a complete orbit
+in $D_1 \times D_2$ contained in no single $M(v, w)$. Containment in a
+product set is coordinate-wise, so
+--- negating ``some $(v,w)$ contains $\gamma$'' ---
+either $\gamma_1$ is contained in no $M_1(v)$, or $\gamma_2$ in no
+$M_2(w)$. Three cases.
+\emph{(both uncontained)}: the factor order clauses give
+$v > v'$ with $\alpha(\gamma_1) \subseteq M_1(v)$,
+$\omega(\gamma_1) \subseteq M_1(v')$, and $w > w'$ likewise for
+$\gamma_2$; by Lemma~\ref{lem:qmp-factor}(ii),
+$\alpha(\gamma) \subseteq M(v, w)$ and
+$\omega(\gamma) \subseteq M(v', w')$, with
+$(v, w) > (v', w')$ strictly in the product order.
+\emph{($\gamma_1$ uncontained, $\gamma_2 \subseteq M_2(w_0)$)}: the
+first factor gives $v > v'$ as above; for the second,
+$\mathrm{range}\,\gamma_2 \subseteq M_2(w_0)$ with $M_2(w_0)$ compact
+in a Hausdorff space, hence closed, gives
+$\alpha(\gamma_2), \omega(\gamma_2) \subseteq
+\mathrm{cl}(\mathrm{range}\,\gamma_2) \subseteq M_2(w_0)$; so
+$\alpha(\gamma) \subseteq M(v, w_0)$,
+$\omega(\gamma) \subseteq M(v', w_0)$, and
+$(v, w_0) > (v', w_0)$ strictly.
+\emph{(the symmetric case)}: exchange the roles of the factors.
+In each case the $\alpha$-side vertex is the strictly higher one, as
+the source-to-sink convention demands.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{QMorseProduct}, witness level]
+\label{thm:qmp-sound}
+If both factor judgements hold, the product judgement holds.
+\end{bthm}
+\begin{proof}
+Choose factor witnesses and apply Lemma~\ref{lem:qmp-transport}.
+\end{proof}
+
+\begin{bremark}[where the flow hypothesis actually binds --- the rule's
+fence]\label{rem:qmp-fence}
+Nothing in Lemmas~\ref{lem:qmp-factor}--\ref{lem:qmp-transport}
+consumes continuity of time: read over $\mathbb{N}$-time systems, the
+same six clauses transport verbatim, at the same ``at most'' polarity.
+The rule is nonetheless fenced to the deterministic-\emph{flow} class,
+for reasons that live above the witness stratum. The certificate-level
+discharge route does not consume semantic witnesses: it composes the
+factor \emph{lattices} (the join-closure of the products of factor
+blocks, every composite facet's inwardness polynomial being a factor's
+with the other factor's coordinates riding along as free box
+variables) and must know that the composite lattice's recomputed
+readout --- its join-irreducibles, cells, and cell order --- is the
+product of the factor readouts, so that the composite tessellation
+represents the product dynamics at the resolution the factors
+certified. For flows this is a theorem: the attractor lattice of a
+product flow is the coproduct of the factor attractor lattices
+(Kalies--Wehbe \cite{kalieswehbe2026}), whose Birkhoff dual
+\cite{birkhoff1937} is exactly ``composite Morse graph $=$ product of
+factor graphs.'' For maps it is false: products of maps exhibit
+emergent, phase-locked attractors outside the coproduct
+(Kalies--Wehbe's counterexample --- already visible in the product of
+two period-two orbits, whose diagonal and anti-diagonal are attractors
+of the product generated by no product of factor attractors), so a
+composite readout computed from factor certificates would silently
+misrepresent the product's global structure, and the judgement's
+ecosystem --- which reads a certified Morse graph as the canonical
+decomposition at the declared resolution --- would be poisoned at
+exactly the canonicity it relies on. Hence the fence: for maps the
+rule must not be derived at all; for flows the readout-transport
+theorem is the rule's semantic import, and it is the reason this core
+rule carries its own lemma rather than reducing to lattice
+combinatorics.
+\end{bremark}
+
+\begin{bremark}[what rides along for free]\label{rem:qmp-rides}
+Two certificate-level transports cost nothing beyond citation, and are
+worth recording with the rule even though the witness-level proof
+above does not touch them. \emph{Facet rows}: every internal facet of
+a composite block is normal to one factor's axis, and its inwardness
+polynomial \emph{is} that factor's facet polynomial --- the other
+factor's coordinates enter as free box variables, so the composite
+row's enclosure data is the factor's, replicated along the free
+coordinates. \emph{Transit rows}: if $\mathcal{A}_1 V \leq
+-\varepsilon$ on a factor cell, the same $V$ read on the product
+satisfies $\mathcal{A}_{1 \times 2} V = \mathcal{A}_1 V \leq
+-\varepsilon$ on cell $\times$ anything --- the other factor's drift
+differentiates $V$ to zero. Both are instances of one principle:
+disjoint variable sets make factor certificates product certificates
+by weakening alone.
+\end{bremark}
+
+\begin{bremark}[the mechanization consumes no arena hypotheses]
+\label{rem:qmp-arena}
+The setting above posits compact forward-invariant arenas because that
+is what arenas are in this catalogue's ecosystem; the transport itself
+never uses either property, and the mechanized statements quantify over
+bare sets $D_1, D_2$ --- strictly more general, and faithful to the
+witness clauses, which constrain the arena only through the judgements.
+Hausdorffness is consumed exactly once, where the proof of
+Lemma~\ref{lem:qmp-transport} says ``compact in a Hausdorff space,
+hence closed''; the mechanization takes it as a topological hypothesis
+over a pseudometric base, which every metric state space satisfies.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The rule is the certified face of compositionality results for global
+dynamics: Kalies--Wehbe \cite{kalieswehbe2026} prove the
+attractor-lattice coproduct isomorphism for product flows and delimit
+it (maps fail; skew products degrade to one-way results), inside the
+lattice-theoretic program of Kalies--Mischaikow--VanderVorst
+\cite{kmv2016,kmv2022}. The witness-level transport
+(Lemma~\ref{lem:qmp-transport}) is elementary Conley theory
+\cite{conley1978} over products; the observation that its ``at most''
+clauses survive even where the canonical readout does not
+(Remark~\ref{rem:qmp-fence}) is exactly why the judgement's fence is
+stated at the rule, not at the witness.
+\end{bremark}
+
+\begin{anchors}
+product semiflow (Setting) & \texttt{Semiflow.prod}, \texttt{prod\_flow} (Product.lean); the max metric is the product metric, \texttt{Prod.dist\_eq}\\
+Lemma \ref{lem:qmp-factor}(i) & \texttt{completeOrbit\_prod\_iff}, \texttt{CompleteOrbit.prodMk}\\
+Lemma \ref{lem:qmp-factor}(ii) & \texttt{omegaSet\_prod\_subset}, \texttt{alphaSet\_prod\_subset}\\
+Lemma \ref{lem:qmp-factor}(iii) & \texttt{EpsChainIn.fst}/\texttt{.snd}, \texttt{ChainRecurrentIn.fst}/\texttt{.snd}\\
+Lemma \ref{lem:qmp-transport} & \texttt{MorseWitness.prod} (all six clauses; the contained cases of the order clause via \texttt{alphaSet\_subset\_closure\_range}, \texttt{omegaSet\_subset\_closure\_range})\\
+Theorem \ref{thm:qmp-sound} & \texttt{qMorseProduct\_sound} --- unconditional, no interface hypotheses\\
+witness clauses (the interface targeted) & \texttt{MorseWitness}, \texttt{MorseSat} (QtslSoundness.lean, bound in the \rulename{QMorseDischarge} section)\\
+Remark \ref{rem:qmp-fence} (readout transport, flows) & \emph{deliberately not mechanized}: Kalies--Wehbe \cite{kalieswehbe2026}, attractor-lattice coproduct isomorphism; Birkhoff duality \cite{birkhoff1937}\\
+interim discharge path & \rulename{QMorseDischarge} on the composite lattice (that section's theorem chain) --- no longer needed as warrant; retained as the certificate-route alternative\\
+\end{anchors}

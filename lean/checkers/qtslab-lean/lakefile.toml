@@ -1,0 +1,20 @@
+name = "qtslab-lean"
+defaultTargets = ["qtslab_lean"]
+
+# The program route shares the reflection route's decode and check
+# functions verbatim — same reader, same reconstruction, same
+# elaboration — so the two routes can never drift apart in what they
+# accept. Only the execution vehicle differs.
+[[require]]
+name = "reflection"
+path = "../reflection"
+
+[[lean_lib]]
+name = "QtslabLean"
+
+# Certificate bytes in, a sequent (or a refusal) out, as a compiled
+# native program: the qtslab usage pattern with Lean's code generator
+# in the trusted base. See README.md for the exact trust statement.
+[[lean_exe]]
+name = "qtslab_lean"
+root = "QtslabLean.Main"

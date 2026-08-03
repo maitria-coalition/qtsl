@@ -1,0 +1,125 @@
+# StreettDegenerate (T9a): alias — request = ⊤ degenerates the Streett pair
+# to classical recurrence. Carries the B8 batch's shared respelling
+# template in its proof (first alias in roster order).
+
+[[rule]]
+id = "StreettDegenerate"
+source = "../QTSL-rules.toml"
+row = "StreettDegenerate (T9a)"
+proof = "book/proofs/StreettDegenerate.tex"
+alias_target = "QStreettBundle"
+conditional = true
+conditional_label = "DTMC"
+commentary = '''
+\rulename{StreettDegenerate} is the recurrence rule in its compact
+spelling: to conclude, with probability at least $p$, that every response
+region is visited infinitely often ($\mathsf{GF}$-shaped claims, the
+classical B\"uchi/recurrence certificate), instantiate the Streett bundle
+at the trivially-true request. It is an \emph{alias} (the source
+catalogue labels it T9a, the first sub-rule of the bundle row): one
+\rulename{QStreettBundle} application, at request regions equal to the
+whole state space, is the entire unpacking --- the emptiness it exploits
+is syntactic, not semantic. When every state requests, the
+finitely-many-requests disjunct of each pair is empty along the tail
+filter, the absorbing-certificate family and its carved-out sets
+$J_i$ are vacuous, and the ranking decay row is demanded off the
+response region alone --- so the degenerate-pair specialization erases
+exactly the tautological rows, and what the checker replays is the
+recurrence certificate, row for row. A producer uses it wherever the
+specification is recurrence rather than
+request-response fairness; nothing about the certificate synthesis
+changes except that the request machinery never materializes.
+
+Scope, stated plainly (this entry is marked \emph{conditional}): the
+bound statement below is the degenerate-instance witness
+\texttt{sound\_StreettDegenerate} (module
+\texttt{QtslAux.QStreett} --- one application of
+\texttt{sound\_QStreettBundle} at request set \texttt{univ}, whose
+finitely-many-requests disjunct is empty along the tail filter; its
+conclusion is the recurrence event
+$\Pr[\forall i,\ \mathrm{Inf}(G_i)] \ge p$, exactly the amended
+display\textquotesingle s claim). The conditionality is inherited from
+the bundle, not added: the witness covers the rule at the
+\emph{discrete-kernel profile} (a time-homogeneous Markov chain
+presented by a single step kernel), and the continuous-time
+general-stochastic-hybrid-system transport remains the open residue this
+alias shares with its target and the battery family. The payload-level
+unpack function still cannot be written at all: neither the bundle sort
+nor this alias is staged in the certificate schema, so there are no wire
+payloads to transport between --- the transport table in the proof is
+stated at the catalogued-field level, which is everything that exists
+today.
+'''
+note = '''
+The degenerate pair is also the honest cost anchor of the
+Streett-primitive design: on recurrence-shaped workloads the bundle
+emits the same rows a dedicated recurrence rule would, so the general
+rule costs nothing where the special case suffices --- while the reverse
+specialization (recurrence-primitive, Streett by automaton product)
+would pay exponentially in the number of pairs.
+'''
+correspondence = '''
+The displayed conclusion $\mathcal{M}
+\vDash_{\mathsf{qraSublevel}(V_0, \mathrm{thr})}
+\mathsf{P}_{\ge p}[\mathsf{Streett}((\top, \varphi_1), \ldots)]$
+$\mapsto$ \texttt{ofReal p ≤ pathMeasure K x \{ω | ∀ i, ∃ᶠ n in atTop,
+ω n ∈ G i\}} for every start with \texttt{x ∈ D} and \texttt{V₀ x ≤
+thr} --- the recurrence event, with the $\top$-requests \emph{erased
+at the statement level}, not merely in the proof: no request binder
+exists in \texttt{sound\_StreettDegenerate} at all, which is the
+display\textquotesingle s ``absorbing families and $J_i$ syntactically
+empty'' carried into the type. The alias tier is visible in the proof
+term: one \texttt{sound\_QStreettBundle} application at \texttt{Rq :=
+fun \_ => Set.univ}, whose frequently-clause is discharged by
+\texttt{univ}-membership.
+\begin{itemize}
+\item the inherited $V_0$ T5 safety kit $\mapsto$ the four
+  kernel-integral rows verbatim: \texttt{hV₀drift} (interior),
+  \texttt{hV₀floor} (floor on $U \cap \bar{D}$), \texttt{hV₀nonneg}
+  (on $\bar{D}$), with \texttt{hV₀int} the undisplayed integrability
+  rider, plus the hull/fail-closed side conditions
+  \texttt{hR3}/\texttt{hR4} and the threshold \texttt{hΘ : p + thr ≤
+  1} --- the battery pattern, unchanged.
+\item ``ranking decay off $[\![\varphi_i]\!]$ alone'' $\mapsto$
+  \texttt{hWdriftR : ∀ i, ∀ y ∈ D, y ∉ U → y ∉ G i → ∫ z, W i z ∂K y
+  ≤ W i y - ε i} --- one drift row where the bundle carries two: the
+  request-conditioned decay and the off-response non-increase
+  coincide when every state is a request, and the statement asks
+  only the merged row (the proof re-splits it for the bundle).
+\item nonneg + upper-bound rows $\mapsto$ \texttt{hW0}/\texttt{hWC}
+  on $\bar{D}$; strictness $\mapsto$ \texttt{hε : ∀ i, 0 < ε i} ---
+  note the specialized statement takes per-pair \texttt{ε i}, mildly
+  wider than the display\textquotesingle s single $\varepsilon_0$.
+\item the measurability pack
+  (\texttt{hD}/\texttt{hDbar}/\texttt{hU}/\texttt{hV₀}/\texttt{hG}/
+  \texttt{hW}) is undisplayed profile regularity, per the battery
+  precedent.
+\end{itemize}
+Width note: the conditional mark is the discrete-kernel profile
+(\texttt{pathMeasure} over a single step kernel \texttt{K}; GSHS
+transport filed, as sibling batteries); the producer-side erasure of
+tautological rows before emission is compile behaviour with no Lean
+counterpart --- correctly, since the certified statement never
+receives the tautological rows to begin with.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QStreett"
+src = "../../lean/qtsl-aux/QtslAux/QStreett.lean"
+decls = ["sound_StreettDegenerate"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}, not by backlog: the rule
+is a producer-side respelling that unpacks to a single
+\rulename{QStreettBundle} node before any certificate is emitted, so no
+wire object can ever contain a \rulename{StreettDegenerate} node --- the
+HOL statement that would verify a degenerate-request bundle is the
+bundle\textquotesingle s own (itself absent today, for the reasons given
+in that section: the satisfaction stratum has no HOL artefact and the
+bundle sort is unstaged). Checked against the HOL sources: the
+\texttt{qtsl\_catalogue} theory is the base-calculus checker cone and
+carries nothing Streett-shaped.
+'''

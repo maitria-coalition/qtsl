@@ -1,0 +1,221 @@
+[[rule]]
+id = "LiRPA"
+source = "../BL-rules.toml"
+row = "LiRPA"
+proof = "book/proofs/LiRPA.tex"
+commentary = '''
+\rulename{LiRPA} is the calculus\textquotesingle s neural-network
+bound-propagation rule — the certificate form of the linear relaxation
+of the ReLU activation that bound-propagation verifiers compute (the
+CROWN/LiRPA family, the triangle relaxation, DeepPoly). Given
+already-proven box bounds $\Phi \vdash a \leq h$ and $\Phi \vdash h
+\leq b$ on the preactivation wire of a cited ReLU application, with
+$a < 0 < b$ (the box straddles the kink — the \emph{unstable} case, in
+the verification literature\textquotesingle s vocabulary), it concludes
+the two-sided affine envelope $\alpha h + \beta \leq y \;\wedge\; y
+\leq \gamma h + \delta$ on the application' s output
+wire $y$. The producer finds the envelope however it likes —
+CROWN\textquotesingle s adaptive slopes, the triangle
+relaxation\textquotesingle s chord, any heuristic — and ships only the
+box endpoints and the four coefficients; no relaxation machinery is
+re-run or trusted.
+
+What the checker recomputes, given the payload (two premise proofs, the
+two wires, six rationals): the \emph{linkage} — the hypernet really
+contains a packaged ReLU application at exactly these ports, of
+positive total size (a one-line decidable port lookup); that the
+premises are literally the atoms $a \leq h$ and $h \leq b$ over one
+shared premise formula; the sign conditions $a < 0$ and $0 < b$; the
+six envelope inequalities, exactly over $\Q$ — the lower line under the
+function at the three checkpoints $a$, $0$, $b$ ($\alpha a + \beta \leq
+0$, $\beta \leq 0$, $\alpha b + \beta \leq b$) and the upper line above
+it at the same three ($0 \leq \gamma a + \delta$, $0 \leq \delta$, $b
+\leq \gamma b + \delta$); and that the conclusion is \emph{exactly} the
+pinned conjunction of the two affine comparison atoms, built by the
+checker from the coefficients — the producer proposes no conclusion
+shape at all.
+
+Each hypothesis but one is essential. Drop the linkage and $y$ is an
+arbitrary wire with no semantic tie to $h$ (the rule as first staged
+had exactly this gap and was kept vacuous — rejecting every certificate
+— until the port-lookup premise arrived). Drop the lower kink check
+($\beta \leq 0$) and the chord through the box endpoints, which
+passes both endpoint checks, would certify as a lower envelope while
+lying strictly above the function at $h = 0$. (The upper kink check
+$0 \leq \delta$ is the one redundancy: under the strict straddle the
+two upper endpoint checks already force $\delta \geq -ab/(b-a) > 0$ —
+evaluate the affine interpolation of the endpoint bounds at $0$ — so
+it rides along because the certificate's check set is the uniform
+six.) Drop an endpoint check
+and a steep line passing the remaining two checkpoints escapes the
+function at the dropped end (the proof section constructs both
+failures). The box premises themselves are what make an affine
+\emph{upper} envelope possible at all — no affine function dominates
+$\max(0, h)$ on all of $\Q$ — and what license lower-line slopes
+outside $[0, 1]$.
+'''
+note = '''
+The family\textquotesingle s shared machinery — the packaged-node
+linkage, the elementwise two-case semantic contract, and the
+conservativity warrant behind it — is stated once, in this
+section\textquotesingle s recipe preamble, and referenced by the four
+sibling rules (\rulename{ReLU-Pos}, \rulename{ReLU-Neg},
+\rulename{ReLU-NN}, \rulename{ReLU-Above}). One envelope serves the
+whole node: the rule is elementwise over the cited
+application\textquotesingle s tensor shape, with a single $(a, b,
+\alpha, \beta, \gamma, \delta)$ for every entry — per-entry envelopes
+are expressed with singleton-shaped applications. The payload
+additionally declares a denominator bound on its witness rationals (a
+size claim for resource accounting; it carries no proof-theoretic
+weight in the soundness argument). The rule\textquotesingle s name is
+the literature\textquotesingle s: linear-relaxation-based perturbation
+analysis~\cite{xu2020lirpa}.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premises as at
+\rulename{Weaken}. This dictionary doubles as the family preamble: its
+linkage row is shared verbatim by the four sibling rules.
+\begin{itemize}
+\item $h \mapsto$ \texttt{preact : Wire}; $y \mapsto$ \texttt{post :
+  Wire}; $a, b, \alpha, \beta, \gamma, \delta \mapsto$ the six
+  rational binders of the same names in \texttt{sound\_lirpa}.
+\item the linkage premise $\ReLU_{\{h\}\to\{y\}} \in H$ $\mapsto$
+  \texttt{hlink} $:$ \texttt{reluLinked H preact post} ---
+  membership \emph{plus} the positive-size gate: unfolding (the
+  definition above), the certified premise demands a packaged ReLU
+  application at exactly these ports \emph{of positive total size}.
+  The display\textquotesingle s bare $\in$ shows no size condition;
+  the certified linkage is strictly narrower, by design (vacuous
+  surface refused at the source --- the intro above), and the
+  narrowing is family-wide.
+\item box premises $\Phi \vdash a \leq h$ and $\Phi \vdash h \leq b$
+  $\mapsto$ \texttt{ihl}, \texttt{ihu} with posts pinned by
+  \texttt{hlowerPost} $:$ \texttt{lowerPremise.post = .atom .le
+  (.const a) (.var preact)} and \texttt{hupperPost} $:$
+  \texttt{upperPremise.post = .atom .le (.var preact) (.const b)} ---
+  displayed comparators and operand orders carried exactly; $\Phi$
+  shared three ways via \texttt{hpre} and \texttt{hpreMatch}.
+\item the eight arithmetic side conditions $\mapsto$ \texttt{hAneg},
+  \texttt{hBpos}, \texttt{hLower1}--\texttt{hLower3},
+  \texttt{hUpper1}--\texttt{hUpper3}, verbatim over $\Q$ --- scalar
+  hypotheses on the payload rationals, not judgements.
+\item conclusion $\Phi \vdash (\alpha h + \beta) \leq y \wedge y \leq
+  (\gamma h + \delta)$ $\mapsto$ the goal under \texttt{hpostForm}
+  $:$ \texttt{lirpaConclusionForm preact post} applied to the four
+  coefficients and \texttt{seq.post}, pinning \texttt{seq.post} to
+  the conjunction of the two affine atoms in the displayed order
+  (lower envelope left). Spelling drift, disclosed: the pinned
+  affine term is \texttt{affineWireTerm}\textquotesingle s
+  offset-first $\beta + \alpha h$, where the display writes $\alpha h
+  + \beta$ --- semantically identical, but formulas are ordered
+  trees, so the certified rule accepts exactly the offset-first
+  spelling (the \rulename{ConvElim}/\rulename{ConvIntro}
+  build-output class).
+\end{itemize}
+Width notes beyond the linkage gate: the certified atoms are
+elementwise over the cited application\textquotesingle s tensor shape
+--- one envelope for every entry, per the note above --- where the
+display reads scalar; that is the batch semantics of the atom
+grammar, not a strengthening. \texttt{reluLinked\_facts}, the four
+interpolation lemmas, \texttt{relu\_projection}, and
+\texttt{reluExpH} are certified alongside as machinery: the first
+extracts the elementwise two-case relation the family consumes, the
+last two ground the packaged symbol in the core expansion --- they
+are \emph{about} the linkage, in the satellite sense of
+\rulename{OrE}\textquotesingle s ctx-rule. No hypothesis of
+\texttt{sound\_lirpa} is unused, and nothing certified is wider than
+the display.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = ["PrimApp.isReluAt", "reluLinked", "affineWireTerm", "lirpaConclusionForm"]
+intro = '''
+\textbf{The linkage and the pinned conclusion, from the checker
+sources.}\enspace \texttt{reluLinked} is the whole of the
+family\textquotesingle s side condition: the hypernet\textquotesingle s
+application list contains a packaged ReLU application at exactly the
+cited preactivation/output ports, of positive total size — one
+decidable lookup (\texttt{PrimApp.isReluAt}), no pattern-matching over
+composites. The positive-size gate refuses vacuous surface at the
+source: a size-zero node\textquotesingle s comparison atoms hold
+vacuously, and a fact no valuation can falsify must not be citable
+(the same lesson the \rulename{Farkas} rule\textquotesingle s
+zero-size counterexample taught that payload).
+\texttt{affineWireTerm} and \texttt{lirpaConclusionForm} pin the
+conclusion: the rule concludes exactly the conjunction of the two
+affine comparison atoms, built from the payload coefficients — there
+is no producer-supplied conclusion shape to audit.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "reluLinked_facts",
+  "lirpa_lower_neg",
+  "lirpa_lower_pos",
+  "lirpa_upper_neg",
+  "lirpa_upper_pos",
+  "sound_lirpa",
+]
+intro = '''
+\textbf{The verified chain.}\enspace \texttt{reluLinked\_facts} turns
+the linkage into semantics: under any admissible valuation the two
+cited wires carry tensors of one shared shape and positive entry
+count, related entrywise by the two-case ReLU relation. The four
+interpolation lemmas are the checkpoint arithmetic — an affine
+function suitably bounded at an interval\textquotesingle s endpoints
+is bounded on the interval, one lemma per envelope side per sign
+branch — and \texttt{sound\_lirpa} assembles them entrywise into the
+rule\textquotesingle s warrant.
+'''
+
+# Fan-leg note for the manual owner: this module is NEW to the book's
+# bindings (first bound by batch B4) and its decls sit inside
+# `namespace ReluExpansion` — if the extractor resolves names with a
+# namespace prefix, these may need to be spelled
+# "ReluExpansion.relu_projection" / "ReluExpansion.reluExpH".
+[[rule.lean]]
+module = "Qtsl.ReluExpansion"
+src = "../../lean/qtsl/Qtsl/ReluExpansion.lean"
+decls = ["relu_projection"]
+full_decls = ["reluExpH"]
+intro = '''
+\textbf{Why consuming the packaged two-case fact is not new kernel
+content.}\enspace The packaged node\textquotesingle s semantic
+contract is proven conservative over the core primitives, never
+axiomatized: \texttt{reluExpH} is the definitional expansion (a copy,
+a sign-split cell complex, an indicator cast, and an exact rank-0
+contraction), and \texttt{relu\_projection} shows — both directions —
+that the two-case relation is exactly the expansion\textquotesingle s
+model-level facts existentially projected onto the external ports, at
+the canonical single-entry instance. The boundary point $h = 0$ rides
+the one-hot cell semantics: both cells admit it, and every admissible
+choice forces $y = 0$. Applications of total size other than one
+currently have no core expansion (a recorded packing gap in the
+development\textquotesingle s notes); the five rules of this family
+consume only the per-entry relation certified here.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development ports the checker\textquotesingle s first-order
+computational surface — the check-function cone — and deliberately
+stops short of the proof-object layer. \rulename{LiRPA}\textquotesingle
+s checkable content sits on the far side of that line three times over:
+its conclusion-form builders (the affine-term constructor and the
+pinned-conjunction selector) are inventoried in the
+port\textquotesingle s own header among the deliberately dropped
+payload-form islands (no ported check function consumes them); its
+linkage premise is a lookup into the hypernet\textquotesingle s
+application list, a structure the port\textquotesingle s scope excludes
+wholesale; and the port predates the linkage\textquotesingle s
+realization — when the port was cut, the Lean side\textquotesingle s
+linkage field was still a placeholder that rejected every certificate,
+so there was no live rule to mirror. A HOL statement becomes writable
+when the proof-object/payload layer is ported together with the
+hypernet structures and the packaged ReLU application.
+'''

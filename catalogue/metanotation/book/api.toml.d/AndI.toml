@@ -1,0 +1,21 @@
+# api.toml.d/AndI.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "AndI"
+
+[api.ts]
+handle = "bl.Builder.andI"
+sig_file = "ts/src/bl.ts"
+sig = ["fn andI"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:andI"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::and_i"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn and_i"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:and_i"

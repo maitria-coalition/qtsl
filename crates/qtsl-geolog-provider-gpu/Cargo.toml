@@ -1,0 +1,46 @@
+[package]
+name = "qtsl-geolog-provider-gpu"
+description = "GPU build of the QTSL ground provider's batch verification: packs the provider's batch-CSR planes into the maitria-kernels rnsfold descriptor and dispatches the combination-family fold to conformance-gated residue-channel lanes (CPU reference always; CUDA behind the `cuda` feature), deferring anything refused to the provider's own exact path. Verdict-identical to the pure-Rust lanes by construction and by battery; never a trusted computing base."
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+qtsl-geolog-provider = { path = "../qtsl-geolog-provider" }
+# The shared GPU machinery homes in maitria-coalition/kernels (owner
+# ruling, 2026-07-21): the rnsfold family's descriptor, channel plan,
+# and scalar reference live in the core kernels crate; the CUDA lane
+# in its sibling. Pinned by rev like every cross-repo pin in this
+# workspace; the pin moves deliberately, with the conformance tests.
+# LANDING ORDER (publication ritual): kernels development commits do
+# not push directly — they land on the kernels development main, the
+# publication step exports that tree, and the executor RE-PINS this
+# rev to the new public HEAD (the publish chaining step), then
+# publishes qtsl. Until that bump, this crate's roweq-consuming code
+# does not resolve against the pin below; local development rides an
+# untracked .cargo/config.toml [patch] onto the kernels development
+# tree. Rider: the `parallel` feature
+# additionally references the kernels development tree's `rayon` feature
+# (parallel plan/validate/host tables), which is not in the pin below
+# either — same bump, same publish step.
+maitria-kernels = { git = "https://github.com/maitria-coalition/kernels-dev.git", rev = "35f92d9fe4db51e80290c7b9bc71441ccd725c48" }
+maitria-kernels-cuda = { git = "https://github.com/maitria-coalition/kernels-dev.git", rev = "35f92d9fe4db51e80290c7b9bc71441ccd725c48", optional = true }
+num-bigint = "0.5"
+num-traits = "0.2"
+rayon = { version = "1", optional = true }
+
+[features]
+default = []
+# The device lane. Off by default: a CPU-only consumer (packing + the
+# kernels reference lane) compiles no CUDA machinery at all.
+cuda = ["dep:maitria-kernels-cuda"]
+# Attempt-grain parallel host walks (pack's columnar passes, the
+# splice spellings pack_par / pack_membership_par, and per-attempt
+# adjudication in assembly), plus the kernels crates' parallel
+# planning/validation — byte-identical outputs to the serial
+# spellings everywhere; off by default so the crate's default build
+# stays dependency-light.
+parallel = ["dep:rayon", "maitria-kernels/rayon"]
+
+[dev-dependencies]
+proptest = "1"

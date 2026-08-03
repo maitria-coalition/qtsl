@@ -1,0 +1,18 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+$ geolog chase examples/routes.geolog
+sorts:
+  Node — 4 elements (4 seeded)
+relations:
+  Edge — 3 rows (3 seeded, 0 derived)
+    [src: east, tgt: port] Edge
+    [src: hub, tgt: east] Edge
+    [src: hub, tgt: west] Edge
+  Path — 4 rows (0 seeded, 4 derived)
+  + [src: east, tgt: port] Path
+  + [src: hub, tgt: east] Path
+  + [src: hub, tgt: port] Path
+  + [src: hub, tgt: west] Path
+fixpoint: reached, no judgements — the model is saturated.
+$ echo $?
+0
+\end{Verbatim}

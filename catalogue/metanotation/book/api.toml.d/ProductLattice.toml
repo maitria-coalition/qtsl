@@ -1,0 +1,21 @@
+# api.toml.d/ProductLattice.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "ProductLattice"
+
+[api.ts]
+handle = "lattice.productLattice"
+sig_file = "ts/src/lattice.ts"
+sig = ["fn productLattice"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:productLattice"
+
+[api.rust]
+handle = "mtk_catalogue::rules::lattice::product_lattice"
+sig_file = "crates/mtk-catalogue/src/rules/lattice.rs"
+sig = ["fn product_lattice"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "fn-body:lattice_row"

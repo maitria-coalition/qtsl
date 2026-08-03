@@ -1,0 +1,106 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe (the general admissible template is stated in the
+\rulename{PConstExact} section; the batch-level honesty clause about
+unstaged payloads is Recipe 1 of the \rulename{StreettDegenerate}
+section and applies here verbatim).}
+
+\begin{brecipe}[the \rulename{StreettCmplRequest} instance --- one node,
+one bundle, per-pair weakening premises]\label{rec:scr-instance}
+A node concluding
+$\mathcal{M} \vDash_{\mathsf{qraSublevel}(V_0,\mathrm{thr})}
+\mathsf{P}_{\ge p}[\mathsf{Streett}((\mathrm{cmpl}\,\rho_1, \varphi_1),
+\ldots)]$ rewrites to the derivation fragment
+\begin{mathpar}
+\inferrule*[Right=\rulename{QStreettBundle}]{
+  \text{the bundle kit at certified regions } (R_i, G_i) \\\\
+  \bigl\{\, [\![\mathrm{cmpl}\,\rho_i]\!] \subseteq R_i \,\bigr\}_i
+  \ \text{(request weakening)} \\
+  \bigl\{\, G_i \subseteq [\![\varphi_i]\!] \,\bigr\}_i
+  \ \text{(response weakening)}
+}{
+  \mathcal{M} \vDash_{\mathsf{qraSublevel}(V_0,\,\mathrm{thr})}
+  \mathsf{P}_{\ge p}\bigl[\mathsf{Streett}((\mathrm{cmpl}\,\rho_1,
+  \varphi_1), \ldots)\bigr]
+}
+\end{mathpar}
+where the request-weakening premises are supplied for free by the
+orientation swap: a certified under-approximation $A_i \subseteq
+[\![\rho_i]\!]$ yields the over-approximation $A_i^{\mathrm{c}} \supseteq
+[\![\rho_i]\!]^{\mathrm{c}}$, and $R_i := A_i^{\mathrm{c}}$ is a region
+atom by the atom dualities (\rulename{NNFDuality} section) --- the
+complement is consumed at the atom level, never as a formula node. The
+weakening premises are ordinary containment rows; nothing new is
+recomputed.
+\end{brecipe}
+
+\begin{bprop}[the direction lemma --- two lines]\label{prop:scr-mono}
+Fix a path $\omega$ and one pair. If the certified regions satisfy
+$\mathrm{Rq} \subseteq \widehat{\mathrm{Rq}}$ (requests
+over-approximated when read semantic-to-certified) and
+$\widehat{G} \subseteq G$ (responses under-approximated), then
+\[
+\Bigl[\bigl(\exists^\infty n,\ \omega_n \in \widehat{\mathrm{Rq}}\bigr)
+\Rightarrow \bigl(\exists^\infty n,\ \omega_n \in \widehat{G}\bigr)\Bigr]
+\;\Longrightarrow\;
+\Bigl[\bigl(\exists^\infty n,\ \omega_n \in \mathrm{Rq}\bigr)
+\Rightarrow \bigl(\exists^\infty n,\ \omega_n \in G\bigr)\Bigr] .
+\]
+\end{bprop}
+\begin{proof}
+Frequent membership is monotone in the set: frequent
+$\mathrm{Rq}$-visits are frequent $\widehat{\mathrm{Rq}}$-visits
+(hypothesis side, first monotonicity), and frequent $\widehat{G}$-visits
+are frequent $G$-visits (conclusion side, second monotonicity). Two
+applications of monotonicity --- which is the entire lemma, and why the
+weakening premises are the only new obligations of the rewrite.
+(Machine-checked as \texttt{streett\_event\_mono}; not hash-bound in this edition.)
+\end{proof}
+
+\begin{bprop}[semantic warrant of the rewrite]\label{prop:scr-sound}
+Under the bundle kit's rows and the weakening premises of
+Recipe~\ref{rec:scr-instance}, the concluded judgement holds: with
+probability $\ge p$, every semantic pair implication
+$(\exists^\infty\ \text{states outside } [\![\rho_i]\!]) \Rightarrow
+(\exists^\infty\ \text{states in } [\![\varphi_i]\!])$ is satisfied.
+\end{bprop}
+\begin{proof}
+The bundle theorem gives the certified-region Streett event probability
+$\ge p$; Proposition~\ref{prop:scr-mono}, applied per pair with
+$\mathrm{Rq} := [\![\mathrm{cmpl}\,\rho_i]\!] \subseteq R_i$ and
+$G_i \subseteq [\![\varphi_i]\!]$, includes that event in the semantic
+one; measures are monotone. (Machine-checked, assembled, as
+\texttt{sound\_QStreettBundle\_tie}; not hash-bound in this edition.)
+\end{proof}
+
+\begin{bremark}[why the orientations are not symmetric, and not optional]
+Swap either direction and the rule is unsound. If a certified request
+region \emph{under}-approximated the complement, a path could request
+infinitely often in the semantic sense while the certificate sees only
+finitely many requests --- the certified pair implication holds
+vacuously, the semantic one fails. Dually, a response region
+\emph{over}-approximating $[\![\varphi_i]\!]$ lets certified
+``responses'' land outside the actual response set. The hypothesis-side
+/ conclusion-side asymmetry of implication is the entire content of the
+direction check, and it is why the complement orientation swap --- which
+produces exactly over-approximations --- is fitted to requests and to
+nothing else.
+\end{bremark}
+
+\begin{bremark}[profile residue]
+At the discrete-kernel profile the lemma chain above is complete and
+machine-checked (not hash-bound in this edition). At the continuous-time
+general-stochastic-hybrid profile, the complement consumption
+additionally involves fine-topology content (regular points of the
+complement region); that leg remains prose in the design record and is
+part of the same open transport named in the bundle section's scope
+remark.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:scr-instance} target & the \rulename{QStreettBundle} section\\
+atom-level complement step & \texttt{denot\_elimNeg} (\texttt{QtslAux.NNFDuality}; machine-checked, not hash-bound in this edition)\\
+Proposition \ref{prop:scr-mono} & \texttt{streett\_event\_mono} (\texttt{QtslAux.QStreett}; machine-checked, not hash-bound in this edition)\\
+Proposition \ref{prop:scr-sound} & \texttt{sound\_QStreettBundle\_tie} (same module, not hash-bound in this edition)\\
+no wire object yet & the bundle sort is unstaged; the typed request field rides its staging leg\\
+\end{anchors}

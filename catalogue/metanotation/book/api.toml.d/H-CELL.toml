@@ -1,0 +1,21 @@
+# api.toml.d/H-CELL.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "H-CELL"
+
+[api.ts]
+handle = "hypernet.Builder.cell"
+sig_file = "ts/src/hypernet.ts"
+sig = ["fn cell", "interface SimpC"]
+snippet_file = "ts/tests/hypernet-native.test.ts"
+snippet = "marker:H-CELL"
+
+[api.rust]
+handle = "mtk_catalogue::hypernet::HypernetBuilder::cell"
+sig_file = "crates/mtk-catalogue/src/hypernet/graph.rs"
+sig = ["fn cell"]
+snippet_file = "crates/mtk-catalogue/tests/golden_hypernet.rs"
+snippet = "marker:H-CELL"

@@ -1,0 +1,102 @@
+[[rule]]
+id = "ReLUPos"
+source = "../BL-rules.toml"
+row = "ReLU-Pos"
+proof = "book/proofs/ReLUPos.tex"
+commentary = '''
+\rulename{ReLU-Pos} is the exactness rule for the active side of a
+ReLU: once $\Phi \vdash h \geq 0$ is proven for the preactivation wire
+of a cited ReLU application, the output wire is not merely bounded but
+\emph{equal} — $\Phi \vdash y = h$. A producer reaches for it when
+earlier bound propagation has shown a neuron stably active (a proven
+lower box bound at or above zero): the lossy affine envelope of
+\rulename{LiRPA} is replaced by an identity, and the equality feeds
+\rulename{EqElim}, so every fact known about $h$ transports to $y$
+verbatim.
+
+What the checker recomputes, given the payload (premise proof, the two
+wires): the linkage — the hypernet really contains a packaged ReLU
+application at exactly these ports, of positive total size (the
+family\textquotesingle s port-lookup side condition, displayed in the
+\rulename{LiRPA} section); that the premise\textquotesingle s
+conclusion is literally the atom $h \geq 0$ over the same premise
+formula; and that the conclusion is literally $y = h$. Both atoms are
+elementwise over the node\textquotesingle s tensor shape.
+
+Drop the premise and the rule is false at any entry with $h < 0$
+(there $y = 0 \neq h$). Drop the linkage and $y$ is an arbitrary wire
+with no semantic tie to $h$ — the staging that lacked it was exhibited
+unsound over unlinked wires during review, and the rule was kept
+vacuous (rejecting every certificate) until the port-lookup premise
+arrived. The interesting hypothesis is the one that is \emph{not}
+there: no side condition excludes the boundary $h = 0$, because the
+node\textquotesingle s two semantic cases agree at the kink — the
+proof section makes this the centre of the argument.
+'''
+note = '''
+TIER NOTE: the unpacking by case analysis over the sign-split fact
+discharges the active branch cleanly, but its boundary branch needs
+the antisymmetry step $h \leq 0 \wedge h \geq 0 \Rightarrow h = 0$,
+and no catalogue rule concludes an equality from a pair of opposite
+inequalities — so, like \rulename{PConstExact}, this rule is
+admissible by \emph{reduction to verified machinery} rather than by a
+complete catalogue derivation: the shipped warrant is the direct lemma
+\texttt{sound\_reluPos}, whose boundary case is one antisymmetry step
+in the model. The proof section states the enumeration behind that
+claim.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}; linkage premise --- including the positive-size
+narrowing hidden under the displayed $\in$ --- exactly as in the
+\rulename{LiRPA} dictionary, the family preamble.
+\begin{itemize}
+\item $h \mapsto$ \texttt{preact}; $y \mapsto$ \texttt{post};
+  $\ReLU_{\{h\}\to\{y\}} \in H$ $\mapsto$ \texttt{hlink} $:$
+  \texttt{reluLinked H preact post}.
+\item premise $\Phi \vdash h \geq 0$ $\mapsto$ \texttt{ih} with
+  \texttt{hpremPost} $:$ \texttt{premise.post = .atom .ge (.var
+  preact) (.const 0)} --- displayed comparator and operand order
+  carried exactly, with no sign-folding (in contrast to the
+  \rulename{ConvElim} family\textquotesingle s all-$\leq$ build
+  output); $\Phi$ shared via \texttt{hpre}.
+\item conclusion $\Phi \vdash y = h$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .eq (.var post) (.var
+  preact)} --- output wire left, preactivation right, as displayed.
+\end{itemize}
+Width note: the certified atoms are elementwise over the cited
+application\textquotesingle s tensor shape (batch semantics, as at
+\rulename{LiRPA}); the boundary $h = 0$ needs no side condition ---
+the node\textquotesingle s two semantic cases agree at the kink, by
+one antisymmetry step in the model (the commentary and tier note).
+Beyond the family\textquotesingle s linkage gate, neither side is
+wider: every hypothesis of \texttt{sound\_reluPos} is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_reluPos"]
+intro = '''
+The warrant consumes the family linkage extraction
+(\texttt{reluLinked\_facts}, displayed in the \rulename{LiRPA}
+section) and the premise, eliminated entrywise; the payload structure
+is \texttt{PReLUPosData} (Core/Catalogue.lean).
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development ports the checker\textquotesingle s first-order
+computational surface and stops short of the proof-object layer, where
+this rule\textquotesingle s entire checkable content lives: the
+payload is two formula equations plus the family linkage, and the
+linkage is a lookup into the hypernet\textquotesingle s application
+list — a structure the port\textquotesingle s header inventories among
+its deliberate exclusions. The port also predates the
+linkage\textquotesingle s realization (when it was cut, the Lean
+side\textquotesingle s linkage field was still a placeholder rejecting
+every certificate). A HOL statement becomes writable when the
+proof-object/payload layer is ported together with the hypernet
+structures and the packaged ReLU application.
+'''

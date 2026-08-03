@@ -1,0 +1,19 @@
+# bindings.toml.d/Cut.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'Cut'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PCutData"
+sha256 = "4a94663690df0ec569bd05ff309a00b755d6419e8a7abd028abab3ed64945e5e"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_cut"
+sha256 = "a46bcf3a6915c4a184eab858c7bf840954e5fcbcacaf038299d9de5c25abab63"
+
+[[correspondence]]
+entry = "Cut"
+steele_sha256 = "6294bb88985ac9857b1369c69a6eeb16bdb73787bdec289de9d91d3df5f8ade6"
+statements_sha256 = "fdfddf9350a99519e5bfd36da62b7b225d875ab35a95b61d20c0396fa3436db4"
+prose_sha256 = "4cc3afed03edeaeb520010e98f8fa7154f3a1857e4820a12d1b3c7e86ddf7895"
+

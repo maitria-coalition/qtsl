@@ -1,0 +1,113 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The closure discipline this move belongs to is set out in full
+in the \rulename{ClosureDiscipline-EXACT} section; this section states
+what is native to the inward move: the rounding containment in both
+orientations, the closedness rider, and the two honesty clauses ---
+strictness of $\varepsilon > 0$, and the deliberate absence of any
+completeness claim.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:cie-template}
+An admissible rule $R$ is warranted by a rewrite replacing any
+$R$-node with a derivation fragment over core (and
+previously-justified) rules with the same conclusion --- or, where the
+conclusion has no catalogue derivation, discharging against a named
+verified theorem. Leaf-first application eliminates every $R$-node in
+finitely many steps; soundness is conserved with no new kernel
+semantic content.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{ClosureDiscipline-INWARD-EPS} instance]
+\label{rec:cie-instance}
+At a positive position, a strict literal rounds inward by a
+producer-chosen $\varepsilon > 0$:
+\[
+\{p < c\} \;\rightsquigarrow\; \{p \le c - \varepsilon\}
+\qquad\qquad
+\{c < p\} \;\rightsquigarrow\; \{c + \varepsilon \le p\}
+\]
+warranted by the containment
+$\{p \le c - \varepsilon\} \subseteq \{p < c\}$
+(Proposition~\ref{prop:cie-sound}): the rounded closed atom
+\emph{strengthens} the certified claim, which is the sound direction
+where the certified region must lie inside the denotation. Payload
+transport: observable and threshold verbatim, threshold shifted by
+$\varepsilon$, strictness dropped; the $\varepsilon$ itself travels
+as certificate annotation data, never as a rule premise.
+\end{brecipe}
+
+\begin{bprop}[the rounding containment]\label{prop:cie-sound}
+For every $\varepsilon > 0$:
+$\{x \mid p(x) \le c - \varepsilon\} \subseteq \{x \mid p(x) < c\}$,
+and symmetrically
+$\{x \mid c + \varepsilon \le p(x)\} \subseteq \{x \mid c < p(x)\}$.
+\end{bprop}
+\begin{proof}
+$p(x) \le c - \varepsilon < c$, the second inequality because
+$\varepsilon > 0$ --- one line of linear arithmetic
+(\texttt{closureInwardEpsLt\_sound}; mirror
+\texttt{closureInwardEpsGt\_sound}). The verified statements take any
+\emph{real} $\varepsilon > 0$; the producer\textquotesingle s
+$\varepsilon$ being rational is a representation fact about
+certificates, subsumed by the cast.
+\end{proof}
+
+\begin{bprop}[closedness rider]\label{prop:cie-closed}
+For continuous $p$, both rounded atoms are closed sets:
+$\{p \le c - \varepsilon\}$ and $\{c + \varepsilon \le p\}$.
+\end{bprop}
+\begin{proof}
+An instance of the exact move\textquotesingle s closedness at the
+shifted threshold $c - \varepsilon$
+(\texttt{closureInwardEps\_isClosed}, one application of
+\texttt{closureExact\_isClosed\_le}); the mirrored orientation
+$\{c + \varepsilon \le p\}$ is closed by the same argument at
+threshold $c + \varepsilon$ --- the preimage of a closed ray under
+continuous $p$ (the binding covers the $\le$ orientation). The move thus delivers exactly
+what the discipline asked of it: a closed atom the kernel can
+consume.
+\end{proof}
+
+\begin{bremark}[$\varepsilon > 0$ strictly --- the boundary counterexample]
+At $\varepsilon = 0$ the containment fails: $\{p \le c\}$ is not
+contained in $\{p < c\}$, and the failure can be total --- take $p$
+constant at $c$: the un-rounded atom is the whole space while the
+literal is empty. The strict positivity of $\varepsilon$ is therefore
+the whole rule, in the same sense that the sign row is half of
+\rulename{HypMultiplier}: remove it and the move manufactures the
+maximal over-claim from nothing.
+\end{bremark}
+
+\begin{bremark}[soundness-only, and the refusal posture]
+No completeness preservation is claimed, deliberately. The
+$\varepsilon$-band $(c - \varepsilon, c)$ is surrendered, and a
+specification exactly tight at its threshold --- the intended witness
+satisfies $p < c$ everywhere while $p$ approaches $c$ on the region
+--- admits no $\varepsilon$ at all: every rounding excludes points the
+witness needs. The honest outcome is refusal (no certificate exists
+through this move), never silent widening; a producer meeting refusal
+here either finds slack elsewhere in the specification or reports the
+tightness, and the discipline\textquotesingle s contract is that the
+checker is never the party doing the forgiving.
+\end{bremark}
+
+\begin{bremark}[why not under a complement]
+Rounding an atom that will be complemented is doubly wrong as a
+discharge of \emph{this} obligation: the complement of the rounded
+atom, $\{c - \varepsilon < p\}$, is strict again --- the closedness
+goal is defeated, and the $\varepsilon$ was spent for nothing.
+Complemented literals belong to the exact move (free, when the inner
+literal is strict) or the outward move (when the inner atom is
+closed); the routing table in the closure-discipline preamble
+(\rulename{ClosureDiscipline-EXACT} section) assigns every case
+exactly one move, and the assignment is what makes the trio a
+discipline rather than three tricks.
+\end{bremark}
+
+\begin{anchors}
+Proposition \ref{prop:cie-sound} & \texttt{closureInwardEpsLt\_sound}, \texttt{closureInwardEpsGt\_sound}\\
+Proposition \ref{prop:cie-closed} & \texttt{closureInwardEps\_isClosed} (via \texttt{closureExact\_isClosed\_le})\\
+rounded-atom reading & the \texttt{hbridge} hypothesis of the rounding lemmas\\
+$\varepsilon$ accounting & certificate annotation data, producer-side (not a rule)\\
+the routing guard & the closure-discipline preamble (\rulename{ClosureDiscipline-EXACT} section)\\
+\end{anchors}

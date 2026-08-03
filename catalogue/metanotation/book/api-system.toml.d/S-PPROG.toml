@@ -1,0 +1,21 @@
+# api-system.toml.d/S-PPROG.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-PPROG"
+entity = "model type"
+
+[api.ts]
+handle = "system.probProg"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_pprog"]
+note = '''The TS conformance corpus holds no construction through this factory at this preview --- the cross-language byte-identity fixtures exercise six profiles, and this one's byte authority is the Rust corpus opposite; the factory takes the same init-object vocabulary as every other profile.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::ProbProg::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_pprog"]
+note = '''The discrete-time slice rides the outcome-row machinery; the corpus's construction of that machinery is the DTMC fixture, and no ProbProg-preset construction is in the conformance corpus at this preview.'''

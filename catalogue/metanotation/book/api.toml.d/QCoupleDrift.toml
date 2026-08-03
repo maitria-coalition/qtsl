@@ -1,0 +1,21 @@
+# api.toml.d/QCoupleDrift.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QCoupleDrift"
+
+[api.ts]
+handle = "rules.qtslExt.coupleDrift"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn coupleDrift", "interface CoupleDriftArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_couple_drift.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::couple_drift"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/dist.rs"
+sig = ["fn couple_drift"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_couple_drift"

@@ -1,0 +1,96 @@
+[[rule]]
+id = "ReLUNN"
+source = "../BL-rules.toml"
+row = "ReLU-NN"
+proof = "book/proofs/ReLUNN.tex"
+commentary = '''
+\rulename{ReLU-NN} is the range fact: the output wire of a cited ReLU
+application is nonnegative, $\Phi \vdash y \geq 0$, with no proof
+premises at all — $\Phi$ is arbitrary (the premise-free convention
+shared with \rulename{Norm} and \rulename{PConstExact}). It is the
+first thing a producer knows about every ReLU output: the lower half
+of every output box starts here, before any information about the
+preactivation exists, and together with \rulename{ReLU-Above} it
+yields the exact pointwise lower envelope of the activation
+($y \geq \max(0, h)$, as two atoms).
+
+What the checker recomputes is nearly everything, because there is
+nearly nothing: the linkage — the hypernet really contains a packaged
+ReLU application at exactly these ports, of positive total size (the
+family\textquotesingle s port-lookup side condition, displayed in the
+\rulename{LiRPA} section) — and that the conclusion is literally the
+atom $y \geq 0$, elementwise over the node\textquotesingle s tensor
+shape.
+
+The linkage is the only hypothesis, and dropping it is the whole
+failure mode: an arbitrary wire asserted nonnegative, against an
+arbitrary premise — the staging that lacked it was exhibited unsound
+over unlinked wires during review, and the rule was kept vacuous until
+the port-lookup premise arrived. The positive-size gate inside the
+linkage keeps even the vacuous-surface corner unciteable (a size-zero
+node satisfies every elementwise atom trivially; the linkage refuses
+it at the source).
+'''
+note = '''
+This is the family\textquotesingle s cleanest unpacking: the case
+analysis over the sign-split fact discharges \emph{both} branches into
+catalogue nodes — the inactive branch\textquotesingle s leaf is the
+ground fact $0 \geq 0$, which rides \rulename{PConstExact} (before
+that rule arrived, the calculus could not state the leaf at all). The
+proof section displays the full derivation, and states its shape
+scope honestly: the constant-sided equality transport type-checks at
+rank-0 instances, and the shape-general warrant is the direct lemma.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; linkage premise --- including the
+positive-size narrowing hidden under the displayed $\in$ --- exactly
+as in the \rulename{LiRPA} dictionary, the family preamble.
+\begin{itemize}
+\item $h \mapsto$ \texttt{preact}; $y \mapsto$ \texttt{post};
+  $\ReLU_{\{h\}\to\{y\}} \in H$ $\mapsto$ \texttt{hlink} $:$
+  \texttt{reluLinked H preact post}. The display\textquotesingle s
+  ``for any $h$\textquotesingle\textquotesingle{} is carried by the
+  linkage alone: \texttt{preact} occurs in no other hypothesis (the
+  roster note records that the appendix payload named only the output
+  wire --- the certified linkage names both ports).
+\item premise-freeness $\mapsto$ silence, the \rulename{PConstExact}
+  representation: no hypothesis mentions \texttt{seq.pre}, so the
+  statement holds under arbitrary premises $\Phi$.
+\item conclusion $\Phi \vdash y \geq 0$ $\mapsto$ the goal under
+  \texttt{hpost} $:$ \texttt{seq.post = .atom .ge (.var post)
+  (.const 0)} --- displayed comparator and operand order carried
+  exactly.
+\end{itemize}
+Width note: certified atoms elementwise over the cited
+application\textquotesingle s tensor shape (batch semantics, as at
+\rulename{LiRPA}). Beyond the family\textquotesingle s linkage gate,
+neither side is wider: both hypotheses of \texttt{sound\_reluNN} are
+consumed, and nothing else is stated.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_reluNN"]
+intro = '''
+The warrant consumes the family linkage extraction
+(\texttt{reluLinked\_facts}, displayed in the \rulename{LiRPA}
+section): each output entry is either $0$ or a copy of a nonnegative
+input entry. The payload structure is \texttt{PReLUNNData}
+(Core/Catalogue.lean) — no premise field.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+As for the rest of the ReLU family: the HOL4 development ports the
+checker\textquotesingle s first-order computational surface and stops
+short of the proof-object layer, where this rule\textquotesingle s
+payload (a conclusion equation plus the family linkage) lives; the
+linkage inspects the hypernet\textquotesingle s application list, a
+structure the port\textquotesingle s header inventories among its
+deliberate exclusions; and the port predates the
+linkage\textquotesingle s realization. A HOL statement becomes
+writable when the proof-object/payload layer is ported together with
+the hypernet structures and the packaged ReLU application.
+'''

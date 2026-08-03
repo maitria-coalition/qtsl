@@ -1,0 +1,19 @@
+# bindings.toml.d/TaylorBound.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'TaylorBound'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "taylorLeaf_le_exp"
+sha256 = "59b1076cc8405ba892c4d84c0a4e8643d51ef8d177f24c75402de2f9aea2b6ed"
+
+[[statement]]
+module = "QtslAux.QtslAliases"
+decl = "taylorLeaf_rat_le_exp"
+sha256 = "a4019a4635386a53515a0fd7aacca41aa521bcc4f54cacda19ad65550011dcbd"
+
+[[correspondence]]
+entry = "TaylorBound"
+steele_sha256 = "aaffeefe2fab920a916a6ef9158e6c6f3e9dd129600172448cacc609d5fd1e87"
+statements_sha256 = "dd8d7ec9fcd706e7d292c758313e1444db214e048161f77214020631f59c043a"
+prose_sha256 = "319ae8ef2958a3ca8acc66adf0cba9d59a9daaa3193e6c35dba5d92a6906450a"
+

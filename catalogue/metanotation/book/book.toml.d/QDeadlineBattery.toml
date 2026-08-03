@@ -1,0 +1,153 @@
+# QDeadlineBattery — GRADUATED from dashboard-only coverage to a full
+# section (B7). The original [[coverage.lean]] block is preserved
+# verbatim as [[rule.lean]]; the QtslBattery block (catalogue form) is
+# added, roster-marked. Proved at the discrete-kernel profile (geometric
+# drift); GSHS transport remains filed — hence conditional = true.
+[[rule]]
+id = "QDeadlineBattery"
+source = "../QTSL-rules.toml"
+row = "QDeadlineBattery"
+proof = "book/proofs/QDeadlineBattery.tex"
+conditional = true
+conditional_label = "DTMC"
+commentary = '''
+\rulename{QDeadlineBattery} is the bounded-reachability battery: it
+concludes that with probability at least $p$ the system reaches the
+target --- satisfies $\mathsf{F}_{\le T}\,\varphi$ --- from every start
+in the sublevel region $\{V \le (1-p)\,q\}$. Its engine is exponential
+decay: decay rows say the certificate shrinks by a factor $\beta$ per
+step off the target, so the discounted process $\beta^{-t} V$ is a
+supermartingale off the target, while the off-target floor $V \ge 1$
+makes \emph{missing} the deadline cost at least one unit of discounted
+certificate value; Markov\textquotesingle s inequality at the horizon
+gives $\Pr[\mathrm{miss}] \le \beta^{T} V(x)$.
+
+The rule\textquotesingle s division of labour between checker and lemma
+is its most instructive feature. The checker replays only exact rational
+comparisons: the one arithmetic leaf is the Taylor comparison
+$q \le \sum_{k \le n} (\theta T)^k / k!$ --- a closed, wire-free
+inequality discharged by the ground-fact rule --- while both
+transcendental facts ($\sum_{k \le n} (\theta T)^k/k! \le e^{\theta T}$
+and $e^{-\theta} e^{\theta} = 1$) live inside the soundness lemma. The
+checker never needs to know $e$ exists.
+
+What the checker recomputes beyond that leaf: the domain-hull and
+fail-closed side conditions (as in the safety battery), and the
+threshold arithmetic in the exact rational vocabulary
+($\mathrm{thr}_{\mathsf F} = \mathrm{thr} \cdot q$ atop
+$p + \mathrm{thr} \le 1$). Soundness is independent of the producer
+knobs $\theta$ and $q$: any discrete rate $\beta \le e^{-\theta}$ and
+any $q$ below the Taylor sum are admissible.
+
+Each hypothesis is essential. Drop the off-target floor and a
+certificate identically $0$ would certify certain reachability of an
+unreachable target. Drop the boundedness row and the unstopped
+certificate\textquotesingle s integrability along the chain is lost ---
+the deadline process, unlike the safety battery\textquotesingle s, is
+never frozen, so integrability cannot ride a stopped process. Drop the
+fail-closed containment and escape from the modelled domain would count
+as success: a reach guarantee must show the escape event \emph{null},
+where the safety battery could simply enlarge its stop set (leaving
+counts as failing is conservative for safety, but would be unsound
+generosity for reachability). Drop the threshold arithmetic and the
+concluded region over-budgets. The proof section walks each.
+
+The conditional mark is the profile statement: the cited theorems
+warrant the rule at the discrete-kernel profile (geometric drift,
+$\beta = e^{-\theta}$ discretized); the continuous-time transport
+remains a stated hypothesis --- filed, not proven.
+'''
+note = '''
+The checked floor is \emph{off-target only}: on the target the
+certificate may take any value, since success needs no budget. This is
+deliberately weaker than a global floor, and the proven statement binds
+the weaker form; a catalogued rendering that states a global floor is
+sound but relaxable to match. The concluded threshold $(1-p)\,q$ is the
+compile\textquotesingle s choice; the underlying theorem consumes only
+the single inequality $\beta^{T} \cdot \mathrm{thr} \le 1 - p$. At this
+profile, guard rows land inside the one-step decay row (the kernel
+carries flow and jumps together); the instantaneous-jump reading, where
+the discount factor does not tick during a jump, belongs to the filed
+continuous-time transport.
+'''
+correspondence = '''
+Model frame and profile as at \rulename{QSafetyBattery}: certified at
+the discrete-kernel profile (the amended cell\textquotesingle s own
+caveat), continuous-time transport filed. The catalogue form binds
+\texttt{sound\_QDeadlineBattery}; \texttt{sound\_QDeadline} carries
+the general inequality it wraps.
+\begin{itemize}
+\item the displayed judgement $\mathcal{M}
+  \vDash_{\mathsf{qraSublevel}(V, (1-p)q)}
+  \mathsf{P}_{\ge p}[\mathsf{F}_{\le T}\,\varphi]$ $\mapsto$ the goal
+  $\mathrm{ofReal}\ p \le$ \texttt{pathMeasure K x \{ω | ∃ k ≤ T, sat
+  (ω k)\}} from every start with \texttt{x ∈ D} and \texttt{V x ≤ (1
+  − p)·q}; the target tie $\mapsto$ \texttt{hF} $:$ $\forall y \in B,
+  \texttt{sat}\ y$ --- $B$ \emph{under}-approximates the target truth
+  set (the polarity opposite to \rulename{QSafetyBattery}\textquotesingle
+  s avoid tie, both safe directions), and again no measurability is
+  asked of \texttt{sat}.
+\item decay rows $\mapsto$ \texttt{hdecay} (one-step $\int V \le
+  \beta V$ on $D \smallsetminus B$; at this profile guard rows land
+  inside it, per the note) with integrability rider \texttt{hint};
+  floors \emph{off-target only} $\mapsto$ \texttt{hfloor} (on
+  $\bar{D} \smallsetminus B$ --- the display\textquotesingle s
+  weaker, deliberately relaxable form is exactly what is bound);
+  nonnegs $\mapsto$ \texttt{hnonneg}; the bound row $V \le M$
+  $\mapsto$ \texttt{hM}.
+\item the T7 Taylor leaf $q \le \sum_{k \le n} (\theta T)^k / k!$
+  $\mapsto$ \texttt{hq}, verbatim --- the one closed comparison a
+  checker replays in exact $\Q$ --- and the drift tie $\beta \le
+  e^{-\theta}$ $\mapsto$ \texttt{hβθ}, with both transcendental
+  facts (\texttt{Real.sum\_le\_exp\_of\_nonneg}; $e^{-\theta}
+  e^{\theta} = 1$) discharged \emph{inside} the lemma: the certified
+  statement is the witness that the checker never needs to know $e$
+  exists.
+\item sign gates $\theta \ge 0$, $0 \le q$, $p \le 1$, $0 \le \beta$
+  $\mapsto$ \texttt{hθ}/\texttt{hq0}/\texttt{hp}/\texttt{hβ},
+  verbatim; side conditions and region measurability as at
+  \rulename{QSafetyBattery} (\texttt{hR3}/\texttt{hR4};
+  \texttt{hD}/\texttt{hDbar}/\texttt{hB}/\texttt{hV}, the
+  undisplayed regularity pack).
+\end{itemize}
+Width note: the wrapped \texttt{sound\_QDeadline} consumes only
+$\beta^T \cdot \mathrm{thr} \le 1 - p$ --- every $(\theta, q)$
+satisfying the displayed leaves yields it, so the catalogue
+parameterization is an instance of a strictly wider certified core;
+producer knobs, exactly as the roster note says.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Battery"
+src = "../../lean/qtsl-aux/QtslAux/Battery.lean"
+decls = ["sound_QDeadline", "sound_QDeadline_hit"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslBattery"
+src = "../../lean/qtsl-aux/QtslAux/QtslBattery.lean"
+decls = ["sound_QDeadlineBattery"]
+intro = '''
+The catalogue form: the $(\theta, q)$ parameterization, concluding on
+$\{V \le (1-p)\,q\}$ from the Taylor leaf and the drift tie
+$\beta \le e^{-\theta}$, with both transcendental facts inside the
+lemma. It is a wrapper over \texttt{sound\_QDeadline}, which carries the
+general inequality form $\beta^{T} \cdot \mathrm{thr} \le 1 - p$.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 development ports the base calculus\textquotesingle s checker
+chain (theory \texttt{qtsl\_catalogue}, developed side by side with the
+base catalogue sources, stopping below the proof-object layer); it
+contains no probability or measure theory.
+\rulename{QDeadlineBattery} lives one theory-extension edge above the
+base calculus and its soundness content is path-space measure theory
+(discounted supermartingales, optional stopping, an escape-null
+argument), for which no counterpart exists anywhere in the ported
+development. A HOL statement of this rule would be a new
+measure-theoretic campaign, not an extension of the ported checker
+chain; until one exists, this box is the honest state of the edifice.
+'''

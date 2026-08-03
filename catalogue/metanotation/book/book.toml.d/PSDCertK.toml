@@ -1,0 +1,133 @@
+# B5 fan fragment (see CellInInterior.toml header note for flagged calls).
+
+[[rule]]
+id = "PSDCertK"
+source = "../BL-rules.toml"
+row = "PSDCERT/K"
+proof = "book/proofs/PSDCertK.tex"
+commentary = '''
+\rulename{PSDCERT/K} is the semidefinite member of the certificate
+family (family discipline in the \rulename{PSDCERT/T} section): it
+certifies $A \succcurlyeq 0$ \emph{with an exactly-checked kernel},
+for the boundary cases the two strict tiers cannot touch --- energy
+forms with conservation laws, graph Laplacians with their all-ones
+kernel, sharp certificates whose slack vanishes identically. Data:
+$A$ over $\Q^{(m+k)\times(m+k)}$ with the $k$ kernel coordinates last
+(the producer applies its permutation before emission --- conjugation
+is index renaming, so the identity-permutation form loses no
+generality); a rational kernel description $N$; and a leading block
+$B$ with a /T-or-/DD inner witness. The checked premise is a single
+entrywise-exact factorization: $A = L^{\mathsf T} B\, L$ for the
+kernel-completion rows $L = (I_m \mid N)$ --- equivalent to
+($A$ symmetric $\wedge$ $A \cdot K = 0$ exactly for
+$K = (-N;\, I_k)$ $\wedge$ leading block $= B$), the cross and
+trailing blocks being forced either way, so a forged $N$ or $B$
+refuses --- plus the strict inner check on $B$. Rectangular congruence
+then gives $A \succcurlyeq 0$ with the form vanishing exactly on the
+span of $K$: the certificate fixes kernel and rank, not just
+semidefiniteness.
+
+The kernel data must be exact by necessity, not by preference: the
+semidefinite-with-kernel matrices form a boundary set with empty
+interior, so no rounding-tolerant witness for kernel directions can
+exist --- any check tolerant to kernel perturbation also accepts
+slightly-indefinite matrices. Exact kernel plus rounding-tolerant bulk
+(the /DD inner witness) is the information-theoretic optimum, and it
+matches the producers: kernels are semantic (theorems supply $N$),
+floats only ever touch the bulk witness $Z$. Corners are structural:
+$k = 0$ degenerates to the inner strict tier; $m = 0$ forces $A = 0$,
+where the factorization premise is the entire content.
+
+What breaks without each hypothesis: an approximate factorization
+certifies nothing (the boundary argument above); a merely semidefinite
+inner block would hide undeclared kernel directions inside $B$; the
+kernel-coordinates-last convention is pure bookkeeping. What reaches
+the formula layer today is the quadratic-form conclusion --- honest
+for this rule, since it is $\succcurlyeq$-shaped --- while the checked
+kernel/rank content becomes formula-expressible only with closed
+tensor terms (the extension the \rulename{PConstExact} section
+records); it is certificate-level assurance meanwhile, deliberately
+not hand-faked into the formula grammar. The proof section walks these
+in order.
+'''
+correspondence = '''
+As at \rulename{PSDCERT/T} --- premise-free silence, the shared
+\texttt{conclCheck} row at size $m + k$, the same
+\texttt{syzygyConclusionForm} selector and undisplayed evaluability
+pack --- with the witness row exchanged for the kernel-completion
+data:
+\begin{itemize}
+\item the block sizes $\mapsto$ \texttt{m k : Nat} with $A$ $:$
+  \texttt{Fin (m + k) → Fin (m + k) → ℚ} (kernel coordinates last,
+  as displayed --- the producer\textquotesingle s permutation is
+  applied before emission, so the certified rule is the $P =
+  \mathrm{id}$ core of the roster note); $N \mapsto$ \texttt{N : Fin
+  m → Fin k → ℚ}; $B \mapsto$ \texttt{B}; the ``/T-or-/DD inner
+  witness\textquotesingle\textquotesingle{} $\mapsto$ the pair
+  \texttt{innerT : Bool} (which inner check) and \texttt{Z : Fin m →
+  Fin m → ℚ} (its witness).
+\item the displayed factorization row $A = L^{\mathsf{T}} B L$
+  entrywise exactly, $L = (I \mid N)$, together with the inner
+  witness $\mapsto$ the single Boolean \texttt{hwit} $:$
+  \texttt{PsdCert.checkK m k A N B innerT Z = true}, entering
+  through \texttt{checkK\_posSemidef} ($A \succcurlyeq 0$ --- the
+  trio\textquotesingle s one genuinely $\succcurlyeq$-shaped member,
+  so here the formula boundary loses nothing) and consumed as
+  \texttt{checkK\_quadForm\_nonneg}.
+\end{itemize}
+Width note, beyond /T\textquotesingle s: the checked kernel and rank
+content (the roster note\textquotesingle s \S1 equivalents) is
+consumed by the matrix-side bridge but never surfaces in the sequent
+--- the certified formula-level claim is exactly the quadratic-form
+conclusion, neither more nor less, which is the honest reading the
+commentary already states and this triple now pins.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "sound_psdCertK",
+]
+
+[[rule.lean]]
+module = "Qtsl.PsdCert"
+src = "../../lean/qtsl/Qtsl/PsdCert.lean"
+decls = [
+  "posSemidef_of_factor",
+  "checkK_posSemidef",
+  "checkK_quadForm_nonneg",
+]
+intro = '''
+\textbf{The rectangular congruence.}\enspace
+\texttt{posSemidef\_of\_factor} is one line --- semidefiniteness
+transports through ANY rectangular congruence, no invertibility
+anywhere --- which is exactly why the factorization premise can carry
+the whole rule. \texttt{checkK\_posSemidef} bridges the executable
+check (selecting the /T or /DD theorem for the inner block), and the
+rational-points corollary feeds the rule lemma.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "kernelExt",
+  "checkK",
+]
+intro = '''
+\textbf{The executable check --- what /K adds.}\enspace The
+kernel-completion rows and the entrywise factorization check; the
+inner witness reuses \texttt{checkT}/\texttt{checkDD} and the
+conclusion check is shared (both displayed in the
+\rulename{PSDCERT/T} section).
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+Same status as \rulename{PSDCERT/T}: the certificate family postdates
+the HOL4 catalogue port and the script contains no counterpart of the
+witness or conclusion checks (verified against the script this
+writing); the port belongs to the next catalogue-slice port.
+'''

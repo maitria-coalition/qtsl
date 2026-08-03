@@ -1,0 +1,42 @@
+\apilang{TypeScript}{spec.returnGe / returnLe / returnMayBeGe / returnMayBeLe}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function returnGe(lo: QLike, ret: PathObservable): ForallSpec
+
+export function returnLe(hi: QLike, ret: PathObservable): ForallSpec
+
+export function returnMayBeGe(lo: QLike, ret: PathObservable): ExistsSpec
+
+export function returnMayBeLe(hi: QLike, ret: PathObservable): ExistsSpec
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const ret = s.poSum(26, s.oChan(0));
+const floor = s.returnGe(
+  Q.of(-3954908734551683826282634489n, 13n ** 26n),
+  ret,
+);
+\end{tssrc}
+\apiprov{The accumulator injections are quoted under the Return stratum; the \texttt{poInt} / \texttt{poDisc} faces and the possibility marks ride the formers-tour vector (the same test file).}
+\apilang{Rust}{mtk\_catalogue::spec::ForallSpec::\{return\_ge, return\_le\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn return_ge(lo: WitRat, ret: PathObservable) -> ForallSpec
+
+pub fn return_le(hi: WitRat, ret: PathObservable) -> ForallSpec
+
+pub fn return_may_be_ge(lo: WitRat, ret: PathObservable) -> ExistsSpec
+
+pub fn return_may_be_le(hi: WitRat, ret: PathObservable) -> ExistsSpec
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let thirteen_pow_26 = (0..26).fold(BigInt::from(1), |a, _| a * 13);
+let bound = WitRat::new(
+    BigInt::parse_bytes(b"-3954908734551683826282634489", 10).unwrap(),
+    thirteen_pow_26,
+);
+let ret = PathObservable::sum(26, StateObservable::chan(0)).unwrap();
+let floor = ForallSpec::return_ge(bound, ret);
+\end{rustsrc}
+\apiprov{The accumulator injections are quoted under the Return stratum; the \texttt{poInt} / \texttt{poDisc} faces and the possibility marks ride the formers-tour vector (the same test file).}

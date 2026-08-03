@@ -1,0 +1,123 @@
+[[rule]]
+id = "SmallGain"
+source = "../BL-rules.toml"
+row = "SmallGain"
+proof = "book/proofs/SmallGain.tex"
+alias_target = "Syzygy"
+commentary = '''
+\rulename{SmallGain} is the calculus\textquotesingle s
+feedback-composition rule in its classical costume: two subsystems, each
+dissipating its own storage function except for a supply fed by the
+other, compose into a single dissipation certificate for
+$V_1 + \lambda V_2$ when the loop gain is strictly less than one
+($\theta$ is the margin). It is an \emph{alias}: the wire format never
+carries a \rulename{SmallGain} node. A producer that finds
+$(\lambda, \theta)$ --- an LP feasibility problem over the membership
+certificates --- elaborates the step to the single \rulename{Syzygy}
+node displayed in the recipe below before emission, so what the checker
+recomputes is exactly \rulename{Syzygy}\textquotesingle s obligation
+set: the exact conclusion identity at weights $(1, \lambda, 1, 1)$, in
+which the cross-supplies cancel by construction. Nothing fixpoint-shaped
+survives to checking time; the classical contraction argument lives
+entirely on the producer\textquotesingle s side, in the choice of
+$(\lambda, \theta)$.
+
+What would break without each hypothesis is inherited from
+\rulename{Syzygy} through the unpack --- that
+section\textquotesingle s commentary applies verbatim to the unpacked
+node. The two conditions native to this rule: $\lambda > 0$, of which
+soundness uses only $\lambda \geq 0$ (the strictness backs the
+rule\textquotesingle s published meaning), and $\theta \in (0,1)$, which
+is well-formedness for $\theta$\textquotesingle s published meaning as a
+robustness margin rather than a soundness need --- the membership
+sequents self-police, and an infeasible pair simply yields unprovable
+memberships.
+'''
+note = '''
+The four component sequents are ordinary sequents over the declared
+operating box; their cone-membership multipliers \emph{are} the LP
+witness. Signed polynomial contracts (rather than norm gains) are
+constitutive, not stylistic: swing-up analyses in the
+{\AA}str\"om--Furuta family exploit the \emph{sign} of
+$\dot\vartheta\cos\vartheta$, which no norm-gain contract can express.
+The $n$-component generalization and $(\lambda,\theta)$-existence
+results are research residue, deliberately outside the checker.
+'''
+comparator = '''
+\badge{BadgeGray}{comparator: structurally n/a} the alias unpacks
+\emph{before} emission (no rule tag; producers elaborate a
+\rulename{SmallGain} step to its \rulename{Syzygy} node), so no wire
+certificate --- and hence no comparator fixture --- can ever contain a
+\rulename{SmallGain} node. Comparator coverage for this rule \emph{is}
+\rulename{Syzygy}\textquotesingle s. The end-to-end instance
+\texttt{DpCompositeSmallGain.lean} is kernel-checked upstream of the
+unpack.
+'''
+correspondence = '''
+The alias\textquotesingle s Lean vehicle is the payload structure
+\texttt{SmallGainStep H} (quoted in full above --- its fields carry the
+display\textquotesingle s metavariables), the verified unpack
+\texttt{toSyzygy}, and the soundness corollary
+\texttt{sound\_smallGain}.
+\begin{itemize}
+\item $\lambda \mapsto$ \texttt{lambda} $: \Q$ with \texttt{lambdaPos}
+  $: 0 < \lambda$; $\theta \mapsto$ \texttt{theta} with
+  \texttt{thetaLo}, \texttt{thetaHi} $: 0 < \theta < 1$; $\alpha_i,
+  \sigma_i \mapsto$ \texttt{alpha1}/\texttt{alpha2},
+  \texttt{sigma1}/\texttt{sigma2}; the composite storage $V_1 + \lambda
+  V_2 \mapsto$ \texttt{lyapTerm}.
+\item the dissipation premises $\Phi_i \vdash e_i \leq 0$ $\mapsto$
+  \texttt{diss1}/\texttt{diss2} with the shape ties
+  \texttt{diss1Post}/\texttt{diss2Post} (each $e_i$ is a field; its
+  published spelling $\mathcal{L}_i V_i + \alpha_i - \sigma_i$ lives on
+  the producer\textquotesingle s side). The operating-box membership
+  premises $\mapsto$ \texttt{mem1}/\texttt{mem2} with
+  \texttt{mem1Poly}/\texttt{mem2Poly} tying their residuals to the
+  displayed schemas $\lambda\sigma_2 - (1{-}\theta)\alpha_1$ and
+  $\sigma_1 - \lambda(1{-}\theta)\alpha_2$ as canonical polynomials.
+\item the display\textquotesingle s side text --- the conclusion
+  identity with cross-supply cancellation --- $\mapsto$ \texttt{foldEq}
+  and \texttt{conclPoly} (the checker-replayed cancellation, exact over
+  canonical polynomials) plus \texttt{postEq} (the conclusion tie);
+  premise containment for all four components $\mapsto$
+  \texttt{pre1}/\texttt{pre2}/\texttt{preM1}/\texttt{preM2}.
+\item conclusion $\Phi \vdash \mathcal{L}(V_1 + \lambda V_2) +
+  \theta\,(\alpha_1 + \lambda\alpha_2) \leq 0$ $\mapsto$ the goal
+  \texttt{st.seq.semanticallyValid H} of \texttt{sound\_smallGain},
+  whose four hypotheses are exactly the component validities.
+\item the alias artefacts: the unpack function is \texttt{toSyzygy}
+  (weights $(1, \lambda, 1, 1)$, components in combination order); the
+  soundness corollary routes through the target rule\textquotesingle s
+  lemma on the collapsed instance --- the displayed rule never reaches
+  the wire.
+\end{itemize}
+Width notes, both directions: soundness uses only $\lambda \geq 0$ of
+\texttt{lambdaPos} (the strictness backs the rule\textquotesingle s
+published meaning), and $\theta$\textquotesingle s range is
+well-formedness rather than a soundness need --- both as the
+commentary states. Conversely the structure carries idx-freeness and
+wire-shape fields (\texttt{e1IdxFree} through
+\texttt{compPostWiresPos}) that the display leaves to the ambient
+calculus\textquotesingle s conventions: the mechanization is narrower
+there, naming every side condition the checker replays.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Composition"
+src = "../../lean/qtsl/Qtsl/Composition.lean"
+decls = ["SmallGainStep", "toSyzygy", "sound_smallGain"]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}, not by backlog: the wire
+format never carries a \rulename{SmallGain} node (no tag --- producers
+elaborate to the $(1,\lambda,1,1)$ \rulename{Syzygy} node before
+emission, warrant \texttt{SmallGainStep.toSyzygy}), and the HOL4
+development\textquotesingle s object is the wire checker. The HOL
+statement that verifies a composed small-gain certificate is therefore
+\rulename{Syzygy}\textquotesingle s (\texttt{syzygyCheck}, previous
+section); an independent HOL port of the alias\textquotesingle s unpack
+function would be new assurance surface only if HOL-side producers ever
+emit \rulename{SmallGain} steps directly.
+'''

@@ -1,0 +1,107 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- reduction to verified
+machinery. The certificate-family preamble --- untrusted witness,
+quadratic-form conclusion through the \rulename{Syzygy}
+conclusion-form selector, strictness dropped at the formula boundary,
+premise-freedom, elementwise batching --- is stated in the
+\rulename{PSDCERT/T} section (its first recipe) and applies verbatim;
+only the witness check differs here.}
+
+\begin{brecipe}[the \rulename{PSDCERT/DD} instance]\label{rec:psddd-instance}
+Witness: $Z \in \Q^{n\times n}$. Checked premises: $A$ symmetric; $Z$
+upper-triangular with positive diagonal; and the congruence
+$B := Z^{\mathsf T} A Z$ --- \emph{recomputed exactly by the checker} ---
+strictly row-diagonally dominant:
+$\sum_{j \neq i} |B_{ij}| < B_{ii}$ for every $i$. (Positivity of the
+diagonal is implied: the off-row sum is $\geq 0$.) Then
+\[
+\inferrule*[Right=\rulename{PSDCERT/DD}]
+  {\;\mathrm{checkDD}(A, Z) = \mathsf{true} \\
+    c \equiv -\textstyle\sum_{i,j} A_{ij}\,p_i\,p_j\;}
+  {\Phi \vdash \Psi}
+\qquad\rightsquigarrow\qquad
+\text{\upshape discharged by } \texttt{sound\_psdCertDD}.
+\]
+The check costs $O(\alpha n^2 + n^3)$ multiplications (the
+$Z^{\mathsf T}(AZ)$ product is the $n^3$ term) on integers of
+\emph{bounded} width --- input bits plus twice the witness bits plus
+$\log n$ --- embarrassingly parallel, still division-free.
+\end{brecipe}
+
+\begin{bprop}[matrix warrant]\label{prop:psddd-matrix}
+A symmetric real matrix $B$ with
+$\sum_{j\neq i}|B_{ij}| < B_{ii}$ for all $i$ is positive definite;
+hence if additionally $Z$ is upper-triangular with positive diagonal
+and $B = Z^{\mathsf T} A Z$ for symmetric $A$, then $A \succ 0$.
+\end{bprop}
+\begin{proof}
+For $x \neq 0$, split the quadratic form and bound each off-diagonal
+term by its arithmetic--geometric-mean envelope,
+$x_i B_{ij} x_j \geq -|B_{ij}|\,(x_i^2 + x_j^2)/2$; folding the
+envelope's two symmetric halves by $B_{ij} = B_{ji}$ gives
+\[
+x^{\mathsf T} B\, x \;\geq\; \sum_i \Bigl(B_{ii} -
+\textstyle\sum_{j \neq i} |B_{ij}|\Bigr)\, x_i^2 \;>\; 0 .
+\]
+(The kernel proof is exactly this self-contained finite-sum argument
+--- \texttt{posDef\_of\_dominant} --- with no spectral machinery. The
+classical reading: symmetry makes the spectrum real, and strict
+dominance with positive diagonal places every Gershgorin disc in the
+right half-line \cite{gershgorin1931,taussky1949,hornjohnson2013}.)
+Transport through the invertible $Z$ as in the /T proof
+(\texttt{posDef\_of\_congruence\_posDef}) yields $A \succ 0$.
+\end{proof}
+
+\begin{bremark}[what each hypothesis is doing]
+\emph{Symmetry of $A$} makes $B$ symmetric by construction, which the
+envelope-folding step consumes ($B_{ij} = B_{ji}$) --- row dominance of
+a nonsymmetric matrix bounds neither the symmetric part's rows nor the
+form. \emph{Triangularity + positive diagonal of $Z$} is, as in /T,
+only the cheapest syntactic invertibility certificate --- invertibility
+is all the transport step needs, and triangularity is what the natural
+producer emits anyway. \emph{Strict dominance} is the content;
+weakening it to non-strict admits singular $B$ (e.g.\ the graph
+Laplacian of a path: weakly dominant, kernel = constants), and the
+conclusion would overclaim. \emph{Exact recomputation of $B$}: the
+congruence is never taken from the certificate --- a wire-supplied $B$
+could be dominant while unrelated to $A$.
+\end{bremark}
+
+\begin{bremark}[rounding tolerance --- why this is the production tier]
+Feed $Z := \lceil 2^s R^{-1} \rfloor$ from an off-stage float Cholesky
+$A \approx R^{\mathsf T} R$: then $B = Z^{\mathsf T} A Z \approx 4^s I$
+with off-diagonal contamination of order $2^s n \|R\|_{\max} +
+n\|A\|_{\max}$, so strict dominance holds once
+$s \gtrsim \log_2 n + \tfrac12 \log_2 \kappa(A) + O(1)$ --- the
+required witness scale tracks \emph{conditioning, not accuracy}, and
+witness entries stay at $\sim s$ bits regardless of $n$. Contrast /T,
+whose exact witness inherits minor-scale bit growth. What a too-coarse
+$Z$ costs is only completeness margin: the check fails closed, and the
+producer retries at a finer scale with soundness never in play. This
+rounded-integer-witness shape is the one Irving analysed and formalized
+at scale \cite{irving2026certificate,irvingaks}; the underlying
+tolerance phenomenon is the factor-width/scaled-diagonal-dominance
+circle of ideas \cite{boman2005} --- context, not a characterization:
+that theorem equates factor-width two with scaled diagonal dominance
+of $A$ \emph{itself} (diagonal scaling only), while /DD checks
+dominance of the congruence target $B = Z^{\mathsf T} A Z$ for
+arbitrary triangular $Z$, and so accepts matrices far outside the SDD
+class.
+\end{bremark}
+
+\begin{bremark}[the /T---/DD complementarity, stated once]
+Same witness idea, dual regimes: /T is exact-witness,
+$O(\alpha n^2)$, and wins at moderate sizes and exact-by-construction
+witnesses; /DD tolerates any rounding at $O(n^3)$ bounded-width
+parallel arithmetic and wins at scale. A producer holding a float
+factorization reaches for /DD by default and /T when it can clear
+denominators cheaply. Both refuse indefinite $A$ against every witness.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:psddd-instance} warrant & \texttt{sound\_psdCertDD} (Soundness); shared transport \texttt{sound\_psdCertOf} (see \rulename{PSDCERT/T})\\
+dominance core (Prop.\ \ref{prop:psddd-matrix}) & \texttt{PsdCert.posDef\_of\_dominant}; assembled in \texttt{posDef\_of\_dd\_witness}\\
+check-to-theorem bridge & \texttt{PsdCert.checkDD\_posDef}; rational-points corollary \texttt{checkDD\_quadForm\_nonneg}\\
+the executable check & \texttt{PsdCert.checkDD} with the exact congruence entries \texttt{congEntry}\\
+conclusion identity + readings & \texttt{PsdCert.conclCheck}; the \rulename{Syzygy} section's conclusion-form selector\\
+\end{anchors}

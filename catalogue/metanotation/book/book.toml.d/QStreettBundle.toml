@@ -1,0 +1,162 @@
+# QStreettBundle: graduated from dashboard-only coverage to a full section
+# (batch B8). The [[rule.lean]] blocks are the former [[coverage.lean]]
+# block preserved verbatim (package = qtsl-aux); conditional stays true —
+# the commentary's scope paragraph states exactly what the bound
+# statements do and do not warrant.
+
+[[rule]]
+id = "QStreettBundle"
+source = "../QTSL-rules.toml"
+row = "QStreettBundle"
+proof = "book/proofs/QStreettBundle.tex"
+conditional = true
+conditional_label = "DTMC"
+commentary = '''
+\rulename{QStreettBundle} concludes a probabilistic Streett-acceptance
+judgement: with probability at least $p$, a path of the modelled system
+satisfies every pair of the Streett condition
+$\mathsf{Streett}((\rho_1, \varphi_1), \ldots, (\rho_k, \varphi_k))$ ---
+for each pair $i$, if \emph{request} states (those satisfying $\rho_i$)
+occur infinitely often along the path, then \emph{response} states
+(those satisfying $\varphi_i$) also occur infinitely often. This is the
+shape of liveness-under-fairness obligations, and it subsumes recurrence
+and stability claims as degenerate pairs (the sub-rule sections that
+follow this one). A producer discharges such a specification by
+synthesizing the certificate family
+$(V_0;\ (V_i, \gamma_i, W_i)_{i \le k};\ \varepsilon_0)$: one safety
+certificate $V_0$ confining probability mass to the operating region,
+and, per pair, a ranking certificate $W_i$ that pays out a fixed rational
+$\varepsilon_0 > 0$ at every un-responded request --- plus, optionally,
+absorbing certificates $(V_i, \gamma_i)$ licensing the sharper ranking
+scope discussed in the proof. Every premise row is an inherited
+base-calculus sequent (a Bernstein-cone-family polynomial inequality the
+base kernel replays), so the bundle adds \emph{zero} kernel arithmetic:
+its entire content is the supermartingale assembly one judgement level
+up, which is where its soundness lemma lives.
+
+What the checker recomputes rather than trusts: the target-cell
+containment behind the $W_i \equiv 0$ convention (the collapse
+side-condition of the \rulename{StreettTargetCellCollapse} section); the
+carved-out set $J_i := \{V_i \le 1 - \gamma_i\} \cap
+(I \smallsetminus [\![\rho_i]\!])$, which is \emph{defined} from the
+payload, never supplied by the producer; the threshold arithmetic
+$p + \mathrm{thr} \le 1$ in exact rational vocabulary; and the
+region-hull mass side-conditions that make the certificate scopes
+fail-closed. What would break without the hypotheses: the nonnegativity
+rows for all three certificate families are essential (a signed
+certificate can subsidize probability-mass leakage --- the recorded
+two-branch counterexample at the quantitative-safety rule); the
+strictness $\varepsilon_0 > 0$ is essential ($W \equiv 1$ satisfies
+every row at $\varepsilon_0 = 0$ while no response is ever forced); the
+floor and hull rows pair up fail-closed. Each is remarked, with its
+counterexample, in the proof.
+
+Scope, stated plainly (this entry is marked \emph{conditional}): the
+statements bound and receipt-credited in this edition are the five
+excursion-cluster theorems quoted below --- the analytic engine of the
+typeset proof --- which cover the rule at the \emph{discrete-kernel
+profile} (a time-homogeneous Markov chain presented by a single step
+kernel) and at the \emph{conservative ranking scope} (decay demanded off
+the response region alone). The end-to-end assembly theorems
+(\texttt{sound\_QStreettBundle}; the complement-request tie
+\texttt{sound\_QStreettBundle\_tie}; the carved-scope forms
+\texttt{sound\_QStreettBundle\_carved} and
+\texttt{\_carved\_discharged}, with the absorption discharge
+\texttt{absorptionBound\_of\_kernel}) are machine-checked in the
+auxiliary module \texttt{QtslAux.QStreett} but not
+hash-bound into this edition. Beyond that sits the open
+continuous-time transport: the general-stochastic-hybrid-system profile
+of the battery family, a residue this rule shares with its safety and
+deadline siblings.
+'''
+note = '''
+One design note travels with the rule --- why Streett is the
+\emph{primitive} acceptance condition here: a B\"uchi condition is
+exactly a one-pair Streett condition with the trivially-true request,
+and the degenerate-pair specialization erases the resulting tautological
+rows --- so a Streett-primitive compile pays no premium on B\"uchi-shaped
+workloads, while a B\"uchi-primitive compile would pay an
+exponential-in-$k$ automaton re-encoding on Streett-shaped ones. The
+sub-rules of the following sections (degenerate request, complement
+request, target-cell collapse) are the compile-level faces of this
+design.
+'''
+correspondence = '''
+The displayed judgement is concluded by \emph{no} statement in this
+bound set --- the commentary\textquotesingle s scope paragraph says so,
+and the dictionary makes the residue positional: the five bound
+excursion theorems are the K5 analytic engine the assembly consumes,
+stated over an arbitrary filtered probability space \texttt{(Ω, 𝒢, μ)}
+with an adapted state process \texttt{X} --- \emph{wider} than the
+discrete-kernel chain (the chain instance arrives in the unbound
+assembly through \texttt{Kernel.traj}); the end-to-end
+\texttt{sound\_QStreettBundle} family is cited machine-checked but
+awaits its bind, the entry\textquotesingle s named follow-up. What the
+display\textquotesingle s rows DO reach in this bound set, per pair:
+\begin{itemize}
+\item ranking interior rows $\mathcal{A}_m W_{i,m} \le -\varepsilon_0$
+  off $[\![\varphi_i]\!] \cup J_i$ $\mapsto$ the conditional-shadow
+  pair in \texttt{streett\_ae\_frequently\_response}: \texttt{hdrift}
+  (conditional non-increase off the response set \texttt{G}) and
+  \texttt{hdriftR} (decay by \texttt{ε₀} at requests off \texttt{G})
+  --- per-time a.e.\ conditional-expectation clauses, the
+  probabilistic sibling of the integrated semantic-shadow forms on
+  the deterministic pages; the BernCone rows reach them through the
+  kernel bridge in the unbound assembly. Conclusion: \texttt{∀ᵐ ω,
+  (∃ᶠ n, X n ω ∈ R) → ∃ᶠ n, X n ω ∈ G} --- the probabilistic content
+  of one Streett pair, exactly.
+\item nonneg rows $\mapsto$ \texttt{hnonneg : 0 ≤ V} --- and the
+  roster\textquotesingle s two-branch signed-certificate
+  counterexample is why the binder is there.
+\item $\varepsilon_0 \in \Q_{>0}$ $\mapsto$ \texttt{hε : 0 < ε₀}
+  (real, the $\Q$ cast upstream); the quantitative window/hitting
+  forms (\texttt{streett\_window\_sum\_le},
+  \texttt{ranking\_hitting\_sum\_le}) take the nonstrict \texttt{0 ≤
+  ε₀} --- strictness is consumed exactly where Borel--Cantelli or
+  summability-to-hitting needs it (\texttt{ae\_hits\_of\_ranking},
+  the frequently-response theorem).
+\item the measurability pack \texttt{hmR}/\texttt{hmG}
+  (request/response events adapted at each time) is undisplayed
+  regularity --- the probabilistic sibling of the PSDCERT
+  evaluability class, as on the battery pages.
+\item \texttt{Supermartingale.exists\_ae\_tendsto\_of\_nonneg} (K5a)
+  is engine stock: Doob convergence with the $L^1$ bound derived
+  from nonnegativity, no display row corresponds.
+\end{itemize}
+Width note, the absences stated: the $V_0$ safety kit, the absorbing
+families $(V_i, \gamma_i)$ and the carved $J_i$, the $W_i \le C_i$
+upper-bound rows (the E2-question rows --- consumed as \texttt{hWC}
+by the \emph{unbound} assembly), the threshold row $p + \mathrm{thr}
+\le 1$, and the G5 target-cell containment all bind nothing in this
+edition --- their certified home is the \texttt{QtslAux.QStreett}
+module, whose statements are not hash-bound here, so the
+corr-certified reach of this entry is the per-pair excursion analysis
+alone.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.Excursions"
+src = "../../lean/qtsl-aux/QtslAux/Excursions.lean"
+decls = [
+  "Supermartingale.exists_ae_tendsto_of_nonneg",
+  "ranking_hitting_sum_le",
+  "ae_hits_of_ranking",
+  "streett_window_sum_le",
+  "streett_ae_frequently_response",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent, with the gap located precisely: the HOL4 development ports the
+\emph{base-calculus} checker cone (the \texttt{qtsl\_catalogue} theory,
+built side-by-side with the Lean catalogue module) --- its object is the
+wire-format certificate checker of the sequent stratum. The extension
+theory\textquotesingle s satisfaction stratum has no HOL artefact at
+all: no checker chain over that stratum has been ported, so there is
+no HOL development for a statement about this rule to live in. A HOL
+statement here would join the proof-object layer above the sequent
+stratum. (Checked against the HOL sources: no Streett-, satisfaction-,
+or NNF-shaped definitions exist there.)
+'''

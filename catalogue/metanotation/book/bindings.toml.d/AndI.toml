@@ -1,0 +1,19 @@
+# bindings.toml.d/AndI.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'AndI'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "PAndIData"
+sha256 = "674239ebbd36806951352cb42eac3b1945e4d64394fac0ee026223c1f070ea08"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_andI"
+sha256 = "847bc9fd2c2a2c5d5e91cd2e68eb3cf7561e89ba9c8b7372568d6d2a10f745aa"
+
+[[correspondence]]
+entry = "AndI"
+steele_sha256 = "0d4c9d6b02edcac65746359eb53e2f66412b61cbfe49d264333347b211291ed2"
+statements_sha256 = "423077b02d3eb250168207a2297b44001529cbe05f2ace1a89605f911b0e70d7"
+prose_sha256 = "94cb1ccfa8c3de88f0ce366d607f03238690a4305fdb7f63ecd3f7e52b8b1215"
+

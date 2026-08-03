@@ -1,0 +1,96 @@
+import std.{Q, q_le, q_lt};
+
+// Engine-decided judgements (oracle = the qtsl certification plugin
+// at the engine's ground seam): bounded computations discharged by
+// evaluation, never derivation-defined. Everything declared and not
+// imported below is ordinary (the default). This header replaces the
+// retired .registry classification sidecar.
+import qtsl.{qtsl_ct_massone};
+
+// CondWire.geolog
+//
+// Conditional-table wires: the species theory for cross-mechanism
+// stochastic couplings whose content is honestly tabular — the
+// probabilistic-graphical-model family (directed and undirected
+// graphical models, probabilistic dependency graphs) and the
+// stochastic-coupling composition pattern that consumes them.
+//
+// A conditional table maps a vector of given values to a
+// distribution over outcomes, in exact rationals. A cross wire
+// cites source port paths (ordered — positions index the table's
+// given-vector), a target port path, and its table. The species
+// bridges onto mechanisms the usual way: one content family plus
+// exclusivity refusals stated where the bridges meet.
+//
+// Conformance family C-CT-MASSONE (admission, per table): for every
+// given vector with any row at all, the outcome masses total
+// exactly one. Whole-fibre arithmetic stays at the evaluator; the
+// demand is minted per table below.
+
+theory CondWire extends Qtsl {
+
+  Val    : Set;   // one finite value of the species' alphabet
+  ValVec : Set;   // a given-vector: ordered values
+
+  vvNil  : ValVec;
+  vvCons : {head: Val, tail: ValVec} -> ValVec;
+
+  refuse ax/cw/vv_nil_cons_disjoint : forall h : Val, t : ValVec,
+      l : ValVec.
+    l = vvNil, l = {head: h, tail: t} vvCons
+    |- false;
+
+  CondTable : Set;   // entity: identity is the rows
+
+  CtRow : {table: CondTable, given: ValVec, outcome: Val, prob: Q}
+    -> Prop;
+
+  report ax/wf/ct_prob_range : forall t : CondTable, g : ValVec,
+      o : Val, p : Q.
+    {table: t, given: g, outcome: o, prob: p} CtRow
+    |- {l: 0, r: p} q_lt, {l: p, r: 1} q_le;
+
+  qtsl_ct_massone : {table: CondTable} -> Prop;   // side-condition
+                                                  // (C-CT-MASSONE)
+
+  report ax/wf/ct_massone : forall t : CondTable.
+    |- {table: t} qtsl_ct_massone;
+
+  // Cross wires. Source order is load-bearing: positions index the
+  // table's given-vector.
+
+  PortPathList : Set;
+
+  pplNil  : PortPathList;
+  pplCons : {head: PortPath, tail: PortPathList} -> PortPathList;
+
+  refuse ax/cw/ppl_nil_cons_disjoint : forall h : PortPath,
+      t : PortPathList, l : PortPathList.
+    l = pplNil, l = {head: h, tail: t} pplCons
+    |- false;
+
+  CrossWire : Set;
+
+  mkCrossWire : {sources: PortPathList, target: PortPath,
+                 table: CondTable} -> CrossWire;
+
+  // The species content family: one row per wire, zero or more.
+  mech_pdgwire : {mech: Mech, wire: CrossWire} -> Prop;
+
+  // Species exclusivity: a mechanism speaks one content language.
+  refuse ax/wf/pdgwire_manifest_excl : forall m : Mech, w : CrossWire,
+      mf : Manifest.
+    {mech: m, wire: w} mech_pdgwire, {mech: m, manifest: mf} mech_manifest
+    |- false;
+
+  // The stochastic-coupling pattern declaration: composite-stratum
+  // rows citing a cross wire on a system. The marginal-compatibility
+  // certificate a coupling may carry is certificate-stratum content,
+  // contributed where proof and vocabulary meet; its absence here is
+  // pending residue as data.
+
+  StochasticCouplingDecl : Set;
+
+  mkStochCoupling : {sys: System, wire: CrossWire}
+    -> StochasticCouplingDecl;
+}

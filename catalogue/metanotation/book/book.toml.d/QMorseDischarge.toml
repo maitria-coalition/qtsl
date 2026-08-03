@@ -1,0 +1,176 @@
+# QMorseDischarge — graduated from dashboard-only coverage to a full
+# literate section (batch B9). The [[rule.lean]] blocks below preserve
+# the former [[coverage.lean]] blocks verbatim (module/src/decls
+# unchanged); conditional = true carries the hyp-flavored check through
+# graduation: the bound theorems warrant the rule modulo the named gap
+# ledger (G3 proven from model-class facts, G4 reduced to overlap
+# transit certificates, G5 reduced to the cell-level cover, G6 remains
+# a hypothesis), narrated as mathematics in the proof section.
+[[rule]]
+id = "QMorseDischarge"
+source = "../QTSL-rules.toml"
+row = "QMorseDischarge"
+proof = "book/proofs/QMorseDischarge.tex"
+conditional = true
+commentary = '''
+\rulename{QMorseDischarge} concludes the global Morse judgement: all
+recurrence of the model inside the arena lives in the declared regions
+$\rho(v)$, and transitions between them run only down the declared
+order. It is reduction-to-base in its cleanest form: the certificate is
+a lattice of blocks over one rational grid whose every internal facet
+carries a strictly-inward sign row of the base calculus, a map $h$
+sending the lattice\textquotesingle s cells to spec vertices or to
+``transit'', containment rows placing each vertex cell inside its
+region, and per-transit-cell decrease rows $\mathcal{A}V + \varepsilon
+\le 0$ --- every leaf a sequent the base kernel already checks, and
+zero new kernel rules.
+
+A producer reaches for it from the refinement loop: synthesize the
+block family (splitting cells where a facet sign fails to certify,
+merging where refinement is not needed), pick transit observables from
+low-degree templates, and match cells to the spec graph. Failure mode
+is refusal with a pointer: a spec whose resolution exceeds what the
+certificate can contain reports exactly which cells obstruct, and that
+report is itself the useful artefact.
+
+What the checker recomputes rather than trusts: the lattice closure
+under union and grid-level intersection; the readout --- the
+join-irreducible members, their unique lower covers, the cells
+$T(b) = \mathrm{cl}(b \smallsetminus b^{-})$, and the induced cell
+order; convexity of $h$\textquotesingle s fibres and monotonicity of
+$h$ on vertex cells; acyclicity of the spec graph; and the box-aligned
+well-formedness checks on $\rho$. The witness the rule assembles is
+$M(v) := \mathrm{Inv}\bigl(\bigcup_{h(b)=v} T(b)\bigr)$ --- the
+invariant part of the fibre\textquotesingle s cell-union, not the
+union of per-cell invariant parts; the proof section shows the
+distinction is essential.
+
+Each hypothesis earns its place. Drop the containment rows and the
+location clause fails. Drop the transit rows and a transit cell could
+harbour recurrence the $\rho$-cover misses. Drop fibre convexity and
+the judgement could assert a strict order the certificate does not
+enforce. Drop facet strictness and three arguments die at once:
+no-facet-riding, fibre disjointness, and the chain-margin bound
+(``strictness pays a second time'').
+
+The mechanization is conditional, honestly: the bound theorems prove
+the witness assembly with a ledger of named hypothesis families ---
+G3 (compactness of the invariant parts), discharged outright from
+model-class facts; G4 (disjointness of distinct fibres), reduced to
+transit certificates on fibre overlaps; G5 (the chain-recurrence
+cover), reduced to the cell-level cover; and G6 (the order clause),
+which remains a hypothesis of the statements bound here, its content
+being the block lattice\textquotesingle s orbit combinatorics. The
+proof section renders each as mathematics, together with G2, the
+pointwise-to-integrated bridge that every certificate-shaped
+hypothesis consumes.
+'''
+note = '''
+The judgement is deliberately an ``at most'' claim: empty Morse sets
+are permitted, so the rule certifies confinement of recurrence and of
+transition order, never existence of structure --- the existence half
+(Conley indices, connection witnesses) is a separately priced
+annotation tier, absent by design. End-to-end certificate receipts
+exist in the development\textquotesingle s exact-arithmetic
+certificate-checker lane, which accepts both direct and
+product-assembled Morse-family certificates against a mutant battery;
+those receipts ride the checker\textquotesingle s own test suite, not
+this book\textquotesingle s receipt store.
+'''
+correspondence = '''
+The displayed judgement $\mathcal{M} \vDash_D \mathsf{Morse}(G, \rho)$
+$\mapsto$ the goal \texttt{MorseSat φ D ρ} = \texttt{Nonempty
+(MorseWitness φ D ρ)} --- the Morse note \S2.2 clauses (compactness,
+invariance, location, disjointness, chain-recurrence cover, order)
+packaged as a structure, so the certified conclusion is existential
+exactly as the judgement reads; the witness assembly $M(v) :=
+\mathrm{MaxInv}\bigl(\bigcup_{h(b)=v} T(b)\bigr)$ lives inside the
+proof term of \texttt{qMorseDischarge\_sound}, never in its statement.
+The display\textquotesingle s spec graph $G$ enters as the binder pair
+\texttt{Vtx} + \texttt{[PartialOrder Vtx]}: the semantics consumes
+only the reachability order (the \texttt{MorseWitness} docstring says
+so in words), and the dag check on the presentation\textquotesingle s
+edge set is R1 recompute with no Lean counterpart --- correctly.
+Order polarity carried exactly: \texttt{hOrder}\textquotesingle s
+conclusion places $\alpha$-limits in the strictly \emph{higher} set
+and $\omega$-limits in the lower (\texttt{w < v ∧ alphaSet γ ⊆ \ldots
+v ∧ omegaSet γ ⊆ \ldots w}), the display\textquotesingle s
+``transitions run only down the declared order.''
+\begin{itemize}
+\item the E2 lattice $L$ and cell map $h$ $\mapsto$ the abstract
+  binders \texttt{cells : ι → Set X} and \texttt{hmap : ι → Option
+  Vtx} (\texttt{none} = transit, the display\textquotesingle s
+  $\sqcup\,\{\text{transit}\}$): the whole lattice stratum ---
+  closure recompute, join-irreducible readout, $T(b)$, fibre
+  convexity and monotonicity of $h$, box-aligned $\rho$-wf --- is
+  presentation the checker recomputes (side condition R1), and the
+  bound statements never see it; they quantify over arbitrary cell
+  families, strictly wider than the display, in the safe direction.
+\item containment rows $\mapsto$ \texttt{hContain} (\texttt{hmap i =
+  some v → cells i ⊆ ρ v}), one-to-one at the semantic stratum.
+\item transit rows $\mathcal{A}V + \varepsilon \le 0$ $\mapsto$
+  \texttt{hTransitCert i} (per \texttt{hmap i = none}) in the
+  semantic-shadow form \texttt{HasTransitCert}: some observable $V$,
+  bounded below on the cell, with explicit margin $\varepsilon > 0$
+  and the \emph{integrated} decrease clause $V(\Phi_t x) \le V(x) -
+  \varepsilon t$ along confined prefixes. The pointwise-to-integrated
+  bridge (gap G2; the \texttt{FlowDerivOn} profile identification) is
+  outside this bound set --- the roster witness cites its
+  mechanization (\texttt{MeanValue.lean}), not bound here.
+\item $\rho$-wf rows $\mapsto$ nothing: no bound hypothesis consumes
+  them (fibre disjointness arrives through \texttt{hOverlap}
+  instead) --- R1 territory, like the lattice.
+\item the conditional ledger, exactly as bound:
+  \texttt{qMorseDischarge\_sound} carries G3--G6 as hypotheses
+  (\texttt{hCompact}/\texttt{hDisj}/\texttt{hCR}/\texttt{hOrder});
+  \texttt{\_modelClass} discharges G3 outright
+  (\texttt{maxInv\_isCompact}: Tychonoff, consuming \texttt{[T2Space
+  X]}, spacewise flow continuity \texttt{hflow}, \texttt{[Finite ι]}
+  + compact cells via \texttt{fiberUnion\_isCompact} --- model-class
+  facts all), reduces G4 to overlap transit certificates
+  (\texttt{HasTransitCert.disjoint\_maxInv}: forward confinement on
+  both sides, no backward uniqueness), reduces G5 to the cell-level
+  cover \texttt{hCell} (M(iii), KMV-III, literature strength) through
+  \texttt{crCover\_assemble} + \texttt{HasTransitCert.maxInv\_empty}
+  (M(iv)), and carries G6 (\texttt{hOrder}) untouched.
+\end{itemize}
+Width note, both directions stated. The roster witness cell narrates
+discharge \emph{past} this bound set --- the order-assembly and
+eventual-member legs, the crossing-certificate sharpening of G4, the
+mean-value bridges, the Dini profile strata --- all cited theorems,
+none bound in this entry: the certified reach here stops at
+\texttt{\_modelClass}\textquotesingle s ledger, and a successor bind
+adopting the later assemblies would shrink the conditional residue to
+the profile identifications (a named re-bind candidate, not a gap in
+what is certified). Binder cargo: \texttt{[PseudoMetricSpace X]} is
+consumed by chain recurrence itself --- $(\varepsilon,T)$-chains need
+distances --- an ambient assumption the display leaves silent.
+'''
+
+[[rule.lean]]
+module = "Qtsl.QtslSoundness"
+src = "../../lean/qtsl/Qtsl/QtslSoundness.lean"
+decls = ["qMorseDischarge_sound"]
+
+[[rule.lean]]
+module = "Qtsl.Discharge"
+src = "../../lean/qtsl/Qtsl/Discharge.lean"
+decls = ["qMorseDischarge_sound_modelClass", "maxInv_isCompact", "fiberUnion_isCompact", "HasTransitCert.disjoint_maxInv", "HasTransitCert.maxInv_empty", "crCover_assemble"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+Absent, and honestly so at two levels. The HOL4
+development\textquotesingle s object is the base-kernel checker cone
+--- the first-order computational surface of the sequent-stratum
+certificate contract (dtype factorization, exact rational arithmetic,
+the catalogue check functions) --- and the satisfaction-judgement
+stratum this rule concludes in has no HOL twin: no Morse-family or
+judgement-stratum definition exists in the ported scripts (verified
+against the port\textquotesingle s definition inventory). The base
+leaves this rule consumes --- facet-sign, containment, and decrease
+rows --- ARE covered by the ported checker; what has no HOL
+counterpart is the judgement-stratum soundness development itself,
+which today is Lean-only. A port would be new assurance surface over
+the semiflow stratum, not a translation of existing checker code.
+'''

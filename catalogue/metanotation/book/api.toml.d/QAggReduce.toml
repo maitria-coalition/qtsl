@@ -1,0 +1,21 @@
+# api.toml.d/QAggReduce.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QAggReduce"
+
+[api.ts]
+handle = "rules.qtslExt.aggReduce"
+sig_file = "ts/src/rules/qtsl-ext.ts"
+sig = ["fn aggReduce", "interface AggReduceArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_agg_reduce.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_ext::agg_reduce"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_ext/agg.rs"
+sig = ["fn agg_reduce"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_ext_common/mod.rs"
+snippet = "fn-body:fx_agg_reduce"

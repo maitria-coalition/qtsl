@@ -1,0 +1,189 @@
+# Transcripts for the MTK production tutorial — the producer-package
+# listings (the workspace/strategy sections ride the companion spec
+# qtsl-tutorial-session.toml, which needs the session package too).
+#
+# The sandbox is the consumer project the chapter describes: an empty
+# directory with @maitria/mtk installed by path. Each listing shown is
+# the committed file under listings/ — the printed bytes are the
+# executed bytes.
+
+timeout = 900
+
+inputs = [
+  "book:listings/exactness.ts",
+  "book:listings/sign.ts",
+  "book:listings/two-tier.ts",
+  "book:listings/spec.ts",
+  "book:listings/rule-row.ts",
+  "book:listings/anatomy.ts",
+  "mtk:crates",
+  "mtk:Cargo.lock",
+  "mtk:ts/src",
+  "mtk:ts/package.json",
+  "qtsl-experiments:gymnasium/out/frozenlake-4x4/exact_T10.cbor",
+]
+
+[session]
+env = { PATH = "{mtk}/ts/node_modules/.bin:{ENV:PATH}" }
+setup = [
+  "npm init -y >/dev/null",
+  "npm install --no-audit --no-fund --loglevel=error {mtk}/ts >/dev/null",
+]
+
+[[mount]]
+tool = "book"
+src = "listings/exactness.ts"
+dest = "exactness.ts"
+mode = "copy"
+
+[[mount]]
+tool = "book"
+src = "listings/sign.ts"
+dest = "sign.ts"
+mode = "copy"
+
+[[mount]]
+tool = "book"
+src = "listings/two-tier.ts"
+dest = "two-tier.ts"
+mode = "copy"
+
+[[mount]]
+tool = "book"
+src = "listings/spec.ts"
+dest = "spec.ts"
+mode = "copy"
+
+[[mount]]
+tool = "book"
+src = "listings/rule-row.ts"
+dest = "rule-row.ts"
+mode = "copy"
+
+[[mount]]
+tool = "book"
+src = "listings/anatomy.ts"
+dest = "anatomy.ts"
+mode = "copy"
+
+# anatomy.ts reads the certificate the Quick Start produced; the corpus
+# copy is byte-identical to that production (the Quick Start's spec
+# checks the identity with cmp at every regeneration), so the sandbox
+# seeds it from the published corpus.
+[[mount]]
+tool = "qtsl-experiments"
+src = "gymnasium/out/frozenlake-4x4/exact_T10.cbor"
+dest = "exact_T10.cbor"
+mode = "copy"
+
+# ---------------------------------------------------------------- exactness
+
+[[fragment]]
+name = "exactness-src"
+kind = "file"
+source = "book:listings/exactness.ts"
+
+[[fragment]]
+name = "exactness-run"
+kind = "run"
+prose-assert = ['^3/10$', '^355/113$', 'non-integer numbers are ambiguous']
+
+  [[fragment.step]]
+  run = "npx tsx exactness.ts"
+
+# --------------------------------------------------------------------- sign
+
+[[fragment]]
+name = "sign-src"
+kind = "file"
+source = "book:listings/sign.ts"
+
+[[fragment]]
+name = "sign-run"
+kind = "run"
+prose-assert = [
+  '^ran on cpu\(hostref\); ladder served F/M/host = 0,0,2$',
+  'cell 0: p in \[1/6, 4/3\] — p > 0 CERTIFIED',
+  'cell 1: p in \[-2/3, 1/3\] — sign open \(subdivide\)',
+]
+
+  [[fragment.step]]
+  run = "npx tsx sign.ts"
+
+# ----------------------------------------------------------------- two-tier
+
+[[fragment]]
+name = "two-tier-src"
+kind = "file"
+source = "book:listings/two-tier.ts"
+
+[[fragment]]
+name = "two-tier-run"
+kind = "run"
+prose-assert = [
+  '^float: optimal 0\.6000000000000001 duals \[ 0\.4, 0\.2 \]$',
+  '^exact: 3/5 at x = 1/5, 2/5$',
+]
+
+  [[fragment.step]]
+  run = "npx tsx two-tier.ts"
+
+# --------------------------------------------------------------------- spec
+
+[[fragment]]
+name = "spec-src"
+kind = "file"
+source = "book:listings/spec.ts"
+
+[[fragment]]
+name = "spec-run"
+kind = "run"
+prose-assert = [
+  '^maitria\.qtsl\.spec\.v1 - 179 bytes$',
+  '^decoded: reach-goal-by-10 v = 0$',
+  '^refused: probRange$',
+  '^  at \(root\): p = 3/2, outside \(0, 1\]$',
+]
+
+  [[fragment.step]]
+  run = "npx tsx spec.ts"
+
+# ----------------------------------------------------------------- rule-row
+
+[[fragment]]
+name = "rule-row-src"
+kind = "file"
+source = "book:listings/rule-row.ts"
+
+[[fragment]]
+name = "rule-row-run"
+kind = "run"
+prose-assert = [
+  '^maitria\.qtsl\.union_bound\.v0 - 58 bytes$',
+  '^concluded bound: 3/16$',
+  '^refused: signConstraint$',
+  '^  QUnionBound\.a:',
+]
+
+  [[fragment.step]]
+  run = "npx tsx rule-row.ts"
+
+# ------------------------------------------------------------------ anatomy
+
+[[fragment]]
+name = "anatomy-src"
+kind = "file"
+source = "book:listings/anatomy.ts"
+
+[[fragment]]
+name = "anatomy-run"
+kind = "run"
+prose-assert = [
+  '^fields: claim deadline env_id goal init kernel kwargs lane mdp_name ns policy repo_sha table v$',
+  '^deadline: 10  states: 16  goal: \[ 15 \]$',
+  "^claim: \\[ '0x032f', '0x4ce3' \\]$",
+  "^kernel\\[0\\]: \\[ 0, 0, 0, '0x02', '0x03' \\]$",
+]
+
+  [[fragment.step]]
+  run = "npx tsx anatomy.ts"

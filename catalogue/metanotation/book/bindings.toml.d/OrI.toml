@@ -1,0 +1,24 @@
+# bindings.toml.d/OrI.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'OrI'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.Core.Catalogue"
+decl = "POrIData"
+sha256 = "c0e2104f333f8d124c10169e0433c7884cb7aabbf07c249a58129d48ada361af"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_orI_left"
+sha256 = "420a4b8f7e3b4d7179d9fdb9eaf6d783eb11f4ce55779ffbdf93029a8a43a7d4"
+
+[[statement]]
+module = "Qtsl.Soundness"
+decl = "sound_orI_right"
+sha256 = "43112fa6c6cc18b874cbe135a4d7f4ee3f3f7e5c9ba979ee1be23078439ca296"
+
+[[correspondence]]
+entry = "OrI"
+steele_sha256 = "160fae4e652c2134de934ebca1749722cc117db7bde418783dda9ddb712eeb02"
+statements_sha256 = "67215b4b6ba9012b3cfe921035f267c6896f2b5a2bc9b580448d063537ca2719"
+prose_sha256 = "39c234251d2a050a251b17d4b7dfe8f1ee0a76c704e65c71ac855d3127e3a077"
+

@@ -1,0 +1,21 @@
+# api.toml.d/EqRefl.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "EqRefl"
+
+[api.ts]
+handle = "bl.Builder.eqRefl"
+sig_file = "ts/src/bl.ts"
+sig = ["fn eqRefl"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:eqRefl"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::eq_refl"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn eq_refl"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:eq_refl"

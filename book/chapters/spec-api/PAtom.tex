@@ -1,0 +1,27 @@
+\apilang{TypeScript}{spec.pathAtomLe / pathAtomGe}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+export function pathAtomLe(c: QLike, ret: PathObservable): PathPred
+
+export function pathAtomGe(c: QLike, ret: PathObservable): PathPred
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const pathEvent = s.pathAtomGe(0n, s.retPath(s.always(indAtom)));
+const eventCap = s.probGe(Q.of(3, 4), pathEvent);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::PathPred::\{atom\_le, atom\_ge\}}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/formula.rs}}
+\begin{rustsrc}
+pub fn atom_le(c: WitRat, ret: PathObservable) -> PathPred
+
+pub fn atom_ge(c: WitRat, ret: PathObservable) -> PathPred
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let path_event = PathPred::atom_ge(
+    q(0, 1),
+    PathObservable::path(PathPred::always(ind_atom.clone())),
+);
+let event_cap = ForallSpec::prob_ge(q(3, 4), path_event).unwrap();
+\end{rustsrc}

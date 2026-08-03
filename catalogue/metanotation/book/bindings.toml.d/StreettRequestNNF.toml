@@ -1,0 +1,29 @@
+# bindings.toml.d/StreettRequestNNF.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'StreettRequestNNF'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "denot_elimNeg"
+sha256 = "fab29c7a1d77e1d5e084bf93232c9e74d54f92f4473b47015409ad663be463cf"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "denot_nnf"
+sha256 = "88b07b926d0e922b96a274afdcdd85ea97a1c7b7379dcf7d8c64e3bd6d1cb10c"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "negLits_nnf"
+sha256 = "eefdaa32aea273c4748ce50b2659e7e2bf03927892a196995bdbbc4038da0a01"
+
+[[statement]]
+module = "QtslAux.NNFDuality"
+decl = "nnf_no_negLit_iff"
+sha256 = "d0bbfeb0add4216be00bd4a292451313bfd97e9c62d6e434303e295912c1a41c"
+
+[[correspondence]]
+entry = "StreettRequestNNF"
+steele_sha256 = "e30e72614260a86e9d66353eebd2efc26f1a6522e95ea0045534ab51689d401d"
+statements_sha256 = "27eb27605b6c9d7689e19eb8a549ed5f64d27057558581c5b742151cd4b9b23f"
+prose_sha256 = "f08082925f8a23ace5a2dbc4297cb3fd9d3d0d37897b0e2af5b1a39d11ed0ced"
+

@@ -1,0 +1,24 @@
+# bindings.toml.d/CountAtomRounding.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'CountAtomRounding'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "countAtomRounding_eq"
+sha256 = "69c46de2c440ef6611afdb230bc965e5c770f2e4a7fd67d50e5e246ecdb4f4e0"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "countAtomRounding_sound"
+sha256 = "bfe46b6967488fdcae3fdc327f337b0ed3d479bf7660a2ea035a8c3c4a44bcec"
+
+[[statement]]
+module = "QtslAux.Structural"
+decl = "countAtomRounding_tighter"
+sha256 = "6950f7d9da31bf2b914adb95f2ee49893c18f9490117077645fc990e39d6fa3c"
+
+[[correspondence]]
+entry = "CountAtomRounding"
+steele_sha256 = "f9362bc5187f0f0dc53c80defde5fe173a34f8032b7bcebbd243a297f7bbcce4"
+statements_sha256 = "f600e3313c265db8b12dc3ef7c0fafa683b3cab496a0c0d155bfcc43a72de7a9"
+prose_sha256 = "3366ee48891751f3d995cf192b165745fe63115fc74b821127c4dc6978447692"
+

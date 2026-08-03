@@ -1,0 +1,9 @@
+/target
+**/__pycache__/
+lean/*/.lake/
+catalogue/metanotation/out/
+/*.log
+/*.receipt
+
+# ad-hoc scratch worktrees parked at repo top level (mount points, never content)
+.worktrees/

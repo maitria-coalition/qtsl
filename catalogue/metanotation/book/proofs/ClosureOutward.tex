@@ -1,0 +1,117 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The closure discipline this move belongs to --- why strict
+literals never reach a row, and how the three moves divide the
+positions --- is set out in full in the
+\rulename{ClosureDiscipline-EXACT} section; this section states only
+what is native to the outward move: the two verified faces of its
+warrant, and the direction analysis that confines it to negative
+positions.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:co-template}
+An admissible rule $R$ is warranted by a rewrite replacing any
+$R$-node with a derivation fragment over core (and
+previously-justified) rules with the same conclusion --- or, where the
+conclusion has no catalogue derivation, discharging against a named
+verified theorem. Leaf-first application eliminates every $R$-node in
+finitely many steps; soundness is conserved with no new kernel
+semantic content.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{ClosureDiscipline-OUTWARD} instance --- two faces]
+\label{rec:co-instance}
+\emph{Atom face.} At a negative position, the complement of a closed
+atom is consumed as its orientation swap:
+\[
+\mathrm{cmpl}\{p \le c\} \;\rightsquigarrow\; \{c \le p\}
+\qquad\qquad
+\mathrm{cmpl}\{c \le p\} \;\rightsquigarrow\; \{p \le c\}
+\]
+warranted by the containment
+$\mathrm{cmpl}\{p \le c\} \subseteq \{c \le p\}$
+(Proposition~\ref{prop:co-atom}): the consumed atom
+\emph{over-approximates} the true complement, losing only the cut
+$\{p = c\}$.
+
+\emph{Region face.} A negative position consuming the complement of a
+\emph{certified region} $R$ (a child certificate\textquotesingle s
+conclusion, not a syntactic atom) is warranted by the antitone kernel
+(Proposition~\ref{prop:co-region}): certified under-approximation of
+the denotation becomes over-approximation of the
+denotation\textquotesingle s complement. Both faces discharge against
+their verified containment; the orientation swap itself is syntactic
+and recomputed by the checker.
+\end{brecipe}
+
+\begin{bprop}[atom face]\label{prop:co-atom}
+$\mathrm{cmpl}\{x \mid p(x) \le c\} \subseteq \{x \mid c \le p(x)\}$,
+and symmetrically
+$\mathrm{cmpl}\{x \mid c \le p(x)\} \subseteq \{x \mid p(x) \le c\}$.
+\end{bprop}
+\begin{proof}
+If $\neg(p(x) \le c)$ then $c < p(x)$, hence $c \le p(x)$ --- the
+strict fact weakened to its non-strict form
+(\texttt{closureOutward\_sound}; the mirror is
+\texttt{closureOutwardGe\_sound}). The containment is strict exactly
+on the cut $\{p = c\}$, which the swap adjoins.
+\end{proof}
+
+\begin{bprop}[region face --- the antitone kernel]\label{prop:co-region}
+If a certified region under-approximates a denotation,
+$R \subseteq [\![\varphi]\!]$, then
+$\mathrm{cmpl}\,[\![\varphi]\!] \subseteq \mathrm{cmpl}\,R$: the
+complement of the certificate over-approximates the complement of the
+denotation.
+\end{bprop}
+\begin{proof}
+Contrapositive, one line: $x \notin \mathrm{cmpl}\,R$ means
+$x \in R \subseteq [\![\varphi]\!]$, so
+$x \notin \mathrm{cmpl}\,[\![\varphi]\!]$
+(\texttt{compl\_over\_approx}). This is the direction transport that
+lets negative positions consume child certificates at all: the
+judgement kind fixes one orientation, and complementation flips it in
+precisely the way the consuming side wants.
+\end{proof}
+
+\begin{bremark}[what is lost, and why the direction is right]
+Only the cut $\{p = c\}$ --- and in the sound direction. At a
+negative position the atom names a set to be excluded or avoided;
+certifying against a superset of it is a fortiori certifying against
+it. The move never claims the cut is negligible --- for a nondegenerate
+observable ($p - c \not\equiv 0$ on a full-dimensional cell) it is a
+measure-zero level set, but soundness nowhere consumes that: the
+containment alone carries the warrant, so even a degenerate observable
+whose cut is fat (at the extreme $p \equiv c$, the whole cell) only
+makes the certificate more conservative, never wrong.
+\end{bremark}
+
+\begin{bremark}[one-directional by design]
+At a \emph{positive} position the same swap would overclaim. Take $p$
+constant at $c$: the swap $\{c \le p\}$ is the whole space, while the
+true complement of $\{p \le c\}$ is empty --- the maximal over-claim.
+Nothing in the move\textquotesingle s own premises excludes this; the
+closure discipline\textquotesingle s routing table
+(the preamble, \rulename{ClosureDiscipline-EXACT} section) is the
+guard, sending positive-position strict literals to the inward move
+instead. A porter implementing the discipline ports the routing with
+it, or re-learns this remark the hard way.
+\end{bremark}
+
+\begin{bremark}[what is deliberately not warranted here]
+The verified faces are the atom step and the region step. The
+composite induction --- pushing complements through conjunctions,
+disjunctions, and nested operators until they reach atoms --- is
+stated once, for all consumers, with the normal-form rewriting rules,
+and this rule\textquotesingle s dashboard check is marked conditional
+for exactly that reason: a complement traversing a full specification
+rides the normal-form sections for the traversal and this rule for
+the atoms it arrives at.
+\end{bremark}
+
+\begin{anchors}
+Proposition \ref{prop:co-atom} & \texttt{closureOutward\_sound}, \texttt{closureOutwardGe\_sound}\\
+Proposition \ref{prop:co-region} & \texttt{compl\_over\_approx}\\
+the judgement reading & \texttt{RegionSat} (quoted in full above)\\
+the routing guard & the closure-discipline preamble (\rulename{ClosureDiscipline-EXACT} section)\\
+the composite traversal & the normal-form rewriting sections (deliberately not this rule)\\
+\end{anchors}

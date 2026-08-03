@@ -1,0 +1,278 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof at
+Putnam-exam-solution detail, at the rule's \emph{proven scope}: discrete-kernel
+profile, conservative ranking scope (Remark~\ref{rem:qsb-scope} states the
+scope loudly, including what is and is not hash-bound in this edition). Every
+hypothesis is used and remarked on; the anchor table maps steps to the Lean
+declarations that carry them.}
+
+\textbf{Setting and claim.}\enspace The semantic object at the discrete-kernel
+profile is a time-homogeneous Markov chain on a measurable state space $S$,
+presented by a single step kernel $K$ (modes, guards, and resets of the
+underlying hybrid presentation flattened into $K$), with path measure $\mu_x$
+on $S^{\mathbb{N}}$ from a start state $x$ (the Ionescu--Tulcea trajectory
+construction). Region data: the operating region $D$, its checker-recomputed
+hull $\bar{D} \supseteq D$, and the exit set $U$ for the confinement
+certificate; per Streett pair $i$ (finitely or countably many), a certified
+request region $R_i$ and response region $G_i$. Certificate data: the
+confinement certificate $V_0 : S \to \R$ with threshold
+$\mathrm{thr}$, and per pair a ranking certificate $W_i : S \to \R$ with decay
+rate $\varepsilon_i \in \Q_{>0}$ and bound $C_i$. The premise rows, each an
+inherited base-calculus sequent:
+
+\begin{itemize}
+\item[(H1)] threshold arithmetic: $p + \mathrm{thr} \le 1$ (exact rational).
+\item[(H2)] hull and mass rows, for every $y \in D \smallsetminus U$:
+  $K(y)(\bar{D}) = 1$ and $K(y)(D \cup U) = 1$ --- one-step mass stays in the
+  hull, and stays in operating-or-exit.
+\item[(H3)] confinement rows: one-step drift
+  $\int V_0 \, dK(y) \le V_0(y)$ on $D \smallsetminus U$ (with one-step
+  integrability); floor $V_0 \ge 1$ on $U \cap \bar{D}$; nonnegativity
+  $V_0 \ge 0$ on $\bar{D}$.
+\item[(H4)] ranking rows, per pair, on the confinement region
+  $D \smallsetminus U$: bounds $0 \le W_i \le C_i$ on $\bar{D}$; nonincrease
+  $\int W_i \, dK(y) \le W_i(y)$ off the response region $G_i$; request decay
+  $\int W_i \, dK(y) \le W_i(y) - \varepsilon_i$ on $R_i \smallsetminus G_i$.
+\item[(H5)] initialization: $x \in D$ and $V_0(x) \le \mathrm{thr}$ --- i.e.\
+  $x$ lies in the concluded region atom
+  $\mathsf{qraSublevel}(V_0, \mathrm{thr})$.
+\end{itemize}
+
+The claim: under (H1)--(H5),
+\[
+\mu_x\Bigl\{\omega \;\Bigm|\; \forall i,\ \bigl(\exists^\infty n,\ \omega_n
+\in R_i\bigr) \Rightarrow \bigl(\exists^\infty n,\ \omega_n \in G_i\bigr)
+\Bigr\} \;\ge\; p ,
+\]
+which is the Streett-acceptance reading of the concluded judgement
+$\mathcal{M} \vDash_{\mathsf{qraSublevel}(V_0,\,\mathrm{thr})}
+\mathsf{P}_{\ge p}[\mathsf{Streett}((\rho_i, \varphi_i))_i]$ once the
+certified regions are tied to the formulas (Remark~\ref{rem:qsb-tie}).
+
+\begin{blemma}[confinement]\label{lem:qsb-confine}
+$\mu_x\{\omega \mid \forall n,\ \omega_n \in D \smallsetminus U\} \ge
+1 - V_0(x) \ge 1 - \mathrm{thr} \ge p$.
+\end{blemma}
+\begin{proof}
+This is the quantitative-safety rule consumed whole: by (H2)--(H3), $V_0$
+read along the path and stopped at the first $U$-visit is a nonnegative
+supermartingale with barrier $\ge 1$ on the stopped set, so Ville's maximal
+inequality bounds the exit probability by $V_0(x)$; the mass rows (H2) keep
+every reachable state inside $\bar{D}$, where the nonnegativity and floor
+rows actually hold --- the fail-closed pairing. The full argument, with the
+two-branch counterexample showing the nonnegativity row is not decoration,
+is the \rulename{QSafetyBattery} section's; here we cite its theorem
+(anchor table) and use only the stated bound. The last two inequalities are
+(H5) and (H1).
+\end{proof}
+
+\begin{blemma}[windowed telescoping invariant]\label{lem:qsb-window}
+Fix one pair $(R, G)$ with certificate $W$, rate $\varepsilon$, and suppose
+the drift rows hold \emph{globally}: $\mathbb{E}[W_{n+1} \mid \mathcal{F}_n]
+\le W_n$ a.e.\ off $G$, and $\le W_n - \varepsilon$ a.e.\ on requests off
+$G$, for the process $W_n := W(X_n)$ adapted to a filtration
+$(\mathcal{F}_n)$, with $W_n \ge 0$ and integrable. For a window start $N$
+let $A_{N,n} := \{\text{no response in } [N, n)\}$. Then for all $n \ge N$,
+\[
+\int_{A_{N,n}} W_n \, d\mu \;+\; \varepsilon \sum_{k = N}^{n-1}
+\mu\bigl(A_{N,k+1} \cap \{X_k \in R\}\bigr) \;\le\; \int W_N \, d\mu .
+\]
+\end{blemma}
+\begin{proof}
+Induction on $n$ from $n = N$, where $A_{N,N}$ is everything and the sum is
+empty. For the step: $A_{N,n+1}$ is $\mathcal{F}_n$-measurable (it
+constrains coordinates $< n + 1$), so the tower property converts
+$\int_{A_{N,n+1}} W_{n+1}$ into $\int_{A_{N,n+1}}
+\mathbb{E}[W_{n+1} \mid \mathcal{F}_n]$. Split $A_{N,n+1}$ at time $n$ into
+its request and non-request parts: on the request part the decay row pays
+$\varepsilon \cdot \mu(A_{N,n+1} \cap \{X_n \in R\})$ --- exactly the new
+summand --- and on the non-request part the nonincrease row holds (both
+parts lie off $G$ at time $n$, since $A_{N,n+1}$ forbids a response at
+$n$). Finally $A_{N,n+1} \subseteq A_{N,n}$ and $W_n \ge 0$ shrink the
+integral domain monotonically, closing the induction. Two features deserve
+remark. First, \emph{no sign condition on $\varepsilon$ is used here}: the
+decrement paid at step $k$ is exactly the summand recorded at index $k$,
+an exact cancellation --- positivity of $\varepsilon$ enters only in
+Lemma~\ref{lem:qsb-bc}. Second, the two drift rows do genuinely different
+work and neither subsumes the other: nonincrease carries the (possibly
+long) non-request stretches; decay is charged only at requests.
+\end{proof}
+
+\begin{blemma}[summability and Borel--Cantelli]\label{lem:qsb-bc}
+Under the hypotheses of Lemma~\ref{lem:qsb-window} with $\varepsilon > 0$
+and $W$ bounded: almost surely, infinitely many requests imply infinitely
+many responses.
+\end{blemma}
+\begin{proof}
+Fix a window start $N$. Lemma~\ref{lem:qsb-window} gives
+\[
+\varepsilon \sum_{j \ge 0} \mu\bigl(\{\text{no response in } [N, N+j]\}
+\cap \{X_{N+j} \in R\}\bigr) \;\le\; \mathbb{E}[W_N] \;<\; \infty ,
+\]
+so the un-responded-request events of window $N$ are summable, and by the
+Borel--Cantelli lemma their limsup is null. A path with infinitely many
+requests but only finitely many responses has a finite (possibly empty)
+set of response times; for any window start $N$ beyond all of them
+($N = 0$ when there are none), the path lies in infinitely many
+of window $N$'s un-responded-request events --- i.e.\ in that null limsup.
+The union over the countably many window starts is null, which is the
+claim. (Here $\varepsilon > 0$ is finally consumed, dividing the bound;
+boundedness of $W$ supplies the finite right-hand side and, upstream,
+integrability of every $W_n$.)
+\end{proof}
+
+\begin{blemma}[localization to the confinement region]\label{lem:qsb-loc}
+The bundle's ranking rows (H4) hold only on $D \smallsetminus U$, while
+Lemma~\ref{lem:qsb-window} wants global rows. Define the \emph{localized}
+pair process: flag the state with the survival indicator of the event
+``no visit to $U \cup D^{\mathrm{c}}$ so far'', zero the certificate at the
+first exit, and count exited states as \emph{responded}. Then the flagged
+process satisfies the global hypotheses of Lemmas
+\ref{lem:qsb-window}--\ref{lem:qsb-bc}, and the conclusion, restricted to
+paths confined forever, descends to the raw process: almost surely on
+$\{\forall n,\ \omega_n \in D \smallsetminus U\}$, infinitely many
+$R_i$-visits imply infinitely many $G_i$-visits.
+\end{blemma}
+\begin{proof}
+On surviving times the current state lies in $D \smallsetminus U$, so the
+one-step mass row (H2) confines the next step to $\bar{D}$, where the
+masked certificate is nonnegative and dominated by the unmasked one-step
+integral --- hence the (H4) rows transfer to the localized certificate
+verbatim. On exited times the certificate is zero and the state sits, by
+construction, in the enlarged response set, so the global rows hold there
+\emph{vacuously}: no drift is ever demanded of a dead path. Restricted to
+confined paths the flag never trips, the enlarged response set coincides
+with $G_i$, and the conclusion is the raw one. The
+exited-counts-as-responded device is not a weakening of the claim: the
+theorem below asserts the pair implications only on the confinement event
+of Lemma~\ref{lem:qsb-confine}, exactly where the device is invisible.
+\end{proof}
+
+\begin{bthm}[soundness of \rulename{QStreettBundle}, discrete profile,
+conservative ranking scope]\label{thm:qsb-sound}
+Under (H1)--(H5),
+$\mu_x\{\omega \mid \forall i,\ (\exists^\infty n,\ \omega_n \in R_i)
+\Rightarrow (\exists^\infty n,\ \omega_n \in G_i)\} \ge p$.
+\end{bthm}
+\begin{proof}
+Per pair $i$, Lemmas \ref{lem:qsb-window}--\ref{lem:qsb-loc} give the pair
+implication almost surely on the confinement event. The pairs are
+countably many, so the almost-sure statements intersect (countable
+intersection of co-null sets); the Streett event therefore contains the
+confinement event up to a null set, and Lemma~\ref{lem:qsb-confine} bounds
+its measure below by $p$. $\qedhere$
+\end{proof}
+
+\begin{bremark}[every hypothesis earns its keep]\label{rem:qsb-hyp}
+\emph{(H1)}: at $p + \mathrm{thr} > 1$ the concluded atom admits start
+states with $1 - V_0(x) < p$ and Lemma~\ref{lem:qsb-confine} yields less
+than $p$ --- the sublevel atom and the probability bound are coupled by
+exactly this row. \emph{(H2)}: drop the hull row and probability mass can
+reach $U \smallsetminus \bar{D}$, where no floor row holds, voiding
+Ville's barrier in Lemma~\ref{lem:qsb-confine}; drop the
+operating-or-exit row and the stopped-process reading of the confinement
+certificate is unsound (mass escapes the region where drift was ever
+asserted) --- the two recomputed side-conditions are the fail-closed
+pairing. \emph{(H3) nonnegativity}: essential, not hygiene --- a signed
+confinement certificate can go negative on one branch and thereby
+subsidize exit mass on another; the recorded two-branch counterexample
+lives in the \rulename{QSafetyBattery} section. \emph{(H4) strictness}:
+at $\varepsilon_i = 0$, take $W_i \equiv 1$ on a one-state chain with
+$K(s) = \delta_s$, $R_i = \{s\}$, $G_i = \varnothing$, $V_0 \equiv 0$:
+every row holds, the path requests forever, and no response ever occurs
+--- the conclusion fails at any $p > 0$. \emph{(H4) bound rows}: the
+constant $C_i$ gives integrability of the localized certificate
+(Lemma~\ref{lem:qsb-loc}) and the finite right-hand side of
+Lemma~\ref{lem:qsb-bc}; nonnegativity of $W_i$ additionally powers the
+monotone domain-shrink step inside Lemma~\ref{lem:qsb-window}.
+\emph{(H5)}: initialization is what makes the region atom an
+\emph{under}-approximation of the satisfaction set --- the workhorse
+orientation of the satisfaction judgement.
+\end{bremark}
+
+\begin{bremark}[scope, loudly]\label{rem:qsb-scope}
+Three nested scopes, from proven-and-bound outward. \emph{(i) Bound in
+this edition}: the five excursion-cluster declarations (anchor table) ---
+the windowed telescoping engine (Lemmas
+\ref{lem:qsb-window}--\ref{lem:qsb-bc}), its additive-drift sibling for
+plain reachability (the ranking hitting-time bound and almost-sure
+hitting), and the nonnegative-supermartingale convergence theorem (part
+of the cluster, available for the general excursion picture; the
+presented proof path does not consume it). These warrant the rule
+\emph{conditionally}: they are the engine, at the discrete-kernel
+profile. \emph{(ii) Machine-checked, not yet bound}: the assembly
+(\texttt{sound\_QStreettBundle} --- Lemmas \ref{lem:qsb-confine},
+\ref{lem:qsb-loc} and Theorem~\ref{thm:qsb-sound} as one statement), the
+formula tie (\texttt{sound\_QStreettBundle\_tie}), and the sharper
+\emph{carved} ranking scope, where decay is demanded only off
+$G_i \cup J_i$ with $J_i := \{V_i \le 1 - \gamma_i\} \cap
+(I \smallsetminus [\![\rho_i]\!])$ and the absorbing certificates
+$(V_i, \gamma_i)$ repay the carve-out: a L\'evy upward-convergence
+argument shows frequent $J_i$-visits preclude frequent requests, the
+absorption bound being discharged from kernel-level rows by a time-shifted
+supermartingale bridge plus a conditional Ville inequality
+(\texttt{sound\_QStreettBundle\_carved},
+\texttt{absorptionBound\_of\_kernel},
+\texttt{sound\_QStreettBundle\_carved\_discharged} --- auxiliary module
+\texttt{QtslAux.QStreett}). Binding these and minting their
+receipts is the named follow-up; until then this page claims them as
+testimony, not as hash-bound warrant. \emph{(iii) Open}: the
+continuous-time general-stochastic-hybrid-system profile --- the same
+transport residue the safety and deadline batteries carry.
+\end{bremark}
+
+\begin{bremark}[the formula tie]\label{rem:qsb-tie}
+The theorem is stated over certified regions $R_i, G_i$; the concluded
+judgement speaks of formulas $\rho_i, \varphi_i$. The sound directions are
+asymmetric: certified \emph{request} regions may \emph{over}-approximate
+the request denotation, certified \emph{response} regions must
+\emph{under}-approximate the response denotation --- weakening the
+hypothesis and strengthening the conclusion of each pair implication.
+This is the content of the complement-request sub-rule
+(\rulename{StreettCmplRequest}, two sections on), whose event-level kernel
+is two monotonicity steps.
+\end{bremark}
+
+\begin{bremark}[degenerate pairs, and why Streett is primitive]
+A B\"uchi acceptance condition is the one-pair Streett condition with
+trivially-true request; on that pair the bundle degenerates to the
+classical recurrence certificate (the \rulename{StreettDegenerate}
+section). The converse embedding does not exist at parity of cost:
+deterministic B\"uchi automata recognize only limit languages
+\cite{landweber1969}, and re-encoding a $k$-pair Streett condition
+B\"uchi-primitively costs an exponential-in-$k$ automaton product, where
+the bundle pays $2k + 1$ certificates. Streett conditions enter the
+literature as the complemented-pairs acceptance of \cite{streett1982},
+the linear-time face of Rabin's pairs \cite{rabin1969}; the standard
+survey is \cite{thomas1990}.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+The ranking row is a Foster--Lyapunov drift condition
+\cite{foster1953,meyntweedie1993} in certificate form; its use to force
+almost-sure hitting is the ranking-supermartingale argument of the
+probabilistic-programs tradition \cite{chakarov2013}. The confinement
+certificate is Ville's inequality \cite{ville1939}; the convergence item
+of the bound cluster is Doob's supermartingale convergence theorem
+\cite{doob1953}; the summability-to-limsup step is Borel--Cantelli (see
+e.g.\ \cite[Thm.~2.3.1]{durrett2019}). As with the polynomial rules of
+the base calculus, the certificate form moves all analytic content into
+the \emph{choice} of $(V_0, W_i, \varepsilon_0)$: what the checker
+replays is row arithmetic, and what this proof adds is only the
+assembly. No completeness is claimed or needed here; the source
+catalogue records a completeness theorem for the bundle relative to its
+termination seam, outside this book's kernel-facing scope.
+\end{bremark}
+
+\begin{anchors}
+Lemma \ref{lem:qsb-confine} & \texttt{sound\_QSafetyBattery\_failClosed} (bound under the \rulename{QSafetyBattery} entry; consumed whole)\\
+Lemma \ref{lem:qsb-window} + no-sign-condition remark & \texttt{streett\_window\_invariant} (the engine's inner induction; subsumed by the bound \texttt{streett\_window\_sum\_le})\\
+Lemma \ref{lem:qsb-bc}, summability form & \texttt{streett\_window\_sum\_le} (bound)\\
+Lemma \ref{lem:qsb-bc}, Borel--Cantelli assembly & \texttt{streett\_ae\_frequently\_response} (bound)\\
+additive-drift sibling (reachability) & \texttt{ranking\_hitting\_sum\_le}, \texttt{ae\_hits\_of\_ranking} (bound)\\
+supermartingale convergence (cluster item) & \texttt{Supermartingale.exists\_ae\_tendsto\_of\_nonneg} (bound; not consumed by the presented path)\\
+Lemma \ref{lem:qsb-loc} & \texttt{streett\_pair\_localized} (\texttt{QtslAux.QStreett}; machine-checked, not hash-bound in this edition)\\
+Theorem \ref{thm:qsb-sound} & \texttt{sound\_QStreettBundle} (same module, not hash-bound in this edition)\\
+Remark \ref{rem:qsb-tie} & \texttt{streett\_event\_mono}, \texttt{sound\_QStreettBundle\_tie} (same module, not hash-bound in this edition)\\
+Remark \ref{rem:qsb-scope}(ii), carved scope & \texttt{AbsorptionBound}, \texttt{ae\_not\_frequently\_of\_absorption}, \texttt{supermartingale\_stopped\_shift}, \texttt{measure\_reach\_after\_le}, \texttt{absorptionBound\_of\_kernel}, \texttt{sound\_QStreettBundle\_carved(\_discharged)} (same module, not hash-bound in this edition)\\
+\end{anchors}

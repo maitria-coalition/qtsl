@@ -1,0 +1,111 @@
+[[rule]]
+id = "ConvIntro"
+source = "../BL-rules.toml"
+row = "ConvIntro"
+proof = "book/proofs/ConvIntro.tex"
+commentary = '''
+\rulename{ConvIntro} closes a region atom: from the canonical barycentric
+halfspace conjunction for $(x, \Delta, S)$ --- the same pinned formula
+\rulename{ConvElim} emits, recomputed by the same build --- it concludes
+$\Phi \vdash x \in \mathcal{R}(\Delta, S)$. A producer uses it to
+re-enter the geometric world after arithmetic: a subdivision branch or a
+combination argument establishes the two vertex atoms, and this rule
+converts them back into the region fact that \rulename{BernCone} or a
+further region rule consumes.
+
+What the checker recomputes: the build (as in \rulename{ConvElim} ---
+one syntactic equation, producer text untrusted, refusal outside the 1-D
+two-vertex fragment), plus this rule\textquotesingle s one extra typing
+field: $\bshape_H(x) = [\,d\,]$, the region term is statically rank-1 of
+the ambient extent. The asymmetry with \rulename{ConvElim} is
+principled: elimination reads the term\textquotesingle s shape out of
+the region atom it consumes, while introduction is handed only halfspace
+atoms --- which hold \emph{elementwise under broadcast} and are
+perfectly satisfied by a scalar $x$ --- so the shape must arrive as a
+checked hypothesis. Drop it and a closed scalar inside the segment
+yields a satisfiable (indeed universally true) premise whose region
+conclusion is unsatisfiable --- a rank-0 tensor never satisfies a
+region atom; the proof section builds the refutation concretely. It is
+the same broadcast liberality that breaks un-gated \rulename{EqElim},
+repaired by the same typing-field pattern.
+'''
+note = '''
+On the fragment, \rulename{ConvIntro} and \rulename{ConvElim} are exact
+inverses --- membership, the four weight-sign facts, and the canonical
+conjunction are three presentations of one determinate-weight geometry,
+so the pair is a lossless interface between region atoms and the
+arithmetic fragment.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}; binders as at \rulename{ConvElim}, mirrored.
+\begin{itemize}
+\item the displayed premise conjunction $\mapsto$ \texttt{hhalf} $:$
+  \texttt{barycentricHalfspaceForm term simplex S premise.post} ---
+  the same verified build, its value now equated with the
+  \emph{premise\textquotesingle s} post; the premise judgement
+  $\mapsto$ \texttt{ih}, context shared via \texttt{hpre}.
+\item the display\textquotesingle s typing premise $\bshape_H(x) =
+  [\,n\,]$ $\mapsto$ \texttt{htermShape} $:$ \texttt{term.bshape H =
+  some [simplex.complex.ambDim]} --- statically rank-1 at the ambient
+  extent, the one hypothesis \rulename{ConvElim} does not have; the
+  commentary derives why introduction needs it and elimination does
+  not.
+\item conclusion $\Phi \vdash x \in \mathcal{R}(\Delta, S)$ $\mapsto$
+  the goal under \texttt{hpost} $:$ \texttt{seq.post = .inRegion term
+  simplex S}.
+\end{itemize}
+Width note: the same one-dimensional fragment confinement as
+\rulename{ConvElim}, forced by the same spec conjuncts --- the
+mechanized statement is the displayed rule at ambient dimension $1$;
+outside it the build refuses and nothing is accepted unverified. The
+\rulename{ConvElim} dictionary\textquotesingle s spelling note
+carries over unchanged: the original-form column shows the mixed
+$\leq$/$\geq$ comparator pattern, while the certified premise formula
+--- and the realized form displayed above --- is the
+build\textquotesingle s sign-folded all-$\leq$ shape: same
+halfspaces, folded spelling certified.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "sound_convIntro",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+intro = '''
+\textbf{Shared machinery.}\enspace The build chain is displayed in full
+in the \rulename{ConvElim} section; here the book re-binds the assembly
+and the form equation, plus this rule\textquotesingle s payload with its
+one extra typing field (\texttt{termShape}).
+'''
+full_decls = [
+  "barycentricHalfspaceBuild",
+  "barycentricHalfspaceForm",
+  "PConvIntroData",
+]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = [
+  "Definition barycentricHalfspaceBuild_def",
+  "Definition barycentricHalfspaceFormB_def",
+]
+receipt = '''
+\texttt{hol-strict} CLEAN census over the ported checker theory:
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host. Loud caveat as
+on the \rulename{ConvElim} cell: the quoted build is the canonical-form
+revision of 2026-07-18, postdating that run; re-attestation rides the
+next clean run (documentary citations --- no signed HOL store yet).
+Scope note: the shape side condition (\texttt{termShape}) rides the
+un-ported hypernet typing island, deferred to the port\textquotesingle s
+proof-object stage.
+'''

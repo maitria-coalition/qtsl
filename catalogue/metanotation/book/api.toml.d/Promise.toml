@@ -1,0 +1,21 @@
+# api.toml.d/Promise.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "Promise"
+
+[api.ts]
+handle = "bl.Builder.promise"
+sig_file = "ts/src/bl.ts"
+sig = ["fn promise"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:promise"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::promise"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn promise"]
+snippet_file = "crates/mtk-catalogue/tests/rules_common/mod.rs"
+snippet = "marker:promise"

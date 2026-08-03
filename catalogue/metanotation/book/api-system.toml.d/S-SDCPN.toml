@@ -1,0 +1,24 @@
+# api-system.toml.d/S-SDCPN.toml — the System Catalogue entry's
+# producer-API section (one fragment per
+# coverage-matrix S-row, stem = id). Everything rendered is extracted
+# from the toolkit sources at emission; specs here are pointers, never
+# quoted text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-SDCPN"
+entity = "model type"
+
+[api.ts]
+handle = "system.sdcpn"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_sdcpn", "marker:ts_sig_sdcpngen"]
+snippet_file = "ts/tests/system-native.test.ts"
+snippet = "fn-body:buildSdcpn"
+note = '''The marking-space kit compiles the uncoloured bounded fragment the mechanized square certifies: race rows in the unordered convention (the compiler-owned arc-multiplicity dictionary --- the ordered census divided by exactly the dictionary theorem), the tangible/vanishing sort split, point-mass immediate branches, and the closed observed process by engine reuse --- the automaton kit where immediate transitions exist, the chain kit otherwise. The kit's Rust face is \texttt{mtk\_catalogue::system::sdcpn\_gen\_kit}; its closed-form controls (the census through the dictionary, the two-step cascade with vanishing initial mass pushed through absorption) ride the test suites on both language surfaces.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::Sdcpn::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_sdcpn"]
+snippet_file = "crates/mtk-catalogue/tests/common/mod.rs"
+snippet = "fn-body:sdcpn"

@@ -1,0 +1,117 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The tier taxonomy defines tier 2 as \emph{verified unpacking
+into core rules} (one node $\to$ many), with rules admissible by
+\emph{reduction to verified machinery} as the recorded boundary case;
+\rulename{Norm} is of the latter kind, and this section --- the book's
+first admissible rule --- states the general template that the later
+recipes instantiate.}
+
+\begin{brecipe}[the admissible template, general form]\label{rec:norm-template}
+An admissible rule $R$ with premises $P_1, \dots, P_n$ and conclusion $C$
+is warranted by a \emph{rewrite}: a function taking any proof-tree node
+\[
+\inferrule*[Right=$R$]{\;\mathcal{T}_1 \rhd P_1 \\ \cdots \\ \mathcal{T}_n \rhd P_n\;}{C}
+\qquad\rightsquigarrow\qquad
+\mathcal{D}\bigl[\mathcal{T}_1, \dots, \mathcal{T}_n\bigr] \rhd C
+\]
+where $\mathcal{D}$ is a derivation fragment over core (and
+previously-justified admissible) rules with the same conclusion,
+consuming the premise subtrees $\mathcal{T}_i$ at its leaves. Applying
+the rewrite leaf-first eliminates every $R$-node from a finite tree in
+finitely many steps, so any judgement derivable with $R$ is derivable
+without it --- admissibility --- and the calculus's soundness theorem is
+conserved with no new kernel semantic content. The verified object
+shipped per admissible rule is either $\mathcal{D}$ itself or
+(equivalently, and how this catalogue's Lean side does it) a soundness
+lemma for $R$ that factors through already-verified machinery.
+\end{brecipe}
+
+\begin{brecipe}[the \rulename{Norm} instance --- the degenerate rewrite]
+\label{rec:norm-instance}
+\rulename{Norm} has no proof premises ($n = 0$): the node
+\[
+\inferrule*[Right=\rulename{Norm}]{
+  \mathrm{polynomialCanonicalEq}(t_1, t_2) \\
+  \text{\upshape both sides shape-stable and finitely typed}
+}{\Phi \vdash t_1 = t_2}
+\qquad\rightsquigarrow\qquad
+\text{\upshape the checker replays the canonical forms;}\;
+\text{\texttt{sound\_norm} stands as warrant.}
+\]
+The side condition is \emph{computational}: both sides idx-free, and
+their canonical monomial polynomials \emph{identical} over $\Q$ ---
+coefficient-for-coefficient, decidable, replayed by the checker. The
+catalogued stratum records an unpacking sketch through
+\rulename{BernCone} and \rulename{ArithAtom} (an equality as a pair of
+zero-polynomial bounds); the shipped warrant is direct and stronger ---
+one verified semantic lemma at all tensor shapes --- with the payload's
+well-typedness fields carrying exactly what the sketch left implicit.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:norm-sound}
+Suppose $t_1, t_2$ are idx-free with $t_1.\mathrm{toPoly} =
+t_2.\mathrm{toPoly}$, the two sides carry the same defined broadcast
+shape in $H$, and every wire of either side is finitely typed. Then
+$\Phi \vdash t_1 = t_2$ is semantically valid over $H$ for
+\emph{arbitrary} $\Phi$.
+\end{bprop}
+\begin{proof}
+Fix any admissible valuation $\sigma$; the premise is not consulted ---
+this is \emph{the \rulename{Norm} convention}, shared by every
+premise-free rule of the catalogue: a fact holding at every valuation
+holds under any premise. The shape and finiteness fields give both
+sides defined evaluations, as tensors of the common broadcast shape:
+finitely typed wires always read, and the shared shape makes the
+broadcast joins on both sides agree. At each entry, evaluation is a
+ring homomorphism from canonical polynomials into $\Q$ (at the
+entry-wise read-out of the wires); a syntactic identity of canonical
+forms is an identity of polynomials, and ring homomorphisms preserve
+polynomial identities --- so the two evaluated tensors agree entry by
+entry, and their shapes agree by hypothesis. Hence the equality atom
+holds at $\sigma$. That is the whole proof; \texttt{sound\_norm}
+packages it once, per-entry, at every tensor shape.
+\end{proof}
+
+\begin{bremark}[what broke without the typing fields]
+\label{rem:norm-b13}
+As first staged --- canonical-form equality alone --- the rule was
+\emph{false}, twice over, and the counterexamples are why the fields
+exist. (i) At a wire of extended dtype holding an infinite value, even
+$\vdash t = t$ is unsatisfiable: evaluation is over exact rationals,
+an infinite entry refuses, and an atom that never evaluates never
+holds; since $\Phi$ is arbitrary, the staged rule derived an
+unsatisfiable conclusion from a satisfiable premise. (ii) A cancelling
+sub-term leaves the canonical form unchanged but not the evaluation:
+$t_2 = t_1 + (w_2 - w_2)$ has $t_2.\mathrm{toPoly} =
+t_1.\mathrm{toPoly}$, yet if $w_2$'s shape does not join with $t_1$'s,
+the right-hand atom side never evaluates. The shared-shape and
+finiteness fields exclude both; a hypothesis whose necessity is
+semantic (evaluability), not algebraic, is exactly the kind a recipe
+must state, or the next porter re-learns it the hard way.
+\end{bremark}
+
+\begin{bremark}[exactness discipline, and the idx-freedom gate]
+\label{rem:norm-f7}
+Canonical-form equality is never up-to-rescaling: $2 \cdot w$ and
+$w + w$ are equal as canonical forms; $2 \cdot w$ and $w$ are not,
+proportional though they are --- the matching discipline every
+combination rule of this catalogue (\rulename{Farkas},
+\rulename{Syzygy}) inherits when it compares atom polynomials. The
+idx-freedom gate is the meaning-preservation condition of the
+translation: the wire-keyed polynomial space cannot express per-entry
+projections, so a projection-bearing term has no canonical form here
+and the comparison is refused rather than performed on the wrong
+object. (The combination rules' widened replays translate projections
+into their own variable spaces; those translations belong to those
+rules, not to \rulename{Norm}.)
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:norm-instance} warrant & \texttt{sound\_norm} (per-entry evaluation at the common broadcast shape)\\
+the computational check & \texttt{polynomialCanonicalEq} $=$ idx-freedom gates $+$ \texttt{Term.toPoly} equality\\
+idx-freedom gate (Remark \ref{rem:norm-f7}) & \texttt{Term.idxFree}; \texttt{Term.toPoly}'s wire-keyed variable space\\
+typing fields (Remark \ref{rem:norm-b13}) & payload fields \texttt{tyEq}, \texttt{tyDef}, \texttt{finL}, \texttt{finR} (\texttt{PNormData})\\
+premise-freedom ($\Phi$ arbitrary) & the \rulename{Norm} convention; \texttt{pre} unused in \texttt{sound\_norm}\\
+wire placement & \texttt{RuleTag.norm}\\
+\end{anchors}

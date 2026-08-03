@@ -1,0 +1,134 @@
+[[rule]]
+id = "EqElim"
+source = "../BL-rules.toml"
+row = "EqElim"
+proof = "book/proofs/EqElim.tex"
+commentary = '''
+\rulename{EqElim} is Leibniz substitution as a proof rule: an established
+equality $t = u$ licenses replacing $t$ by $u$ at a designated hole in an
+established formula. The payload names the hole (a wire $a$), the body
+formula $\Psi$, and the two terms; premises prove $t = u$ and
+$\Psi\sub{a}{t}$ over the shared context, and the conclusion is
+$\Psi\sub{a}{u}$. A producer reaches for it wherever a derived fact must
+be rewritten along an equality: pushing a resolved value through a bound
+(the ReLU rules conclude equalities such as $y = h$ exactly so that this
+rule can consume them), transporting an atom across a
+\rulename{Norm}-derived respelling, or assembling transitivity --- which
+is not primitive in this calculus: with \rulename{EqRefl} and
+\rulename{EqSym} it is a two-node derivation through this rule.
+
+What the checker recomputes: both substitution instances --- it applies
+the (binder-free, hence capture-free) substitution function to
+$(\Psi, a, t)$ and to $(\Psi, a, u)$ and demands syntactic equality with
+the cited premise and conclusion formulas --- plus the premise-sharing
+equations, and the typing side condition: $t$ and $u$ carry a
+\emph{common defined} broadcast shape in the ambient hypernet. Nothing
+semantic is consulted; every side condition is a decidable syntactic
+equation.
+
+The typing condition is the essential hypothesis. Equality atoms hold
+\emph{elementwise under broadcast}, so a scalar can stand equal to a
+vector whose every entry it matches --- a genuine, derivable, usable
+fact that is nonetheless not a license to interchange the two terms: in
+a region atom, which constrains the shape of its term, the substitution
+flips satisfiability. Dropping the condition admits a concrete derivation
+of an unsatisfiable conclusion from a satisfiable premise (the proof
+section constructs it); with the condition, that certificate is refused
+because no common shape exists. Dropping either substitution equation
+instead would let the conclusion be an arbitrary formula; dropping the
+premise-match would combine facts proven under different contexts.
+'''
+note = '''
+Producer-side, equational obligations are typically discharged by
+congruence-closure engines \cite{nelsonoppen1980,nieuwenhuisoliveras2007};
+the certificate carries not the closure computation but its residue ---
+a chain of \rulename{EqRefl}/\rulename{EqSym}/\rulename{EqElim} nodes,
+each checked by recomputing one substitution.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premises as at
+\rulename{Weaken}.
+\begin{itemize}
+\item $t, u \mapsto$ \texttt{termT termU : Term}; the hole $a \mapsto$
+  \texttt{wire : Wire}; the body $\Psi \mapsto$ \texttt{bodyForm :
+  Formula}; $\Phi \mapsto$ \texttt{seq.pre}, shared with both premise
+  sequents through \texttt{hpre} and \texttt{hpreMatch}.
+\item the equality premise $\Phi \vdash t = u$ $\mapsto$ \texttt{ihEq}
+  with the shape tie \texttt{heqPost} $:$ \texttt{eqPremise.post =
+  .atom .eq termT termU}.
+\item the substitution displays $\Psi\sub{a}{t}$ and $\Psi\sub{a}{u}$
+  $\mapsto$ \texttt{hbodySubT} and \texttt{hconclSubU} through
+  \texttt{substituteInFormula}, quoted in full below: the one-line
+  equation \texttt{F\textquotesingle{} = F.subst w t} over plain leaf
+  replacement --- the grammar has no binders, so no capture or
+  freshness side condition exists to omit.
+\item the typing premise $\exists s.\; \bshape_H(t) = s = \bshape_H(u)$
+  $\mapsto$ \texttt{htyEq}: existence of one shape \texttt{s} with
+  \texttt{termT.bshape H = some s} and \texttt{termU.bshape H = some
+  s} --- the \texttt{some} carries the definedness the
+  display\textquotesingle s equation chain asserts by letting $s$
+  range over shapes.
+\item conclusion $\Phi \vdash \Psi\sub{a}{u}$ $\mapsto$ the goal
+  \texttt{seq.semanticallyValid H}. Certified alongside as the
+  semantic engine: \texttt{Term.evalQ\_subst\_congr} and
+  \texttt{Formula.holds\_subst\_congr} --- substitution congruence
+  along equal evaluations, the two lemmas the soundness proof routes
+  through.
+\end{itemize}
+No width difference in either direction: statement and display carry
+the same typing gate (the commentary\textquotesingle s counterexample
+is what its absence admits), and every hypothesis is consumed.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "Term.evalQ_subst_congr",
+  "Formula.holds_subst_congr",
+  "sound_eqElim",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+intro = '''
+\textbf{The substitution the rule trusts, in full.}\enspace The payload
+fields \texttt{bodySubT} and \texttt{conclSubU} are equations against the
+substitution function displayed below: plain leaf replacement over a
+grammar with no binders, so no capture or freshness side condition exists
+anywhere. A skeptical reader should confirm by eye that
+\texttt{substituteInFormula} is nothing but that equation --- the rule
+manipulates formulas syntactically and consults no valuation; semantic
+truth enters only through \texttt{sound\_eqElim}, from the premise
+validity hypotheses.
+'''
+full_decls = [
+  "Term.subst",
+  "Formula.subst",
+  "substituteInFormula",
+  "PEqElimData",
+]
+
+[rule.hol]
+status = "ported"
+script = "../../hol/checker/qtsl_catalogueScript.sml"
+theory = "qtsl_catalogue"
+decls = [
+  "Definition termSubst_def",
+  "Definition formulaSubst_def",
+  "Definition substituteInFormulaB_def",
+]
+receipt = '''
+\texttt{hol-strict} CLEAN census over the ported checker theory:
+\texttt{qtsl\_catalogue}, 458 theorems, 0 cheat-tagged, 0 nonstandard
+axioms (whitelist: \texttt{DISK\_THM}; the four \texttt{bool} axioms) ---
+verification run of 2026-07-17 on an isolated build host. The script has
+been revised since that run (2026-07-18, in the barycentric-build region,
+away from the definitions cited here), so the census attests the theory
+as then built; there is no signed HOL receipt store yet --- these
+citations are documentary. Scope note, honest: the substitution core of
+this rule\textquotesingle s check is what is ported; the broadcast-shape
+side condition (\texttt{tyEq}) rides the hypernet typing island, which
+the port deliberately defers to its proof-object stage.
+'''

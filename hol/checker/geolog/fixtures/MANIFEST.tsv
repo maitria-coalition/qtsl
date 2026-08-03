@@ -1,0 +1,44 @@
+# name	file	rust_verdict	expected_hol	note
+single-genesis	single-genesis.geolog	OK	OK	the staged genesis golden alone (971 ops; empty deps, None message)
+single-qtslcert	single-qtslcert.geolog	OK	OK	QtslCert extension revision alone; prereqs = derived boundary, flag 0
+single-formats-roster	single-formats-roster.geolog	OK	OK	GroundFormats alone; genesis prereq as flag-1 roster entry
+single-qtsl-findable	single-qtsl-findable.geolog	OK	OK	Qtsl alone; prereqs flagged well-known-findable (flag 2)
+tiny	tiny.geolog	OK	OK	synthetic 2-commit pair: every value family, zone runs, message, parents
+variant-empty-body	variant-empty-body.geolog	OK	OK	zero-op body; Some("") message (distinct from None)
+variant-fragment-ops	variant-fragment-ops.geolog	OK	OK_SEALED_UNSUPPORTED	eltd + CertBlob + unknown-kind rows: wire-valid, outside the sealed fragment
+mut-magic	mut-magic.geolog	SPEC	UNREADABLE	magic byte flipped
+mut-version-2	mut-version-2.geolog	SPEC	UNSUPPORTED	container version 2 (future format)
+mut-truncated-header	mut-truncated-header.geolog	SPEC	UNREADABLE	cut mid version field
+mut-trailing-byte	mut-trailing-byte.geolog	SPEC	UNREADABLE	one byte after the last commit record
+mut-truncated-body	mut-truncated-body.geolog	SPEC	UNREADABLE	cut inside the last body
+mut-commits-zero	mut-commits-zero.geolog	SPEC	UNREADABLE	count >= 1 is the grammar
+mut-prereq-flag3	mut-prereq-flag3.geolog	SPEC	UNSUPPORTED	reserved lineage-anchor flag: v1 readers reject
+mut-prereq-flag9	mut-prereq-flag9.geolog	SPEC	UNREADABLE	unknown prereq flag
+mut-prereq-unsorted	mut-prereq-unsorted.geolog	SPEC	UNREADABLE	CHID order descending
+mut-prereq-dup	mut-prereq-dup.geolog	SPEC	UNREADABLE	duplicate CHID entry
+mut-skel-version	mut-skel-version.geolog	REFUSE:UnsupportedVersion 	UNREADABLE	skeleton version 2
+mut-skel-parents-over	mut-skel-parents-over.geolog	REFUSE:ParentCountOverLen 	UNREADABLE	parent_count 3 over empty deps
+mut-skel-deps-desc	mut-skel-deps-desc.geolog	REFUSE:DepsNotCanonical 	UNREADABLE	content segment descending
+mut-skel-msg-over	mut-skel-msg-over.geolog	REFUSE:MessageOverCap 	UNREADABLE	message over the 4096 cap
+mut-skel-msg-utf8	mut-skel-msg-utf8.geolog	REFUSE:MessageNotUtf8 	UNREADABLE	message bytes not UTF-8
+mut-skel-slack	mut-skel-slack.geolog	REFUSE:NonCanonical 	UNREADABLE	leading slack byte shifts the end-anchored root
+mut-body-format0	mut-body-format0.geolog	OK	UNSUPPORTED	well-formed legacy (format-0) body: outside the handled fragment
+mut-body-format7	mut-body-format7.geolog	REFUSE:UnsupportedBodyFormat 	UNSUPPORTED	unknown body_format 7
+mut-body-interleave	mut-body-interleave.geolog	REFUSE:InterleaveNotEmpty 	UNREADABLE	non-empty interleave channel
+mut-body-overlong-leb	mut-body-overlong-leb.geolog	REFUSE:HexaneNonCanonical 	UNREADABLE	overlong ULEB128 value in elta_sort (canonicality gate)
+mut-body-symbols-order	mut-body-symbols-order.geolog	REFUSE:SymbolsNotCanonical 	UNREADABLE	symbol table order broken (or cells invalidated) by content patch
+mut-body-vecref	mut-body-vecref.geolog	REFUSE:FrameArchive 	UNREADABLE	symbols vec-ref target shifted by -1
+mut-body-zone-coverage	mut-body-zone-coverage.geolog	REFUSE:ZoneRunCoverage 	UNREADABLE	zone channel covers 1 of 2 Timestamp cells
+mut-body-residual-tabled	mut-body-residual-tabled.geolog	REFUSE:ResidualRowTabledKind 	UNREADABLE	residual row claiming tabled kind 0
+mut-body-op-order	mut-body-op-order.geolog	REFUSE:OpsNotCanonicalOrder 	UNREADABLE	rela rows out of rule-5 lex order
+mut-body-retired-chid	mut-body-retired-chid.geolog	REFUSE:Cell(RetiredChidSpelling)	UNREADABLE	retired 36-byte hash-carrying ElemRef spelling
+mut-body-nonminimal-nat	mut-body-nonminimal-nat.geolog	REFUSE:Cell(Literal(NatNotMinimalLe 	UNREADABLE	Nat literal with redundant zero high byte
+bind-pair-closed	bind-pair-closed.geolog	BIND	OK	P1: content-closed pair (child parent-deps root, indexed) — sealed-bind fully OK
+bind-lineage-cut	bind-lineage-cut.geolog	BIND	OK	P1: lineage-only parent cut boundary (flag 0, unindexed) — sealed-bind OK per 4.6
+bind-two-tips	bind-two-tips.geolog	BIND	OK	P1: two independent dep-free commits — bind OK, sealed-bind tip_not_unique
+bind-mut-bodyhash	bind-mut-bodyhash.geolog	BIND	OK	P1: skeleton body_hash field flipped on commit 1
+bind-mut-boundary-omit	bind-mut-boundary-omit.geolog	BIND	OK	P1: prereq table omits one derived-boundary entry
+bind-mut-boundary-surplus	bind-mut-boundary-surplus.geolog	BIND	OK	P1: prereq table carries a surplus entry
+bind-mut-topo-swap	bind-mut-topo-swap.geolog	BIND	OK	P1: child precedes its parent — frozen-Kahn order violated
+bind-mut-dup-commit	bind-mut-dup-commit.geolog	BIND	OK	P1: the same commit contained twice
+bind-mut-depover	bind-mut-depover.geolog	BIND	OK	P1: op cites dep index 0 against an empty dep list

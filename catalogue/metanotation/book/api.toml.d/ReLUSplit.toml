@@ -1,0 +1,22 @@
+# api.toml.d/ReLUSplit.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "ReLUSplit"
+note = '''\rulename{ReLU-Split} is an admissible surface with no wire constructor: the builder unpacks a structurally complete call into its derivation --- five rows per branch (axiom, conjunction elimination, the ReLU face, equality symmetry, Leibniz substitution) closed by the context-carrying disjunction elimination, whose conjunction path locates the sign-split disjunction inside the conclusion's premise --- so the certificate stream carries only core rows, and the receipts beside the quoted construction assert the emitted expansion itself: the row count, the sign-split premise, and the closing elimination's path.'''
+
+[api.ts]
+handle = "bl.Builder.reluSplit"
+sig_file = "ts/src/bl.ts"
+sig = ["fn reluSplit"]
+snippet_file = "ts/tests/rules-native.test.ts"
+snippet = "marker:reluSplit"
+
+[api.rust]
+handle = "mtk_catalogue::rules::bl::BlProofBuilder::relu_split"
+sig_file = "crates/mtk-catalogue/src/rules/bl/builder.rs"
+sig = ["fn relu_split"]
+snippet_file = "crates/mtk-catalogue/tests/rules_builders.rs"
+snippet = "marker:relu_split"

@@ -1,0 +1,9 @@
+\begin{Verbatim}[fontsize=\small,frame=leftline,rulecolor=\color{accentmid},framesep=3mm,xleftmargin=3mm]
+instance Demo : Routes {
+  hub, east, west, port : Node;
+
+  [src: hub,  tgt: east] Edge;
+  [src: hub,  tgt: west] Edge;
+  [src: east, tgt: port] Edge;
+}
+\end{Verbatim}

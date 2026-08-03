@@ -1,0 +1,87 @@
+
+\sourcenote{Genre: admissible rule (tier 2). The family machinery is
+stated in the \rulename{LiRPA} section's family template. This rule is
+premise-free: $\Phi$ is arbitrary and never consulted (the
+\rulename{Norm} convention).}
+
+\begin{brecipe}[the \rulename{ReLU-NN} instance --- the full unpacking]
+\label{rec:relunn-instance}
+The node:
+\[
+\inferrule*[Right=\rulename{ReLU-NN}]{
+  \ReLU_{\{h\}\to\{y\}} \in H
+}{
+  \Phi \vdash y \geq 0
+}
+\qquad\rightsquigarrow\qquad
+\text{case analysis on }
+(h \leq 0 \wedge y = 0) \vee (0 \leq h \wedge y = h),
+\]
+and both branches discharge into catalogue nodes --- the family's
+cleanest unpacking. \emph{Inactive branch} (context carries $y = 0$):
+\begin{enumerate}
+\item $\vdash 0 \geq 0$ --- \rulename{PConstExact}, the closed exact
+  ground fact (before that rule arrived, this leaf had no derivation at
+  all --- the calculus could not state a ground fact);
+\item $\Phi_{-} \vdash y = 0$ --- \rulename{Ax} + $\wedge$E from the
+  branch context; then $\Phi_{-} \vdash 0 = y$ by \rulename{EqSym};
+\item $\Phi_{-} \vdash y \geq 0$ --- \rulename{EqElim} along $0 = y$,
+  transporting $\Psi[a \coloneqq 0] = (0 \geq 0)$ (step 1, weakened)
+  to $\Psi[a \coloneqq y]$, where $\Psi = (a \geq 0)$.
+\end{enumerate}
+\emph{Active branch} (context carries $0 \leq h$ and $y = h$): the
+context's sign atom is re-oriented to $h \geq 0$ by the polarity
+plumbing walked in full in the \rulename{ReLU-Above} section, and
+\rulename{EqElim} along $h = y$ (an equality between two wires of the
+node's one shared shape) transports it to $y \geq 0$. $\vee$E in its
+context-carrying form closes the case analysis, and \rulename{Cut}
+stitches the sign-split fact into place.
+\end{brecipe}
+
+\begin{bremark}[the shape scope of the displayed derivation]
+\label{rem:relunn-shapescope}
+The realized \rulename{EqElim} carries a broadcast-shape side
+condition (its section documents the counterexample that forced it):
+both sides of the transported equality must share a broadcast shape.
+Step 3's equality $0 = y$ has a rank-$0$ constant on one side, so the
+displayed transport type-checks where the output wire is rank-$0$ ---
+at tensor-shaped instances that step is stopped by the gate, and the family's
+realized warrant does not route through the derivation at all: it is
+the direct lemma \texttt{sound\_reluNN}, shape-general, via the
+linkage extraction. (Wire-to-wire transports such as the active
+branch's $h = y$ are unaffected: the linkage forces one shared shape.)
+The derivation above is thus the honest admissibility story at scalar
+instances, and the reduction-to-verified-machinery story --- the
+\rulename{PConstExact} pattern, stated in the family template --- is
+what covers every shape.
+\end{bremark}
+
+\begin{bprop}[semantic warrant]\label{prop:relunn-sound}
+If the linkage holds, the sequent concluding $y \geq 0$ is
+semantically valid over any premise formula $\Phi$.
+\end{bprop}
+\begin{proof}
+Fix an admissible valuation $\sigma$ ($\sigma \models \Phi$ is taken
+but never consulted --- the rule is premise-free). The linkage
+extraction (\texttt{reluLinked\_facts}) gives the output tensor and,
+per entry, either $y = 0$ or $y = p$ with $0 \leq p$; in both cases
+$0 \leq y$. The conclusion atom compares the output tensor entrywise
+against the rank-$0$ constant $0$. That is \texttt{sound\_reluNN},
+step for step.
+\end{proof}
+
+\begin{bremark}[the only hypothesis]
+The linkage is the rule's sole side condition, and dropping it is the
+whole failure mode: an arbitrary wire asserted nonnegative against an
+arbitrary premise. Its positive-size gate additionally keeps the
+vacuous corner unciteable --- a size-zero node satisfies every
+elementwise atom trivially, and a fact no valuation can falsify must
+not enter a derivation (the family template's hygiene remark).
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:relunn-instance} warrant & \texttt{sound\_reluNN}\\
+family linkage extraction & \texttt{reluLinked\_facts} (see the \rulename{LiRPA} section)\\
+ground-fact leaf (step 1) & \texttt{sound\_pConstExact} (the \rulename{PConstExact} section)\\
+payload structure & \texttt{PReLUNNData} (two wires, linkage --- no premise field)\\
+\end{anchors}

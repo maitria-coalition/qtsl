@@ -1,0 +1,91 @@
+
+\sourcenote{Genre: core rule (tier 1). Setting as in the \rulename{Ax}
+section; counterexamples read over the one-wire hypernet.}
+
+\textbf{Claim (\texttt{sound\_cut}).}\enspace The payload supplies the
+cut formula $\chi$ (\texttt{cutFormula}), a left premise
+$\Phi \vdash \chi$ and a right premise $\Phi \wedge \chi \vdash \Psi$
+with their sub-derivations, and four tree identities: the conclusion's
+premise is the left premise's premise (\texttt{preEq}), its conclusion
+is the right premise's conclusion (\texttt{postEq}), the left premise
+concludes exactly $\chi$ (\texttt{cutLeft}), and the right premise's
+premise is exactly $\Phi \wedge \chi$ over the \emph{same} $\Phi$
+(\texttt{cutRight}). If both premise sequents are semantically valid,
+so is $\Phi \vdash \Psi$.
+
+\begin{bthm}[soundness of \rulename{Cut}]\label{thm:cut-sound}
+Under the four payload identities, semantic validity of both premise
+sequents implies semantic validity of the conclusion, over every
+hypernet.
+\end{bthm}
+\begin{proof}
+Let $\sigma$ be admissible with $\sigma \models \Phi$.
+
+\emph{Step 1 (earn the cut formula).} By \texttt{preEq}, $\sigma$
+satisfies the left premise's premise; left validity gives
+$\sigma \models \chi$ (\texttt{cutLeft} identifies the left conclusion
+with $\chi$).
+
+\emph{Step 2 (assemble the enlarged context).} The $\wedge$-clause of
+satisfaction is meta-conjunction, so the standing assumption and Step 1
+give $\sigma \models \Phi \wedge \chi$ --- and by \texttt{cutRight} this tree
+\emph{is} the right premise's premise.
+
+\emph{Step 3 (apply the right premise).} Right validity gives
+$\sigma \models \Psi$, pinned as the conclusion's post by
+\texttt{postEq}.
+\end{proof}
+
+\begin{bremark}[context sharing is essential]\label{rem:cut-sharing}
+\texttt{cutRight} forces the right premise's context to be the left
+premise's context --- the context-sharing (\emph{additive}) format
+\cite{girard1987}. Allow the right context to be foreign, say
+$\Phi' \wedge \chi$, and cut breaks: take the left premise
+$\top \vdash \top$ (an \rulename{Ax} instance) and the right premise
+$(w \leq 0) \wedge \top \vdash w \leq 0$ (valid: satisfaction of the
+conjunction projects); the degenerate rule would conclude
+$\top \vdash w \leq 0$ --- false at $\sigma(w) = 1$.
+\end{bremark}
+
+\begin{bremark}[\texttt{cutLeft} moors the cut formula]
+Keep the sharing but unmoor $\chi$ from what the left premise actually
+proved, and the right premise may consume an assumption nobody earned:
+from the left premise $\top \vdash \top$ and the right premise
+$\top \wedge (w \leq 0) \vdash w \leq 0$ (valid, again by projection),
+the degenerate rule would conclude $\top \vdash w \leq 0$. The two
+counterexamples are deliberately near-twins: \texttt{cutRight} guards
+\emph{whose context}, \texttt{cutLeft} guards \emph{whose lemma}, and
+each fails independently. \texttt{preEq}'s removal admits the
+context-swap family (the \rulename{Weaken} section); \texttt{postEq}'s
+removal frees the conclusion outright.
+\end{bremark}
+
+\begin{bremark}[the cut formula leaves no trace]
+The conclusion $\Phi \vdash \Psi$ mentions $\chi$ nowhere --- the
+conclusion does not determine the certified content (a hiddenness
+\rulename{Cut} shares with $\wedge$E's discarded conjunct), so the
+payload names \texttt{cutFormula} explicitly. That is a design choice
+rather than a forced move --- the checker could equally read $\chi$
+off the left premise's post --- and the explicit field keeps the check
+local. The same invisibility is what the rule is \emph{for}:
+certificate producers stage lemmas --- prove a bound or region fact
+once, then continue under the enlarged context $\Phi \wedge \chi$ ---
+and iterated cuts stage a chain of them.
+\end{bremark}
+
+\begin{bremark}[semantic cut costs nothing]
+Gentzen's Hauptsatz \cite{gentzen1935} eliminates cut from derivations
+at, in general, superexponential blow-up; nothing here needs it. The
+soundness argument is the three steps above, the checker never
+normalizes a proof, and the calculus keeps \rulename{Cut} as a
+first-class node because producers want staged lemmas, not cut-free
+normal forms. In the lattice reading: if $x \leq m$ then $x = x \sqcap
+m$, so $x \sqcap m \leq y$ gives $x \leq y$ --- transitivity worn as
+meet bookkeeping.
+\end{bremark}
+
+\begin{anchors}
+Steps 1--3 & \texttt{sound\_cut}; payload \texttt{PCutData} (fields \texttt{cutFormula}, \texttt{preEq}, \texttt{postEq}, \texttt{cutLeft}, \texttt{cutRight}); wired as \texttt{RuleData.cut}\\
+$\wedge$-clause of satisfaction & \texttt{Formula.holds} (case \texttt{and})\\
+lattice reading & \texttt{M3.cut\_kit}\\
+\end{anchors}

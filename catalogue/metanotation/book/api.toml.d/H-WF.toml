@@ -1,0 +1,22 @@
+# api.toml.d/H-WF.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "H-WF"
+note = '''Courtesy check: the returned list is every violation found, and empty means the linearity, SSA, and per-primitive typing conditions hold and every pooled complex validates --- but the checker's replay is the authority, never this preflight. The corpus construction validates the worked example's fifteen-application drift graph.'''
+
+[api.ts]
+handle = "hypernet.Hypernet.preflight"
+sig_file = "ts/src/hypernet.ts"
+sig = ["fn preflight"]
+snippet_file = "ts/tests/hypernet-native.test.ts"
+snippet = "marker:H-WF"
+
+[api.rust]
+handle = "mtk_catalogue::hypernet::Hypernet::preflight"
+sig_file = "crates/mtk-catalogue/src/hypernet/wf.rs"
+sig = ["fn preflight"]
+snippet_file = "crates/mtk-catalogue/tests/golden_hypernet.rs"
+snippet = "marker:H-WF"

@@ -1,0 +1,108 @@
+# NNFDuality (T12): alias per duality — negation-normal-form rewrites as
+# region-denotation equalities.
+
+[[rule]]
+id = "NNFDuality"
+source = "../QTSL-rules.toml"
+row = "NNFDuality (T12)"
+proof = "book/proofs/NNFDuality.tex"
+commentary = '''
+\rulename{NNFDuality} is the spec-surface negation calculus (the source
+catalogue labels it T12): double negation, De Morgan through
+$\wedge/\vee$, and the four atom/strict swaps
+$\neg\{f \le c\} \leftrightarrow \{f > c\}$,
+$\neg\{f < c\} \leftrightarrow \{f \ge c\}$ --- both orientations of
+both comparison directions. Each duality is a judgement-level $1 \to 1$
+rewrite of a formula inside a satisfaction judgement, and each unpacks
+not into another rule but into a \emph{region-denotation equality},
+stated once per duality: the rewritten formula denotes the same set of
+states, so any region under-approximating one denotation
+under-approximates the other, and the judgement transports unchanged. A
+producer uses the dualities to push negations down to atoms (the
+negation-normal-form pass of the \rulename{StreettRequestNNF} section)
+so that every negative position is consumed either by an atom swap or by
+the typing pass\textquotesingle s rejection --- never by a negation
+node in the certificate. The checker recomputes nothing: the dualities
+are definitional set identities over the state space, and the
+strict-inequality sides interact with the closure discipline (rounding
+of strict literals at positive positions) only through the separate
+closure rules, deliberately out of this rule\textquotesingle s scope.
+
+There is no single target rule, and hence no \emph{alias-for} header
+here: the alias claim is \emph{per duality}, each into its own
+definitional equality. Mechanization state, plainly: the bound
+statements below are the four atom swaps, machine-checked as set-level
+denotation equalities in both orientations of both comparison
+directions (module \texttt{QtslAux.NNFDuality}:
+\texttt{compl\_le\_atom}, \texttt{compl\_lt\_atom},
+\texttt{compl\_ge\_atom}, \texttt{compl\_gt\_atom}), together with
+the normalization pass\textquotesingle s denotation-preservation
+theorem \texttt{denot\_nnfAux}, inside which double negation and De
+Morgan are consumed from the ambient set library --- each applied once
+per duality, so the displayed equalities are covered jointly by the
+swaps (atoms) and the pass theorem (connectives). These are definitional
+set identities over the state space, warranted in full; the entry
+carries no conditional flag.
+'''
+note = '''
+Both orientations of both directions are stated deliberately: an early
+one-sided draft of the atom swaps was caught in review, and the repaired
+statement is the four-lemma family. The strict-atom sides are stated
+here as \emph{denotation} facts only; whether a strict literal may
+appear in a concluded region is the closure discipline\textquotesingle s
+question, answered by polarity-directed rounding in its own catalogue
+rows.
+'''
+correspondence = '''
+The displayed atom/strict swaps map one-to-one onto the four bound
+equalities, each a region-denotation identity:
+$[\![\neg\{f \le c\}]\!] = \{f > c\}$ $\mapsto$
+\texttt{compl\_le\_atom : \{x | f x ≤ c\}ᶜ = \{x | c < f x\}}, and
+likewise \texttt{compl\_lt\_atom} ($\neg\{f < c\} = \{f \ge c\}$),
+\texttt{compl\_ge\_atom}, \texttt{compl\_gt\_atom} (the reversed
+orientations --- both directions bound separately, honouring the
+recorded one-sidedness catch). Binder note, wider-safe: \texttt{f : σ
+→ ℝ} is an arbitrary function on an arbitrary carrier --- the
+polynomial atom structure of the certificate format is erased, so
+the certified equalities cover every instance the rule will ever be
+applied to. The propositional dualities ($\neg\neg\varphi$, De
+Morgan both ways) $\mapsto$ the \texttt{neg}/\texttt{and}/\texttt{or}
+cases of \texttt{denot\_nnfAux}\textquotesingle s both-polarity
+induction, where \texttt{compl\_compl} /
+\texttt{Set.compl\_inter} / \texttt{Set.compl\_union} are each
+consumed from mathlib once --- the display\textquotesingle s
+``stated once per duality'' realized as proof structure rather than
+as four more standalone statements. Width note: the entry is
+unconditional --- set-level witnesses cover the catalogued claim in
+full (axioms: \texttt{propext} alone) --- and the
+grammar-level guarantee the display mentions (no negation node
+survives to any staged representation) is certified not here but by
+the T22 entry\textquotesingle s normal-form \emph{type}; this
+page\textquotesingle s statements are the denotation half only, as
+its note already rules.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.NNFDuality"
+src = "../../lean/qtsl-aux/QtslAux/NNFDuality.lean"
+decls = [
+  "compl_le_atom",
+  "compl_lt_atom",
+  "compl_ge_atom",
+  "compl_gt_atom",
+  "denot_nnfAux",
+]
+
+[rule.hol]
+status = "out-of-scope"
+reason = '''
+Out of scope for the HOL side \emph{by design}: the dualities are
+producer-side formula rewrites that unpack to definitional denotation
+equalities before any certificate is emitted --- no wire object carries
+a negation node (the typing discipline rejects surviving negative
+literals), so there is nothing for a wire checker, HOL or otherwise, to
+verify. Checked against the HOL sources: the \texttt{qtsl\_catalogue}
+theory is the base-calculus checker cone; formula-level negation of the
+extension theory\textquotesingle s spec surface does not appear in it.
+'''

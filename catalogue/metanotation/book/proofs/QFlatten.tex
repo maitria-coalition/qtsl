@@ -1,0 +1,115 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe of the reduction-to-verified-machinery kind: the node discharges
+against the checker's substitution recompute plus a semantic witness
+pair, not against catalogue nodes. Scope, stated loudly: the witness
+pair is proven at the finite-kernel tier, on the synchronous-product
+wiring; the general compiled-class statement is substitution
+correctness, definitional by the presentation semantics.}
+
+\begin{brecipe}[the \rulename{QFlatten} rewrite]\label{rec:qfl-rewrite}
+A \rulename{QFlatten} node takes a composite presentation --- components
+wired together --- to its monolithic manifest:
+\[
+\inferrule*[Right=\rulename{QFlatten}]{\;\mathrm{sys} = \mathsf{SysWire}(w,\ \mathit{Sys}_1, \ldots, \mathit{Sys}_n)\;}{\mathrm{flat}(\mathrm{sys})\ \text{a monolithic manifest, same compiled semantics}}
+\qquad\rightsquigarrow\qquad
+\text{\upshape the checker replays the substitution.}
+\]
+The rewrite target contains zero catalogue nodes: a presentation's
+compiled semantics \emph{is} its flattened object's, so at the compiled
+class the side condition is a recomputation --- polynomial substitution
+plus guard-product bookkeeping --- and the rule adds no kernel semantic
+content (the admissibility criterion). What deserves proof, and gets it
+below, is the slogan the rule is trusted for: \textbf{wiring adds
+structure, never expressiveness}. Directed substitution wirings do
+\emph{not} reduce to the independent synchronous product treated below
+--- wiring an upstream output into a downstream input creates
+conditional dependence the product law does not carry --- so the
+flatten witness below attests the independent-product case, and the
+directed case rests on the substitution recompute (the side condition
+above) alone.
+\end{brecipe}
+
+\begin{bprop}[never expressiveness: the flatten witness]\label{prop:qfl-law}
+Let $K_1, K_2$ be finite kernels with initial laws $\mu_1, \mu_2$, and
+let the flattened manifest be the product kernel
+$K_{\otimes}\bigl((a,b), (a',b')\bigr) = K_1(a, a')\, K_2(b, b')$ with
+initial law $(\mu_1 \otimes \mu_2)(a, b) = \mu_1(a)\, \mu_2(b)$. Then
+at every horizon $n$,
+\[
+\mathrm{law}_{K_\otimes}\bigl(\mu_1 \otimes \mu_2,\ n\bigr)
+\;=\; \mathrm{law}_{K_1}(\mu_1, n) \,\otimes\, \mathrm{law}_{K_2}(\mu_2, n):
+\]
+the monolithic chain's law is, at every time, exactly the product of
+the component laws --- the composite presentation and its flattened
+manifest compile to the same semantics.
+\end{bprop}
+\begin{proof}
+One step factors, by Fubini for finite sums and bilinearity:
+\[
+\mathrm{step}_{K_\otimes}(\mu_1 \otimes \mu_2)(a', b')
+= \sum_{a, b} \mu_1(a) \mu_2(b)\, K_1(a, a') K_2(b, b')
+= \Bigl(\sum_a \mu_1(a) K_1(a, a')\Bigr)\Bigl(\sum_b \mu_2(b) K_2(b, b')\Bigr),
+\]
+i.e.\ $\mathrm{step}_{K_\otimes}(\mu_1 \otimes \mu_2) =
+\mathrm{step}_{K_1}\mu_1 \otimes \mathrm{step}_{K_2}\mu_2$. Induction
+on $n$ closes. Closure rides along: the product of kernels is a kernel
+and the product of laws is a law (nonnegativity termwise; unit mass by
+the same factorization at $K \equiv$ constants).
+\end{proof}
+
+\begin{bprop}[added structure: the projections are free simulation
+witnesses]\label{prop:qfl-proj}
+If $K_2$ is row-stochastic, the first projection is an \emph{exact}
+intertwining witness from $K_\otimes$ onto $K_1$:
+$\pi_{1\#} K_\otimes\bigl((a,b), \cdot\bigr) = K_1(a, \cdot)$ for every
+product state $(a, b)$; symmetrically for $\pi_2$ under
+row-stochastic $K_1$; and $\pi_{1\#}(\mu_1 \otimes \mu_2) = \mu_1$
+whenever $\mu_2$ has unit mass.
+\end{bprop}
+\begin{proof}
+$\pi_{1\#} K_\otimes\bigl((a,b), \cdot\bigr)(a') =
+\sum_{b'} K_1(a, a') K_2(b, b') = K_1(a, a') \sum_{b'} K_2(b, b') =
+K_1(a, a')$, the last step by the unit row sum. The initial-law
+statement is the same computation at $\mu$. Consequence: the flattened
+manifest \emph{remembers} its components --- each projection is exactly
+the strict-witness column of \rulename{QDistTransport}, obtained for
+free, so every component-level specification remains addressable on the
+flattened object with zero degradation. $\mathsf{SysWire}$ adds these
+handles and nothing else: Proposition~\ref{prop:qfl-law} caps
+expressiveness, this proposition delivers the structure.
+\end{proof}
+
+\begin{bremark}[why the well-formedness hypotheses are not decoration]
+Both directions consume them. In Proposition~\ref{prop:qfl-proj}, drop
+the unit row sum of the \emph{other} factor and the projection witness
+fails: the pushed row picks up $\sum_{b'} K_2(b, b')$ as a spurious
+scale factor, so a sub-stochastic (leaky) second component would make
+every component-1 judgement transport against a deflated law --- the
+component-spec addressability claim silently weakens. In
+Proposition~\ref{prop:qfl-law}, unit masses are what make the product
+law a probability law at every time. The scheduling hypotheses of
+composite dynamics --- clock rows, simultaneity, non-Zeno families ---
+are deliberately \emph{premise classes} cited by every composition rule
+rather than rows of this one: flattening is about state and kernel
+structure, and importing the clock discipline here would duplicate its
+single authoritative statement.
+\end{bremark}
+
+\begin{bremark}[the tier boundary, honestly]
+The propositions above are the synchronous-product instance at the
+finite-kernel tier --- the tier where law, product, and pushforward are
+finite exact-arithmetic objects, shared with the relational-chain
+machinery. General wirings (directed substitution, guard products)
+reduce by the checker's own recompute; the reduction is definitional in
+the compiled class and is not re-proven as a theorem here. Nothing
+above claims the measure/kernel tier; its flatten-commutes statements
+are a sibling development.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:qfl-rewrite} side condition & the substitution recompute (polynomial substitution + guard-product bookkeeping; checker-side)\\
+Proposition \ref{prop:qfl-law} & \texttt{prodKernel}; \texttt{prodDist}; \texttt{step\_prodKernel}; \texttt{law\_prodKernel}; closure \texttt{isMarkov\_prodKernel}, \texttt{isDist\_prodDist}\\
+Proposition \ref{prop:qfl-proj} & \texttt{pushKernel\_fst}; \texttt{pushKernel\_snd}; \texttt{push\_fst\_prodDist}\\
+consumed by & \rulename{QSimTransport}'s strict cell (\texttt{PushKernel}; \texttt{strict\_cell\_exact})\\
+\end{anchors}

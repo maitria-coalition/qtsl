@@ -1,0 +1,24 @@
+# bindings.toml.d/QUnionBound.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QUnionBound'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "compl_firstExit_subset"
+sha256 = "e151086afb6b728f0b669fd5ff44c80a0009e948d7ae7ac7ca1b930334804ef4"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "sound_QUnionBound"
+sha256 = "17421a778e17676aafa2af5f645ce24d857d897c879c3b0a265b3acf78afe33d"
+
+[[statement]]
+module = "QtslAux.QtslBattery"
+decl = "sound_QUnionBound_ofReal"
+sha256 = "eabbbd444583762ce6772443952e86253574fb33958c0d0687b39238360037d9"
+
+[[correspondence]]
+entry = "QUnionBound"
+steele_sha256 = "574aa6ba280f77f5a25e770e9147283d2e146db1dfc32bf10023ca59bcb9aeb1"
+statements_sha256 = "650a1ebcb1092d6a5d79e59ad4371d327cdab9ffe92f2d78840a14be897a7bca"
+prose_sha256 = "76608cdfc0910d2550f7fba395a648e757339ccef795fb49d0d4c1c2b0972b95"
+

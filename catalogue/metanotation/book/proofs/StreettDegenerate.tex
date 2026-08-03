@@ -1,0 +1,136 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. This
+section additionally states, once for the whole batch of
+satisfaction-level aliases, the general template those sections share;
+the \rulename{StreettCmplRequest}, \rulename{StreettTargetCellCollapse},
+\rulename{NNFDuality}, \rulename{StreettRequestNNF},
+\rulename{SugarBatch}, and \rulename{NegFAlias} sections reference it by
+this section's rule name instead of restating it.}
+
+\begin{brecipe}[the satisfaction-level alias template]\label{rec:sd-template}
+An alias rule $A$ at the satisfaction stratum is warranted by a $1 \to 1$
+unpack into a single application of a target rule $T$ (or, for the
+spec-surface rewrites, into a single definitional denotation equality):
+the $A$-node and its image conclude the same judgement from the same
+premise data, payload transported, nothing derived. Soundness is then a
+corollary, $\mathrm{sound}_A = \mathrm{sound}_T \circ \mathrm{unpack}$,
+and the certificate format need never carry $A$: producers elaborate
+before emission. The five artefacts an alias owes this book are the same
+as at the base stratum (the \rulename{SmallGain} section is the model):
+the unpack, the filled-in target application, the payload-transport
+table, the exactness identity, and the soundness corollary. One honest
+divergence from the base-stratum model, stated once here: no alias in
+this batch carries a \emph{verified payload function} for its unpack
+--- the transport tables are stated at the catalogued-field level,
+and the unpack-function slot of each alias records that absence.
+Where a discrete-profile \emph{semantic} witness exists in the
+auxiliary Lean development it is named (the soundness content is
+machine-checked at that level), and where none exists the status is
+stated as filed. Neither case is a hash-bound warrant in this
+edition; the per-section text says which case holds.
+\end{brecipe}
+
+\begin{brecipe}[the filled-in application --- \rulename{StreettDegenerate}
+rewritten into its \rulename{QStreettBundle} instance]\label{rec:sd-filled}
+A degenerate node claims, from the confinement certificate $V_0$ and
+per-region ranking certificates $(W_i, \varepsilon_i)$, that with
+probability $\ge p$ every response region $G_i$ is visited infinitely
+often. Its image is the single bundle node at request regions
+$R_i := S$ (every state requests):
+\begin{mathpar}
+\inferrule*[Right=\rulename{QStreettBundle}]{
+  \text{confinement rows for } V_0 \\
+  \bigl\{\vdash \text{nonincrease of } W_i \ \text{off } G_i\bigr\} \\
+  \bigl\{\vdash \varepsilon_i\text{-decay of } W_i \ \text{off } G_i\bigr\}
+  \ \text{(the request row at } R_i = S\text{)} \\\\
+  p + \mathrm{thr} \le 1
+}{
+  \mathcal{M} \vDash_{\mathsf{qraSublevel}(V_0,\,\mathrm{thr})}
+  \mathsf{P}_{\ge p}\bigl[\mathsf{Streett}((\top, \varphi_1), \ldots,
+  (\top, \varphi_k))\bigr]
+}
+\end{mathpar}
+Discharging the bundle's obligations at this instance: the request
+regions are measurable trivially; the decay row \emph{subsumes} the
+nonincrease row (off $G_i$, every state is a request state, so
+nonincrease follows from decay with $\varepsilon_i \ge 0$); the
+absorbing families $(V_i, \gamma_i)$ and carved sets $J_i$ are vacuous
+--- at $R_i = S$ the set $I \smallsetminus [\![\top]\!]$ is empty, so
+$J_i = \varnothing$ syntactically, the rows carved to $J_i$ and to
+off-request regions are rows over the empty region, and the
+specialization targets the bundle's conservative (absorber-free)
+scope --- the scope its ranking-route soundness theorem consumes ---
+so no request-region absorber obligation survives. The dead premise slots are honestly dead, and the
+degenerate-pair specialization pass erases them before emission.
+\end{brecipe}
+
+\begin{brecipe}[payload transport, catalogued-field level]\label{rec:sd-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{degenerate node} & \textbf{\rulename{QStreettBundle} node}\\
+\midrule
+$V_0$ rows, threshold, init & verbatim\\
+response regions $G_i$, certificates $(W_i, \varepsilon_i)$ & verbatim\\
+--- & request regions $:= S$ (each pair)\\
+--- & absorbing families: empty; $J_i = \varnothing$ (syntactic)\\
+decay rows off $G_i$ & request-decay rows (at $R_i = S$); nonincrease subsumed\\
+\end{tabular}
+\end{center}
+Unpack-function slot: no verified payload function in this edition
+(Recipe~\ref{rec:sd-template}); the semantic witness exists ---
+\texttt{sound\_StreettDegenerate}, one \texttt{sound\_QStreettBundle}
+application at request set \texttt{univ} (auxiliary module, not
+hash-bound in this edition).
+\end{brecipe}
+
+\begin{bprop}[the exactness identity]\label{prop:sd-exact}
+For every path $\omega$ and pair $i$, at $R_i = S$:
+\[
+\bigl(\exists^\infty n,\ \omega_n \in S\bigr) \Rightarrow
+\bigl(\exists^\infty n,\ \omega_n \in G_i\bigr)
+\quad\Longleftrightarrow\quad
+\exists^\infty n,\ \omega_n \in G_i .
+\]
+\end{bprop}
+\begin{proof}
+The hypothesis $\exists^\infty n,\ \omega_n \in S$ holds of every path
+(every time is a request time), so the implication and its conclusion are
+equivalent --- one line, which is the point. Equivalently, in acceptance
+vocabulary: the finitely-many-requests disjunct
+$\mathrm{Fin}(S)$ is empty along the tail filter, so the pair condition
+$\mathrm{Fin}(R_i) \vee \mathrm{Inf}(G_i)$ collapses to
+$\mathrm{Inf}(G_i)$.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:sd-sound}
+Under the degenerate node's rows,
+$\mu_x\{\omega \mid \forall i,\ \exists^\infty n,\ \omega_n \in G_i\}
+\ge p$.
+\end{bprop}
+\begin{proof}
+Apply the bundle's theorem (\rulename{QStreettBundle} section,
+Theorem numbered there) at $R_i = S$ and rewrite the event by
+Proposition~\ref{prop:sd-exact}. There is no other content --- the alias
+genre working as intended. (Machine-checked as
+\texttt{sound\_StreettDegenerate}; not hash-bound in this edition, per the template's
+honesty clause.)
+\end{proof}
+
+\begin{bremark}[this is the B\"uchi case]
+A B\"uchi condition \emph{is} the one-pair Streett condition with
+trivially-true request, so this alias is where the classical
+recurrence certificate lives inside the Streett-primitive design.
+Deterministic B\"uchi automata recognize only limit languages
+\cite{landweber1969}, so the reverse direction --- expressing a general
+Streett condition B\"uchi-primitively --- is not a respelling at all but
+an exponential automaton re-encoding; the asymmetry is why the bundle,
+not the recurrence rule, is the primitive (\cite{streett1982,thomas1990};
+see the bundle section's remark).
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:sd-filled} target & the \rulename{QStreettBundle} section, Theorem \& hypotheses (H1)--(H5)\\
+Proposition \ref{prop:sd-exact} & syntactic; no formal anchor needed (one line of filter algebra)\\
+Proposition \ref{prop:sd-sound} & \texttt{sound\_StreettDegenerate} (\texttt{QtslAux.QStreett}; machine-checked, not hash-bound in this edition)\\
+no wire tag, by design & producers elaborate before emission onto the bundle sort\\
+\end{anchors}

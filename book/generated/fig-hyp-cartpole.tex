@@ -1,0 +1,59 @@
+\begin{tikzpicture}[x=0.94cm,y=0.82cm,
+  box/.style={draw=accentdeep, fill=accent!50, rounded corners=1pt,
+    font=\footnotesize\ttfamily, inner sep=2.5pt, minimum height=4.2mm},
+  cbox/.style={draw=NoteGray, fill=white, rounded corners=1pt,
+    font=\footnotesize, inner sep=2pt, minimum height=3.6mm},
+  pbox/.style={draw=NoteGray, fill=NoteGray!12, rounded corners=1pt,
+    font=\footnotesize\ttfamily, inner sep=2.5pt, minimum height=4.2mm},
+  wire/.style={-, line width=0.5pt, draw=black!75},
+  wlab/.style={font=\scriptsize, inner sep=1pt},
+  port/.style={font=\small\itshape, inner sep=1pt}]
+\node[port] (in-0) at (0.00, 0.00) {$s$};
+\node[port] (in-1) at (0.00, -1.50) {$c$};
+\node[port] (in-2) at (0.00, 1.50) {$\omega$};
+\node[pbox] (a0) at (1.60, 0.00) {copy$_{3}$};
+\node[pbox] (a1) at (1.60, -1.50) {copy$_{3}$};
+\node[pbox] (a2) at (1.60, 1.50) {copy$_{3}$};
+\node[box] (a3) at (4.80, 3.00) {contract};
+\node[cbox] (a4) at (4.80, 2.25) {$-1$};
+\node[box] (a5) at (4.80, 1.50) {contract};
+\node[cbox] (a6) at (4.80, -2.25) {$K_1/l$};
+\node[box] (a7) at (4.80, -3.00) {contract};
+\node[cbox] (a8) at (4.80, 0.75) {$g/l$};
+\node[box] (a9) at (4.80, 0.00) {contract};
+\node[cbox] (a10) at (4.80, -0.75) {$K_0/l$};
+\node[box] (a11) at (4.80, -1.50) {contract};
+\node[box] (a12) at (8.20, -1.50) {stack$_{3}$};
+\node[cbox] (a13) at (11.60, -0.75) {$\mathbf{1}_{3}$};
+\node[box] (a14) at (11.60, -1.50) {contract};
+\node[port] (out-0) at (13.23, 1.50) {$\dot s$};
+\node[port] (out-1) at (13.23, 0.00) {$\dot c$};
+\node[port] (out-2) at (13.23, -1.50) {$\dot\omega$};
+\draw[wire] (in-0) -- (a0.west);
+\draw[wire] (in-1) -- (a1.west);
+\draw[wire] (in-2) -- (a2.west);
+\draw[wire] ([yshift=1.50mm]a0.east) .. controls (3.04, 0.00) and (3.36, 1.50) .. ([yshift=-1.20mm]a5.west);
+\draw[wire] (a0.east) -- (a9.west);
+\draw[wire] ([yshift=-1.50mm]a0.east) .. controls (3.04, 0.00) and (3.36, -1.50) .. ([yshift=1.20mm]a11.west);
+\draw[wire] ([yshift=1.50mm]a1.east) .. controls (3.04, -1.50) and (3.36, 3.00) .. ([yshift=-1.20mm]a3.west);
+\draw[wire] ([yshift=-1.50mm]a1.east) .. controls (3.04, -1.50) and (3.36, -3.00) .. ([yshift=-1.20mm]a7.west);
+\draw[wire] (a1.east) -- ([yshift=-1.20mm]a11.west);
+\draw[wire] ([yshift=1.50mm]a2.east) .. controls (3.04, 1.50) and (3.36, 3.00) .. ([yshift=1.20mm]a3.west);
+\draw[wire] (a2.east) -- ([yshift=1.20mm]a5.west);
+\draw[wire] ([yshift=-1.50mm]a2.east) .. controls (3.04, 1.50) and (3.36, -3.00) .. ([yshift=1.20mm]a7.west);
+\draw[wire] (a3.east) .. controls (6.33, 3.00) and (6.67, 1.50) .. node[wlab, above, pos=0.35] {$c\omega$} (8.20, 1.50) -- (11.60, 1.50) -- (out-0);
+\draw[wire] (a5.east) .. controls (6.33, 1.50) and (6.67, 0.00) .. node[wlab, above, pos=0.35] {$-s\omega$} (8.20, 0.00) -- (11.60, 0.00) -- (out-1);
+\draw[wire] (a7.east) .. controls (6.33, -3.00) and (6.67, -1.50) .. node[wlab, above, pos=0.35] {$\tfrac{K_1}{l}c\omega$} ([yshift=-1.50mm]a12.west);
+\draw[wire] (a9.east) .. controls (6.33, 0.00) and (6.67, -1.50) .. node[wlab, above, pos=0.35] {$\tfrac{g}{l}s$} ([yshift=1.50mm]a12.west);
+\draw[wire] (a11.east) -- node[wlab, above, pos=0.35] {$\tfrac{K_0}{l}cs$} (a12.west);
+\draw[wire] (a12.east) -- node[wlab, above, pos=0.35] {$[3]$} (a14.west);
+\draw[wire] (a14.east) -- (out-2);
+\draw[wire] (a4) -- (a5.north);
+\draw[wire] (a6) -- (a7.north);
+\draw[wire] (a8) -- (a9.north);
+\draw[wire] (a10) -- (a11.north);
+\draw[wire] (a13) -- (a14.north);
+\draw[dashed, draw=accentmid, line width=0.6pt] (7.11, -3.60) -- (7.11, 3.45);
+\node[font=\small, text=accentmid] at (6.76, 3.70) {$\Pi$};
+\node[font=\small, text=accentmid] at (7.46, 3.70) {$\Sigma$};
+\end{tikzpicture}

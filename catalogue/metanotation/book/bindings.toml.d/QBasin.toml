@@ -1,0 +1,19 @@
+# bindings.toml.d/QBasin.toml — machine-maintained by `qtsl-book bind`.
+# Statement hashes cited by book entry 'QBasin'. Regenerate, never hand-edit.
+
+[[statement]]
+module = "Qtsl.QtslSoundness"
+decl = "qBasin_batch"
+sha256 = "ffae0c4752c4115b5e3d08bf38111eb2d5130627f33d82be4778860c048f67b5"
+
+[[statement]]
+module = "Qtsl.QtslSoundness"
+decl = "qBasin_sound"
+sha256 = "0b4b5c8846d875b294ac971cb65a6e2254995aaddc33ddfea684c46082ca23a3"
+
+[[correspondence]]
+entry = "QBasin"
+steele_sha256 = "1f254ff739acc418fcdfdd4512134964257c57fcee887b94949060199e97f6d7"
+statements_sha256 = "7423ae762dea714d5bccd44a7dd62b29ed14111419f2aab892e9595f5ca6092b"
+prose_sha256 = "88eedc0f9c0fdac0902d8e8c3ff345b2d249885cd226844759dd15a92f4d3fa7"
+

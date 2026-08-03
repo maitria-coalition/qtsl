@@ -1,0 +1,21 @@
+# api.toml.d/PositiveCombinationRoot.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "PositiveCombinationRoot"
+
+[api.ts]
+handle = "rules.qtslCore.positiveCombination"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn positiveCombination", "interface PositiveCombinationArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_positive_combination.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::positive_combination"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/discharge.rs"
+sig = ["fn positive_combination"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_positive_combination"

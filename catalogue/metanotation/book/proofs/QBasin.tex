@@ -1,0 +1,136 @@
+
+\sourcenote{Genre: core rule (tier 1) --- an ordinary mathematical proof at
+Putnam-exam-solution detail. Every hypothesis of the rule is used below
+and remarked on; the formal-anchor table maps each step to the Lean
+declaration that carries it. This rule concludes a judgement one stratum
+above the sequent calculus: premises typed $\vdash$ are ordinary sequents
+the base kernel replays, and the rule's own soundness lives at the
+judgement stratum, over a dynamical model. Uniquely among the Morse-family
+rules in this book, its mechanization is \emph{unconditional}: the cited
+theorems are proved outright, with no interface hypotheses.}
+
+\textbf{Setting and claim.}\enspace Fix a \emph{forward semiflow} $\varphi$
+on a state space $X$: a map $\Phi : \R_{\geq 0} \times X \to X$, written
+$\Phi_t$, with $\Phi_0 = \mathrm{id}$ and $\Phi_{s+t} = \Phi_t \circ
+\Phi_s$ (the abstract shadow of the model class: a deterministic
+polynomial-drift flow on its chart domains). Regions denote subsets of
+$X$. Two judgement forms participate:
+
+\emph{(invariance scope)}\enspace $\mathsf{QInvScope}(S, X_0)$ asserts the
+conjunction: $S$ is forward-invariant ($x \in S \Rightarrow \Phi_t x \in S$
+for all $t \geq 0$) and $X_0 \subseteq S$.
+
+\emph{(safety)}\enspace the region judgement
+$\mathcal{M} \vDash_{X_0} \mathsf{P}_{\geq 1}[\mathsf{G}\,\neg\beta]$
+asserts, in the deterministic reading, that every point of $X_0$ avoids
+$B := \llbracket\beta\rrbracket$ at every forward time:
+$\forall x \in X_0,\ \forall t \geq 0,\ \Phi_t x \notin B$. The
+$\mathsf{P}_{\geq 1}$ is the degenerate probabilistic costume of this
+universal statement --- no measure, no stochastic machinery, and no
+supermartingale certificate participates anywhere in this section (the
+model-class fence: deterministic flows only).
+
+The rule's premises: the cited invariance judgement (an internal edge ---
+the claim is consumed, not its derivation), and one disjointness fact
+$S \cap \llbracket\beta_j\rrbracket = \emptyset$ per avoid region,
+discharged by per-box sign rows of the base calculus (or by cell
+bookkeeping the checker recomputes, when $\beta_j$ is aligned to the
+certificate's grid).
+
+\begin{bthm}[soundness of \rulename{QBasin}]\label{thm:qbasin-sound}
+Let $S, X_0, B \subseteq X$ with
+\emph{(a)} $S$ forward-invariant,
+\emph{(b)} $X_0 \subseteq S$
+(jointly: the cited $\mathsf{QInvScope}(S, X_0)$ judgement), and
+\emph{(c)} $S \cap B = \emptyset$.
+Then every $x \in X_0$ satisfies $\Phi_t x \notin B$ for all
+$t \geq 0$.
+\end{bthm}
+\begin{proof}
+Three sentences. By (b), $x \in S$; by (a), $\Phi_t x \in S$ for every
+$t$. Were $\Phi_t x \in B$, it would lie in $S \cap B$, which (c)
+declares empty. Hence $\Phi_t x \notin B$.
+\end{proof}
+
+\begin{bprop}[the batch form]\label{prop:qbasin-batch}
+Let $\{B_j\}_{j \in J}$ be any family of avoid regions with, for each
+$j$, the single fact $S \cap B_j = \emptyset$. Under (a) and (b) of
+Theorem~\ref{thm:qbasin-sound}, every $x \in X_0$ avoids
+$\bigcup_j B_j$ at every forward time --- equivalently, each $B_j$
+separately, and all of them jointly.
+\end{bprop}
+\begin{proof}
+A point of the union lies in some $B_j$; apply
+Theorem~\ref{thm:qbasin-sound} to that $j$. Nothing about $J$ is used ---
+the index family may be infinite, though a certificate of course carries
+finitely many rows.
+\end{proof}
+
+\begin{bremark}[each hypothesis is essential]\label{rem:qbasin-hyp}
+Drop (a), keeping (b) and (c): on $X = \R$ with the unit-speed drift
+$\Phi_t x = x + t$, take $S = X_0 = [0,1]$ and $B = [2,3]$. Then
+$X_0 \subseteq S$ and $S \cap B = \emptyset$, yet the trajectory from
+$x = 0$ enters $B$ at $t = 2$ --- invariance is the entire dynamical
+content of the rule, and it arrives wholesale through the cited
+judgement. Drop (b): a point $x \in X_0 \smallsetminus S$ may sit in $B$
+already, violating the conclusion at $t = 0$. Drop (c): a point of
+$S \cap B$ reachable from $X_0$ (at worst a point of
+$X_0 \cap B$ itself, again at $t = 0$) violates it. The two set-theoretic
+hypotheses fail at time zero when dropped; the dynamical one fails at
+positive time --- which is why (a) is a judgement with its own producing
+rules while (b) and (c) are single containment/disjointness rows.
+\end{bremark}
+
+\begin{bremark}[the premise is the invariance judgment, not the Morse
+judgment]\label{rem:qbasin-premise}
+A natural mis-design would take the global Morse judgement as the
+premise: it is the stronger-looking claim. But
+$\mathsf{Morse}(G, \rho)$ alone implies no particular invariant
+enclosure of $X_0$ --- an orbit from $X_0$ may transit
+$\llbracket\beta\rrbracket$ \emph{en route} to its Morse set, so
+recurrence structure without an enclosure proves no safety at all. The
+sound premise is the certificate-level invariance fact, and the Morse
+machinery contributes through the \emph{factory} instead: every lattice
+member of the family object (and every down-closed cell-set, via
+\rulename{QLatticeInv}) yields a $\mathsf{QInvScope}$ judgement whose
+facet rows already exist in the family object. This rule then mints one
+safety atom per avoid region at the price of its own disjointness rows
+alone --- zero new rows per additional $\beta$ after the first
+containment, which is the row-count payoff the batch form
+(Proposition~\ref{prop:qbasin-batch}) states as mathematics.
+\end{bremark}
+
+\begin{bremark}[what the checker recomputes]
+At this rule the checker verifies: that the cited judgement's region and
+init fields equal the rule's own scope data (the conclusion tie), and
+the disjointness rows --- per-box, per-atom sign sequents of the base
+calculus, or grid bookkeeping when $\beta_j$ is cell-aligned. Nothing
+else: soundness is pure logic over the judgement's semantic content,
+which is why the mechanized statement is three lines and
+hypothesis-free. Basin-minted and battery-minted safety atoms are
+\emph{type-identical} conclusions, deliberately: downstream citations
+consume the judgement and may not key on its producer.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+Safety-by-invariance is the classical frame of set-invariance control
+--- Nagumo's subtangentiality theorem \cite{nagumo1942} is the
+ancestral invariance certificate, and Blanchini's survey
+\cite{blanchini1999} the modern map of the field --- and of barrier
+certificates \cite{prajnajadbabaie2004}, which synthesize one function
+per specification coupling the invariance argument to the safety
+argument. The rule's point is the \emph{decoupling}: invariance is
+certified once, as a judgement (by strictly inward facet rows, at
+\rulename{QBlockInv}), and each safety claim is thereafter a citation
+plus disjointness rows. The batch corollary is the certificate-side
+face of the elementary observation that one invariant set separates its
+contents from every disjoint avoid set at once.
+\end{bremark}
+
+\begin{anchors}
+Theorem \ref{thm:qbasin-sound} & \texttt{qBasin\_sound} (QtslSoundness.lean); premise cargo \texttt{hscope}, \texttt{hAvoid}\\
+Proposition \ref{prop:qbasin-batch} & \texttt{qBasin\_batch}\\
+invariance-scope denotation & \texttt{Semiflow.InvScopeSat}\\
+safety denotation ($\mathsf{P}_{\geq 1}$, deterministic reading) & \texttt{Semiflow.SafetySat}\\
+disjointness rows & per-box \rulename{BernCone}-family sequents (base kernel); cell-aligned case = recomputed bookkeeping\\
+\end{anchors}

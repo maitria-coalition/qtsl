@@ -1,0 +1,83 @@
+[[rule]]
+id = "PConstExact"
+source = "../BL-rules.toml"
+row = "PConstExact"
+proof = "book/proofs/PConstExact.tex"
+commentary = '''
+\rulename{PConstExact} is the calculus\textquotesingle s ground-fact
+rule: it lets a derivation state an exact closed arithmetic fact ---
+$\vdash -3/4 \leq 0$, or $\vdash (2/3)^2 = 4/9$ --- with no premises.
+Before it, the calculus literally could not derive a ground fact at all:
+every other rule transforms facts it is given. A producer uses it
+wherever a numeric side condition enters a derivation --- a constant
+bound, an exact constant comparison feeding a later combination step.
+
+What the checker recomputes is the entire side condition:
+\texttt{evalClosed}, the verified closed-term evaluator, exact over $\Q$,
+must return \texttt{true} on the comparison. There is no separate
+``closedness'' hypothesis to check: the
+evaluator returns \texttt{none} the moment it meets a wire, so a
+\texttt{true} result certifies closedness as a byproduct --- a
+hypothesis the payload cannot mis-declare. One comparator, $\neq$, is
+excluded from the admissible set even though the underlying semantic
+lemma covers it: the calculus maintains a second, three-valued soundness
+screen, and a premise-free $\neq$ atom would break it (the proof section
+unpacks why). Without the exclusion, the rule would silently invalidate
+an invariant the rest of the calculus is entitled to assume.
+'''
+note = '''
+The rule generalizes the earlier scalar-constant-fact rule, retained as
+the corner case $e_2 = 0$. Its tier is the taxonomy\textquotesingle s
+recorded boundary case: admissible by \emph{reduction to verified
+machinery} --- the soundness lemma is one step to the
+evaluator-correctness theorem --- rather than by unpacking into a
+catalogue derivation, because no such derivation exists; that
+impossibility is the rule\textquotesingle s point. It is not core
+because it adds no new kernel semantic content.
+'''
+correspondence = '''
+\begin{itemize}
+\item $e_1$, $e_2$ $\mapsto$ \texttt{e₁ e₂ : Term}; $\bowtie$
+  $\mapsto$ \texttt{b : BowTie}; the judgement context $\Phi$ and the
+  concluded sequent $\mapsto$ \texttt{seq : Sequent} with the
+  conclusion tie \texttt{hpost} $:$ \texttt{seq.post = .atom b e₁ e₂}.
+  Premise-freeness is represented by silence: no hypothesis mentions
+  \texttt{seq.pre}, so the statement holds under arbitrary premises.
+\item side condition $\mathrm{evalClosed}(e_1 \bowtie e_2) =
+  \mathsf{true}$ $\mapsto$ \texttt{hEval} $:$
+  \texttt{(Formula.atom b e₁ e₂).evalClosed = some true} --- note the
+  \texttt{some}: the verified evaluator is partial and returns
+  \texttt{none} on any wire, so the display\textquotesingle s separate
+  ``wire-free (closed) terms\textquotesingle\textquotesingle{}
+  hypothesis is \emph{absorbed}: it has no Lean binder of its own
+  because a successful evaluation certifies it.
+\item conclusion $\Phi \vdash e_1 \bowtie e_2$ $\mapsto$ the goal
+  \texttt{seq.semanticallyValid H}, validity at every valuation of the
+  ambient hypernet.
+\end{itemize}
+Width note, deliberate and essential: the display restricts
+$\bowtie \in \{<, \leq, =, \geq, >\}$, while the Lean statement is
+proven for \emph{all} constructors of \texttt{BowTie}, including
+$\neq$. The comparator exclusion is an admission-layer fact --- the
+checker refuses a premise-free $\neq$ atom to protect the three-valued
+screen, as the commentary explains --- not a semantic one. The
+mechanized statement is therefore strictly wider than the displayed
+rule, and the displayed rule is exactly the admitted fragment of it.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = ["sound_pConstExact"]
+
+[rule.hol]
+status = "absent"
+reason = '''
+\rulename{PConstExact} postdates the HOL4 port of the wire-format
+checker: its wire tag is allocated on the Lean side
+(\texttt{Core/Catalogue.lean}, \texttt{pConstExact}), but the
+corresponding column-side check has not entered theory
+\texttt{qtsl\_catalogue}, so the checker the HOL4 development verifies
+does not carry the rule and there is no HOL statement about it to
+quote; this box is the honest state of the edifice.
+'''

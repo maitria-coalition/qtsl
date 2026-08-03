@@ -1,0 +1,192 @@
+# B5 fan fragment. NOTE for the manual owner: the [rule.hol] reason field
+# and the two newly-bound modules (Qtsl.Catalogue mathlib-side;
+# see also PSDCert* fragments binding Qtsl.PsdCert) are flagged
+# in the batch report — schema/bind checks are enforced upstream.
+
+[[rule]]
+id = "CellInInterior"
+source = "../BL-rules.toml"
+row = "Cell-In-Interior"
+proof = "book/proofs/CellInInterior.tex"
+commentary = '''
+\rulename{Cell-In-Interior} is one of the two rules that read the cell
+primitive --- the calculus\textquotesingle s only source of disjunction.
+A cell application $\Cell[\Sigma]_{\{x\}\to\{b_1,\ldots,b_N\}}$ tabulates
+which cell of a simplicial decomposition its input point lies in, as
+one-hot indicator outputs; piecewise definitions (a piecewise-linear
+activation, a case-defined dynamics) enter the hypernet through it. This
+rule discharges the case a proof is actually in: from a premise placing
+$x$ \emph{strictly inside} cell $C_i$ --- a conjunction of strict
+barycentric inequalities in the pinned flat vertex order --- it concludes
+the full one-hot vector, $b_i = 1$ and $b_j = 0$ for every $j \neq i$. A
+producer reaches for it after region reasoning (the region introduction
+rules, \rulename{Subdivide}) has confined the input to one
+cell\textquotesingle s interior, and needs the indicator values as
+arithmetic facts downstream --- typically to substitute a branch\textquotesingle s
+closed form for the primitive\textquotesingle s output.
+
+What the checker recomputes, given the payload (schema, cell index, cited
+application, premise proof): that the cited cell application is present
+in the hypernet with the input wire typed at shape $[\mathrm{ambDim}]$
+and every output at total size one; that the premise formula is
+byte-for-byte the schema-derived strict-interior build for cell $i$
+(barycentric atoms recomputed from the vertex coordinates --- no formula
+text trusted from the wire); and that the conclusion is the recomputed
+one-hot form. Soundness then rides the model: admissibility of the cell
+application forces some cell choice $k$ with weak membership and the
+one-hot outputs at $k$; the strict premise pins $k = i$ through the
+schema\textquotesingle s interior-disjointness well-formedness.
+
+Each hypothesis is essential. Weaken strictness to weak membership
+and a boundary point of two cells admits a valuation one-hotting the
+\emph{other} cell --- the conclusion fails. Drop interior-disjointness
+(distinct cells of the enumeration have disjoint interiors --- which the
+complex\textquotesingle s simplicial conformity does NOT imply: conformity never
+sees the extension masks and permits duplicate cell entries) and the
+model may one-hot an overlapping cell. Drop the output typing and the
+model\textquotesingle s entry-level one-hot fact decouples from the whole-wire
+equality atoms (a zero-size output satisfies every atom vacuously; a
+multi-entry output can falsify the atom away from entry zero). Drop the
+input-shape tie and the premise\textquotesingle s constraint on the input tensor
+no longer speaks about the model\textquotesingle s evaluation point. The proof
+section walks these in order.
+'''
+note = '''
+The checkable fragment is 1-dimensional (two-vertex cell supports on
+distinct coordinates) --- the same fragment as the region machinery;
+everything beyond is refused, never approximated. The intended
+catalogue elaboration (case analysis over the cell axiom\textquotesingle s
+disjunction) awaits the context-carrying case-analysis constructor; the
+shipped warrant is a direct semantic lemma, the degenerate-rewrite
+shape the \rulename{PConstExact} section defines.
+'''
+correspondence = '''
+Judgement frame as in \rulename{Ax}; sub-derivation premise as at
+\rulename{Weaken}.
+\begin{itemize}
+\item $\Sigma \mapsto$ \texttt{schema : SimpC}; $i \mapsto$
+  \texttt{whichI : Fin schema.cells.length}; $x \mapsto$ the term
+  \texttt{.var input} --- the region term literally \emph{is} the
+  input wire, as at \rulename{BernCone}; $b_1, \ldots, b_N \mapsto$
+  \texttt{outputs : List Wire}.
+\item the linkage $\Cell[\Sigma]_{\{x\}\to\{b_1,\ldots,b_N\}} \in H$
+  $\mapsto$ \texttt{happ}, plain application-list membership ---
+  contrast the \rulename{LiRPA} family\textquotesingle s size-gated
+  lookup: here the port discipline rides two explicit typing
+  hypotheses instead, \texttt{hinshape} (the input wire\textquotesingle
+  s type has shape \texttt{[schema.ambDim]}) and \texttt{houts}
+  (every output wire singleton-sized). Neither has a displayed row;
+  the payload carries both verbatim (\texttt{PCellInIntData}\textquotesingle
+  s port-typing fields, displayed above), and its source comment
+  records why they are essential twice: the model\textquotesingle s
+  sp-fact pins entry 0 of each output while the conclusion atom
+  evaluates the whole wire, and the premise atoms constrain the input
+  tensor, which ties to the model\textquotesingle s rational point
+  only at the declared shape. The Norm-typing-pack class; a
+  candidate for the same display-resync treatment.
+\item premise $\Phi \vdash \bigwedge_v \lambda^{C_i}_v(x)
+  \bowtie^{\circ}_v 0$ $\mapsto$ \texttt{ih} with \texttt{hint} $:$
+  \texttt{cellStrictInteriorForm schema (.var input) whichI
+  premise.post} --- the premise formula is pinned as the
+  \emph{build\textquotesingle s} output: the two-atom conjunction in
+  flat vertex order, comparators $<$ on extended vertices and $>$ on
+  core ones exactly as displayed, each atom comparing the barycentric
+  entry to \texttt{.const 0}. The build succeeds only at
+  \texttt{schema.ambDim = 1}, so the certified reach of the displayed
+  rule is the 1-dimensional fragment, by refusal (the
+  \rulename{ConvElim}/\rulename{ConvIntro} class; the note above says
+  it, this triple certifies it). $\Phi$ shared via \texttt{hpre}.
+\item conclusion $\Phi \vdash b_i = 1 \wedge \bigwedge_{j \neq i} b_j
+  = 0$ $\mapsto$ the goal under \texttt{hpost} $:$
+  \texttt{cellOneHotForm schema outputs whichI seq.post} --- pinned
+  as the one-hot build\textquotesingle s output: the $b_i = 1$ atom
+  first, then the ascending-$j$ chain of zeros; the displayed
+  big-wedge has exactly one accepted spelling.
+\item nowhere in the certificate: the interior-disjointness
+  well-formedness. It is consumed from the \emph{model
+  side} --- admissible valuations carry
+  \texttt{SimpC.CellIntDisjoint} in the cell sp-fact (certified
+  alongside), and the proof pins the model\textquotesingle s cell
+  choice with it --- so the display is right to show no such premise,
+  and the rule\textquotesingle s soundness is honestly conditional on
+  that provisional schema conjunct (the commentary\textquotesingle s
+  PROPOSED-B2-DISJOINT story, now visible in the statement chain).
+\end{itemize}
+Width note: within the 1-dimensional fragment nothing certified is
+narrower or wider than the display --- every hypothesis is consumed,
+and the two builds pin both formulas to single spellings.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Soundness"
+src = "../../lean/qtsl/Qtsl/Soundness.lean"
+decls = [
+  "sound_cellInInterior",
+  "cellStrictInteriorBuild_spec",
+  "maskRegionStrict_pair_intro",
+  "holds_cellOneHot",
+]
+
+[[rule.lean]]
+module = "Qtsl.Core.Catalogue"
+src = "../../lean/qtsl/Qtsl/Core/Catalogue.lean"
+full_decls = [
+  "baryLambdas1D",
+  "cellStrictInteriorBuild",
+  "cellStrictInteriorForm",
+  "cellOneHotBuild",
+  "cellOneHotForm",
+  "PCellInIntData",
+]
+intro = '''
+\textbf{The recomputed forms and the payload.}\enspace The premise and
+conclusion formulas are never read off the certificate as text: the
+checker rebuilds both from the schema --- the strict-interior
+conjunction from the 1-D barycentric coordinate terms
+(\texttt{baryLambdas1D}, offset-first affine normal forms over the
+two-vertex support), the conclusion from the one-hot pattern --- and the
+payload\textquotesingle s form fields assert equality with the rebuilt
+formulas. A skeptical reader should confirm by eye: the builds succeed
+only over a 1-dimensional complex with exactly two support vertices at
+distinct coordinates (everything else reads \texttt{none} and the rule
+refuses); the strict comparators are $<$ at extended vertices and $>$
+at core vertices; and the payload carries the port-typing obligations
+(input at $[\mathrm{ambDim}]$, outputs at total size one) explicitly.
+'''
+
+[[rule.lean]]
+module = "Qtsl.Catalogue"
+src = "../../lean/qtsl/Qtsl/Catalogue.lean"
+full_decls = ["MaskRegionStrict", "SimpC.CellIntDisjoint"]
+intro = '''
+\textbf{The semantic side: strict regions and interior
+disjointness.}\enspace \texttt{MaskRegionStrict} is the strict-sign twin
+of the weak region membership the model\textquotesingle s cell fact
+carries; \texttt{SimpC.CellIntDisjoint} is the well-formedness the
+pinning argument consumes, stated over cell \emph{indices} (so duplicate
+entries are excluded) at rational points (the model\textquotesingle s
+cell inputs are rational). It is consumed as a conjunct of the cell
+application\textquotesingle s model-level fact: an application over a
+non-disjoint enumeration admits no valuation --- hypothesis-side
+vacuity, sound but weak --- rather than an unsound conclusion. The
+predicate is a proposed schema amendment realized provisionally; the
+roster page records its status.
+'''
+
+[rule.hol]
+status = "absent"
+reason = '''
+The HOL4 port covers the checker cone up to (not including) the
+proof-object layer, and its header inventories the cell-rule payload
+forms --- the strict-interior, one-hot, witness, and zero builds ---
+as a deliberately dropped island: they are rule-payload machinery with
+no receipt in the ported slice, scheduled with the proof-object payload
+port. The shared barycentric ingredient (\texttt{baryCoeffs1D}, the
+affine data both cell builders read) IS ported and receipted; the cell
+builders themselves and the cell soundness argument are not. The
+roster\textquotesingle s name-match candidates for this rule
+(\texttt{coverCheck}/\texttt{coverChainCheck}/\texttt{coverReach}) were
+checked against the script and are the \rulename{Subdivide} interval
+cover machinery --- receipted under that rule\textquotesingle s mutants,
+unrelated to cells.
+'''

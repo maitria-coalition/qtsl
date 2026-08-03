@@ -1,0 +1,45 @@
+name = "su-functor"
+version = "0.1.0"
+defaultTargets = ["SuFunctor"]
+
+[leanOptions]
+autoImplicit = false
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "6f604786851f312da512a988fd54eee4ca35dcf9"
+
+# The certificate calculus: hypernets, valuations, formulas, sequents,
+# proof objects, and the per-rule soundness development.
+[[require]]
+name = "Qtsl"
+path = "../qtsl"
+
+# Pseudo double categories and lax double functors (the ambient notions
+# of the semantic-universe chapter's composition tier).
+[[require]]
+name = "double-cat"
+path = "../double-cat"
+
+# Finite-support imprecise probability: credal sets, lower/upper
+# expectations, penalty coherence (the composition tier's kernel stock).
+[[require]]
+name = "qtsl-aux"
+path = "../qtsl-aux"
+
+# The reflection route: sealed certificate bytes decoded, reconstructed,
+# and elaborated into a kernel-accepted validity theorem.  Consumed by
+# the adequacy tier's composed corollary (`Adequacy.CheckerAcceptance`):
+# acceptance of bytes read as a judgment in the semantic universe.
+[[require]]
+name = "reflection"
+path = "../checkers/reflection"
+
+[[lean_lib]]
+name = "SuFunctor"
+globs = ["SuFunctor", "SuFunctor.+"]
+
+[[lean_lib]]
+name = "AxiomReceipts"
+globs = ["AxiomReceipts"]

@@ -1,0 +1,41 @@
+\apilang{TypeScript}{judgment.dist}
+\apiprov{signature --- \texttt{ts/src/judgment.ts}}
+\begin{tssrc}
+export function dist(args: {
+  functor: string;
+  a: DistSubject;
+  b: DistSubject;
+  eps: QLike;
+}): Result<Artifact, JudgmentRefusal>
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+s.unwrap(
+  j.dist({
+    functor: "wasserstein-1",
+    a: { kind: "manifest", sys: j.sysRef("sys-a") },
+    b: { kind: "snapshot", locator: "snap-7" },
+    eps: Q.of(1, 100),
+  }),
+),
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::judgment::QDist::new}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/judgment/kinds.rs}}
+\begin{rustsrc}
+pub fn new(
+    functor: impl Into<String>,
+    a: DistSubject,
+    b: DistSubject,
+    eps: WitRat,
+) -> Result<Self, Refusal>
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/roundtrip\_spec.rs}}
+\begin{rustsrc}
+let dist = QDist::new(
+    "wasserstein-1",
+    DistSubject::Manifest(SysRef("sys-a".into())),
+    DistSubject::Snapshot("snap-7".into()),
+    q(1, 100),
+)
+.unwrap();
+\end{rustsrc}

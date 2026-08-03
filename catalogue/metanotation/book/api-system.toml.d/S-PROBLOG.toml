@@ -1,0 +1,24 @@
+# api-system.toml.d/S-PROBLOG.toml — the System Catalogue entry's
+# producer-API section (fan seam: one fragment per coverage-matrix
+# S-row, stem = id). Everything rendered is extracted from the
+# toolkit sources at emission; specs here are pointers, never quoted
+# text. Emit/verify: `qtsl-book api-tex` / `qtsl-book check`.
+
+[api]
+id = "S-PROBLOG"
+entity = "model type"
+
+[api.ts]
+handle = "system.problog"
+sig_file = "ts/src/system.ts"
+sig = ["marker:ts_sig_problog"]
+snippet_file = "ts/tests/problog-native.test.ts"
+snippet = "marker:ts_problog_system"
+note = '''\texttt{facts} are the smokers fixture's weighted rows (stress and influence facts sharing declared coins), built beside the quoted lines; the system constructed here feeds the certificate corpus's \texttt{fromSystem} path, whose emitted bytes are verified against the committed golden vectors.'''
+
+[api.rust]
+handle = "mtk_catalogue::system::presets::ProbLog::manifest"
+sig_file = "crates/mtk-catalogue/src/system/presets.rs"
+sig = ["marker:preset_problog"]
+snippet_file = "crates/mtk-catalogue/tests/builders.rs"
+snippet = "marker:problog_happy"

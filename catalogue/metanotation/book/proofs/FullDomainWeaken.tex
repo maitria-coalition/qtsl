@@ -1,0 +1,105 @@
+
+\sourcenote{Genre: alias rule (tier 3) --- a respelling template. An
+alias owes the book five artefacts: the verified 1$\to$1 unpack, the
+filled-in application of the target, the payload-transport table, the
+exactness identity, and the soundness corollary through the
+target\textquotesingle s lemma. This alias is the
+tier\textquotesingle s degenerate case --- its target is a verified
+lemma rather than a catalogue node, because no region-weakening rule
+exists to apply --- and the five artefacts below say so honestly
+rather than inventing a node.}
+
+\begin{brecipe}[the alias template, degenerate-target form]\label{rec:fdw-template}
+An alias rule $A$ is warranted by a verified function carrying its
+payload to the payload of a \emph{single} target application --- one
+node $\to$ one node, nothing derived. Where the target is not a
+catalogue node but a verified theorem, the transport carries the
+payload into the theorem\textquotesingle s hypotheses instead, and the
+soundness corollary is the theorem itself: the alias-tier twin of the
+admissible tier\textquotesingle s recorded
+reduction-to-verified-machinery boundary case.
+\end{brecipe}
+
+\begin{brecipe}[the filled-in application]\label{rec:fdw-filled}
+\[
+\inferrule*[Right=\rulename{FullDomainWeaken}]{
+  \mathcal{T} \rhd\ \vdash P \ \text{on } D_m
+}{
+  \vdash P \ \text{on } D_m \smallsetminus \mathrm{Off}
+}
+\qquad\rightsquigarrow\qquad
+\texttt{fullDomainWeaken\_offScope}\bigl[\mathcal{T}\bigr]
+\;\rhd\; \vdash P \ \text{on } D_m \smallsetminus \mathrm{Off}
+\]
+with the general form --- any scope the compile certifies inside the
+domain --- carried by \texttt{fullDomainWeaken\_sound}: from $P$ on
+$D_m$ and $\mathrm{scope} \subseteq D_m$, conclude $P$ on
+$\mathrm{scope}$.
+\end{brecipe}
+
+\begin{brecipe}[payload transport]\label{rec:fdw-transport}
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{off-scoped row} & \textbf{full-domain row}\\
+\midrule
+row payload $P$ & $P$ (verbatim)\\
+scope $D_m \smallsetminus \mathrm{Off}$ & $D_m$ (the off-region dropped)\\
+$\mathrm{scope} \subseteq D_m$ & compile guarantee (\texttt{hbridge}), not a posted premise\\
+\end{tabular}
+\end{center}
+\end{brecipe}
+
+\begin{bprop}[exactness identity]\label{prop:fdw-identity}
+$D_m \smallsetminus \mathrm{Off} \subseteq D_m$; more generally, every
+off-scoped row\textquotesingle s scope is contained in its
+mode\textquotesingle s domain.
+\end{bprop}
+\begin{proof}
+A set difference is contained in its left operand --- one line
+(\texttt{Set.diff\_subset}). The general containment is the compile
+fact the bridge hypothesis names, supplied by the presentation layer,
+never proven per-instance.
+\end{proof}
+
+\begin{bprop}[soundness corollary]\label{prop:fdw-sound}
+If $P$ holds everywhere on $D_m$, it holds everywhere on any
+$\mathrm{scope} \subseteq D_m$ --- in particular on
+$D_m \smallsetminus \mathrm{Off}$.
+\end{bprop}
+\begin{proof}
+Restriction of a universally quantified statement along an inclusion:
+for $x \in \mathrm{scope}$, the inclusion gives $x \in D_m$, and the
+full-domain row gives $P(x)$. \texttt{fullDomainWeaken\_sound} is this
+one line, and it is axiom-free --- no classical reasoning, no choice:
+pure monotonicity of $\forall$.
+\end{proof}
+
+\begin{bremark}[what is spent]
+Nothing, soundness-wise --- and possibly everything,
+feasibility-wise: if $P$ fails anywhere in $D_m \cap \mathrm{Off}$
+(points of the off-region outside $D_m$ never enter the row), the
+full-domain row is simply unprovable and the move is unavailable. The
+off-region existing at all signals that some row somewhere needed it;
+this move is the discharge for the rows that did not, and its
+availability is itself a diagnosis: the carve-out was free for this
+row. When it fails, the kit\textquotesingle s working move
+(\rulename{VerifiedCover}) localizes the work instead of abandoning
+the carve-out.
+\end{bremark}
+
+\begin{bremark}[deliberately not the sequent weakening]
+The base calculus has a weakening rule; this is deliberately not it.
+Sequent weakening grows a premise \emph{list} --- what a sequent
+assumes; this move shrinks a quantification \emph{region} --- where a
+row is asserted. The two live one extension layer apart and neither
+subsumes the other: a base sequent has no scope field to weaken, and
+this move never touches a premise list. The kinship is real, and the
+identification would be a type error.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:fdw-filled} unpack & \texttt{fullDomainWeaken\_offScope} (the emitted shape)\\
+general form & \texttt{fullDomainWeaken\_sound} (axiom-free)\\
+Proposition \ref{prop:fdw-identity} & \texttt{Set.diff\_subset}; the \texttt{hbridge} inclusion\\
+region-layer monotonicity, generic & \texttt{regionSat\_mono} (same module)\\
+\end{anchors}

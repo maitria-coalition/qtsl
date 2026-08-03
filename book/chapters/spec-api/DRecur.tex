@@ -1,0 +1,32 @@
+\apilang{TypeScript}{spec.derived.recurrenceAs}
+\apiprov{signature --- \texttt{ts/src/spec.ts}}
+\begin{tssrc}
+recurrenceAs(gamma: StatePred): ForallSpec
+
+gf(gamma: StatePred): PathPred
+
+fg(phi: StatePred): PathPred
+\end{tssrc}
+\apiprov{construction --- \texttt{ts/tests/spec-native.test.ts}}
+\begin{tssrc}
+const gamma0 = s.unwrap(s.derived.boolWireSet(0, 2));
+const gamma1 = s.unwrap(s.derived.boolWireSet(1, 2));
+const recur0 = s.derived.recurrenceAs(gamma0);
+const recur1 = s.derived.recurrenceAs(gamma1);
+\end{tssrc}
+\apilang{Rust}{mtk\_catalogue::spec::derived::recurrence\_as}
+\apiprov{signature --- \texttt{crates/mtk-catalogue/src/spec/derived.rs}}
+\begin{rustsrc}
+pub fn recurrence_as(gamma: StatePred) -> Result<ForallSpec, Refusal>
+
+pub fn gf(gamma: StatePred) -> Result<PathPred, Refusal>
+
+pub fn fg(phi: StatePred) -> PathPred
+\end{rustsrc}
+\apiprov{construction --- \texttt{crates/mtk-catalogue/tests/golden\_spec.rs}}
+\begin{rustsrc}
+let gamma0 = derived::bool_wire_set(0, 2).unwrap();
+let gamma1 = derived::bool_wire_set(1, 2).unwrap();
+let recur0 = derived::recurrence_as(gamma0).unwrap();
+let recur1 = derived::recurrence_as(gamma1).unwrap();
+\end{rustsrc}

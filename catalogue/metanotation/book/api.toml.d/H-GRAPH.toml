@@ -1,0 +1,22 @@
+# api.toml.d/H-GRAPH.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "H-GRAPH"
+note = '''The trio quoted here is the container's content-address surface --- strict decode, canonical bytes, SHA-256 digest; a graph is closed by \texttt{HypernetBuilder::finish} (TS \texttt{Builder.finish}), which runs the full preflight as a belt. The construction quoted below is the corpus's decode--re-encode--digest loop over the four committed reference vectors.'''
+
+[api.ts]
+handle = "hypernet.Hypernet"
+sig_file = "ts/src/hypernet.ts"
+sig = ["fn fromCanonicalBytes", "fn canonicalBytes", "fn digest"]
+snippet_file = "ts/tests/hypernet-native.test.ts"
+snippet = "marker:H-GRAPH"
+
+[api.rust]
+handle = "mtk_catalogue::hypernet::Hypernet"
+sig_file = "crates/mtk-catalogue/src/hypernet/canon.rs"
+sig = ["fn from_canonical_bytes", "fn canonical_bytes", "fn digest"]
+snippet_file = "crates/mtk-catalogue/tests/golden_hypernet.rs"
+snippet = "marker:H-GRAPH"

@@ -1,0 +1,247 @@
+# Graduated from a dashboard-only [[coverage]] fragment to a full [[rule]]
+# entry (fan batch B6). The four original [[coverage.lean]] blocks are
+# preserved verbatim as the first four [[rule.lean]] blocks below
+# (module/src/package/decls unchanged); the two QtslCompose blocks are new
+# bindings for the n-ary acyclic assembly + derived tier split. The
+# conditional flag is carried over: graduation must never widen a warrant.
+[[rule]]
+id = "QAGCompose"
+source = "../QTSL-rules.toml"
+row = "QAGCompose"
+conditional = true
+proof = "book/proofs/QAGCompose.tex"
+commentary = '''
+\rulename{QAGCompose} is the satisfaction-judgement
+stratum\textquotesingle s composition rule --- assume--guarantee
+transport over a structured system presentation. From
+interface-indexed satisfaction of each component
+($\mathsf{QSatI}(\Sigma_i, \mathit{spec}_i)$: every behaviour of
+$\Sigma_i$ whose inputs satisfy the assumption $\alpha_i$ delivers the
+guarantee $\gamma_i$, with quantitative slack where declared) and a
+wiring certificate (the lens square transporting delivered guarantees
+into downstream assumptions, with slack
+$\kappa \in \mathcal{K}^0_\infty$), it concludes satisfaction of the
+wired composite at the output spec. A producer uses it to certify a
+system of interacting components --- each certified once, against its
+own datasheet --- without ever building the monolithic certificate.
+
+The soundness warrant factors, and the factorization organizes
+everything on this page: $\mathrm{sound} = $ (transport arithmetic)
+$\circ$ (semantic reading). The transport half is profile-generic
+exact polynomial arithmetic --- the $(1, \lambda, 1, 1)$ cancellation
+of cross-supplies, the sequent-layer machinery of \rulename{Promise}
+and \rulename{Syzygy} --- and consumes only linearity of the
+obligation operator over the wiring. The semantic half is
+per-profile, and it is where this entry\textquotesingle s conditional
+check lives. What the cited theorems prove, per profile and shape:
+for general stochastic hybrid systems (GSHS), \emph{series}
+composition (the conditioning tower, qualitative and product-bound
+forms, plus the certified pipeline through the maximal-inequality
+kernel), \emph{parallel} composition (the weighted-sum
+supermartingale --- the semantic face of the syzygy weights), and
+\emph{feedback in sum-form} (the cancellation run under conditional
+expectation along the joint jump skeleton, with non-expansive
+boundary rows) are proven; the $n$-ary \emph{acyclic} assembly is
+proven at any $n$ by strong induction on the causality certificate,
+with union-bound slack composition; and the per-profile tier split is
+itself a proven, derived function of the presentation. \emph{Feedback
+in gauge-form} (jumps that expand the certificate, repaid by flow
+decay) is partial: its reduction theorem and the max-form
+piecewise-deterministic instance are machine-checked end-to-end, while
+the finite-index price of the diffusion term and the admissible-window
+pinch remain open. The deterministic-ODE row is at statement level;
+the discrete-kernel row\textquotesingle s assembly and the
+sampled-data row are stated, not yet assembled. The commentary states
+this grid plainly because the dashboard\textquotesingle s conditional
+mark warrants exactly the proven cells, never the whole catalogued
+rule.
+
+Two fences are part of the statement, not omissions. Undirected
+stochastic wire sharing (common noise) is out of scope: stochastic
+components sharing a wire need exactly one determining side, and the
+proven parallel cell covers directed coupling and disjoint tensor
+only. And the $n$-ary theorems are acyclic by construction --- the
+presentation\textquotesingle s causality certificate makes a directed
+cycle unrepresentable --- so feedback rides the binary small-gain
+cells, where the coupling of jump times between the two components is
+handled by the joint-skeleton argument.
+
+What a checker recomputes, once the rule\textquotesingle s row sorts
+are staged: the causality certificate (a rank function strictly
+increasing along wires), the slack composite (lens composition plus
+slack addition, with the class membership rows discharged by
+\rulename{QWireCertDischarge}), and the well-posedness row families
+for the stochastic profiles. The component satisfactions and the
+wiring squares are cited judgements and inherited sequent leaves ---
+the rule adds no kernel arithmetic of its own.
+'''
+note = '''
+The tier split is derived from mechanism field-family population,
+never stored as a tag: admissible where every mechanism in the
+presentation derives the ODE or discrete profile (the composite
+certificate $\sum_i \lambda_i V_i$ is syntactically constructible and
+the node unpacks through the sequent-layer transport), core where any
+mechanism is stochastic (no unpacking exists; the semantic theorems
+are the warrant). One rule node either way.
+'''
+correspondence = '''
+The display is one $n$-ary rule; the bound set is a \emph{grid}, and
+the dictionary\textquotesingle s first duty is to say which display
+constituent lands in which theorem. All statements live over the
+compiled behaviour space (\texttt{Ω}, the composite execution
+law\textquotesingle s carrier), reached from the presentation through
+bridge hypotheses --- the events \texttt{conform j} / \texttt{sat j}
+(component $j$\textquotesingle s input-conformance and
+guarantee-delivery, interpreted over composite behaviours: the
+I-bridge of the kernel-semantics interface) --- so the certified
+statements quantify over exactly the Systems whose compilation
+discharges those bridges.
+\begin{itemize}
+\item the E1 premises $\mathsf{QSatI}(\Sigma_i, \ldots)$ $\mapsto$,
+  $n$-ary face: \texttt{h : ∀ j, ∀ᵐ ω ∂μ, ω ∈ conform j → ω ∈ sat j}
+  (\texttt{qualitative}) and quantitatively \texttt{hε : μ (conform j
+  ∩ (sat j)ᶜ) ≤ ε j} (\texttt{fail\_bound}) --- per-component
+  satisfaction as a.e.\ implication / failure-measure bound.
+\item the $\mathsf{QWireCert}$ premise $\mapsto$ \texttt{hw : ∀ j,
+  conformExt ∩ (⋂ i ∈ S.upstream j, sat i) ⊆ conform j}: the wiring
+  squares with the $\kappa$-slack \emph{folded into the predicates}.
+  Consequence, stated plainly: the displayed $\kappa_{\mathrm{out}}$
+  recompute row has no counterpart in the $n$-ary bound statements
+  --- quantitative slack composition appears instead as the
+  union-bound $\sum_j \varepsilon_j$ (\texttt{fail\_bound\_out}, the
+  inventory\textquotesingle s $\sum_i (1 - p_i)$ display at any $n$).
+\item the causality certificate $\mapsto$ \texttt{System.rank} +
+  \texttt{System.causality} as \emph{data} (the structure is bound by
+  display): rank strictly increasing along wires is a field, the
+  induction of \texttt{sat\_of\_conform} runs on it, and a directed
+  cycle is unrepresentable --- the Lean face of ``recomputed.''
+\item W0--W3 well-posedness rows $\mapsto$ nothing bound ---
+  schema-stratum families, honestly absent.
+\item the conclusion $\mathsf{QSatI}(\mathsf{SysWire}(w, \vec{\Sigma}),
+  \mathit{spec}_{\mathrm{out}})$ $\mapsto$ \texttt{qualitative}\textquotesingle s
+  goal (a.e.\ delivery of \texttt{satOut} on conforming inputs) and
+  \texttt{fail\_bound\_out}\textquotesingle s (failure measure at the
+  output spec), with \texttt{hout} the output reading of the
+  delivered guarantees; \texttt{fail\_subset} is the pure
+  set-algebra localization engine (a composite failure localizes at a
+  rank-minimal failing component, conforming there).
+\item the tier split (the display\textquotesingle s
+  admissible/core banner) $\mapsto$ \texttt{System.qagTier}, a
+  \emph{derived function of the presentation} with both unfoldings
+  proven (\texttt{qagTier\_admissible\_iff}: every chart ODE or
+  discrete; \texttt{qagTier\_core\_iff}: some chart stochastic), and
+  \texttt{admissible\_constructs} making ``syntactically
+  constructible'' a statement: composite row of $\sum_i \lambda_i
+  V_i$ from component dissipation rows + wiring identification rows,
+  pointwise, at nonnegative certificate weights and free-sign wiring
+  multipliers --- the pointwise shadow of the main
+  package\textquotesingle s \texttt{sound\_syzygy} (witness prose,
+  package boundary).
+\item the binary GSHS cells, premise shapes as bound:
+  \texttt{Series.certified} consumes two supermartingale certificates
+  (\texttt{Supermartingale Yᵢ 𝒢 μ}, nonneg, positive barriers,
+  floor-row transport \texttt{hbarᵢ}, violation-witness inclusions
+  \texttt{hwitᵢ}) + one wiring square \texttt{conform₁ ∩ sat₁ ⊆
+  conform₂}, concluding the composite failure bound with
+  certificate-valued $\varepsilon$\textquotesingle s (initial mass
+  over barrier, per component); \texttt{Parallel.certified} /
+  \texttt{certified\_pair} conclude the avoid bound for the
+  weighted-sum certificate (the semantic face of the syzygy
+  weights); \texttt{FeedbackSum.supermartingale} /
+  \texttt{avoid\_bound} operate on the bundled
+  \texttt{SumFormFeedback} structure --- and its binder rows carry a
+  width find: soundness consumes only \texttt{0 ≤ lambda}, \texttt{0
+  ≤ theta}; the rule-level ranges $\lambda > 0$, $\theta \in (0,1)$
+  are well-formedness, never hypotheses --- with the $(1, \lambda, 1,
+  1)$ cancellation entering as the two integrated a.e.\ membership
+  rows \texttt{mem₁}/\texttt{mem₂};
+  \texttt{sound\_GSHS\_safety\_barrier} is the $\kappa = 0$ max-form
+  PDMP instance at a general positive floor \texttt{m}, consuming
+  measurability, kernel instances, Dynkin/non-expansion data, and a
+  global bound \texttt{C} on the certificate.
+\end{itemize}
+Width note: the conditional mark\textquotesingle s content is the
+grid-vs-rule gap the commentary already states (A-row at statement
+level, B/D assembly filed, gauge-form partial) --- the dictionary adds
+that within the \emph{proven} cells the mappings above are exact, that
+the $n$-ary statements are acyclic by type (not by side condition),
+and that no bound statement consumes the $\mathcal{K}^0_\infty$
+structure of $\kappa$ itself (that lives in
+\rulename{QWireCertDischarge}\textquotesingle s bound set; here slack
+is pre-folded or union-bounded).
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.AGCompose.GshsSeries"
+src = "../../lean/qtsl-aux/QtslAux/AGCompose/GshsSeries.lean"
+decls = ["certified"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.AGCompose.GshsParallel"
+src = "../../lean/qtsl-aux/QtslAux/AGCompose/GshsParallel.lean"
+decls = ["certified", "certified_pair"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.GshsFeedbackSum"
+src = "../../lean/qtsl-aux/QtslAux/GshsFeedbackSum.lean"
+decls = ["supermartingale", "avoid_bound"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.MaxFormPDMP"
+src = "../../lean/qtsl-aux/QtslAux/MaxFormPDMP.lean"
+decls = ["sound_GSHS_safety_barrier"]
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslCompose.Presentation"
+src = "../../lean/qtsl-aux/QtslAux/QtslCompose/Presentation.lean"
+decls = [
+  "System",
+  "System.qagTier",
+  "System.qagTier_admissible_iff",
+  "System.qagTier_core_iff",
+  "admissible_constructs",
+]
+intro = '''
+\textbf{The presentation layer, bound by display.}\enspace The
+\texttt{System} structure is the abstraction the composition theorems
+consume: the field-family population pattern of each mechanism (from
+which the doctrine profile is \emph{derived}, never stored) and the
+wiring order with its causality certificate carried as data --- a rank
+function strictly increasing along wires, which is precisely what the
+checker-side causality condition recomputes. \texttt{System.qagTier}
+derives the rule\textquotesingle s tier from the same data, with both
+unfoldings proven; \texttt{admissible\_constructs} makes the
+admissible face\textquotesingle s \textquotedblleft syntactically
+constructible\textquotedblright{} clause a checkable statement rather
+than prose.
+'''
+
+[[rule.lean]]
+package = "qtsl-aux"
+module = "QtslAux.QtslCompose.AGCompose"
+src = "../../lean/qtsl-aux/QtslAux/QtslCompose/AGCompose.lean"
+decls = [
+  "sat_of_conform",
+  "qualitative",
+  "fail_subset",
+  "fail_bound",
+  "fail_bound_out",
+]
+
+[rule.hol]
+status = "absent"
+reason = '''
+The satisfaction-judgement extension postdates the HOL4 port entirely:
+the ported cone is the base calculus\textquotesingle s first-order
+check-function surface (theory \texttt{qtsl\_catalogue}, stopping
+before even the base proof-object layer), and no extension-theory
+definition exists anywhere in the HOL development. A HOL statement of
+this rule presupposes a HOL port of the satisfaction stratum, which is
+its own campaign; until then this box is the honest state of the
+edifice.
+'''

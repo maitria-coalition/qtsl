@@ -1,0 +1,118 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. Proof-theoretically \rulename{Promise} unpacks into core rules
+(conjunct plumbing + \rulename{Cut}); in the realized calculus it is a
+native constructor, kept for cost and for the locality-warrant payload.
+The recipe shows the unpack; the semantic warrant is the kernel lemma
+\texttt{sound\_promise}, which is the unpack's semantic shadow run in
+one pass.}
+
+\textbf{Setting.}\enspace The payload (the \texttt{PromiseStep}
+structure quoted above) carries a supplier sequent $\Phi_1 \vdash Q$, a
+consumer sequent whose premise contains the contract $Q$ at a declared
+conjunct path $\pi$ (write it $\Phi_2 \wedge_{\pi} Q \vdash \Psi$ ---
+the $\pi$-notation meaning $Q$ sits at path $\pi$ in the premise's
+conjunction tree, $\Phi_2$ being the rest), a declared interface wire
+list $Y$, and the composite sequent, whose premise is the consumer's
+with $Q$ \emph{replaced} by $\Phi_1$ at $\pi$ and whose conclusion is
+$\Psi$. Four checked hypotheses: \emph{(P1)} the path reads $Q$ in the
+consumer's premise; \emph{(P2)} replacing $Q$ by $\Phi_1$ at $\pi$
+yields exactly the composite premise; \emph{(P3)}
+$\wires(Q) \subseteq Y$; \emph{(P4)} the supplier's wires meet the
+consumer's and the goal's only inside $Y$. (P1)--(P2) are the splice
+plumbing; (P3)--(P4) are the locality warrant.
+
+\begin{brecipe}[the \rulename{Promise} instance --- cut through a
+conjunct path]\label{rec:promise-instance}
+The general admissible template (one rule node $\rightsquigarrow$ a
+derivation fragment over core rules with the same conclusion, applied
+leaf-first until no such node remains) instantiates as:
+\[
+\inferrule*[Right=\rulename{Promise}]{\;\mathcal{T}_s \rhd \Phi_1 \vdash Q \\ \mathcal{T}_c \rhd \Phi_2 \wedge_{\pi} Q \vdash \Psi\;}{\Phi_2 \wedge_{\pi} \Phi_1 \vdash \Psi}
+\qquad\rightsquigarrow\qquad
+\inferrule*[Right=\rulename{Cut}]{
+  \inferrule*{\mathcal{T}_s}{\Phi_2 \wedge_{\pi} \Phi_1 \vdash Q}
+  \\
+  \inferrule*{\mathcal{T}_c}{\Phi_2 \wedge_{\pi} Q \vdash \Psi}
+}{\Phi_2 \wedge_{\pi} \Phi_1 \vdash \Psi}
+\]
+where the left branch widens $\mathcal{T}_s$'s premise from $\Phi_1$ to
+the whole composite (the $\pi$-addressed conjunct entails $\Phi_1$: a
+$\wedge$-extraction chain along $\pi$, then \rulename{Weaken}), and the
+cut re-inserts $Q$ at $\pi$ against the untouched context $\Phi_2$ (a
+$\wedge$-restructuring chain: $\wedge$E on the context,
+$\wedge$I against $Q$, rebuilt along $\pi$) --- the display elides the
+intermediate node: \rulename{Cut}'s right premise proper is
+$(\Phi_2 \wedge_{\pi} \Phi_1) \wedge Q \vdash \Psi$, obtained from
+$\mathcal{T}_c$ by exactly that restructuring chain. Both chains are linear in
+the depth of $\pi$; no rule beyond
+$\wedge$I/$\wedge$E/\rulename{Weaken}/\rulename{Cut} appears, so
+leaf-first elimination terminates and conservativity holds with no new
+kernel semantic content.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:promise-sound}
+If the supplier and consumer sequents are semantically valid and
+(P1)--(P2) hold, the composite sequent is semantically valid.
+\end{bprop}
+\begin{proof}
+Fix an admissible valuation $\sigma$ satisfying the composite premise.
+Reading the composite premise at $\pi$ returns $\Phi_1$ (the read of a
+successful replacement returns the replacement --- the round-trip lemma
+\texttt{Formula.conjGet\_of\_conjReplace}), and an addressed conjunct
+of a holding conjunction holds (\texttt{Formula.holds\_of\_conjGet});
+so $\sigma \models \Phi_1$, and supplier validity gives
+$\sigma \models Q$. Replacing $\Phi_1$ back by $Q$ at $\pi$ recovers
+the consumer's premise exactly
+(\texttt{Formula.conjReplace\_back}, using (P1)--(P2)), and replacement
+by a holding formula preserves holding
+(\texttt{Formula.holds\_conjReplace}); so
+$\sigma \models \Phi_2 \wedge_{\pi} Q$, and consumer validity gives
+$\sigma \models \Psi$. This is \texttt{sound\_promise} verbatim: pure
+predicate logic over the semantics --- admissibility of $\sigma$ is
+passed through untouched, and neither confinement hypothesis is
+consulted.
+\end{proof}
+
+\begin{bremark}[the confinement premises are warrant, not soundness]
+\label{rem:promise-warrant}
+(P3)--(P4) appear in no step of Proposition~\ref{prop:promise-sound},
+and dropping them admits no false sequent: cut is sound regardless of
+where the contract's wires live. What their removal \emph{does} admit
+is a degenerate reading of the rule --- a ``contract'' mentioning
+supplier-private wires, i.e.\ a composition whose interface is as wide
+as the components themselves. Everything the rule is \emph{for} then
+fails: the contract stops being a datasheet (a public artefact whose
+vocabulary is the declared separator), certificate size stops scaling
+with the interface, and any bounded-disclosure reading of ``what the
+consumer learns about the supplier'' becomes vacuous. Those
+consequences are theorems \emph{about certificates that carry the
+checks}, which is why the checks are checked --- a hypothesis whose
+necessity is economic and epistemic rather than semantic is exactly
+the kind a recipe must label, or the next reader deletes it as
+redundant.
+\end{bremark}
+
+\begin{bremark}[relation to the literature]
+Assume--guarantee composition descends from composing-specifications
+calculi \cite{abadilamport1993}; the subtlety those calculi negotiate
+is \emph{circularity} --- each component assuming what the other
+guarantees --- which needs an induction over time or a fixpoint
+argument \cite{mcmillan1999}. \rulename{Promise} deliberately takes
+the acyclic case, where plain cut suffices and the whole rule is
+bookkeeping around it; the circular case enters this calculus only
+through the feedback rules (\rulename{SmallGain} at the sequent layer,
+the feedback cells of the satisfaction-layer composition rule), where
+the guarded-fixpoint structure is explicit. Separating the two ---
+cut where cut suffices, guarded fixpoints only where feedback is real
+--- is the design's answer to the classical observation that circular
+assume-guarantee is unsound without a well-foundedness device.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:promise-instance} payload \& plumbing & \texttt{PromiseStep} (fields \texttt{path}, \texttt{pathReads}, \texttt{prePlumb}, \texttt{postEq})\\
+path read/replace round trips & \texttt{Formula.conjGet\_of\_conjReplace}, \texttt{Formula.conjReplace\_back}\\
+addressed conjunct entailed; replacement preserves holding & \texttt{Formula.holds\_of\_conjGet}, \texttt{Formula.holds\_conjReplace}\\
+Proposition \ref{prop:promise-sound} & \texttt{sound\_promise}; wired as core \texttt{RuleData.promise} into \texttt{ProofObject.sound}\\
+confinement checks (warrant only) & \texttt{formulaWiresWithin}, \texttt{wiresSeparated} (payload fields \texttt{contractConfined}, \texttt{separation})\\
+\end{anchors}

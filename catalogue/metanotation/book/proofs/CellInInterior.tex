@@ -1,0 +1,141 @@
+
+\sourcenote{Genre: admissible rule (tier 2) --- a proof-tree-rewriting
+recipe. The intended elaboration is a case analysis over the cell
+primitive's one-hot disjunction (the $\sp[\Cell[\Sigma]]$ axiom recorded
+on the roster page --- the calculus's only source of disjunction); the
+\emph{realized} warrant is the degenerate rewrite in the
+\rulename{PConstExact} sense, discharging against a named verified
+semantic lemma. Both are presented, and the honest reason the first is
+not yet a checkable catalogue derivation is stated.}
+
+\begin{brecipe}[the intended rewrite --- case analysis over the cell disjunction]
+\label{rec:cii-intended}
+A cell application $\Cell[\Sigma]_{\{x\}\to\{b_1,\ldots,b_N\}}$
+contributes to the ambient premise its one-hot disjunction
+\[
+\sp[\Cell[\Sigma]] \;=\; \bigvee_{k=1}^{N}\Bigl( x \in \overline{C_k}
+\;\wedge\; b_k = 1 \;\wedge\; \textstyle\bigwedge_{j \neq k} b_j = 0 \Bigr).
+\]
+The intended unpacking of one \rulename{Cell-In-Interior} node is a
+case split on $k$: in branch $k = i$ the conclusion
+$b_i = 1 \wedge \bigwedge_{j\neq i} b_j = 0$ is a conjunct of the case
+hypothesis; in a branch $k \neq i$ the case hypothesis
+$x \in \overline{C_k}$ contradicts the rule's strict-interior premise
+$x \in \mathring{C_i}$ --- \emph{provided distinct cells of the
+enumeration have disjoint interiors}, which is exactly the schema
+well-formedness the soundness theorem consumes
+(Remark~\ref{rem:cii-disjoint}). Two honest gaps keep this a template
+rather than a shipped derivation: (i) the disjunction sits \emph{inside}
+the premise conjunction, and the calculus's disjunction elimination as
+currently realized acts only on a disjunction at the root of the premise
+--- the context-carrying form that reaches it is proven as a satellite
+theorem but its core constructor swap is still scheduled; (ii) the
+contradiction in the off-branches is semantic (disjoint interiors), not
+yet a formula-level refutation in the negation-free grammar.
+\end{brecipe}
+
+\begin{brecipe}[the realized rewrite --- discharge against the semantic lemma]
+\label{rec:cii-realized}
+As shipped, the rule is admissible by \emph{reduction to verified
+machinery} (the \rulename{PConstExact} pattern): the node
+\[
+\inferrule*[Right=\rulename{Cell-In-Interior}]
+  {\;\mathcal{T} \rhd \Phi \vdash \textstyle\bigwedge_{v}
+    \lambda^{C_i}_v(x) \bowtie^{\circ}_v 0\;}
+  {\Phi \vdash b_i = 1 \wedge \textstyle\bigwedge_{j \neq i} b_j = 0}
+\qquad\rightsquigarrow\qquad
+\text{\upshape discharged by } \texttt{sound\_cellInInterior},
+\]
+where the premise is the \emph{strict} barycentric-interior conjunction
+for cell $C_i$ (one strict atom per support vertex, $<$ for extended
+vertices, $>$ for core vertices, in the pinned flat vertex order) and
+the checker recomputes both formula shapes from the schema --- the
+premise via \texttt{cellStrictInteriorBuild}, the one-hot conclusion via
+\texttt{cellOneHotBuild} --- so no formula text is trusted from the
+certificate.
+\end{brecipe}
+
+\begin{bprop}[semantic warrant]\label{prop:cii-sound}
+Suppose the payload carries a proof of the strict-interior premise, the
+cited cell application is in the hypernet, the input wire is typed at
+shape $[\mathrm{ambDim}]$, every output wire at total size $1$, and the
+premise and conclusion formulas match the recomputed builds. Then the
+conclusion sequent is semantically valid.
+\end{bprop}
+\begin{proof}[Proof sketch (the lemma's actual route)]
+Fix an admissible valuation $\sigma$ satisfying $\Phi$. Admissibility of
+the cited cell application yields the model-level fact: the schema's
+cells have disjoint interiors, the input wire holds a rational point
+$x$, and there is a cell choice $k$ with $x \in
+\mathcal{R}(\Delta_k, S_k)$ (weak membership) whose one-hot valuation
+the outputs realize --- entry $0$ of output $j$ reads $1$ if $j = k$,
+else $0$. The premise, transported through the input wire's declared
+shape (the tensor-to-point tie), gives \emph{strict} barycentric signs
+at $x$ for cell $i$, i.e.\ $x$ lies in the strict interior of $C_i$
+(\texttt{maskRegionStrict\_pair\_intro} assembles the region witness
+from the two strict atoms). If $k \neq i$, disjointness of interiors is
+contradicted: $x$ is strictly inside $C_i$ and weakly inside $C_k$. So
+$k = i$, and the one-hot output pattern at $k$ \emph{is} the conclusion:
+each conjunct is an equality between a singleton-shaped output wire and
+the constant its entry holds (\texttt{holds\_cellOneHot}).
+\end{proof}
+
+\begin{bremark}[why the premise must be strict]\label{rem:cii-strict}
+At a shared boundary face the one-hot semantics deliberately admits
+\emph{either} adjacent cell as the model's choice: a boundary point has
+the one-hot set of every cell whose closure contains it. A weak-interior
+premise therefore cannot pin $k$ --- for $x$ on the face between $C_i$
+and $C_k$ the valuation one-hotting $C_k$ satisfies the weak premise
+and falsifies $b_i = 1$. Strictness excludes exactly the boundary, where
+the pinning genuinely fails; the companion rule \rulename{Cell-Out}
+covers boundary points from the other side.
+\end{bremark}
+
+\begin{bremark}[the disjointness hypothesis, and why the complex's
+conformity does not deliver it]\label{rem:cii-disjoint}
+The step $k = i$ uses: no rational point lies strictly inside cell $i$
+and weakly inside a \emph{different} cell $k$
+(\texttt{SimpC.CellIntDisjoint}, stated over cell \emph{indices} so
+duplicate entries are excluded). The schema's simplicial conformity
+field does not imply this: conformity constrains simplex-mask
+intersections only, never sees the extension masks that carve cells out
+of simplices, and permits literally duplicate cell entries --- either
+defect lets the model one-hot an overlapping cell and falsifies the
+conclusion. The predicate is consumed as a conjunct of the cell
+application's model-level fact: an application over a non-disjoint
+enumeration admits no valuation at all (hypothesis-side vacuity ---
+sound, merely weak), the same reading that excludes NaN executions.
+It is a proposed schema amendment realized provisionally; the roster
+page records its status.
+\end{bremark}
+
+\begin{bremark}[the port-typing hypotheses are essential twice]
+The model's one-hot fact pins \emph{entry $0$} of each output wire,
+while the conclusion's equality atoms evaluate the \emph{whole} wire;
+the total-size-$1$ typing is what makes the two coincide (a multi-entry
+output could satisfy the entry fact while its remaining entries falsify
+the atom; a zero-size output would satisfy every atom vacuously).
+Dually, the premise's barycentric atoms constrain the input
+\emph{tensor}, and the declared shape $[\mathrm{ambDim}]$ (with
+$\mathrm{ambDim} = 1$ in the checkable fragment) ties that tensor to the
+model's rational point.
+\end{bremark}
+
+\begin{bremark}[scope of the checkable fragment]
+\texttt{cellStrictInteriorBuild} succeeds only over a $1$-dimensional
+complex with a two-vertex cell support on distinct coordinates --- the
+same fragment as the region machinery elsewhere in the catalogue;
+everything beyond it is refused, not approximated (fail-toward-refusal).
+Higher-dimensional cell complexes await their own barycentric builders;
+the rule's statement is dimension-general and only the builder gates
+narrow it.
+\end{bremark}
+
+\begin{anchors}
+Recipe \ref{rec:cii-realized} warrant & \texttt{sound\_cellInInterior} (Soundness)\\
+premise shape extraction & \texttt{cellStrictInteriorBuild\_spec}; builder \texttt{cellStrictInteriorBuild} / \texttt{baryLambdas1D}\\
+strict-region assembly & \texttt{maskRegionStrict\_pair\_intro}; \texttt{MaskRegionStrict}\\
+the disjointness pin (Rem.\ \ref{rem:cii-disjoint}) & \texttt{SimpC.CellIntDisjoint}; the cell case of \texttt{PrimApp.SemOk}\\
+one-hot conclusion & \texttt{cellOneHotBuild}; \texttt{holds\_cellOneHot}\\
+port typing ties & \texttt{PCellInIntData} fields \texttt{inputShape}, \texttt{outputsScalar}\\
+\end{anchors}

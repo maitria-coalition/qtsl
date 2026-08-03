@@ -1,0 +1,21 @@
+# api.toml.d/QDeadlineBattery.toml — the entry's producer-API section (one
+# fragment per entry, stem = id). Everything
+# rendered is extracted from the toolkit sources at build time; specs
+# here are pointers, never quoted text. See DESIGN.md §API sections.
+
+[api]
+id = "QDeadlineBattery"
+
+[api.ts]
+handle = "rules.qtslCore.deadlineBattery"
+sig_file = "ts/src/rules/qtsl-core.ts"
+sig = ["fn deadlineBattery", "interface DeadlineBatteryArgs"]
+snippet_file = "ts/tests/rules-qtsl-golden.test.ts"
+snippet = "conform:qtsl_deadline_battery.v0.cbor"
+
+[api.rust]
+handle = "mtk_catalogue::rules::qtsl_core::deadline_battery"
+sig_file = "crates/mtk-catalogue/src/rules/qtsl_core/battery.rs"
+sig = ["fn deadline_battery"]
+snippet_file = "crates/mtk-catalogue/tests/qtsl_common/mod.rs"
+snippet = "fn-body:fx_deadline_battery"
