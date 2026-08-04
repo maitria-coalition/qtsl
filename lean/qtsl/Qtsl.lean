@@ -20,6 +20,14 @@ import Qtsl.PsdCert
 import Qtsl.ReluExpansion
 import Qtsl.PpolyExpansion
 import Qtsl.DenotationClass
+import Qtsl.DenotationGadgets
+import Qtsl.DenotationCompile
+import Qtsl.DenotationComplete
+import Qtsl.MaskRegionAffine
+import Qtsl.ShapePositions
+import Qtsl.TensorNF
+import Qtsl.PrimitiveBasisSoundWF
+import Qtsl.PrimitiveBasisSoundX
 import Qtsl.CellFlavors
 import Qtsl.CellFlavorsDemo
 import Qtsl.CellFlavorsExpansion

@@ -93,6 +93,31 @@
 # prior revs: qc=6419ae4be3de7b250d6e5be472cf8a55d875e21a9509ee1f66e3d00792a8ec53 dc=6d8a418fe5c019e087e1b8625b41a47f6fd90ceaa45c3d54c7de62ea3fd5edd7
 # revs: qc=9952506dd2491e880a6107471a1ca92f66a4a33a64a8cc250833d00402e3b0e6 dc=bc30a5f3b22da487f77080d5aa4186084376552b7ce070ccf44d4c5226c5aa96
 #
+# EVENT 8 (the absorption/contraction bake — the first FAMILY-ADDITION
+# event): the qc/dc pair's sources are byte-stable, so the `# revs:`
+# header above is UNCHANGED at this event (verified at mint: sealing
+# the pair from the event-8 tree reproduces all six pinned
+# revision/C1/companion chids exactly). Two NEW closure families join
+# the roster instead: dac (the DtmcAbsorb species' home) and dcc
+# (dac + DtmcContraction — the generator-form contraction
+# strengthening; expected-value containers carry absorption rows AND
+# contraction rows, so their single prerequisite closure carries both
+# fragments). dac's revision chid deliberately EQUALS the pre-mint
+# staged-chain revision the wave's containers already name: revision
+# chids hash semantic ops, not comments, and the absorb fragment's
+# only pre-mint motion was comments (the reachability-sharpened
+# residual is an evaluator-side strengthening of the same
+# side-condition relation; old certificates' looser claims remain
+# admissible). Staged and baked verdicts therefore bind to one
+# revision — continuity is exact, and the pre-mint `--staged-chain`
+# lane retires for this family with zero container re-emission owed.
+# Chids minted on the current engine (geolog-alpha main at mint time;
+# the seal-leg pin fence in check.sh re-verifies all four closures'
+# revisions every battery run). Golden genesis/ground-comparisons
+# deps UNCHANGED (dep check via `geolog load` on the extracted .glc).
+# Double-mint verified (fresh stores, separate processes, byte-equal
+# chids). Prior chids remain resolvable forever.
+#
 # Embedded containers (all events) re-extracted from register-scrubbed
 # sources — comment-only edits, each vintage re-sealed on an engine
 # equivalent to its mint's (verified: unscrubbed sources reproduce the
@@ -115,9 +140,23 @@ closure dc revision bc30a5f3b22da487f77080d5aa4186084376552b7ce070ccf44d4c5226c5
 closure dc c1_revision_hash 010594201cd5a49f144d4280c8928ef07c3ab84baefc60d167005b81b9a837f6
 closure dc seal_companion 5f6160abe1457e98cda6f26643a1e5e7ec07d8d35935198d028b6fbc7abd7556
 
+closure dac sources BernsteinLogic.geolog,Qtsl.geolog,Dtmc.geolog,DtmcAbsorb.geolog
+closure dac shape theories=12 axioms=747 revision_ops=40119
+closure dac revision 6f1b2c7ef562c437174dd3eabfcb9d7e487de3c841d63b85ff42017be5ff29d0
+closure dac c1_revision_hash d138d91521b2f83f79e5a62a7df8a073bcbd56d7d7131ebb1c48923b7cfdd198
+closure dac seal_companion d36f889506b37757714fba17d7c09b3aaff115c46b41296494b1d5ebf4595d51
+
+closure dcc sources BernsteinLogic.geolog,Qtsl.geolog,Dtmc.geolog,DtmcAbsorb.geolog,DtmcContraction.geolog
+closure dcc shape theories=13 axioms=753 revision_ops=40495
+closure dcc revision 70b31e69b4891c03d4654fc5520234683e1829af59593cacb7cdc723a89d4d9d
+closure dcc c1_revision_hash 5f2b6cad0abbfb70d1a606fe33759359321a2be7a3cd1631c17470cccdb18619
+closure dcc seal_companion 5fe210990933258eee583590e0f01928b0931bad69e9a3f8089ed27309a9a2c4
+
 golden genesis 6d9691e1d2ee858cd5004d82dd6d6e78d2b02252631c251ad992f805ac169d94
 golden ground_comparisons e91ba7cd511a3db3e9f7bb36eedc3a7318d564d57ff018965f114e2d9dae2509
 
 source_sha256 BernsteinLogic.geolog 6967bb151f5812dfaf98bed985f0e91025e0d3a4a7264b5555f52db2797095c9
 source_sha256 Qtsl.geolog ffc24239c5edf7c345fe86739eeff6b26b1b6b26a50df73cd262de17875d8e29
 source_sha256 Dtmc.geolog aa9ebd3f5e87a0143f696620210127c43c92efc277ce75cb4b703bbc64a25fec
+source_sha256 DtmcAbsorb.geolog b51cb4988ab051e4040921d1cfc1c541b09a77fb811fc56764dac1654bd4d3aa
+source_sha256 DtmcContraction.geolog 63a6e83e1629b1526bdd538b2313e7368c47254c7befb07a81359841b932468b

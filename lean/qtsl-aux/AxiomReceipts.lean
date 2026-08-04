@@ -1172,3 +1172,43 @@ build of this target constitutes an audit of the whole list.
 #print axioms Qtsl.KilledTimeIndexed.killedRead_eq_of_prefix_eq
 #print axioms Qtsl.KilledTimeIndexed.accum_eq_of_prefix_eq
 #print axioms Qtsl.KilledTimeIndexed.isMarkovKernel_expHold
+
+-- The bottom of the von Neumann lattice and the two-valued nets
+-- (QuantumStackScalars)
+#print axioms VonNeumannAlgebra.centralizer_univ_eq_range_algebraMap
+#print axioms VonNeumannAlgebra.generate_empty
+#print axioms VonNeumannAlgebra.coe_bot_eq_centralizer_univ
+#print axioms VonNeumannAlgebra.coe_bot
+#print axioms VonNeumannAlgebra.mem_bot_iff
+#print axioms VonNeumannAlgebra.coe_top
+#print axioms VonNeumannAlgebra.commutant_top
+#print axioms VonNeumannAlgebra.commutant_bot
+#print axioms VonNeumannAlgebra.smulRight_innerSL_notMem_range_algebraMap
+#print axioms VonNeumannAlgebra.bot_ne_top
+#print axioms VonNeumannAlgebra.bot_lt_top
+#print axioms VonNeumannAlgebra.bot_ne_top_qubit
+#print axioms Qtsl.QuantumStack.twoValuedWNet
+#print axioms Qtsl.QuantumStack.twoValuedWNet_alg_pos
+#print axioms Qtsl.QuantumStack.twoValuedWNet_alg_neg
+#print axioms Qtsl.QuantumStack.scalarWNet
+#print axioms Qtsl.QuantumStack.scalarWNet_full_interior
+#print axioms Qtsl.QuantumStack.scalarWNet_faithful_interior
+#print axioms Qtsl.QuantumStack.not_le_of_interiorSieve_arrow
+#print axioms Qtsl.QuantumStack.mink_chron_irrefl
+#print axioms Qtsl.QuantumStack.stepNet_alg_apex
+#print axioms Qtsl.QuantumStack.stepNet_alg_member
+#print axioms Qtsl.QuantumStack.stepNet_netUnion_subset_bot
+#print axioms Qtsl.QuantumStack.stepNet_not_generated
+#print axioms Qtsl.QuantumStack.stepConstEndo
+#print axioms Qtsl.QuantumStack.stepNet_not_full
+#print axioms Qtsl.QuantumStack.stepNet_qubit_not_full
+
+-- Connectivity necessity at operator grade: the gapped cover refutation
+-- (QuantumStackConnectivity)
+#print axioms Qtsl.QuantumStack.le_left_of_gapped_chain
+#print axioms Qtsl.QuantumStack.pairSieve_gapped_not_connected
+#print axioms Qtsl.QuantumStack.pairSieve_kissing_connected
+#print axioms Qtsl.QuantumStack.constWNet_pair_full
+#print axioms Qtsl.QuantumStack.constWNet_gapped_generated
+#print axioms Qtsl.QuantumStack.descentComparisonW_gapped_not_full
+#print axioms Qtsl.QuantumStack.descentComparisonW_gapped_qubit_not_full

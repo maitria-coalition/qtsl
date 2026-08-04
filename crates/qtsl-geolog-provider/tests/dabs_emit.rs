@@ -1,11 +1,20 @@
 //! Round-trip battery for the `dabs-emit` producer binary: a JSON
-//! spec emits a certificate container, the checker's staged lane
-//! accepts it with exact claim counts, and double-emit is
-//! byte-identical (the determinism discipline: the container is a
-//! pure function of spec + chain). Refusal legs pin the emitter's
-//! shape validation (unknown state, zero claims) — the emitter never
-//! evaluates truth, so a numerically false bracket EMITS fine and
-//! FAILS at check (held here too).
+//! spec emits a certificate container, the checker accepts it with
+//! exact claim counts, and double-emit is byte-identical (the
+//! determinism discipline: the container is a pure function of
+//! spec + chain). Refusal legs pin the emitter's shape validation
+//! (unknown state, zero claims) — the emitter never evaluates truth,
+//! so a numerically false bracket EMITS fine and FAILS at check
+//! (held here too).
+//!
+//! Lane note, post-mint: the fixture chain's sealed revision
+//! GRADUATED into the baked roster at the family-addition event (its
+//! chid deliberately equals the dac closure's — revision hashing is
+//! comment-insensitive, and the pre-mint fragment's only motion was
+//! comments), so certificates emitted against it now classify as
+//! baked-family and discharge with NO flags: staged and baked
+//! verdicts bind to one revision, which was the graduation's whole
+//! point.
 
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
@@ -73,8 +82,10 @@ fn run_emit(spec: &str, out: &PathBuf) -> (i32, String) {
 }
 
 fn run_check(cert: &PathBuf, extra: &[&str]) -> (i32, String) {
-    let chain = chain_path();
-    let mut args: Vec<&str> = vec!["--staged-chain", chain.to_str().unwrap(), "--staged-cert"];
+    // No flags: the fixture's revision is rostered post-graduation
+    // (see the module doc's lane note), so the certificates classify
+    // as baked-family and discharge without any staged kit.
+    let mut args: Vec<&str> = Vec::new();
     args.extend_from_slice(extra);
     args.push(cert.to_str().unwrap());
     let o = Command::new(check_bin())

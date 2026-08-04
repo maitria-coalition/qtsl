@@ -1,0 +1,4 @@
+# barn-lean receipt — su-functor-d5105faae-053057-7341
+# 2026-08-04T05:40:49Z  exit=0  commit=d5105faae9fd1d0f65fb74d9232a3586707bb91f
+# declared 43G from: lean-routing.toml row for lean/su-functor
+BARN-LEAN-RECEIPT jobid=su-functor-d5105faae-053057-7341 sha=d5105faae9fd1d0f65fb74d9232a3586707bb91f scope=lean/su-functor exit=0 wall_s=579.6 time_maxrss_gib=5.42 tree_rss_peak_gib=39.04 declared_gib=43 cache=hit:20260804T003219Z cmd_override=0 box=barn

@@ -7,24 +7,15 @@ license.workspace = true
 
 [dependencies]
 qtsl-geolog-provider = { path = "../qtsl-geolog-provider" }
-# The shared GPU machinery homes in maitria-coalition/kernels (owner
-# ruling, 2026-07-21): the rnsfold family's descriptor, channel plan,
-# and scalar reference live in the core kernels crate; the CUDA lane
-# in its sibling. Pinned by rev like every cross-repo pin in this
-# workspace; the pin moves deliberately, with the conformance tests.
-# LANDING ORDER (publication ritual): kernels development commits do
-# not push directly — they land on the kernels development main, the
-# publication step exports that tree, and the executor RE-PINS this
-# rev to the new public HEAD (the publish chaining step), then
-# publishes qtsl. Until that bump, this crate's roweq-consuming code
-# does not resolve against the pin below; local development rides an
-# untracked .cargo/config.toml [patch] onto the kernels development
-# tree. Rider: the `parallel` feature
-# additionally references the kernels development tree's `rayon` feature
-# (parallel plan/validate/host tables), which is not in the pin below
-# either — same bump, same publish step.
-maitria-kernels = { git = "https://github.com/maitria-coalition/kernels-dev.git", rev = "35f92d9fe4db51e80290c7b9bc71441ccd725c48" }
-maitria-kernels-cuda = { git = "https://github.com/maitria-coalition/kernels-dev.git", rev = "35f92d9fe4db51e80290c7b9bc71441ccd725c48", optional = true }
+# The shared GPU machinery homes in maitria-coalition/kernels: the
+# rnsfold family's descriptor, channel plan, and scalar reference live
+# in the core kernels crate; the CUDA lane in its sibling. Pinned by
+# rev at the public release repository, like every cross-repo pin in
+# this workspace; the pin moves deliberately, with the conformance
+# tests. The `parallel` feature references the same pin's `rayon`
+# feature (parallel plan/validate/host tables).
+maitria-kernels = { git = "https://github.com/maitria-coalition/kernels.git", rev = "af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923" }
+maitria-kernels-cuda = { git = "https://github.com/maitria-coalition/kernels.git", rev = "af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923", optional = true }
 num-bigint = "0.5"
 num-traits = "0.2"
 rayon = { version = "1", optional = true }

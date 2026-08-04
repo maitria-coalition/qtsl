@@ -389,6 +389,33 @@ pub(crate) enum RelKind {
     /// completed kernel. Staged-fragment vocabulary: the family
     /// resolves only against closures carrying `DAbsQuery`. No store.
     Dabs(DabsKind),
+    /// The DtmcContraction family ([`crate::dgc`]): the strengthened
+    /// generator-form demand (R18) and its four claim relations over
+    /// the chain species' stored rows — regional contraction under
+    /// the completed kernel, exact partial survival sums, the
+    /// κ-derived geometric assemblies. Resolves only against closures
+    /// carrying `DGenContraction`. No store.
+    Dgc(DgcKind),
+}
+
+/// The DtmcContraction family's dispatch kinds ([`crate::dgc`]): the
+/// strengthened generator-form demand and its claim relations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DgcKind {
+    /// `qtsl_dtmc_genform_contraction` — the R18 demand: shape/range,
+    /// no re-entry, per-region-state contraction, offset prologue
+    /// determinism where declared, cross-face same-chain coincidence.
+    Genform,
+    /// `qtsl_dgc_partial_lo` — `lo ≤` the exact partial survival sum.
+    PartialLo,
+    /// `qtsl_dgc_ev_bracket` — the first-moment bracket
+    /// (`lo ≤ L`, `hi ≥ L + κ·W/(1−c)`); demands `c < 1`.
+    EvBracket,
+    /// `qtsl_dgc_survival_tail` — the geometric survival envelope
+    /// (`rate ∈ [c, 1)`, `coeff·rate^horizon ≥ κ·W`).
+    SurvivalTail,
+    /// `qtsl_dgc_z_one` — termination mass exactly one.
+    ZOne,
 }
 
 /// The NN conclusion-form family's dispatch kinds

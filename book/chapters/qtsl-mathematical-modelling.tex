@@ -2991,11 +2991,14 @@ stochastic hybrid processes, the founding papers' own bridge) enters
 as a translation between \emph{presentations} --- never as the
 definition of the net's semantics, whose compiled reading remains
 structural in the net while the flattened object is combinatorially
-large --- and its uncoloured jump-skeleton stratum is mechanized,
-definedness-premise rows, a commuting-triangle instance, and the
-composed community-to-community corollary included
-(the Adequacy leg below), with the coloured obligations enumerated by
-name. The compilation
+large --- and its jump-skeleton stratum is mechanized at the
+uncoloured grain \emph{and} at the coloured deterministic-firing
+slice: definedness-premise rows, the commuting-triangle cell, the
+constructed flattening with its agreement derived, and the composed
+community-to-community corollary included at both grains
+(the Adequacy leg below), with the remaining coloured obligations ---
+the hybrid-grain carrier identification and the firing-measure
+kernels --- enumerated by name. The compilation
 direction is Bag-primary: arcs compile into composition patterns ---
 rendezvous of creation/destruction capabilities --- over the places'
 Bag mechanisms, the zero-arc case being the identity.
@@ -3196,7 +3199,9 @@ Mechanized, sorry-free, beside the cascade module
 
 The flattening toward the hybrid-process reading
 (section~\ref{sec:mt-gshs}) enters as a bridge between presentations,
-not as a definition, and its uncoloured stratum is mechanized.  The
+not as a definition, and its jump-skeleton stratum is mechanized ---
+at the uncoloured grain in full, and one colour grain up at the
+deterministic-firing slice (the coloured paragraph below).  The
 translation's definedness premises are certificate-shaped rows:
 initial tangibility (no immediate transition enabled at the initial
 support --- decidable, with the closed chain's initial row passing
@@ -3262,8 +3267,37 @@ are mechanized in
 \texttt{SuFunctor.Adequacy.StochasticPetriFlatten},
 \texttt{SuFunctor.Adequacy.StochasticPetriFlattenAgreement},
 \texttt{SuFunctor.Adequacy.StochasticPetriComposed}, and
-\texttt{QtslAux.KilledTimeIndexed}; the coloured
-obligations are the staged residue, named below.
+\texttt{QtslAux.KilledTimeIndexed}.
+
+The same story closes one colour grain up, at the
+deterministic-firing slice.  The premise rows carry over with their
+colour reading --- initial tangibility unchanged; the invariant token
+bound with \emph{colour-indexed} weights, its step soundness reading
+the consumed and produced colour counts of each transition at each
+colour vector; cascade termination from the coloured rank
+certificate --- and the one premise the uncoloured development could
+only name, per-place colour-box discharge, is carried by the
+formation itself at this fragment: the colour boxes are finite types
+by construction.  The triangle cell is packaged against a flattened
+presentation on an abstract mode carrier exactly as before (the
+socket a hybrid-grain carrier identification plugs into), and the
+flattening is again \emph{constructed}: one flattened transition per
+delay transition \emph{per colour vector}, its jump intensity the
+coloured ordered census times the colour-dependent rate, its reset
+the cascade-closed firing kernel through the coloured cascade, with
+the agreement derived and the composed corollary stated with no
+agreement hypothesis --- the token-game community law of a coloured
+net and its flattened execution's community law, one invertible
+globular cell apart at every jump horizon, at the deterministic
+slice.  On the control net the certificate is the colour dependence
+itself: from a one-of-each marking the flattened jump chain drains
+with probability $2/5$ and flips back with $3/5$, the two branches
+differing \emph{only} in the colour their selections read --- a rate
+map reading colours, flowing through the flattening into the
+community law, consumed as a token-game verdict by transport.
+Mechanized, sorry-free
+(\texttt{SuFunctor.Adequacy.StochasticPetriColouredComposed}); the
+hybrid-grain residue stays staged, named below.
 
 The angelic face closes the scheduler-reading triple.  Liveness-style
 claims quantify \emph{existentially} --- some resolution of the
@@ -3309,15 +3343,27 @@ uncoloured fragment on the nose at the one-colour instance ---
 mechanized, sorry-free
 (\texttt{SuFunctor.Adequacy.StochasticPetriColoured},
 \texttt{SuFunctor.Adequacy.StochasticPetriColouredCascade}).
+The scheduler-quantification faces ride the same coloured arena: the
+demonic reading quantifies enabling-respecting adversaries over
+(transition, colour-vector) pairs --- at colour the demon selects
+\emph{tokens}, not merely transitions, and a single transition's
+blocked selections, whether by supply or by guard cylinder, already
+refute the branch-level Zeno certificate that would have transported
+the automaton square on the nose --- with the set-valued square, the
+angelic dual, and both directed verdict transfers flowing from one
+membership lemma; a recolouring control net admitting no cascade rank
+at all pins the rank hypothesis as substantive rather than
+decorative.  Mechanized, sorry-free
+(\texttt{SuFunctor.Adequacy.StochasticPetriColouredDemonic}).
 What stays staged, by name: the firing-measure \emph{kernels} beyond
 the deterministic slice (the kernel presentation is deliberately left
 as an abstract seam for a forthcoming probabilistic vocabulary, so
 nothing here entrenches an encoding); the guard species (boundary
-forcing); the coloured flattening obligations (the per-place
-colour-box discharge premise, the guard-row identification, and the
-colour-vector carrier identification with its padding obligations);
-and the exponential time-law stratum, exactly as for the plain
-continuous-time frame.
+forcing); the coloured flattening's hybrid-grain residue --- the
+colour-vector carrier identification with its padding obligations
+(the flattening itself, its premise rows, and the composed corollary
+having landed at the deterministic slice above); and the exponential
+time-law stratum, exactly as for the plain continuous-time frame.
 
 \paragraph{Variadic certificates: one row per Petri transition.}
 A certificate for a net whose token count is unbounded across runs
@@ -3482,7 +3528,10 @@ statics square, the delay-race face, the immediate/cascade face
 --- at the declared scheduler and under scheduler quantification
 alike --- and the set-firing face (simultaneous composite firings of
 non-conflicting immediates) are mechanized (the Adequacy paragraph
-above), while the guard species and the coloured generator faces
+above), with the coloured generator faces landed at their
+deterministic slice and the coloured scheduler-quantification faces
+alongside them, while the guard species (boundary forcing) and the
+firing-measure kernels beyond the deterministic slice
 remain the named next legs; net-of-nets composition
 runs through the token-colouring closure
 of the composition inventory
@@ -3970,7 +4019,18 @@ certificate boundary; conditioning denotes a normalized ratio whose
 positivity is itself an obligation.
 
 \paragraph{Status.} The forward, unconditioned slice is in place at
-the discrete tier, as above. Conditioning --- posterior bounds for
+the discrete tier, as above --- and the former-level square is
+machine-checked, sorry-free: a program's loop denotes stage kernels,
+the unrolled program text denotes the kernel-local Kleisli iterate of
+those kernels at every horizon (\texttt{noiseDenot\_progTraj},
+unconditional at the finite-outcome stratum, every measurable stage
+admitted), and for a program whose stage kernels have exact-rational
+faces the semantic universe's judgment on the compiled outcome-row
+presentation pins exactly the unrolled text's denotation
+(\texttt{su\_pprog\_adequacy} in module
+\texttt{SuFunctor.Adequacy.ProbProg}) --- so the formation rule
+below sharing the chain former's data is a theorem-backed reading,
+not an analogy. Conditioning --- posterior bounds for
 the operation most probabilistic programs exist to perform --- is
 the named frontier, problem statement in hand, shared with
 section~\ref{sec:mt-bn}; the published yardsticks are the guaranteed

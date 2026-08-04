@@ -179,6 +179,7 @@ use crate::circuit::{
 use crate::contract::{build_contract_vocab, eval_contract, ContractVocab};
 use crate::dabs::{build_dabs_vocab, eval_dabs, DabsVocab};
 use crate::deadline::{build_deadline_vocab, eval_deadline_table, DeadlineVocab};
+use crate::dgc::{build_dgc_vocab, eval_dgc, DgcVocab};
 use crate::dwellgate::{build_dwellgate_vocab, DwellGateVocab};
 use crate::enclosure::{build_enclosure_vocab, eval_enclosure_witness_valid, EncVocab};
 use crate::error::EvalError;
@@ -393,6 +394,12 @@ pub struct QtslVocab {
     /// closure), so the family resolves only against closures that
     /// carry the fragment. Its own group, no shared substrate needed.
     pub dabs: Option<DabsVocab>,
+    /// The DtmcContraction family ([`crate::dgc`]): the strengthened
+    /// generator-form witness species over the same stored grain —
+    /// resolves only against closures carrying `DGenContraction`
+    /// (the event-8 dcc closure and its staged pre-mint chains). Its
+    /// own group, no shared substrate needed.
+    pub dgc: Option<DgcVocab>,
     /// One line per unresolved family group: which group, and why.
     pub notes: Vec<String>,
 }
@@ -736,6 +743,12 @@ impl QtslVocab {
         .map_err(|e| note("DtmcAbsorb family (staged-fragment vocabulary)", e))
         .ok();
 
+        let dgc = (|| -> Result<DgcVocab, String> {
+            build_dgc_vocab(indices, find_sort(indices, "DGenContraction")?)
+        })()
+        .map_err(|e| note("DtmcContraction family (dcc-closure vocabulary)", e))
+        .ok();
+
         QtslVocab {
             bl,
             morse,
@@ -775,6 +788,7 @@ impl QtslVocab {
             wirecausality,
             avgbattery,
             dabs,
+            dgc,
             notes,
         }
     }
@@ -844,6 +858,10 @@ const FAMILY_ENTRIES: &[&[EntryRow]] = &[
     // absorption-bracket family — staged-fragment vocabulary, so no
     // baked closure binds it yet.
     crate::dabs::ENTRIES,
+    // Appended at the END (same discipline): the DtmcContraction
+    // generator-form strengthening — the event-8 dcc closure's
+    // family.
+    crate::dgc::ENTRIES,
 ];
 
 /// The full claimed roster size (every entry, all family groups).
@@ -1025,6 +1043,7 @@ impl QtslGroundProvider {
                 RelKind::WireCausality => vocab.wirecausality.is_some(),
                 RelKind::AvgBattery => vocab.avgbattery.is_some(),
                 RelKind::Dabs(_) => vocab.dabs.is_some(),
+                RelKind::Dgc(_) => vocab.dgc.is_some(),
             };
             if !available {
                 continue;
@@ -1546,6 +1565,10 @@ impl QtslGroundProvider {
                     .as_ref()
                     .expect("claimed implies vocabulary");
                 eval_dabs(name, v, *k, &refs, rows)
+            }
+            RelKind::Dgc(k) => {
+                let v = self.vocab.dgc.as_ref().expect("claimed implies vocabulary");
+                eval_dgc(name, v, *k, &refs, rows)
             }
         };
         match out {

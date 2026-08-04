@@ -13,18 +13,18 @@ license.workspace = true
 # commit) — the reprovocab::baked derivation loads the minted revision
 # bodies through this engine's own meta-schema loader, so checker and
 # mint share one grammar vintage.
-geolog-ground-api = { git = "https://github.com/maitria-coalition/geolog-alpha-dev.git", rev = "83ebe88d5007b101112941f2b47ccb9cefd97fb9" }
+geolog-ground-api = { git = "https://github.com/maitria-coalition/geolog-alpha.git", rev = "dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519" }
 # The engine's cell codec: values cross the seam as canonical envelope
 # cells, and this crate decodes them with the same validating codec the
 # engine encodes with (never a bespoke parser). Default features off:
 # only the value/cell grammar is consumed here, not the signing seam.
-geolog-envelope = { git = "https://github.com/maitria-coalition/geolog-alpha-dev.git", rev = "83ebe88d5007b101112941f2b47ccb9cefd97fb9", default-features = false }
+geolog-envelope = { git = "https://github.com/maitria-coalition/geolog-alpha.git", rev = "dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519", default-features = false }
 # The meta-schema loader half (parse/load/hash/view — the chase-facing
 # half stays off): the reprovocab::baked vocabulary derives its
 # declaration index from the minted revisions' decoded declaration rows
 # via `load_revision` + `revision_view` (`DepView`), never from a
 # transcription. Same rev as the seam pins — one engine vintage.
-geolog-meta-rows = { git = "https://github.com/maitria-coalition/geolog-alpha-dev.git", rev = "83ebe88d5007b101112941f2b47ccb9cefd97fb9", default-features = false }
+geolog-meta-rows = { git = "https://github.com/maitria-coalition/geolog-alpha.git", rev = "dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519", default-features = false }
 
 # The org's one canonical hypernet decoder (AXHN0001 + digest): the
 # store-seam families (qtsl_kcite_wf, the circuit fragment of
@@ -32,7 +32,7 @@ geolog-meta-rows = { git = "https://github.com/maitria-coalition/geolog-alpha-de
 # objects through it — checker-side bytes-semantics at the shared
 # bottom-of-lattice home. Same pin
 # convention as the seam deps: moves deliberately, never by drift.
-maitria-hypernet = { git = "https://github.com/maitria-coalition/kernels-dev.git", rev = "4176759c2fff7cc00b8ce15e9251fc77c2e5ed6d" }
+maitria-hypernet = { git = "https://github.com/maitria-coalition/kernels.git", rev = "af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923" }
 
 # Exact arbitrary-precision arithmetic for the evaluators (the exact
 # tier has no rounding and invents no values).

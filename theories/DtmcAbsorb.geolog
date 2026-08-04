@@ -29,13 +29,30 @@ import qtsl.{qtsl_dabs_wf, qtsl_dabs_absorb_bracket,
 //
 // Soundness (the bridge lemmas, mechanized — see the catalogue entry
 // for lemma names and grades): for every t' >= T, the t'-step
-// class-c mass of the completed chain lies in [N_c, N_c + R]; both
-// endpoints are monotone data of absorbing sets (class gain after T
-// is bounded by the non-absorbed mass at T). Consequently the
-// eventual (supremum) class measure M_c lies in [N_c, N_c + R], and
-// for the normalized measure with normalizer M = sum over classes:
-// M_c/M lies in [N_c/(S+R), (N_c+R)/(S+R)] whenever S > 0 (the
-// correlated-ratio form; the evaluator REFUSES posterior claims at
+// class-c mass of the completed chain lies in [N_c, N_c + R_c],
+// where R_c is the REACHABILITY-SHARPENED per-class residual: the
+// residual mass restricted to states from which some class-c state
+// is reachable through the completed kernel's stored-row support
+// (mass that can never arrive in the class is never charged to it —
+// a class unreachable from every alive state has R_c = 0 and width
+// exactly N_c at any T >= 1, with no termination assumption). The
+// evaluator recomputes reachability by a backward walk over the
+// stored rows, filtered on strictly positive probability; R_c <= R
+// always (an absorbing non-class state never reaches the class), so
+// every certificate admitted under the uniform-residual reading
+// stays admissible — claims may be looser than canonical, never
+// tighter. The proof shape: no positive-support row leads from
+// outside the co-reachable set into it (such a row would witness
+// reaching), so the co-reachable set's mass is NONINCREASING —
+// equivalently, its non-reaching complement is forward-closed and
+// its mass nondecreasing; class gain after T is therefore bounded by
+// the co-reachable non-class mass at T. Consequently the eventual
+// (supremum) class measure M_c lies in [N_c, N_c + R_c], and for the
+// normalized measure with normalizer M = sum over classes: M_c/M
+// lies in [N_c/(S+R), (N_c+R)/(S+R)] whenever S > 0 (the
+// correlated-ratio form keeps the UNIFORM residual R — its one
+// budget shared across numerator and denominator is what makes the
+// single normalizer sound; the evaluator REFUSES posterior claims at
 // S = 0 — no positive evidence witness). The binding of stored rows
 // to any external program is a translation obligation outside this
 // species' trust path.
@@ -92,9 +109,12 @@ theory DtmcAbsorb extends Dtmc {
     |- {q: q} qtsl_dabs_wf;
 
   // Unnormalized bracket claim (side-condition C-DABS-ABSORB): holds
-  // iff lo <= N_c and N_c + R <= hi, both recomputed by the T-step
-  // evaluation above. Refuses past the evaluation budget rather than
-  // verdicting.
+  // iff lo <= N_c and N_c + R_c <= hi, both recomputed by the T-step
+  // evaluation above — R_c the reachability-sharpened per-class
+  // residual (the residual restricted to states that can still reach
+  // the class through the stored-row support; the backward walk rides
+  // the same evaluation budget). Refuses past the evaluation budget
+  // rather than verdicting.
   qtsl_dabs_absorb_bracket : {q: DAbsQuery, class: Nat, lo: Q, hi: Q}
     -> Prop;   // side-condition
 
@@ -120,14 +140,18 @@ theory DtmcAbsorb extends Dtmc {
   // ==========================================================
   //
   // * SOFT SCORES (weighted, non-probability rows): the score-carrying
-  //   transfer needs the multiplicative contraction strengthening of
-  //   the qtsl_gen_form seam (transfer <= c . V on a region, with exit
-  //   domination) — designed as the gen-form generalization with a
-  //   c = 1 subsumption of the supermartingale corollary, staged
-  //   separately; absent here so that every row this species reads
-  //   stays under C-DTMC-ROWMASS.
+  //   transfer is the multiplicative contraction strengthening of the
+  //   qtsl_gen_form seam — RESIDENT beside this file as
+  //   DtmcContraction.geolog (same revision event; the c = 1
+  //   subsumption of the supermartingale corollary is mechanized as
+  //   qGenFormContraction_subsumes_genform). Absent HERE so that every
+  //   row this species reads stays under C-DTMC-ROWMASS; the sibling's
+  //   present-score evaluator face is itself a deliberate deferral
+  //   (its own absent-notes).
   // * MOMENT BRACKETS (expected values, higher moments): sound moment
-  //   tails need geometric-decay data (the same contraction rows), not
-  //   conservation alone; deliberately absent until that species lands.
-  // * TAIL ASYMPTOTICS (O(c^n) claims): same dependency, same reason.
+  //   tails need geometric-decay data, not conservation alone —
+  //   carried by DtmcContraction.geolog's qtsl_dgc_ev_bracket rows
+  //   (first moments; higher moments remain FILED there).
+  // * TAIL ASYMPTOTICS (O(c^n) claims): carried by
+  //   DtmcContraction.geolog's qtsl_dgc_survival_tail rows.
 }

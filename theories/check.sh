@@ -198,6 +198,13 @@ golden pair-closure "$TMP/full.geolog"
 cat BernsteinLogic.geolog Qtsl.geolog Dtmc.geolog > "$TMP/dc.geolog"
 golden dtmc-closure "$TMP/dc.geolog"
 
+# the event-8 family closures (absorption brackets; + contraction)
+cat BernsteinLogic.geolog Qtsl.geolog Dtmc.geolog DtmcAbsorb.geolog > "$TMP/dac.geolog"
+golden dac-closure "$TMP/dac.geolog"
+
+cat BernsteinLogic.geolog Qtsl.geolog Dtmc.geolog DtmcAbsorb.geolog DtmcContraction.geolog > "$TMP/dcc.geolog"
+golden dcc-closure "$TMP/dcc.geolog"
+
 # the generator battery's closure (CondWire carries CondTable for
 # the GenCondTable fixture)
 cat BernsteinLogic.geolog Qtsl.geolog CondWire.geolog > "$TMP/gc.geolog"
@@ -221,6 +228,8 @@ load_leg() { # name file
 load_leg qtsl-closure "$TMP/qc.geolog"
 load_leg pair-closure "$TMP/full.geolog"
 load_leg dtmc-closure "$TMP/dc.geolog"
+load_leg dac-closure "$TMP/dac.geolog"
+load_leg dcc-closure "$TMP/dcc.geolog"
 load_leg cellflavor-cwa cwa/CellFlavorChase.geolog
 
 # census fence helper for refuse<->report flips on the theory file:
@@ -1384,6 +1393,10 @@ seal_leg qtsl-closure "$TMP/qc.geolog" \
   "$(sed -n 's/^closure qc revision //p' pins/baked_v1_pins.txt)"
 seal_leg dtmc-closure "$TMP/dc.geolog" \
   "$(sed -n 's/^closure dc revision //p' pins/baked_v1_pins.txt)"
+seal_leg dac-closure "$TMP/dac.geolog" \
+  "$(sed -n 's/^closure dac revision //p' pins/baked_v1_pins.txt)"
+seal_leg dcc-closure "$TMP/dcc.geolog" \
+  "$(sed -n 's/^closure dcc revision //p' pins/baked_v1_pins.txt)"
 
 # ---- B5: the anchoring manifest (every extent field's independent
 #      consumer chain, machine-readable; new species add a row or

@@ -32,7 +32,21 @@ there is no bespoke certificate file format.
   class/rejection labelings, the labeled-state well-formedness
   demand, and the unnormalized/posterior bracket side-conditions,
   discharged by the provider's exact-Q T-step walk (the
-  `--staged-chain` lane of `glc-check` exercises it pre-bake).
+  `--staged-chain` lane of `glc-check` exercises it pre-bake). The
+  unnormalized bracket's upper side charges the REACHABILITY-SHARPENED
+  per-class residual (mass that cannot reach a class is never charged
+  to it; the posterior form keeps the uniform residual — its one
+  shared budget is what makes the single normalizer sound).
+- `DtmcContraction.geolog` — STAGED (a revision-event passenger, in
+  no baked closure or golden yet): the score-carrying, regional,
+  quantitative contraction strengthening of the generator-form seam
+  (`extends Dtmc`; the incumbent `qtsl_dtmc_genform` rows are its
+  degenerate face, byte-identical) — FINITE-FACE contraction
+  witnesses with exhaustively stored weights, the anchor-offset
+  moment datum, and the partial/EV/survival-tail/z-one claim
+  side-conditions. Template-presented and pattern-presented region
+  faces are deliberate deferrals to their own design legs (the
+  fragment's absences block names the open questions).
 - `check.sh` — the instrument battery: strict checks against committed
   goldens, chase fixtures (positive and refusal), and schema-level
   mutants, each mutant required to fail at a named fixture. Needs the

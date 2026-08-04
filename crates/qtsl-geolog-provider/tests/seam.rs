@@ -53,7 +53,7 @@ fn entry_count_matches_lib_headline() {
     // artifact pair: bump both in the same commit.
     assert_eq!(
         qtsl_geolog_provider::provider::ENTRY_COUNT,
-        121,
+        126,
         "ENTRY_COUNT moved — update the lib.rs roster headline (and \
          this pin) in the same commit"
     );

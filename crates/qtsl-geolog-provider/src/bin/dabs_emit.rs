@@ -54,6 +54,20 @@
 //!     "wf": true,
 //!     "absorb":    [[0, "14762/59049", "4921/19683"]],
 //!     "posterior": [[0, "14762/14763", "1/1"]]
+//!   },
+//!   "contraction": {
+//!     "anchor": "alive",
+//!     "horizon": 10,
+//!     "offset": 0,
+//!     "c": "1/3",
+//!     "weights": [["alive", "1/1"]],
+//!     "claims": {
+//!       "genform": true,
+//!       "partial_lo": ["29524/19683"],
+//!       "ev": [["29524/19683", "59049/39366"]],
+//!       "tail": [["1/1", "1/3"]],
+//!       "z_one": true
+//!     }
 //!   }
 //! }
 //! ```
@@ -73,6 +87,23 @@
 //!   `[classNat, lo, hi]` bracket claims. At least one claim row is
 //!   required (the checker refuses zero-claim containers; the emitter
 //!   refuses earlier with the same posture).
+//! - `contraction` (optional, ADDITIVE: a spec without it emits
+//!   byte-identical containers to the pre-extension emitter): one
+//!   `DGenContraction` witness on the same chain. `anchor` names a
+//!   state (the witness's chain is the anchor's chain); `horizon` is
+//!   ABSOLUTE; `offset` (optional; a row is emitted only when
+//!   positive — absent = 0 is the wire's own default); the
+//!   contraction rate is `c`, or LEGACY `gamma` (exactly one: the
+//!   v0 dev-oracle grammar's rate line canonicalizes as c := gamma —
+//!   emission is byte-identical either way); `weights` are the
+//!   stored certificate component (`[state, V]`; the support IS the
+//!   alive region); `claims.genform` emits the R18 demand row,
+//!   `partial_lo`/`ev`/`tail` carry claim rows per the certificate
+//!   grammar, `z_one` the termination row. Contraction claim rows
+//!   count toward the at-least-one-claim demand. The emitter
+//!   validates SHAPE only, never truth — the checker recomputes
+//!   everything, and a witness carrying deferred-face data would
+//!   refuse THERE, not here.
 
 use geolog_envelope::body::{Body, Op};
 use geolog_envelope::receipt::store_body;
@@ -293,6 +324,59 @@ impl<'a> Decls<'a> {
     }
 }
 
+/// The contraction species' declarations — resolved LAZILY, only when
+/// the spec carries a `contraction` block, so absorb-only emission
+/// against a closure without `DGenContraction` (the dac family) stays
+/// exactly as it was.
+struct CDecls<'a> {
+    witness_sort: u32,
+    c_anchor: &'a FunDecl,
+    c_horizon: &'a FunDecl,
+    c_offset: &'a FunDecl,
+    c_rate: &'a FunDecl,
+    dweight: &'a FunDecl,
+    genform: &'a FunDecl,
+    partial_lo: &'a FunDecl,
+    ev_bracket: &'a FunDecl,
+    survival_tail: &'a FunDecl,
+    z_one: &'a FunDecl,
+}
+
+impl<'a> CDecls<'a> {
+    fn resolve(vocab: &'a BakedVocab) -> Result<CDecls<'a>, String> {
+        let f = |n: &str| -> Result<&'a FunDecl, String> {
+            vocab.index.fun(n).ok_or_else(|| {
+                format!(
+                    "the chain's closure declares no `{n}` — a `contraction` block \
+                     needs the DtmcContraction species (the dcc family)"
+                )
+            })
+        };
+        Ok(CDecls {
+            witness_sort: vocab
+                .index
+                .sort("DGenContraction")
+                .map(|c| c.1)
+                .ok_or_else(|| {
+                    "the chain's closure declares no `DGenContraction` sort — a \
+                     `contraction` block needs the DtmcContraction species (the dcc \
+                     family)"
+                        .to_string()
+                })?,
+            c_anchor: f("DGenContraction/anchor")?,
+            c_horizon: f("DGenContraction/horizon")?,
+            c_offset: f("DGenContraction/offset")?,
+            c_rate: f("DGenContraction/c")?,
+            dweight: f("dweight")?,
+            genform: f("qtsl_dtmc_genform_contraction")?,
+            partial_lo: f("qtsl_dgc_partial_lo")?,
+            ev_bracket: f("qtsl_dgc_ev_bracket")?,
+            survival_tail: f("qtsl_dgc_survival_tail")?,
+            z_one: f("qtsl_dgc_z_one")?,
+        })
+    }
+}
+
 fn ext(counter: u32) -> ElemRef {
     // dep 0 = the staged revision (the commit's sole dep).
     ElemRef::External {
@@ -328,10 +412,20 @@ fn rec_args(d: &FunDecl, named: &[(&str, Value)]) -> Result<Vec<Value>, String> 
 
 fn emit_ops(vocab: &BakedVocab, spec: &Json) -> Result<Vec<Op>, String> {
     let d = Decls::resolve(vocab)?;
-    let top = obj(spec, "spec", &["chain", "query", "claims"])?;
+    let top = obj(spec, "spec", &["chain", "query", "claims", "contraction"])?;
     let chain_j = top.get("chain").ok_or("`chain` is required")?;
     let query_j = top.get("query").ok_or("`query` is required")?;
     let claims_j = top.get("claims").ok_or("`claims` is required")?;
+    // The contraction block is ADDITIVE: a spec without it takes
+    // exactly the pre-extension op path (byte-identity for the
+    // committed corpus is by construction), and its declarations
+    // resolve LAZILY so absorb-only emission against a
+    // contraction-free closure is untouched.
+    let contraction_j = top.get("contraction");
+    let cdecls = match contraction_j {
+        Some(_) => Some(CDecls::resolve(vocab)?),
+        None => None,
+    };
     let chain_o = obj(chain_j, "chain", &["states", "init", "rows"])?;
     let query_o = obj(
         query_j,
@@ -529,6 +623,208 @@ fn emit_ops(vocab: &BakedVocab, spec: &Json) -> Result<Vec<Op>, String> {
             claim_count += 1;
         }
     }
+    // --- the contraction witness (optional block; ops appended after
+    // the absorb claims, spec order within) -------------------------------
+    if let (Some(cj), Some(cd)) = (contraction_j, &cdecls) {
+        let co = obj(
+            cj,
+            "contraction",
+            &[
+                "anchor", "horizon", "offset", "c", "gamma", "weights", "claims",
+            ],
+        )?;
+        let witness_e = ops.len() as u32;
+        ops.push(Op::Elta {
+            sort: ext(cd.witness_sort),
+        });
+        let anchor_e = state(
+            co.get("anchor").ok_or("`contraction.anchor` is required")?,
+            "contraction.anchor",
+        )?;
+        ops.push(Op::Funa {
+            fun: ext(cd.c_anchor.chid.1),
+            args: vec![lref(witness_e)],
+            value: lref(anchor_e),
+        });
+        let horizon = nat(
+            co.get("horizon")
+                .ok_or("`contraction.horizon` is required")?,
+            "contraction.horizon",
+        )?;
+        ops.push(Op::Funa {
+            fun: ext(cd.c_horizon.chid.1),
+            args: vec![lref(witness_e)],
+            value: Value::Lit(Literal::nat(horizon)),
+        });
+        // Offset: a row is emitted only when positive (absent = 0 is
+        // the wire's own default; committed artifacts predating the
+        // offset row are unchanged).
+        if let Some(off) = co.get("offset") {
+            let off = nat(off, "contraction.offset")?;
+            if off > 0 {
+                ops.push(Op::Funa {
+                    fun: ext(cd.c_offset.chid.1),
+                    args: vec![lref(witness_e)],
+                    value: Value::Lit(Literal::nat(off)),
+                });
+            }
+        }
+        // The contraction rate: `c`, or LEGACY `gamma` (the pre-mint
+        // dev-oracle grammar's rate line) — exactly one; the
+        // canonicalization is c := gamma, so emission is
+        // byte-identical either way. The schema demands /c present
+        // always.
+        let rate = match (co.get("c"), co.get("gamma")) {
+            (Some(c), None) => fraction(c, "contraction.c")?,
+            (None, Some(g)) => fraction(g, "contraction.gamma (canonicalized as c)")?,
+            (Some(_), Some(_)) => {
+                return Err("`contraction` carries both `c` and `gamma` — exactly one \
+                     (gamma is the legacy spelling of the same rate)"
+                    .to_string())
+            }
+            (None, None) => {
+                return Err("`contraction.c` is required (or legacy `gamma`)".to_string())
+            }
+        };
+        ops.push(Op::Funa {
+            fun: ext(cd.c_rate.chid.1),
+            args: vec![lref(witness_e)],
+            value: Value::Lit(rate),
+        });
+        // The stored certificate component (spec order; the support
+        // IS the alive region).
+        let weights = arr(
+            co.get("weights")
+                .ok_or("`contraction.weights` is required")?,
+            "contraction.weights",
+        )?;
+        if weights.is_empty() {
+            return Err(
+                "`contraction.weights` is empty — the alive region must be nonempty \
+                 (the face-grammar demand; the checker refuses it too)"
+                    .to_string(),
+            );
+        }
+        for (i, row) in weights.iter().enumerate() {
+            let what = format!("contraction.weights[{i}]");
+            let cells = arr(row, &what)?;
+            let [st, val] = cells.as_slice() else {
+                return Err(format!("`{what}`: expected [state, V]"));
+            };
+            let args = rec_args(
+                cd.dweight,
+                &[("cw", lref(witness_e)), ("state", lref(state(st, &what)?))],
+            )?;
+            ops.push(Op::Funa {
+                fun: ext(cd.dweight.chid.1),
+                args,
+                value: Value::Lit(fraction(val, &what)?),
+            });
+        }
+        // Claim rows: genform, partial_lo, ev, tail, z_one — fixed
+        // family order, spec order within.
+        let cclaims = obj(
+            co.get("claims").ok_or("`contraction.claims` is required")?,
+            "contraction.claims",
+            &["genform", "partial_lo", "ev", "tail", "z_one"],
+        )?;
+        let flag_claim = |ops: &mut Vec<Op>,
+                          claim_count: &mut usize,
+                          key: &str,
+                          decl: &FunDecl|
+         -> Result<(), String> {
+            if let Some(v) = cclaims.get(key) {
+                let v = v
+                    .as_bool()
+                    .ok_or_else(|| format!("`contraction.claims.{key}` is not a boolean"))?;
+                if v {
+                    let args = rec_args(decl, &[("cw", lref(witness_e))])?;
+                    ops.push(Op::Rela {
+                        rel: ext(decl.chid.1),
+                        args,
+                    });
+                    *claim_count += 1;
+                }
+            }
+            Ok(())
+        };
+        flag_claim(&mut ops, &mut claim_count, "genform", cd.genform)?;
+        for (i, row) in arr(
+            cclaims.get("partial_lo").unwrap_or(&Json::Array(vec![])),
+            "contraction.claims.partial_lo",
+        )?
+        .iter()
+        .enumerate()
+        {
+            let what = format!("contraction.claims.partial_lo[{i}]");
+            let args = rec_args(
+                cd.partial_lo,
+                &[
+                    ("cw", lref(witness_e)),
+                    ("lo", Value::Lit(fraction(row, &what)?)),
+                ],
+            )?;
+            ops.push(Op::Rela {
+                rel: ext(cd.partial_lo.chid.1),
+                args,
+            });
+            claim_count += 1;
+        }
+        for (i, row) in arr(
+            cclaims.get("ev").unwrap_or(&Json::Array(vec![])),
+            "contraction.claims.ev",
+        )?
+        .iter()
+        .enumerate()
+        {
+            let what = format!("contraction.claims.ev[{i}]");
+            let cells = arr(row, &what)?;
+            let [lo, hi] = cells.as_slice() else {
+                return Err(format!("`{what}`: expected [lo, hi]"));
+            };
+            let args = rec_args(
+                cd.ev_bracket,
+                &[
+                    ("cw", lref(witness_e)),
+                    ("lo", Value::Lit(fraction(lo, &what)?)),
+                    ("hi", Value::Lit(fraction(hi, &what)?)),
+                ],
+            )?;
+            ops.push(Op::Rela {
+                rel: ext(cd.ev_bracket.chid.1),
+                args,
+            });
+            claim_count += 1;
+        }
+        for (i, row) in arr(
+            cclaims.get("tail").unwrap_or(&Json::Array(vec![])),
+            "contraction.claims.tail",
+        )?
+        .iter()
+        .enumerate()
+        {
+            let what = format!("contraction.claims.tail[{i}]");
+            let cells = arr(row, &what)?;
+            let [coeff, rate] = cells.as_slice() else {
+                return Err(format!("`{what}`: expected [coeff, rate]"));
+            };
+            let args = rec_args(
+                cd.survival_tail,
+                &[
+                    ("cw", lref(witness_e)),
+                    ("coeff", Value::Lit(fraction(coeff, &what)?)),
+                    ("rate", Value::Lit(fraction(rate, &what)?)),
+                ],
+            )?;
+            ops.push(Op::Rela {
+                rel: ext(cd.survival_tail.chid.1),
+                args,
+            });
+            claim_count += 1;
+        }
+        flag_claim(&mut ops, &mut claim_count, "z_one", cd.z_one)?;
+    }
+
     if claim_count == 0 {
         return Err(
             "no claims: a certificate with no claim rows certifies nothing (the \
@@ -612,6 +908,14 @@ Spec schema (stable; unknown fields refuse):
 - classes: [state, classNat]; rejects: state names.
 - claims.wf (default false); absorb/posterior each carry
   [classNat, lo, hi]. At least one claim row is required.
+- contraction (optional, additive; needs a closure declaring the
+  DtmcContraction species — the dcc family): anchor, ABSOLUTE
+  horizon, optional offset (a row is emitted only when positive),
+  rate as "c" or legacy "gamma" (exactly one; c := gamma), weights
+  [[state, V], ...] (the support is the alive region, nonempty),
+  claims {genform, partial_lo: [lo...], ev: [[lo, hi]...],
+  tail: [[coeff, rate]...], z_one}. Contraction claim rows count
+  toward the at-least-one-claim demand.
 
 Determinism: the output is a pure function of (spec, chain) — ops in
 spec order, timestamp zero, fixed public signing seed (reproducibility

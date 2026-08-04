@@ -483,29 +483,55 @@ fn horizon_past_budget_refuses() {
     assert!(out.contains("REFUSE") && out.contains("budget"), "{out}");
 }
 
-/// Without `--staged-chain`, the same certificate is an unknown
-/// prerequisite — the staged lane resolves nothing by default, and no
-/// baked pin is consulted.
+/// GRADUATION (the family-addition mint): the fixture chain's sealed
+/// revision joined the baked roster — its chid deliberately equals
+/// the absorption closure's (revision hashing is comment-insensitive,
+/// and the pre-mint fragment's only motion was comments) — so the
+/// same certificate now discharges with NO flags at all: staged and
+/// baked verdicts bind to one revision. What the pre-mint version of
+/// this test pinned ("the staged lane resolves nothing by default")
+/// survives below with an honestly-unrostered revision.
 #[test]
-fn staged_cert_without_flag_refuses() {
+fn staged_fixture_certificates_graduated() {
     let mut die = die_ops(10);
     push_claim(&mut die.ops, "qtsl_dabs_wf", &[("q", lref(die.q))]);
     let p = cert("no-flag.glc", die.ops);
+    let (code, out) = run(&[p.to_str().unwrap()]);
+    assert_eq!(code, 0, "{out}");
+    assert!(
+        out.contains("ACCEPT") && out.contains("qtsl_dabs_wf=1/1"),
+        "{out}"
+    );
+}
+
+/// Nothing resolves by default: a certificate naming a revision that
+/// is neither rostered nor loaded through `--staged-chain` is an
+/// unknown prerequisite — REFUSE, no pin consulted.
+#[test]
+fn unrostered_prereq_refuses() {
+    let mut die = die_ops(10);
+    push_claim(&mut die.ops, "qtsl_dabs_wf", &[("q", lref(die.q))]);
+    // Seal against a revision no roster carries and no flag loads.
+    let fake_rev = [0xABu8; 32];
+    let commit = sign_commit(die.ops, vec![fake_rev]);
+    let p = write_tmp("fake-rev.glc", &write_container(&[fake_rev], &[commit]));
     let (code, out) = run(&[p.to_str().unwrap()]);
     assert_eq!(code, 1);
     assert!(out.contains("REFUSE unknown_prereq"), "{out}");
 }
 
-/// The `--staged-cert` mode flag matches the lane; a family-flag
-/// mismatch refuses.
+/// Family-flag semantics after the graduation: the certificate names
+/// a ROSTERED revision, so `--baked-cert` matches and `--staged-cert`
+/// mismatches (the exact inverse of the pre-mint expectations — the
+/// classification keys on the roster, not on how the kit was loaded).
 #[test]
 fn staged_mode_flag() {
     let mut die = die_ops(10);
     push_claim(&mut die.ops, "qtsl_dabs_wf", &[("q", lref(die.q))]);
     let p = cert("mode-flag.glc", die.ops);
-    let (code, out) = run_staged(&["--staged-cert", p.to_str().unwrap()]);
-    assert_eq!(code, 0, "{out}");
     let (code, out) = run_staged(&["--baked-cert", p.to_str().unwrap()]);
+    assert_eq!(code, 0, "{out}");
+    let (code, out) = run_staged(&["--staged-cert", p.to_str().unwrap()]);
     assert_eq!(code, 1);
     assert!(out.contains("mode_flag_mismatch"), "{out}");
 }

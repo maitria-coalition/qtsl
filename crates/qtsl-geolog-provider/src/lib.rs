@@ -11,10 +11,10 @@
 //! relations, packaged as one [`GroundProvider`] the engine's binder
 //! adjudicates like any other.
 //!
-//! The claimed roster (121 relations —
+//! The claimed roster (126 relations —
 //! [`provider::ENTRY_COUNT`] is the computed authority, and this
 //! headline count has grown family by family as evaluator groups
-//! joined; the seam fixture stages 99 of the 121 — all
+//! joined; the seam fixture stages 99 of the 126 — all
 //! `Scope::Snapshot`: every one
 //! is a row-context check over certificate rows):
 //!
@@ -141,7 +141,18 @@
 //!   `qtsl_dabs_absorb_bracket` / `qtsl_dabs_posterior_bracket` pair,
 //!   recomputed by the exact-ℚ T-step evaluation of the completed
 //!   kernel (staged-fragment vocabulary: resolves only against
-//!   closures carrying `DAbsQuery`).
+//!   closures carrying `DAbsQuery`); the unnormalized upper side
+//!   carries the reachability-sharpened per-class residual;
+//! - **contraction certificates** ([`dgc`], 5 relations): the
+//!   DtmcContraction species — the strengthened generator-form
+//!   demand `qtsl_dtmc_genform_contraction` (R18) and its claim
+//!   relations `qtsl_dgc_partial_lo`, `qtsl_dgc_ev_bracket`,
+//!   `qtsl_dgc_survival_tail`, `qtsl_dgc_z_one`: regional
+//!   contraction under the completed kernel, exact killed-on-exit
+//!   survival sums, and the κ-derived geometric assemblies (resolves
+//!   only against closures carrying `DGenContraction` — the event-8
+//!   dcc closure's family; the pattern face is deliberately
+//!   unrealized this event).
 //!
 //! Each evaluator mirrors a definition in the repository's Lean
 //! development (`lean/`, the `Qtsl` packages) — the spec authority —
@@ -215,6 +226,7 @@ pub mod container;
 pub mod contract;
 pub mod dabs;
 pub mod deadline;
+pub mod dgc;
 pub mod dwellgate;
 pub mod enclosure;
 pub mod error;

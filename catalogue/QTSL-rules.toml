@@ -1,12 +1,12 @@
 # QTSL-rules.toml — the QTSL extension theory's rule page.
 #
 # PROVENANCE: LEFT is the QTSL rule catalogue (2026-07-18 — distilled
-# from the design rulings cited there with timestamps; revisable, not
-# verbatim). RIGHT is what the staged `QtslCert` revision
-# actually realizes today (the upstream geolog implementation's `qtslcert.rs`,
-# the 719-op revision + the event-13 `qraAffine` enactment) rendered into
-# the same metanotation — authored from the staged sorts' field
-# rosters and the recompute registry. An EMPTY right column is the
+# from design rulings; revisable, not verbatim). RIGHT is what the
+# staged `QtslCert` revision of the extension theory actually realizes
+# today — the declarations-only certificate schema (judgement kinds,
+# rule sorts, recompute registry, and the later-enacted `qraAffine`
+# affine region atom) — rendered into the same metanotation, authored
+# from the staged sorts' field rosters and the recompute registry. An EMPTY right column is the
 # honest state: the rule is catalogued and tiered but has no staged
 # realization (the catalogue's MISSING-ROW findings) — on this page,
 # absence renders loudly instead of not rendering at all (the reason the
@@ -17,7 +17,7 @@
 # (12 core + 8 admissible + 13 alias, QAGCompose counted once with its
 # per-profile tier split rendered in the badge) + 1 edge discipline
 # (TowerCitation, the GLUE category: the fourth tier category per the
-# TowerCitation rendering note, 2026-07-19,
+# TowerCitation rendering decision, 2026-07-19,
 # counted apart from the tiered rows) — plus one tier-less row
 # for the ⊨ judgment kinds (the sp-axiom precedent: not a proof rule,
 # skipped by the book dashboard). Side-condition registry entries,
@@ -36,12 +36,12 @@
 # named in the witness prose, never the whole catalogued rule.
 #
 # TIER AMBIGUITIES are flagged in notes as AMBIGUOUS rather than forced
-# (the taxonomy addendum's flagged-not-forced precedent); the flagged
-# set: QLatticeInv (D1), QNegFAlias (D1(ii)), StreettTargetCellCollapse
-# (T9c side-condition weight). Resolved at wave completion, 2026-07-19:
-# QAGCompose (per-profile split now rendered in the tier badge, ratified
-# leg-4 flag-4) and TowerCitation (rule-vs-discipline — re-categoried
-# GLUE, the fourth category, per its rendering note).
+# (flagged, never forced, where genuinely arguable); the flagged
+# set: QLatticeInv, QNegFAlias, StreettTargetCellCollapse
+# (T9c side-condition weight). Resolved 2026-07-19:
+# QAGCompose (per-profile split now rendered in the tier badge, ratified)
+# and TowerCitation (rule-vs-discipline — re-categoried
+# GLUE, the fourth category, per its rendering decision).
 #
 # Re-render: cd metanotation && cargo run --release --bin qtsl-rules -- \
 #   --rules QTSL-rules.toml --no-verify
@@ -51,7 +51,7 @@ basename = "BL-QTSL-rules"
 title = "QTSL over Bernstein Logic: the extension theory\\textquotesingle s rules, catalogued \\(\\mid\\) staged"
 subtitle = "the \\(\\vDash\\) stratum: 33 tiered rules + 1 edge discipline \\enspace\\(\\cdot\\)\\enspace \\textcolor{DiffRed}{red = catalogued, not yet staged} \\enspace\\(\\cdot\\)\\enspace \\textcolor{DiffBlue}{blue = only in the staged schema} \\enspace\\(\\cdot\\)\\enspace an empty right column IS the coverage claim \\enspace\\(\\cdot\\)\\enspace page minted 19 July 2026"
 left_header = "\\normalsize\\textbf{as catalogued}\\enspace\\footnotesize (rule catalogue, 2026-07-18)"
-right_header = "\\normalsize\\textbf{as staged}\\enspace\\footnotesize (\\texttt{QtslCert} revision listing, python lane: \\texttt{QtslCert.geolog} via \\texttt{qtslcert\\_rows.py})"
+right_header = "\\normalsize\\textbf{as staged}\\enspace\\footnotesize (the staged \\texttt{QtslCert} revision listing)"
 legend = '''
 \textbf{How to read this page.}\enspace QTSL is a literal geolog theory extension
 over the BL tower (\texttt{theory QtslCert extends BernsteinLogic, Qtsl}; ratified
@@ -70,30 +70,28 @@ Margin marks are derived live from both Lean packages --- the core calculus
 check carrying a superscript scope tag warrants exactly the proven fragment or
 profile named in the row\textquotesingle s witness prose, not the whole
 catalogued rule. Every soundness obligation on this page is RELATIVE: proven
-\emph{on the hypothesis that BL is sound} (the extension-edge obligation,
-extension doc \S3); root soundness then follows by DAG induction over admitted
+\emph{on the hypothesis that BL is sound} (the extension-edge obligation);
+root soundness then follows by DAG induction over admitted
 derivations, with the E3 acyclicity pass making the induction well-founded.
 
-\textbf{The three-tier taxonomy} (ratified 2026-07-18, names
-11:5x) applies unchanged one extends-edge up: \textbf{core} = semantic
+\textbf{The three-tier taxonomy} (ratified 2026-07-18) applies unchanged one extends-edge up: \textbf{core} = semantic
 soundness against the model; \textbf{admissible} = verified unpacking into core
 rules; \textbf{alias} = verified unpacking into a single application. One
 page-local fourth category, \textbf{glue} (edge discipline): typing/conformance
 obligations on derivation edges --- no conclusion judgement, nothing to unpack
 --- warranted by the extension-edge DAG induction + the E3 acyclicity pass (the
-\rulename{TowerCitation} row; rendering note 2026-07-19). Genuinely
+\rulename{TowerCitation} row). Genuinely
 arguable sorts are FLAGGED in their notes, never forced.
 '''
 colophon = '''
 \textbf{Provenance and verification.}\enspace Catalogued: the QTSL rule catalogue
-(2026-07-18; the design rulings cited there with timestamps
-are the spine). Staged: the upstream geolog implementation's \texttt{qtslcert.rs}
---- the declarations-only \texttt{QtslCert} revision (judgement kinds
+(2026-07-18; design rulings are the spine). Staged: the
+declarations-only \texttt{QtslCert} revision of the extension theory (judgement kinds
 \texttt{QSat}/\texttt{QRegionSat}/\texttt{QInvScope}/\texttt{QMorse}, eight rule
-sorts, the five-entry recompute registry R1--R5, and the event-13
+sorts, the five-entry recompute registry R1--R5, and the later-enacted
 \texttt{qraAffine} affine region atom); geometric applicability axioms are
-spelled in the QtslCert applicability-axioms note, awaiting the
-transcription leg, and the \([\)SYSTEM\(]\) holes (\texttt{QSat/sys} + kin,
+spelled beside the staged revision, awaiting
+transcription, and the \([\)SYSTEM\(]\) holes (\texttt{QSat/sys} + kin,
 \texttt{QSatI}, \texttt{QWireCert}) stood deliberately open at cataloguing
 time, pending the System staging leg. (Amended 2026-07: the System/Spec
 vocabulary is staged and \texttt{QSat}\textquotesingle s claim record
@@ -104,8 +102,7 @@ closing move is the claim record\textquotesingle s own demand set (warrant
 edge, init-membership eval leaf, root tie), not a rule node, see the
 honest absences below; \texttt{QWireCert} remains the open row.)
 \par\smallskip
-\textbf{The receipt ledger} (catalogue \S ledger, recounted from the rows at
-wave completion): of the \textbf{33 tiered rows} (the glue row
+\textbf{The receipt ledger} (recounted from the rows): of the \textbf{33 tiered rows} (the glue row
 \rulename{TowerCitation} is counted apart, below), \textbf{9 are proven as
 stated at their profile or scope} --- \rulename{QBasin} and
 \rulename{QUnionBound} outright (the latter measure-generic, no profile
@@ -132,10 +129,10 @@ checks warrant exactly the fragment their superscripts name.
 punctual/certificate-class residues (G3 proven outright from model-class
 facts, G4 sharpened to per-facet crossing certificates with only the punctual
 right-derivative residue, G5 reduced to the cell-level KMV-III cover, the G6
-order assembly mechanized --- Option C --- and G6a --- M(ii)\textquotesingle s
+order assembly mechanized --- the order entering as theorem data --- and G6a --- M(ii)\textquotesingle s
 orbit-interval conclusion --- DISCHARGED by the leg-7 eventual-member
 mechanization to R1-shadow combinatorics + per-member invariance +
-strict-inwardness shadows, the Option-A leg);
+strict-inwardness shadows);
 \rulename{QBlockInv} --- G1b mechanized to the G2 floor, and the
 facet-rows-to-dwell bridge\textquotesingle s pointwise-to-integrated leg
 DISCHARGED by the same-day mean-value gap-fill
@@ -155,12 +152,10 @@ the KW readout-transport import; \texttt{QSatFromRegion} left this list ---
 Lean-witnessed 2026-07-20, then dissolved outright 2026-07-24, see the
 honest absences). The glue row \rulename{TowerCitation} (edge
 discipline, counted apart) is prose-proved: consumption-site soundness + the
-extension doc \S3 DAG induction. Counts as of 2026-07-19 wave completion + all same-day gap-fill landings
+extension-edge DAG induction. Counts as of 2026-07-19, including the same-day gap-fill strata
 (G6 order assembly, G4 crossing certificates,
-\texttt{AbsorptionBound} discharge), tree \texttt{8d0c38611}, amended
-same-day by the mean-value G2 bridge (\texttt{MeanValue.lean}) and
-the leg-7 G6a discharge (\texttt{EventualMember.lean} --- hash
-refreshes when it ships); remaining named residues (the punctual
+\texttt{AbsorptionBound} discharge), the mean-value G2 bridge (\texttt{MeanValue.lean}), and
+the leg-7 G6a discharge (\texttt{EventualMember.lean}); remaining named residues (the punctual
 \texttt{FlowDerivOn} profile identification --- the G2 integrated
 shadows both discharged by the mean-value bridge --- the punctual G4
 fact, and leg 7\textquotesingle s strict-inwardness shadows in the same
@@ -192,7 +187,7 @@ of congruence/composition rules is theorem-backed:
 MIX judgement (awaiting design review; its LDL\(^\top\)-PSD
 obligation-node kind arrived as the PSDCERT family, the exact-matrix-identity
 kind is the residue). This page is generated: the source of truth is
-\texttt{metanotation/QTSL-rules.toml}; re-run \texttt{qtsl-rules --rules
+\texttt{catalogue/QTSL-rules.toml}; re-run \texttt{qtsl-rules --rules
 QTSL-rules.toml}.
 '''
 
@@ -215,9 +210,9 @@ $\mathsf{QSat}$: $\mathcal{M} \vDash s$ (the root kind). \quad
 $\mathsf{QRegionSat}$: $\forall x \in R:\ x \vDash_{\mathcal{M}} \varphi$, with $R \subseteq [\![\varphi]\!]$ (under-approximating). \quad
 $\mathsf{QInvScope}$: $S$ forward-invariant $\wedge\ X_0 \subseteq S$. \quad
 $\mathsf{QMorse}$: $\mathcal{M} \vDash_D \mathsf{Morse}(G, \rho)$. \quad
-region atoms: $\mathsf{qraSublevel}(V, \mathrm{thr})$, $\mathsf{qraBox}$, and the event-13 $\mathsf{qraAffine}(\sum_i c_i V_i, \mathrm{thr})$ — $\mathsf{qraSublevel}$ henceforth its $k = 1$ alias.
+region atoms: $\mathsf{qraSublevel}(V, \mathrm{thr})$, $\mathsf{qraBox}$, and the affine atom $\mathsf{qraAffine}(\sum_i c_i V_i, \mathrm{thr})$ — $\mathsf{qraSublevel}$ henceforth its $k = 1$ alias.
 '''
-note = 'The $\vdash$/$\vDash$ terminology pin (2026-07-18): \textbf{judgement} is the general category; a \textbf{sequent} is the $\vdash$ form (BL\textquotesingle s single sort, correct as-is); a \textbf{satisfaction judgement} is the $\vDash$ form — \texttt{QJudgment}, a sibling sort, never a refinement. \textquotedblleft One layer up\textquotedblright{} (the taxonomy addendum\textquotesingle s phrase for the Morse/MIX kinds) has the formal referent: one extends-edge up.'
+note = 'The $\vdash$/$\vDash$ terminology pin (2026-07-18): \textbf{judgement} is the general category; a \textbf{sequent} is the $\vdash$ form (BL\textquotesingle s single sort, correct as-is); a \textbf{satisfaction judgement} is the $\vDash$ form — \texttt{QJudgment}, a sibling sort, never a refinement. \textquotedblleft One layer up\textquotedblright{} (said of the Morse/MIX kinds) has the formal referent: one extends-edge up.'
 
 # ============================ Group S — structural ============================
 
@@ -238,7 +233,7 @@ a nested $\mathsf{P}_{\ge p}[\psi]$ compiles its child first and cites the child
 amended = '''
 staged as \emph{typing}, not as a node sort: E1 — derivation premises are judgement kinds XOR inherited $\mathsf{Proof}$, never \texttt{QProof}, never a rule sort; E2 — certificate-data references are not derivation edges; E3 — the admittedness + acyclicity pass over the certificate\textquotesingle s own row graph (loader conformance, ships with the certificate-object loading leg: a cyclic certificate would chase-satisfy every axiom while proving nothing).
 '''
-note = 'Soundness: MECHANIZED at certificate-object level, conditional (M1f; \texttt{QtslAux.Acceptance} — the acceptance module\textquotesingle s first brick: the extension-edge induction in well-founded + finite-acyclic forms, the E3 acyclicity-to-well-foundedness bridge, and the consumption-site transport pair; residues R1–R3 named in the book section) — the sound direction at every discharge-plan consumption site (positive: passed exactly; complement: orientation swap = the over-approximation the floors want), then root soundness by the extension doc \S3 DAG induction. Category: GLUE — the page\textquotesingle s fourth category (edge discipline; the TowerCitation rendering note, 2026-07-19, resolving the former rule-vs-discipline flag): typing/conformance obligations on derivation edges, warranted by the extension-edge DAG induction + the E3 acyclicity pass. It cannot be core, admissible, or alias — nothing to unpack into; it IS the unpacking mechanism, the ratified System account\textquotesingle s induction step rather than one of its per-rule $\mathrm{sound}_R$\textquotesingle s.'
+note = 'Soundness: MECHANIZED at certificate-object level, conditional (M1f; \texttt{QtslAux.Acceptance} — the acceptance module\textquotesingle s first brick: the extension-edge induction in well-founded + finite-acyclic forms, the E3 acyclicity-to-well-foundedness bridge, and the consumption-site transport pair; residues R1–R3 named in the book section) — the sound direction at every discharge-plan consumption site (positive: passed exactly; complement: orientation swap = the over-approximation the floors want), then root soundness by the extension-edge DAG induction. Category: GLUE — the page\textquotesingle s fourth category (edge discipline; the rendering decision of 2026-07-19, resolving the former rule-vs-discipline flag): typing/conformance obligations on derivation edges, warranted by the extension-edge DAG induction + the E3 acyclicity pass. It cannot be core, admissible, or alias — nothing to unpack into; it IS the unpacking mechanism, the ratified System account\textquotesingle s induction step rather than one of its per-rule $\mathrm{sound}_R$\textquotesingle s.'
 
 # ============================ Group B — batteries ============================
 
@@ -253,7 +248,7 @@ aux_lemmas = [
   "Qtsl.LayerD.sound_GSHS_safety_battery",
 ]
 scope = "disc.+PDMP"
-witness = 'PROVEN at the discrete-kernel profile, qtsl-aux: \texttt{sound\_QSafetyBattery} + \texttt{\_failClosed} (\texttt{QtslAux/Battery.lean}, 0-sorry over mathlib\textquotesingle s \texttt{Kernel.traj}, taking exactly $h_\Theta : p + \mathrm{thr} \le 1$) — and the STAGED RIGHT COLUMN as a bound theorem: \texttt{sound\_QSafetyBattery\_staged} (\texttt{QtslBattery.lean}, 0-sorry) takes the node\textquotesingle s own premise families — per-mode interior rows against the mode\textquotesingle s flow mechanism, per-jump guard boundary rows, per-mode floors/nonnegs, the \(\Q\)-valued $p + \mathrm{thr} \le 1$ row cast once — assembled onto the flattened battery through the mechanism-compile mixture bridge (\texttt{mixture\_drift}/\texttt{mixture\_integrable}: the one-step kernel as a sub-convex mixture of flow step and enabled jumps — the ratified System notion\textquotesingle s discrete-profile compilation, SYSTEMS doc \S2–3), concluding region-level as the \texttt{QRegionSat} reads. GSHS profile: FILED (D0--D4 + K1 assembly), with the PDMP sub-profile machine-checked end-to-end (\texttt{sound\_GSHS\_safety\_battery}, \texttt{LayerD/Skeleton.lean}, 0-sorry — no diffusion debt).'
+witness = 'PROVEN at the discrete-kernel profile, qtsl-aux: \texttt{sound\_QSafetyBattery} + \texttt{\_failClosed} (\texttt{QtslAux/Battery.lean}, 0-sorry over mathlib\textquotesingle s \texttt{Kernel.traj}, taking exactly $h_\Theta : p + \mathrm{thr} \le 1$) — and the STAGED RIGHT COLUMN as a bound theorem: \texttt{sound\_QSafetyBattery\_staged} (\texttt{QtslBattery.lean}, 0-sorry) takes the node\textquotesingle s own premise families — per-mode interior rows against the mode\textquotesingle s flow mechanism, per-jump guard boundary rows, per-mode floors/nonnegs, the \(\Q\)-valued $p + \mathrm{thr} \le 1$ row cast once — assembled onto the flattened battery through the mechanism-compile mixture bridge (\texttt{mixture\_drift}/\texttt{mixture\_integrable}: the one-step kernel as a sub-convex mixture of flow step and enabled jumps — the ratified System notion\textquotesingle s discrete-profile compilation), concluding region-level as the \texttt{QRegionSat} reads. GSHS profile: FILED (the layer strata + the safety-kernel assembly), with the PDMP sub-profile machine-checked end-to-end (\texttt{sound\_GSHS\_safety\_battery}, \texttt{LayerD/Skeleton.lean}, 0-sorry — no diffusion debt).'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -291,7 +286,7 @@ aux_lemmas = [
   "Qtsl.Battery.sound_QDeadlineBattery",
 ]
 scope = "disc."
-witness = 'PROVEN at the discrete profile, qtsl-aux: \texttt{sound\_QDeadline} + \texttt{\_hit} (\texttt{Battery.lean}, 0-sorry; geometric drift $\beta = e^{-\theta}$), riding the shipped K3 kernel (\texttt{Deadline.lean}: \texttt{supermartingale\_inv\_pow\_mul}, \texttt{expMoment\_hitting}, \texttt{deadline\_tail}) — and the CATALOGUE FORM outright: \texttt{sound\_QDeadlineBattery} (\texttt{QtslBattery.lean}, 0-sorry) concludes on $\{V \le (1-p)\,q\}$ from the T7 Taylor leaf $q \le \sum_{k \le n} (\theta T)^k/k!$ (the exact-\(\Q\) \rulename{PConstExact} row) + the drift tie $\beta \le e^{-\theta}$, with both transcendental facts (\texttt{Real.sum\_le\_exp\_of\_nonneg}, $e^{-\theta} e^{\theta} = 1$) in the lemma, never the checker. NB the checked floor is OFF-target only (weaker than the left column\textquotesingle s global floor — the F7 form; the rule text could be relaxed to match). GSHS transport: FILED. Schema: MISSING-ROW — no \texttt{QDeadline*} sort staged; the census\textquotesingle s next battery port (field pattern exported, roster \S4.7).'
+witness = 'PROVEN at the discrete profile, qtsl-aux: \texttt{sound\_QDeadline} + \texttt{\_hit} (\texttt{Battery.lean}, 0-sorry; geometric drift $\beta = e^{-\theta}$), riding the shipped deadline kernel (\texttt{Deadline.lean}: \texttt{supermartingale\_inv\_pow\_mul}, \texttt{expMoment\_hitting}, \texttt{deadline\_tail}) — and the CATALOGUE FORM outright: \texttt{sound\_QDeadlineBattery} (\texttt{QtslBattery.lean}, 0-sorry) concludes on $\{V \le (1-p)\,q\}$ from the T7 Taylor leaf $q \le \sum_{k \le n} (\theta T)^k/k!$ (the exact-\(\Q\) \rulename{PConstExact} row) + the drift tie $\beta \le e^{-\theta}$, with both transcendental facts (\texttt{Real.sum\_le\_exp\_of\_nonneg}, $e^{-\theta} e^{\theta} = 1$) in the lemma, never the checker. NB the checked floor is OFF-target only — genuinely weaker than the left column\textquotesingle s global floor (a two-point witness with $V \equiv 0$ off the target separates the two forms); the rule text could be relaxed to match. GSHS transport: FILED. Schema: MISSING-ROW — no \texttt{QDeadline*} sort staged; the next battery port (field pattern exported for staging).'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -321,7 +316,7 @@ amended = '''
 }
 \end{mathpar}
 '''
-note = 'Core. Soundness independent of the $\theta, q$ choices (producer knobs). Off-scope machinery = T2/T3/T17; deadline threshold $\mathrm{thr}_{\mathsf{F}} = \mathrm{thr} \cdot q$ in \texttt{q\_mul} vocabulary (staged-ready, threshold-axiom note).'
+note = 'Core. Soundness independent of the $\theta, q$ choices (producer knobs). Off-scope machinery = T2/T3/T17; deadline threshold $\mathrm{thr}_{\mathsf{F}} = \mathrm{thr} \cdot q$ in \texttt{q\_mul} vocabulary (staged-ready).'
 
 [[rule]]
 name = "QUnionBound"
@@ -332,7 +327,7 @@ aux_lemmas = [
   "Qtsl.Battery.sound_QUnionBound_ofReal",
   "Qtsl.Battery.compl_firstExit_subset",
 ]
-witness = 'PROVEN, measure-generic — no profile residue: \texttt{sound\_QUnionBound} (+ \texttt{\_ofReal} form) is the rule over an arbitrary measure, and \texttt{compl\_firstExit\_subset} is K4\textquotesingle s début decomposition itself (pure path-set algebra over sequence space, no measurability asked), the exact $\mathrm{fail} \subseteq E_1 \cup E_2$ instance the until battery cites (\texttt{QtslAux/QtslBattery.lean}, 0-sorry).'
+witness = 'PROVEN, measure-generic — no profile residue: \texttt{sound\_QUnionBound} (+ \texttt{\_ofReal} form) is the rule over an arbitrary measure, and \texttt{compl\_firstExit\_subset} is the début decomposition itself (pure path-set algebra over sequence space, no measurability asked), the exact $\mathrm{fail} \subseteq E_1 \cup E_2$ instance the until battery cites (\texttt{QtslAux/QtslBattery.lean}, 0-sorry).'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -354,7 +349,7 @@ amended = '''
 \end{mathpar}
 packaged instance (the d\'ebut decomposition, pure path-set algebra over sequence space): failure of $(\varphi_s\,\mathsf{U}_{\le T}\,\varphi)$, at stop set $\mathit{Stop}$ and good-exit set $R$, is contained in $\{\text{some \emph{first} } \mathit{Stop}\text{-visit presents a bad state}\} \cup \{\text{no } \mathit{Stop}\text{-visit through } T\}$ --- the containment the until battery cites as its $\mathrm{fail} \subseteq E_1 \cup E_2$ premise.
 '''
-note = 'Core (small). Soundness: PROVEN (qtsl-aux; was the KSI K4 \textquotedblleft NEW (easy)\textquotedblright{} item) — subadditivity (\texttt{measure\_union\_le}) + the début decomposition under stopped-process definitions; doubles as the AG slack-composition device (K4: one item, two consumers). Schema: MISSING-ROW.'
+note = 'Core (small). Soundness: PROVEN (qtsl-aux; catalogued as an easy new lemma and proved as such) — subadditivity (\texttt{measure\_union\_le}) + the début decomposition under stopped-process definitions; doubles as the AG slack-composition device (one lemma, two consumers). Schema: MISSING-ROW.'
 
 [[rule]]
 name = "QUntilBattery"
@@ -365,7 +360,7 @@ aux_lemmas = [
   "Qtsl.Battery.sound_QUntilBattery_firstHit",
 ]
 scope = "disc."
-witness = 'PROVEN at the discrete profile, qtsl-aux: \texttt{sound\_QUntilBattery} + \texttt{\_firstHit} (\texttt{QtslBattery.lean}, 0-sorry) — and the Lean proof IS the admissible-tier unpacking: one T5 slice stopped at the composite stop set (\texttt{measure\_firstBad\_le}: floor on the bad exit only, K1 via \texttt{ville\_ineq}), one T6 slice at target $A \cup R$ (\texttt{measure\_missTarget\_le}, consuming \texttt{sound\_QDeadline\_hit} as a black box), one \rulename{QUnionBound} application on the début decomposition. Concluded region = the event-13 \texttt{qraAffine} atom $\{V_a + c\,V_d \le 1-p\}$ under the tie $\beta^T \le c$ — fully rational at this profile, no transcendental leaf ($c = q^{-1}$, $q \le e^{\theta T}$ is the catalogue instance, dischargeable by the T7 pattern when $\theta$-rates are wanted). Fail-closed: $D^{\mathrm{c}}$ joins the stop set on the bad side; an $R$-landing succeeds wherever it lands (the $R$ formula tie is global). GSHS transport: FILED.'
+witness = 'PROVEN at the discrete profile, qtsl-aux: \texttt{sound\_QUntilBattery} + \texttt{\_firstHit} (\texttt{QtslBattery.lean}, 0-sorry) — and the Lean proof IS the admissible-tier unpacking: one T5 slice stopped at the composite stop set (\texttt{measure\_firstBad\_le}: floor on the bad exit only, Ville\textquotesingle s inequality via \texttt{ville\_ineq}), one T6 slice at target $A \cup R$ (\texttt{measure\_missTarget\_le}, consuming \texttt{sound\_QDeadline\_hit} as a black box), one \rulename{QUnionBound} application on the début decomposition. Concluded region = the \texttt{qraAffine} atom $\{V_a + c\,V_d \le 1-p\}$ under the tie $\beta^T \le c$ — fully rational at this profile, no transcendental leaf ($c = q^{-1}$, $q \le e^{\theta T}$ is the catalogue instance, dischargeable by the T7 pattern when $\theta$-rates are wanted). Fail-closed: $D^{\mathrm{c}}$ joins the stop set on the bad side; an $R$-landing succeeds wherever it lands (the $R$ formula tie is global). GSHS transport: FILED.'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -379,7 +374,7 @@ original = '''
 $\mathbb{P}_x \ge 1 - V_a(x) - e^{-\theta T} V_d(x)$; two floors doing different work — $V_a$\textquotesingle s on $A$ only, $V_d$\textquotesingle s global.
 '''
 amended = '''
-\emph{realized form, as the discrete-profile assembly binds it (the concluded region atom is the event-13 affine atom):}
+\emph{realized form, as the discrete-profile assembly binds it (the concluded region atom is the \texttt{qraAffine} affine atom):}
 \begin{mathpar}
 \inferrule*{
   \text{a T5 slice for } V_a \ \text{at the composite stop set } (A \cup R) \cup D^{\mathrm{c}},\ \text{floor on } A \ \text{only} \\
@@ -391,7 +386,7 @@ amended = '''
 }
 \end{mathpar}
 '''
-note = 'Admissible over $\{$T5, T6, \rulename{QUnionBound}$\}$ — three premises, so not alias; the monolithic-core alternative was declined (would duplicate two batteries\textquotesingle{} soundness in a third lemma), and the shipped Lean assembly vindicates the choice: it consumes the T6 theorem as a black box. Soundness: PROVEN at the discrete profile (was FILED $\sim$1 page per KSI; review round 1 had attacked all four planted corners of the union bound, no counterexample). Schema: rule sort still MISSING-ROW, but the catalogue\textquotesingle s sharpest schema finding is RESOLVED on this tree: the composite atom $\{V_a + q^{-1} V_d \le 1 - p\}$ is now statable as \texttt{qraAffine}$([(1, V_a), (q^{-1}, V_d)],\ 1 - p)$ (event 13; $\beta$ refused with row receipts, rider enacted).'
+note = 'Admissible over $\{$T5, T6, \rulename{QUnionBound}$\}$ — three premises, so not alias; the monolithic-core alternative was declined (would duplicate two batteries\textquotesingle{} soundness in a third lemma), and the shipped Lean assembly vindicates the choice: it consumes the T6 theorem as a black box. Soundness: PROVEN at the discrete profile (was FILED $\sim$1 page; adversarial review attacked all four planted corners of the union bound, no counterexample). Schema: rule sort still MISSING-ROW, but the catalogue\textquotesingle s sharpest schema finding is RESOLVED on this tree: the composite atom $\{V_a + q^{-1} V_d \le 1 - p\}$ is now statable as \texttt{qraAffine}$([(1, V_a), (q^{-1}, V_d)],\ 1 - p)$ since the affine atom\textquotesingle s enactment.'
 
 [[rule]]
 name = "QStreettBundle"
@@ -404,8 +399,8 @@ aux_lemmas = [
   "Qtsl.Excursions.streett_window_sum_le",
   "Qtsl.Excursions.streett_ae_frequently_response",
 ]
-scope = "K5"
-witness = 'PROVEN at the discrete-kernel profile, conservative ranking scope (2026-07-19, qtsl-aux \texttt{QStreett.lean}: \texttt{sound\_QStreettBundle} — $V_0$ confinement via \texttt{sound\_QSafetyBattery\_failClosed} (K1) + per-pair K5c consumption through the survival-flag localization \texttt{streett\_pair\_localized}; 0-sorry, axioms propext/choice/Quot.sound; K2 turned out unused). The $J_i$-carved scope is \texttt{sound\_QStreettBundle\_carved} over the named hypothesis \texttt{AbsorptionBound} (the time-$k$ Markov transport of the K1 reach bound for $(V_i, \gamma_i)$; Lévy-upward leg \texttt{ae\_not\_frequently\_of\_absorption}), and the hypothesis is DISCHARGED (2026-07-19, same file): \texttt{absorptionBound\_of\_kernel} — the shifted supermartingale bridge \texttt{supermartingale\_stopped\_shift} (Battery\textquotesingle s bridge at start time $k$, over the continuation kernel \texttt{Kernel.traj}) + Ville (\texttt{measure\_reach\_after\_le}), tied to the $\mathcal{F}_k$-conditional by \texttt{Kernel.condExp\_traj}; the absorbing rows enter at GLOBAL scope (nonneg/bound/floor-on-request/drift-off-request on all of $S$, $V_i \le 1 - \gamma_i$ on $J_i$) — sharp for the after-$k$ event as stated, which counts post-exit requests that no $\bar{D}$-scoped certificate can bound; composed hypothesis-free form \texttt{sound\_QStreettBundle\_carved\_discharged}; the parameterized \texttt{\_carved} form remains for citation stability; 0-sorry, axioms std 3. GSHS-profile residue as with the batteries. The K5 excursion cluster it consumes: \texttt{Excursions.lean}, unchanged.'
+scope = "excursions"
+witness = 'PROVEN at the discrete-kernel profile, conservative ranking scope (2026-07-19, qtsl-aux \texttt{QStreett.lean}: \texttt{sound\_QStreettBundle} — $V_0$ confinement via \texttt{sound\_QSafetyBattery\_failClosed} (the safety reach bound) + per-pair excursion-cluster consumption through the survival-flag localization \texttt{streett\_pair\_localized}; 0-sorry, axioms propext/choice/Quot.sound; one catalogued auxiliary lemma turned out unused). The $J_i$-carved scope is \texttt{sound\_QStreettBundle\_carved} over the named hypothesis \texttt{AbsorptionBound} (the time-$k$ Markov transport of the reach bound for $(V_i, \gamma_i)$; Lévy-upward leg \texttt{ae\_not\_frequently\_of\_absorption}), and the hypothesis is DISCHARGED (2026-07-19, same file): \texttt{absorptionBound\_of\_kernel} — the shifted supermartingale bridge \texttt{supermartingale\_stopped\_shift} (Battery\textquotesingle s bridge at start time $k$, over the continuation kernel \texttt{Kernel.traj}) + Ville (\texttt{measure\_reach\_after\_le}), tied to the $\mathcal{F}_k$-conditional by \texttt{Kernel.condExp\_traj}; the absorbing rows enter at GLOBAL scope (nonneg/bound/floor-on-request/drift-off-request on all of $S$, $V_i \le 1 - \gamma_i$ on $J_i$) — sharp for the after-$k$ event as stated, which counts post-exit requests that no $\bar{D}$-scoped certificate can bound; composed hypothesis-free form \texttt{sound\_QStreettBundle\_carved\_discharged}; the parameterized \texttt{\_carved} form remains for citation stability; 0-sorry, axioms std 3. GSHS-profile residue as with the batteries. The excursion cluster it consumes: \texttt{Excursions.lean}, unchanged.'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -434,7 +429,7 @@ amended = '''
 }
 \end{mathpar}
 '''
-note = 'Core — the largest single lemma in the catalogue (the QSC architecture transported: per pair, a.s.\ eventual absorption-or-response via ranking decay on $I$; $\mathbb{P} \ge 1 - V_0(x)$). The nonneg rows are essential: the signed-$V_0$ two-branch counterexample (review round 1, MAJOR). The $W_i \le C_i$ upper-bound rows are EXPLICIT PREMISES, answered in review (the review wave asked whether they ride \texttt{QCertFam}): E2 referents are shared objects with NO claim content — rules referencing them impose the claims (\texttt{qtslcert.rs}, certificate-data sorts header) — so the bound cannot travel in the E2 reference; the Lean consumes it as \texttt{hWC} beside the nonneg row \texttt{hW0} (\texttt{sound\_QStreettBundle}, qtsl-aux \texttt{QStreett.lean}), and the display now carries the row. Schema: MISSING-ROW (field pattern = roster \S4.7\textquotesingle s export). Sub-rules rowed separately: T9a/T9b/T9c below.'
+note = 'Core — the largest single lemma in the catalogue (the QSC architecture transported: per pair, a.s.\ eventual absorption-or-response via ranking decay on $I$; $\mathbb{P} \ge 1 - V_0(x)$). The nonneg rows are essential: the signed-$V_0$ two-branch counterexample (review round 1, MAJOR). The $W_i \le C_i$ upper-bound rows are EXPLICIT PREMISES, answered in review (the review asked whether they ride \texttt{QCertFam}): E2 referents are shared objects with NO claim content — rules referencing them impose the claims, per the staged schema\textquotesingle s certificate-data discipline — so the bound cannot travel in the E2 reference; the Lean consumes it as \texttt{hWC} beside the nonneg row \texttt{hW0} (\texttt{sound\_QStreettBundle}, qtsl-aux \texttt{QStreett.lean}), and the display now carries the row. Schema: MISSING-ROW (field pattern exported for staging). Sub-rules rowed separately: T9a/T9b/T9c below.'
 
 [[rule]]
 name = "StreettDegenerate (T9a)"
@@ -476,8 +471,8 @@ amended = '''
 \end{mathpar}
 requests sit on the hypothesis side of each pair implication, so the orientation swap of the complement (the workhorse judgement certifies under-approximations; complements arrive as over-approximations) is exactly the sound direction, for free.
 '''
-witness = 'PROVEN at the discrete profile (2026-07-19, qtsl-aux \texttt{QStreett.lean}: \texttt{streett\_event\_mono} — the event-level Lemma Q(i) kernel, two \texttt{Frequently.mono}s — and \texttt{sound\_QStreettBundle\_tie}, the assembled bundle-through-formula-tie with requests over-approximated and responses under-approximated; the Q(ii) atom step is mechanized in \texttt{NNFDuality.lean} \texttt{denot\_elimNeg}). The GSHS-side Lemma Q(ii) fine-topology content (nearly Borel, $E^r \subseteq E$) remains prose, design note \S3.3.'
-note = 'Admissible. Soundness: the design note \S3.3 prose (review round 2 confirmed all four parts of Lemma Q) + the discrete-profile Lean witness above. Schema: rides the typed request field of the (unstaged) T9 sort.'
+witness = 'PROVEN at the discrete profile (2026-07-19, qtsl-aux \texttt{QStreett.lean}: \texttt{streett\_event\_mono} — the event-level Lemma Q(i) kernel, two \texttt{Frequently.mono}s — and \texttt{sound\_QStreettBundle\_tie}, the assembled bundle-through-formula-tie with requests over-approximated and responses under-approximated; the Q(ii) atom step is mechanized in \texttt{NNFDuality.lean} \texttt{denot\_elimNeg}). The GSHS-side Lemma Q(ii) fine-topology content (nearly Borel, $E^r \subseteq E$) remains prose.'
+note = 'Admissible. Soundness: the prose argument (adversarial review confirmed all four parts of Lemma Q) + the discrete-profile Lean witness above. Schema: rides the typed request field of the (unstaged) T9 sort.'
 
 [[rule]]
 name = "StreettTargetCellCollapse (T9c)"
@@ -572,7 +567,7 @@ amended = '''
 \end{mathpar}
 the three rules of the sugar row, each warranted by its definitional equation ($\mathsf{avoid}\,\beta := \mathsf{G}\neg\beta$; $\mathsf{GF}\varphi := \mathsf{Streett}((\top, \varphi))$; $\mathsf{FG}\neg\beta := \mathsf{Streett}((\beta, \bot))$) --- displayed in the certify direction, and invertible because the equations are equalities. The staged spec surface enacts all three by construction: sugar constructors build their expansions rather than new node kinds (witnessed by the reference implementation\textquotesingle s concrete-syntax canonicality battery), so premise and conclusion are one object downstream and no checker recomputation exists.
 '''
-note = 'Three rules, one row: \rulename{SugarAvoid}, \rulename{SugarGF}, \rulename{SugarFG} share the row because they share one implementation mechanism (definitional expansion). Trivial selection by the tactic engine is the degenerate case of checker-side alias rules — no residual desugarer component survives (extension doc \S4).'
+note = 'Three rules, one row: \rulename{SugarAvoid}, \rulename{SugarGF}, \rulename{SugarFG} share the row because they share one implementation mechanism (definitional expansion). Trivial selection by the tactic engine is the degenerate case of checker-side alias rules — no residual desugarer component survives.'
 
 [[rule]]
 name = "NegFAlias (T15)"
@@ -598,13 +593,13 @@ amended = '''
 }
 \end{mathpar}
 '''
-note = 'Staging notes: choice-free; axiom \texttt{ax/qnegfalias/concl} spelled ($T$ existential = producer-chosen). TIER AMBIGUOUS (flagged, not forced — the catalogue\textquotesingle s D1(ii) flag): alias $\to$ \rulename{QSafetyBattery} as sorted, but if the folded denotation implication must itself be a rule application, the tier moves to admissible. Soundness: FILED (two lines). NB the mirror neg-G is NOT a rule at all — see colophon (structurally unstatable; the pair must never be ported as one duality entry).'
+note = 'Staging notes: choice-free; axiom \texttt{ax/qnegfalias/concl} spelled ($T$ existential = producer-chosen). TIER AMBIGUOUS (flagged, not forced): alias $\to$ \rulename{QSafetyBattery} as sorted, but if the folded denotation implication must itself be a rule application, the tier moves to admissible. Soundness: FILED (two lines). NB the mirror neg-G is NOT a rule at all — see colophon (structurally unstatable; the pair must never be ported as one duality entry).'
 
 # ==================== Group D — the discharge kit ====================
 
 [[rule]]
 name = "HypMultiplier (T2)"
-stratum = "BL-leaf machinery (\\(\\vdash\\) side): the S4.5(b) Farkas discharge"
+stratum = "BL-leaf machinery (\\(\\vdash\\) side): the pointwise Farkas discharge"
 tier = 2
 aux_lemmas = ["Qtsl.Structural.hypMultiplier_sound"]
 witness = 'PROVEN, qtsl-aux (separate package, hence prose not mark): \texttt{hypMultiplier\_sound} (\texttt{QtslAux/Structural.lean}, 0-sorry, axioms std-3) — the pointwise Farkas obligation exactly as catalogued; the child atom enters through a System-bridge hypothesis (\texttt{hbridge}), discharged definitionally when the presentation layer ships.'
@@ -693,7 +688,7 @@ aux_lemmas = [
   "Qtsl.Structural.positiveCombinationInter_sound",
   "Qtsl.Structural.positiveCombinationUnion_sound",
 ]
-witness = 'PROVEN, qtsl-aux: \texttt{positiveCombinationAnd\_sound} / \texttt{Or} (the two catalogued one-liners) + \texttt{Inter} / \texttt{Union} (n-ary, covering finding 8\textquotesingle s single-node shape; \texttt{Structural.lean}, 0-sorry). The $\wedge/\vee$ semantic clauses enter as System-bridge hypotheses (\texttt{denAnd} $= \mathrm{den}_1 \cap \mathrm{den}_2$ etc.) — supplied by the spec layer, never asserted in qtsl-aux.'
+witness = 'PROVEN, qtsl-aux: \texttt{positiveCombinationAnd\_sound} / \texttt{Or} (the two catalogued one-liners) + \texttt{Inter} / \texttt{Union} (n-ary, covering the single-node shape; \texttt{Structural.lean}, 0-sorry). The $\wedge/\vee$ semantic clauses enter as System-bridge hypotheses (\texttt{denAnd} $= \mathrm{den}_1 \cap \mathrm{den}_2$ etc.) — supplied by the spec layer, never asserted in qtsl-aux.'
 original = '''
 the root boolean combination compiles to the region combination of the children\textquotesingle s atoms — zero rows: children\textquotesingle s judgements + two one-line lattice-monotonicity lemmas (intersection/union of under-approximations under-approximates the $\wedge$/$\vee$).
 '''
@@ -715,7 +710,7 @@ amended = '''
 \end{mathpar}
 $n$-ary forms $\bigcap_i R_i$ / $\bigcup_i R_i$ over a block family (\texttt{positiveCombination\{And,Or,Inter,Union\}\_sound}); positive connectives only — negation rides the normal-form and closure machinery, never this rule.
 '''
-note = 'Admissible (multiple children, two lemma directions — not alias). Status: PROVEN (see witness). Schema: MISSING-ROW — a \texttt{QAndRegion}/\texttt{QOrRegion} node pair or a single n-ary combination node (the staged n-ary \texttt{StateF} shape suggests the latter; catalogue finding 8 — the Lean n-ary forms are ready for either choice).'
+note = 'Admissible (multiple children, two lemma directions — not alias). Status: PROVEN (see witness). Schema: MISSING-ROW — a \texttt{QAndRegion}/\texttt{QOrRegion} node pair or a single n-ary combination node (the staged n-ary \texttt{StateF} shape suggests the latter; the Lean n-ary forms are ready for either choice).'
 
 [[rule]]
 name = "ClosureDiscipline-EXACT (T13)"
@@ -790,7 +785,7 @@ amended = '''
 \]
 $\{p \le c - \varepsilon\} \subseteq \{p < c\}$ (\texttt{closureInwardEpsLt\_sound}/\texttt{Gt}, any real $\varepsilon > 0$ — rationality subsumed by cast): the rounded closed atom strengthens the claim at positive positions; soundness-only, no completeness preservation claimed — the honest failure at a critical threshold is refusal. Closedness rider: \texttt{closureInwardEps\_isClosed}.
 '''
-note = 'Admissible. Soundness: Lemma Q(iv) PROSE, review-confirmed; now machine-checked (see witness); the S11/r2.9 no-completeness-claim inherited verbatim. Schema: MISSING-ROW (batch).'
+note = 'Admissible. Soundness: Lemma Q(iv) PROSE, review-confirmed; now machine-checked (see witness); the no-completeness-claim inherited verbatim. Schema: MISSING-ROW (batch).'
 
 # ==================== Group A — arithmetic leaves ====================
 
@@ -808,7 +803,7 @@ the transcendental fact $\sum_{k \le n} (\theta T)^k / k! \le e^{\theta T}$ belo
 amended = '''
 one \rulename{PConstExact} application (wire-free closed comparison, exact $\Q$ evaluation) — no QTSL sort exists and none is needed.
 '''
-note = 'Alias $\to$ \rulename{PConstExact}. Deliberately NOT aliased onto the tag-28 enclosure rule (that would import witness brackets for a metatheory one-liner; PEnclosure is python-checker-only besides). Inherits the D1(iii) comparator-scope check at port time.'
+note = 'Alias $\to$ \rulename{PConstExact}. Deliberately NOT aliased onto the enclosure rule (that would import witness brackets for a metatheory one-liner; PEnclosure is python-checker-only besides). Inherits the comparator-scope check at port time.'
 
 [[rule]]
 name = "RootEval (T19)"
@@ -821,7 +816,7 @@ membership of the init point in the root atom by exact rational evaluation — t
 amended = '''
 staged as the \texttt{QSat} claim record\textquotesingle s \texttt{eval} field (a BL \texttt{Proof} leaf; the record-level home the 2026-07-24 dissolution gave the former bridge rule\textquotesingle s eval slot); sublevel atoms discharge through \rulename{PConstExact}, box atoms through the registry interval check.
 '''
-note = 'Alias $\to$ \rulename{PConstExact}. Inherits the D1(iii) comparator-scope check at port time.'
+note = 'Alias $\to$ \rulename{PConstExact}. Inherits the comparator-scope check at port time.'
 
 # ==================== Group M — the Morse family ====================
 
@@ -830,8 +825,8 @@ name = "QMorseDischarge"
 stratum = "Morse: concludes \\(\\mathsf{QMorse}\\) — reduction-to-base in its cleanest form"
 tier = 1
 lemmas = ["PPLC.Qtsl.Semiflow.qMorseDischarge_sound", "PPLC.Qtsl.Semiflow.qMorseDischarge_sound_modelClass", "PPLC.Qtsl.Semiflow.qMorseDischarge_sound_orderAssembled", "PPLC.Qtsl.Semiflow.qMorseDischarge_sound_eventualMember", "PPLC.Qtsl.Semiflow.qMorseDischarge_sound_cellCover", "PPLC.Qtsl.Semiflow.orderClause_assemble", "PPLC.Qtsl.Semiflow.eventualMember_interval", "PPLC.Qtsl.Semiflow.maxInv_isCompact", "PPLC.Qtsl.Semiflow.HasTransitCert.disjoint_maxInv", "PPLC.Qtsl.Semiflow.disjoint_maxInv_of_crossingCerts", "PPLC.Qtsl.Semiflow.hasCrossingCert_of_deriv", "PPLC.Qtsl.Semiflow.crCover_assemble", "PPLC.Qtsl.Semiflow.integrated_le_of_flowDeriv_le", "PPLC.Qtsl.Semiflow.hasTransitCert_of_rows", "PPLC.Qtsl.Semiflow.hasTransitCert_of_rows_isCompact"]
-scope = "cert residues (G6a discharged leg 7; G2 integrated shadows to FlowDerivOn)"
-witness = 'the location + invariance clauses are proved outright (\texttt{maxInv\_subset}, \texttt{maxInv\_isInvariant}); the gap ledger post-discharge (\texttt{Discharge.lean}, Q-wave leg 5): G3 DISCHARGED to model-class facts (\texttt{maxInv\_isCompact}, Tychonoff — spacewise-continuous flow + compact cells + T2, no compactness hypothesis survives); G4 REDUCED to overlap transit certificates (\texttt{HasTransitCert.disjoint\_maxInv} — forward halves of complete orbits agree, so NO backward-uniqueness enters), then SHARPENED to the row shape (gap-fill leg, \texttt{Crossing.lean}, 2026-07-19): per-cell-pair CROSSING certificates — level-set containment + punctual forward drop, one per shared facet — suffice for fibre disjointness (\texttt{disjoint\_maxInv\_of\_crossingCerts} via \texttt{not\_forward\_confined\_of\_crossingCerts}, consuming trajectory continuity + cell closedness, both model-class). The union-level certificate was NOT row-shaped and per-piece transit certificates alone do NOT compose across the overlap union (circle-rotation counterexample, module header) — the level-set structure is the essential content of \textquotesingle strictness pays a second time\textquotesingle, and facet-hopping confinement dies by closedness + finiteness + continuity. The calculus half is mechanized (\texttt{hasCrossingCert\_of\_deriv}): G4\textquotesingle s surviving analytic residue is PUNCTUAL — per overlap point, the negative right-derivative of the facet functional along the flow, i.e. the chain-rule identification $\frac{d}{dt}V(\Phi_t x)|_0 = (\mathcal{A}V)(x)$ made negative by the BernCone row — strictly weaker than the integrated G2 shadows (M(iv) transit rows and G1b\textquotesingle s mirrored growth clause — both now MECHANIZED by the interval mean-value gap-fill leg, \texttt{MeanValue.lean}, 2026-07-19: \texttt{integrated\_le\_of\_flowDeriv\_le} stated once, instantiated at $\pm V$; this route deliberately does not pass through it); G5 REDUCED via \texttt{crCover\_assemble} to the cell-level M(iii) cover (KMV-III margin argument, literature strength) + per-cell transit certificates (M(iv), \texttt{HasTransitCert.maxInv\_empty}) — and the transit certificates themselves now discharge from rows (\texttt{MeanValue.lean}): \texttt{hasTransitCert\_of\_rows\_isCompact} turns the pointwise row bound $\mathcal{A}V \le -\varepsilon$ — consumed through the shared profile predicate \texttt{FlowDerivOn} — plus cell compactness and $V$-continuity into \texttt{HasTransitCert}; the whole G2 class\textquotesingle s surviving analytic residue is the per-region chain-rule identification $\texttt{FlowDerivOn}\,V\,(\mathcal{A}V)$ (doctrine-profile warrant), with NO regularity of $\mathcal{A}V$ consumed; the order clause (G6) REDUCED (Q-wave leg 6, \texttt{OrderAssembly.lean}, the G6 design note\textquotesingle s Option C): the cell order enters the discharge interface as theorem data (a partial order on cells + the R1 shadows — fibre convexity \texttt{hConv}, monotonicity \texttt{hMono}), M(v)\textquotesingle s order paragraph is mechanized (\texttt{orderClause\_assemble}: extremes-not-transit via limit-set nonemptiness + complete-orbit extraction in the compact orbit space, the same-fibre convexity case), and the residue is G6a — M(ii)\textquotesingle s orbit-interval CONCLUSION (extreme cells $b_\omega \le b_\alpha$ bracketing every visited cell; prose tier A, the eventual-member construction, Morse note \S3 proof (ii)); judgement semantics and certificate schema untouched (the order stays R1-recomputed checker-side, never stored); then G6a DISCHARGED (Q-wave leg 7, \texttt{EventualMember.lean}, the design note\textquotesingle s Option-A leg): the eventual-member construction mechanized against leg 6\textquotesingle s fixed statement (\texttt{eventualMember\_interval} --- the tail-absorbing join-irreducible family is nonempty and downward-directed, its realization-minimum is $b_\omega$, the backward pigeonhole twin is $b_\alpha$, and every visited time descends through lower covers into a bracketed CELL), consuming NO limit-set machinery, compactness, or continuity --- G6a replaced on the interface by five R1-recompute combinatorial rows (top member, Birkhoff join-decomposition, strict lower covers, cell $\supseteq$ member-minus-cover, order reflects realization inclusion), per-member forward invariance (G1\textquotesingle s class), closedness of join-irreducible realizations, and the strict-inwardness shadows (F1 meet-confinement, F2 $\omega$/$\alpha$ absorption --- the same certified-sign bridge class as G1b/G2); no block-lattice structure minted, so R1\textquotesingle s combinatorics keep their single checker-side home. Assemblies: \texttt{qMorseDischarge\_sound\_modelClass} (leg 5), \texttt{qMorseDischarge\_sound\_orderAssembled} (leg 6), \texttt{qMorseDischarge\_sound\_eventualMember} (leg 7), \texttt{qMorseDischarge\_sound\_cellCover} (crossing gap-fill), 0-sorry, standard closure. Model-class fence: deterministic flows only (\texttt{flows\_only}), riding E3 conformance until the System sort stages doctrine profiles. PROFILE-STRATUM SCOPING (design ruling, 2026-07-19: per-point differentiability is semantically FALSE for switched/hybrid systems): the chain-rule identification $\texttt{FlowDerivOn}\,V\,(\mathcal{A}V)$ is the SMOOTH-ODE-profile warrant only; switched/hybrid profiles ride \texttt{DiniProfile.lean} (the Dini extension, 2026-07-19) --- \texttt{FlowDiniLeOn}, the $D^+$ upper-Dini bound (corner- and Zeno-immune; discharged for switched flows by \texttt{SolvesSwitchedODEOn} + rows for EVERY incident mode --- \texttt{hasTransitCert\_of\_switched\_rows} and kin), the a.e./AC stratum (\texttt{hasTransitCert\_of\_ac}, the AC-FTC engine, no topology on the state consumed), and the Filippov hull stratum (\texttt{SolvesFilippovOn}; \texttt{le\_on\_convexHull} reduces the $\mathrm{co}\{f_i\}$ sliding bound to per-mode vertex rows, so sliding costs no new row shape). Hybrid A1 rows (GSHS/SDCPN class) cite the Dini module, never the smooth seam alone.'
+scope = "cert residues (G6a discharged; G2 integrated shadows to FlowDerivOn)"
+witness = 'the location + invariance clauses are proved outright (\texttt{maxInv\_subset}, \texttt{maxInv\_isInvariant}); the gap ledger post-discharge (\texttt{Discharge.lean}, Q-wave leg 5): G3 DISCHARGED to model-class facts (\texttt{maxInv\_isCompact}, Tychonoff — spacewise-continuous flow + compact cells + T2, no compactness hypothesis survives); G4 REDUCED to overlap transit certificates (\texttt{HasTransitCert.disjoint\_maxInv} — forward halves of complete orbits agree, so NO backward-uniqueness enters), then SHARPENED to the row shape (gap-fill leg, \texttt{Crossing.lean}, 2026-07-19): per-cell-pair CROSSING certificates — level-set containment + punctual forward drop, one per shared facet — suffice for fibre disjointness (\texttt{disjoint\_maxInv\_of\_crossingCerts} via \texttt{not\_forward\_confined\_of\_crossingCerts}, consuming trajectory continuity + cell closedness, both model-class). The union-level certificate was NOT row-shaped and per-piece transit certificates alone do NOT compose across the overlap union (circle-rotation counterexample, module header) — the level-set structure is the essential content of \textquotesingle strictness pays a second time\textquotesingle, and facet-hopping confinement dies by closedness + finiteness + continuity. The calculus half is mechanized (\texttt{hasCrossingCert\_of\_deriv}): G4\textquotesingle s surviving analytic residue is PUNCTUAL — per overlap point, the negative right-derivative of the facet functional along the flow, i.e. the chain-rule identification $\frac{d}{dt}V(\Phi_t x)|_0 = (\mathcal{A}V)(x)$ made negative by the BernCone row — strictly weaker than the integrated G2 shadows (M(iv) transit rows and G1b\textquotesingle s mirrored growth clause — both now MECHANIZED by the interval mean-value gap-fill leg, \texttt{MeanValue.lean}, 2026-07-19: \texttt{integrated\_le\_of\_flowDeriv\_le} stated once, instantiated at $\pm V$; this route deliberately does not pass through it); G5 REDUCED via \texttt{crCover\_assemble} to the cell-level M(iii) cover (KMV-III margin argument, literature strength) + per-cell transit certificates (M(iv), \texttt{HasTransitCert.maxInv\_empty}) — and the transit certificates themselves now discharge from rows (\texttt{MeanValue.lean}): \texttt{hasTransitCert\_of\_rows\_isCompact} turns the pointwise row bound $\mathcal{A}V \le -\varepsilon$ — consumed through the shared profile predicate \texttt{FlowDerivOn} — plus cell compactness and $V$-continuity into \texttt{HasTransitCert}; the whole G2 class\textquotesingle s surviving analytic residue is the per-region chain-rule identification $\texttt{FlowDerivOn}\,V\,(\mathcal{A}V)$ (doctrine-profile warrant), with NO regularity of $\mathcal{A}V$ consumed; the order clause (G6) REDUCED (Q-wave leg 6, \texttt{OrderAssembly.lean} — the order-as-theorem-data design): the cell order enters the discharge interface as theorem data (a partial order on cells + the R1 shadows — fibre convexity \texttt{hConv}, monotonicity \texttt{hMono}), M(v)\textquotesingle s order paragraph is mechanized (\texttt{orderClause\_assemble}: extremes-not-transit via limit-set nonemptiness + complete-orbit extraction in the compact orbit space, the same-fibre convexity case), and the residue is G6a — M(ii)\textquotesingle s orbit-interval CONCLUSION (extreme cells $b_\omega \le b_\alpha$ bracketing every visited cell; prose tier A, the eventual-member construction); judgement semantics and certificate schema untouched (the order stays R1-recomputed checker-side, never stored); then G6a DISCHARGED (Q-wave leg 7, \texttt{EventualMember.lean} — the eventual-member mechanization): the eventual-member construction mechanized against leg 6\textquotesingle s fixed statement (\texttt{eventualMember\_interval} --- the tail-absorbing join-irreducible family is nonempty and downward-directed, its realization-minimum is $b_\omega$, the backward pigeonhole twin is $b_\alpha$, and every visited time descends through lower covers into a bracketed CELL), consuming NO limit-set machinery, compactness, or continuity --- G6a replaced on the interface by five R1-recompute combinatorial rows (top member, Birkhoff join-decomposition, strict lower covers, cell $\supseteq$ member-minus-cover, order reflects realization inclusion), per-member forward invariance (G1\textquotesingle s class), closedness of join-irreducible realizations, and the strict-inwardness shadows (F1 meet-confinement, F2 $\omega$/$\alpha$ absorption --- the same certified-sign bridge class as G1b/G2); no block-lattice structure minted, so R1\textquotesingle s combinatorics keep their single checker-side home. Assemblies: \texttt{qMorseDischarge\_sound\_modelClass} (leg 5), \texttt{qMorseDischarge\_sound\_orderAssembled} (leg 6), \texttt{qMorseDischarge\_sound\_eventualMember} (leg 7), \texttt{qMorseDischarge\_sound\_cellCover} (crossing gap-fill), 0-sorry, standard closure. Model-class fence: deterministic flows only (\texttt{flows\_only}), riding E3 conformance until the System sort stages doctrine profiles. PROFILE-STRATUM SCOPING (design ruling, 2026-07-19: per-point differentiability is semantically FALSE for switched/hybrid systems): the chain-rule identification $\texttt{FlowDerivOn}\,V\,(\mathcal{A}V)$ is the SMOOTH-ODE-profile warrant only; switched/hybrid profiles ride \texttt{DiniProfile.lean} (the Dini extension, 2026-07-19) --- \texttt{FlowDiniLeOn}, the $D^+$ upper-Dini bound (corner- and Zeno-immune; discharged for switched flows by \texttt{SolvesSwitchedODEOn} + rows for EVERY incident mode --- \texttt{hasTransitCert\_of\_switched\_rows} and kin), the a.e./AC stratum (\texttt{hasTransitCert\_of\_ac}, the AC-FTC engine, no topology on the state consumed), and the Filippov hull stratum (\texttt{SolvesFilippovOn}; \texttt{le\_on\_convexHull} reduces the $\mathrm{co}\{f_i\}$ sliding bound to per-mode vertex rows, so sliding costs no new row shape). Hybrid A1 rows (GSHS/SDCPN class) cite the Dini module, never the smooth seam alone.'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -855,7 +850,7 @@ amended = '''
 }
 \end{mathpar}
 '''
-note = 'Side condition R1 (\texttt{qtsl\_morse\_readout}): lattice closure + readout recompute, $h$ fibre convexity + monotonicity, dag check, box-aligned $\rho$ checks; the conclusion tie IS the R1 kit atom (\texttt{ax/qmorsedischarge/kit}). Core — its lemma exists (NOT in the no-receipt class). The witness assembly is $M(v) := \mathrm{MaxInv}\bigl(\bigcup_{h(b) = v} T(b)\bigr)$ — the invariant part of the fibre\textquotesingle s cell-union, NOT the union of per-cell invariant parts (the note\textquotesingle s self-caught first-draft defect). End-to-end certificate receipts: the corner cell\textquotesingle s \texttt{ck\_quantmorse} v2 ACCEPTs (direct + assembled), exact $\Q$, 21-verdict mutant battery.'
+note = 'Side condition R1 (\texttt{qtsl\_morse\_readout}): lattice closure + readout recompute, $h$ fibre convexity + monotonicity, dag check, box-aligned $\rho$ checks; the conclusion tie IS the R1 kit atom (\texttt{ax/qmorsedischarge/kit}). Core — its lemma exists (NOT in the no-receipt class). The witness assembly is $M(v) := \mathrm{MaxInv}\bigl(\bigcup_{h(b) = v} T(b)\bigr)$ — the invariant part of the fibre\textquotesingle s cell-union, NOT the union of per-cell invariant parts (a self-caught first-draft defect). End-to-end certificate receipts: the corner cell\textquotesingle s \texttt{ck\_quantmorse} v2 ACCEPTs (direct + assembled), exact $\Q$, 21-verdict mutant battery.'
 
 [[rule]]
 name = "QMorseProduct"
@@ -890,7 +885,7 @@ stratum = "Morse: concludes \\(\\mathsf{QInvScope}\\) from strict facet-inwardne
 tier = 1
 lemmas = ["PPLC.Qtsl.Semiflow.qBlockInv_sound", "PPLC.Qtsl.Semiflow.qBlockInv_sound_of_dwell", "PPLC.Qtsl.Semiflow.invariant_of_boundaryDwell", "PPLC.Qtsl.Semiflow.HasFacetRows.boundaryDwell", "PPLC.Qtsl.Semiflow.qBlockInv_sound_of_facetRows", "PPLC.Qtsl.Semiflow.integrated_ge_of_flowDeriv_ge", "PPLC.Qtsl.Semiflow.hasFacetRows_of_rows", "PPLC.Qtsl.Semiflow.qBlockInv_sound_of_rows", "PPLC.Qtsl.Grid.wedge_containment", "PPLC.Qtsl.Grid.hasFacetRows_of_rows", "PPLC.Qtsl.Grid.qBlockInv_sound_of_grid", "PPLC.Qtsl.Grid.qBlockInv_sound_of_pointwiseRows", "PPLC.Qtsl.Semiflow.invariant_of_invScopeSat", "PPLC.Qtsl.Semiflow.invariant_of_facetRows_univ"]
 scope = "G1 at profile warrant"
-witness = 'G1 MECHANIZED TO THE G2 FLOOR (\texttt{Discharge.lean}, Q-wave leg 5 + G1b gap-fill): \texttt{invariant\_of\_boundaryDwell} — closed block + continuous trajectories + boundary dwell $\Rightarrow$ forward invariance (interior points dwell by continuity alone) — composed with the G1b bridge \texttt{HasFacetRows.boundaryDwell}: facet rows in \texttt{HasTransitCert}\textquotesingle s integrated semantic-shadow form (growth mirroring decrease) + block-in-arena + forward-invariant arena $\Rightarrow$ the boundary dwell; end-to-end corollary \texttt{qBlockInv\_sound\_of\_facetRows}. The first-exit GEOMETRY of Morse note \S3 proof (i) — active-facet selection at corners (the wedge test is one-directional BY DESIGN: the $\leftrightarrow$ form is false at reentrant corners of a box-union), finite confinement, $\partial D$-face passthrough — is off the ledger. Residue ledger after the same-day gap-fill pair (\texttt{MeanValue.lean}, the interval mean-value bridge; \texttt{GridGeometry.lean}, the G1b\textquotesingle(b)+(c) box-union grid model; 2026-07-19): (a) per-facet pointwise-to-integrated — DISCHARGED: \texttt{integrated\_ge\_of\_flowDeriv\_ge} (the one-statement $\pm V$ mirror of the transit bridge) turns the row bound $\mathcal{A}\ell \ge \varepsilon$, consumed through the profile predicate \texttt{FlowDerivOn}, into the integrated growth clause — \texttt{hasFacetRows\_of\_rows}, composed end-to-end as \texttt{qBlockInv\_sound\_of\_rows}; surviving analytic residue: only the per-region chain-rule identification $\texttt{FlowDerivOn}\,\ell\,(\mathcal{A}\ell)$ + model-class continuity of $\ell$ and trajectories (regularity of $\mathcal{A}\ell$ NOT consumed); (b) wedge containment + block-in-arena — CLOSED Lean-side on the box-union grid model: \texttt{Grid.wedge\_containment} (proved at every block point, a superset of the frontier) + \texttt{Grid.blockRegion\_subset\_arena}, packaged by \texttt{Grid.hasFacetRows\_of\_rows}, end-to-end \texttt{Grid.qBlockInv\_sound\_of\_grid}; adjudication: the former \textquotedblleft R1-recomputable, checker-side\textquotedblright\ classification named no enforcing computation (\texttt{qtsl\_morse\_readout} is a schema declaration with no oracle binding at all; \texttt{blockLatticeWF} sits in the generated registry as DEFERRED, frozen spec, no recompute), so the Lean theorem is the honest home and the eventual R1 obligation shrinks to syntactic facet-list well-formedness; (c) arena forward invariance — CLOSED to interface data: \texttt{invariant\_of\_invScopeSat} (nested-certificate path) + \texttt{invariant\_of\_facetRows\_univ} (top-level path; regress terminates at \texttt{invariant\_univ}); the remainder is the doctrine-profile warrant that a chart\textquotesingle s denotation confines trajectories to its arena — model-class, named, not analytic. CAPSTONE (union of the pair): \texttt{Grid.qBlockInv\_sound\_of\_pointwiseRows} — grid block + pointwise row bounds through the profile $\Rightarrow$ \texttt{InvScopeSat}; every remaining hypothesis is a model-class regularity fact, exact row arithmetic, the arena interface, or the profile identification. PROFILE-STRATUM SCOPING (the 2026-07-19 09:46 ruling, as on the Morse row): the profile identification here is likewise smooth-only; the facet-growth face at the hybrid strata is \texttt{DiniProfile.lean}\textquotesingle s \texttt{hasFacetRows\_of\_dini\_rows} / \texttt{hasFacetRows\_of\_switched\_rows} (mirrored $D^-$ bounds through \texttt{FlowDiniGeOn}).'
+witness = 'G1 MECHANIZED TO THE G2 FLOOR (\texttt{Discharge.lean}, Q-wave leg 5 + G1b gap-fill): \texttt{invariant\_of\_boundaryDwell} — closed block + continuous trajectories + boundary dwell $\Rightarrow$ forward invariance (interior points dwell by continuity alone) — composed with the G1b bridge \texttt{HasFacetRows.boundaryDwell}: facet rows in \texttt{HasTransitCert}\textquotesingle s integrated semantic-shadow form (growth mirroring decrease) + block-in-arena + forward-invariant arena $\Rightarrow$ the boundary dwell; end-to-end corollary \texttt{qBlockInv\_sound\_of\_facetRows}. The first-exit GEOMETRY of the prose argument — active-facet selection at corners (the wedge test is one-directional BY DESIGN: the $\leftrightarrow$ form is false at reentrant corners of a box-union), finite confinement, $\partial D$-face passthrough — is off the ledger. Residue ledger after the same-day gap-fill pair (\texttt{MeanValue.lean}, the interval mean-value bridge; \texttt{GridGeometry.lean}, the G1b\textquotesingle(b)+(c) box-union grid model; 2026-07-19): (a) per-facet pointwise-to-integrated — DISCHARGED: \texttt{integrated\_ge\_of\_flowDeriv\_ge} (the one-statement $\pm V$ mirror of the transit bridge) turns the row bound $\mathcal{A}\ell \ge \varepsilon$, consumed through the profile predicate \texttt{FlowDerivOn}, into the integrated growth clause — \texttt{hasFacetRows\_of\_rows}, composed end-to-end as \texttt{qBlockInv\_sound\_of\_rows}; surviving analytic residue: only the per-region chain-rule identification $\texttt{FlowDerivOn}\,\ell\,(\mathcal{A}\ell)$ + model-class continuity of $\ell$ and trajectories (regularity of $\mathcal{A}\ell$ NOT consumed); (b) wedge containment + block-in-arena — CLOSED Lean-side on the box-union grid model: \texttt{Grid.wedge\_containment} (proved at every block point, a superset of the frontier) + \texttt{Grid.blockRegion\_subset\_arena}, packaged by \texttt{Grid.hasFacetRows\_of\_rows}, end-to-end \texttt{Grid.qBlockInv\_sound\_of\_grid}; adjudication: the former \textquotedblleft R1-recomputable, checker-side\textquotedblright\ classification named no enforcing computation (\texttt{qtsl\_morse\_readout} is a schema declaration with no oracle binding at all; \texttt{blockLatticeWF} sits in the generated registry as DEFERRED, frozen spec, no recompute), so the Lean theorem is the honest home and the eventual R1 obligation shrinks to syntactic facet-list well-formedness; (c) arena forward invariance — CLOSED to interface data: \texttt{invariant\_of\_invScopeSat} (nested-certificate path) + \texttt{invariant\_of\_facetRows\_univ} (top-level path; regress terminates at \texttt{invariant\_univ}); the remainder is the doctrine-profile warrant that a chart\textquotesingle s denotation confines trajectories to its arena — model-class, named, not analytic. CAPSTONE (union of the pair): \texttt{Grid.qBlockInv\_sound\_of\_pointwiseRows} — grid block + pointwise row bounds through the profile $\Rightarrow$ \texttt{InvScopeSat}; every remaining hypothesis is a model-class regularity fact, exact row arithmetic, the arena interface, or the profile identification. PROFILE-STRATUM SCOPING (the 2026-07-19 09:46 ruling, as on the Morse row): the profile identification here is likewise smooth-only; the facet-growth face at the hybrid strata is \texttt{DiniProfile.lean}\textquotesingle s \texttt{hasFacetRows\_of\_dini\_rows} / \texttt{hasFacetRows\_of\_switched\_rows} (mirrored $D^-$ bounds through \texttt{FlowDiniGeOn}).'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -940,7 +935,7 @@ amended = '''
 }
 \end{mathpar}
 '''
-note = 'Staging notes: named registry-shape residue — R1\textquotesingle s kit-arg shape vs $[\mathrm{lat}, \mathrm{downset}]$, the sixth-relation fork (axioms note \S3.4). TIER AMBIGUOUS (flagged, not forced — the catalogue\textquotesingle s D1 flag): alias $\to$ \rulename{QBlockInv} as sorted — a single application with facet rows cited from the family object — but if registry-backed citation is ruled heavier than the alias criterion allows, it moves to admissible; machinery unchanged. Warrant: M(ii) — the exactness identity and soundness corollaries now machine-checked (witness field); the classical Birkhoff citation remains on the book page as warrant genealogy, nothing mechanized rests on it.'
+note = 'Staging notes: named registry-shape residue — R1\textquotesingle s kit-arg shape vs $[\mathrm{lat}, \mathrm{downset}]$, the sixth-relation fork. TIER AMBIGUOUS (flagged, not forced): alias $\to$ \rulename{QBlockInv} as sorted — a single application with facet rows cited from the family object — but if registry-backed citation is ruled heavier than the alias criterion allows, it moves to admissible; machinery unchanged. Warrant: M(ii) — the exactness identity and soundness corollaries now machine-checked (witness field); the classical Birkhoff citation remains on the book page as warrant genealogy, nothing mechanized rests on it.'
 
 [[rule]]
 name = "QBasin"
@@ -962,7 +957,7 @@ zero new rows per additional $\beta$ after the first containment; no Ville certi
 amended = '''
 \begin{mathpar}
 \inferrule*{
-  \mathrm{inv} : \mathsf{QInvScope}(S, X_0) \ \text{(E1 — NOT the \texttt{QMorse} judgement: the roster\textquotesingle s \S4.6 correction)} \\
+  \mathrm{inv} : \mathsf{QInvScope}(S, X_0) \ \text{(E1 — deliberately the invariance judgement, NOT \texttt{QMorse})} \\
   \bigl\{\vdash S \cap [\![\beta_j]\!] = \emptyset\bigr\} \ \text{(\texttt{avoid\_disjoint} rows)}
 }{
   \mathcal{M} \vDash_{X_0} \mathsf{P}_{\ge 1}[\mathsf{G}\,\neg\beta_j]
@@ -993,7 +988,7 @@ aux_lemmas = [
   "Qtsl.QtslCompose.admissible_constructs",
 ]
 scope = "C1/C2/C3a + n-ary acyclic + tier split"
-witness = 'the 12-cell soundness grid, per profile: GSHS C1 series + C2 parallel PROVEN (qtsl-aux \texttt{AGCompose/\{GshsSeries,GshsParallel\}.lean}, 0-sorry — the parallel weighted-sum supermartingale is the semantic face of the syzygy weights); C3a feedback sum-form PROVEN (\texttt{GshsFeedbackSum.lean} — the $(1,\lambda,1,1)$ cancellation under conditional expectation; no dwell-time hypothesis crept in); C3b gauge-form PARTIAL (Statement I proven; Statement II paper-level with its G3/G4 strata shipped sorry-free, and the $\kappa = 0$ max-form PDMP instance machine-checked end-to-end, \texttt{MaxFormPDMP.lean}); A-row (ODE) statement-level; B-row (discrete) rides \texttt{Kernel.traj} + K1/K2/K4, assembly FILED; D mixed (sampled-data) boundary-row lemma FILED. The factorization: sound =  (T) transport arithmetic (profile-generic, LANDED — the \texttt{sound\_promise}/\texttt{sound\_syzygy}/\texttt{sound\_smallGain} layer) $\circ$ (S) semantic reading (per-profile). NEW (2026-07-19, composition-cluster leg): the n-ary acyclic assembly + the tier split RENDERED — qtsl-aux \texttt{QtslCompose/\{Presentation,AGCompose\}.lean}, 0-sorry: \texttt{System.qagTier} derived from field-family population per the ratified System pin (never a stored tag), unfoldings \texttt{qagTier\_admissible\_iff}/\texttt{qagTier\_core\_iff}; \texttt{sat\_of\_conform}/\texttt{qualitative}/\texttt{fail\_subset}/\texttt{fail\_bound\_out} = the catalogue display at any $n$ by strong induction on the causality certificate (union-bound slack composition); \texttt{admissible\_constructs} = the constructibility clause as a checkable statement. Receipts: build green 2026-07-19, closures within [propext, Classical.choice, Quot.sound].'
+witness = 'the 12-cell soundness grid, per profile: GSHS C1 series + C2 parallel PROVEN (qtsl-aux \texttt{AGCompose/\{GshsSeries,GshsParallel\}.lean}, 0-sorry — the parallel weighted-sum supermartingale is the semantic face of the syzygy weights); C3a feedback sum-form PROVEN (\texttt{GshsFeedbackSum.lean} — the $(1,\lambda,1,1)$ cancellation under conditional expectation; no dwell-time hypothesis crept in); C3b gauge-form PARTIAL (Statement I proven; Statement II paper-level with its G3/G4 strata shipped sorry-free, and the $\kappa = 0$ max-form PDMP instance machine-checked end-to-end, \texttt{MaxFormPDMP.lean}); A-row (ODE) statement-level; B-row (discrete) rides \texttt{Kernel.traj} + the shipped reach-bound and début-decomposition lemmas, assembly FILED; D mixed (sampled-data) boundary-row lemma FILED. The factorization: sound =  (T) transport arithmetic (profile-generic, LANDED — the \texttt{sound\_promise}/\texttt{sound\_syzygy}/\texttt{sound\_smallGain} layer) $\circ$ (S) semantic reading (per-profile). NEW (2026-07-19, composition-cluster leg): the n-ary acyclic assembly + the tier split RENDERED — qtsl-aux \texttt{QtslCompose/\{Presentation,AGCompose\}.lean}, 0-sorry: \texttt{System.qagTier} derived from field-family population per the ratified System pin (never a stored tag), unfoldings \texttt{qagTier\_admissible\_iff}/\texttt{qagTier\_core\_iff}; \texttt{sat\_of\_conform}/\texttt{qualitative}/\texttt{fail\_subset}/\texttt{fail\_bound\_out} = the catalogue display at any $n$ by strong induction on the causality certificate (union-bound slack composition); \texttt{admissible\_constructs} = the constructibility clause as a checkable statement. Receipts: build green 2026-07-19, closures within [propext, Classical.choice, Quot.sound].'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -1019,7 +1014,7 @@ amended = '''
 \end{mathpar}
 tier split derived from mechanism field-family population, never a stored tag: \textbf{admissible} where every mechanism derives ODE/discrete --- the composite certificate $\sum_i \lambda_i V_i$ is syntactically constructible and the node unpacks through the sequent-layer transport (\rulename{Promise}/\rulename{Syzygy}) --- \textbf{core} where any mechanism is stochastic (SDE/GSHS): the warrant is the per-profile semantic theorems. This display is the acyclic $n$-ary form (the causality certificate makes a directed cycle unrepresentable); feedback rides the binary small-gain cells, sum-form and gauge-form.
 '''
-note = 'TIER SPLIT, rendered in the badge (leg-4 flag-4, ratified; derived from mechanism field-family population per the ratified System pin — \texttt{System.qagTier} with its \texttt{qagTier\_admissible\_iff}/\texttt{qagTier\_core\_iff} unfoldings — never a stored tag; the single tier field holds the core sort): \textbf{admissible} where the composite certificate is syntactically constructible (ODE/discrete — the SmallGain computation is the witness that AG composition at the inequality layer IS a \rulename{Syzygy} instance); \textbf{core} where soundness is semantic-only (stochastic hybrid — the C-row theorems, now substantially shipped). One rule node either way. Schema: MISSING-ROW family — \texttt{QSatI}, \texttt{QWireCert}, \texttt{QAGCompose} all ride the [SYSTEM] staging leg (the staged \texttt{QSat} left \texttt{sys} as the absent field: the hole shaped like a System). C2 scope honesty: undirected stochastic wire sharing (common noise) FENCED in v1 — directed-influence composites only.'
+note = 'TIER SPLIT, rendered in the badge (ratified; derived from mechanism field-family population per the ratified System pin — \texttt{System.qagTier} with its \texttt{qagTier\_admissible\_iff}/\texttt{qagTier\_core\_iff} unfoldings — never a stored tag; the single tier field holds the core sort): \textbf{admissible} where the composite certificate is syntactically constructible (ODE/discrete — the SmallGain computation is the witness that AG composition at the inequality layer IS a \rulename{Syzygy} instance); \textbf{core} where soundness is semantic-only (stochastic hybrid — the C-row theorems, now substantially shipped). One rule node either way. Schema: MISSING-ROW family — \texttt{QSatI}, \texttt{QWireCert}, \texttt{QAGCompose} all ride the [SYSTEM] staging leg (the staged \texttt{QSat} left \texttt{sys} as the absent field: the hole shaped like a System). C2 scope honesty: undirected stochastic wire sharing (common noise) FENCED in v1 — directed-influence composites only.'
 
 [[rule]]
 name = "QWireCertDischarge"
@@ -1082,7 +1077,7 @@ aux_lemmas = [
   "BernsteinLogic.QtslCompose.Marks.fatCarve_marks_realized",
 ]
 scope = "discrete-relational tier: carved assembly engine (value pins = singleton carves, subsumption machine-checked) + acyclic chaining at both dial ends + the countermodel battery"
-witness = 'the soundness metatheorem\textquotesingle s discrete-relational instance, machine-checked end-to-end (\texttt{QtslCompose/AGComposeMarks.lean} + \texttt{AGComposeCarves.lean}, 0-sorry, standard axiom closures): \texttt{marks\_of\_carved\_delivery} — the assembly engine at general lags (carve rows + schedule walk + seriality + the diagonal closure $\Rightarrow$ a joint run realizing every mark at its label; the joint object, and every delivered point, exists only under the conclusion\textquotesingle s binder); \texttt{marks\_of\_pinned\_delivery} and its re-derivation \texttt{marks\_of\_pinned\_delivery\_via\_carve} — the r4 value pins as the singleton-carve instance, subsumption as a theorem; \texttt{carvedDelivery\_mark\_iff\_conditional} — the carve dial\textquotesingle s identity: the $\forall\exists$ premise IS the maximal-carve row; \texttt{pins\_of\_conditional\_delivery} + \texttt{marks\_of\_conditional\_delivery\_acyclic} + \texttt{marks\_acyclic\_via\_maximal\_carve} — the chaining bridge at both dial ends: on acyclic-instant networks the premises alone conclude, nothing pinned on the wire. The battery is part of the warrant: \texttt{z1\_refutes\_walkless} / \texttt{z1\_refutes\_walkless\_carve} (delete the walk — the relay–delay loop refutes, at value and carve level), \texttt{z5\_refutes\_pinless} / \texttt{z5\_refutes\_closureless} (delete the pin/diagonal column — the swap loop with swap-closed marks refutes), and the r5 discriminant pair \texttt{z5\_carvedDelivery\_mark} / \texttt{z5\_no\_carve\_closure} (carve-invariance HOLDS on the swap loop; NO carve inside the marks closes its diagonal — the diagonal, not invariance, is what refuses Z5), with \texttt{allOnes\_marks\_realized} and the fat-carve control \texttt{fatCarve\_marks\_realized} (a non-singleton carve concludes with no value named in any hypothesis) the positive controls. Per-profile instances beyond the discrete-relational tier (stochastic assembly via Ionescu--Tulcea, per-species diagonal devices — Banach/Kakutani/Tarski, history-dependent mechanisms, general difference-constraint walk): named successors.'
+witness = 'the soundness metatheorem\textquotesingle s discrete-relational instance, machine-checked end-to-end (\texttt{QtslCompose/AGComposeMarks.lean} + \texttt{AGComposeCarves.lean}, 0-sorry, standard axiom closures): \texttt{marks\_of\_carved\_delivery} — the assembly engine at general lags (carve rows + schedule walk + seriality + the diagonal closure $\Rightarrow$ a joint run realizing every mark at its label; the joint object, and every delivered point, exists only under the conclusion\textquotesingle s binder); \texttt{marks\_of\_pinned\_delivery} and its re-derivation \texttt{marks\_of\_pinned\_delivery\_via\_carve} — the value pins as the singleton-carve instance, subsumption as a theorem; \texttt{carvedDelivery\_mark\_iff\_conditional} — the carve dial\textquotesingle s identity: the $\forall\exists$ premise IS the maximal-carve row; \texttt{pins\_of\_conditional\_delivery} + \texttt{marks\_of\_conditional\_delivery\_acyclic} + \texttt{marks\_acyclic\_via\_maximal\_carve} — the chaining bridge at both dial ends: on acyclic-instant networks the premises alone conclude, nothing pinned on the wire. The battery is part of the warrant: \texttt{z1\_refutes\_walkless} / \texttt{z1\_refutes\_walkless\_carve} (delete the walk — the relay–delay loop refutes, at value and carve level), \texttt{z5\_refutes\_pinless} / \texttt{z5\_refutes\_closureless} (delete the pin/diagonal column — the swap loop with swap-closed marks refutes), and the discriminant pair \texttt{z5\_carvedDelivery\_mark} / \texttt{z5\_no\_carve\_closure} (carve-invariance HOLDS on the swap loop; NO carve inside the marks closes its diagonal — the diagonal, not invariance, is what refuses Z5), with \texttt{allOnes\_marks\_realized} and the fat-carve control \texttt{fatCarve\_marks\_realized} (a non-singleton carve concludes with no value named in any hypothesis) the positive controls. Per-profile instances beyond the discrete-relational tier (stochastic assembly via Ionescu--Tulcea, per-species diagonal devices — Banach/Kakutani/Tarski, history-dependent mechanisms, general difference-constraint walk): named successors.'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -1227,7 +1222,7 @@ amended = '''
 \end{mathpar}
 the checker never sees a marking: the multiset quotient is compiled away producer-side, aggregate dimension independent of the marking bound $M$; every row family is valid for \emph{every} bag, so adding rows only shrinks $K$ and never cuts a reachable aggregate point.
 '''
-note = 'Core (extension-edge semantic lemma). Soundness: PROSE — P3, \emph{proof: evaluation}; the content is the containment certificate; the realizability gap of $K$ is honest completeness cost (refusal-shaped, never soundness-shaped). Design RATIFIED (2026-07-18), with the Dash–Staton correction carried: the operative aggregate is measurable-query observables $\langle \mathrm{marking}, f \rangle$ over $\mathrm{Bag}(\mathrm{Color})$ — counts and pools are the $f \equiv 1$ / $f = \mathrm{id}$ degenerate queries. Side conditions: box discharge [D10]; generator closure (sympy artefact-pair, C1--C4 PASS). Schema: MISSING-ROW — the aggregation node (D9) is a dispatched design brief.'
+note = 'Core (extension-edge semantic lemma). Soundness: PROSE — P3, \emph{proof: evaluation}; the content is the containment certificate; the realizability gap of $K$ is honest completeness cost (refusal-shaped, never soundness-shaped). Design RATIFIED (2026-07-18), with the Dash–Staton correction carried: the operative aggregate is measurable-query observables $\langle \mathrm{marking}, f \rangle$ over $\mathrm{Bag}(\mathrm{Color})$ — counts and pools are the $f \equiv 1$ / $f = \mathrm{id}$ degenerate queries. Side conditions: aggregate-box discharge; generator closure (artefact-paired, all four checks passing). Schema: MISSING-ROW — the aggregation node is a design in progress.'
 
 [[rule]]
 name = "CountAtomRounding (P3.3)"
@@ -1258,11 +1253,10 @@ note = 'Alias-class (a free tightening rewrite). Key witness: the drain example\
 # ==================== Group R — distance judgments (the QDist tier) ====================
 # Provenance: design ruling, 2026-07-19 — QTSL gains behavioral distances
 # as a new KIND of judgment, the conclusion form shared by QRel, QFixBall,
-# and future distance-rule families. Design authority: the wball
-# adjudication note (judgment-
-# primary rewrite). Naming: "distance judgment", never "behavioral" — the
-# Willems trajectory-semantics collision is documented there. Nothing in this
-# group is staged into genesis rows; extension-theory vocabulary only.
+# and future distance-rule families. Naming: "distance judgment", never
+# "behavioral" — that word already means Willems trajectory semantics,
+# and the collision is deliberate to avoid. Nothing in this
+# group is staged; extension-theory vocabulary only.
 
 [[rule]]
 name = "QDist judgement kind"
@@ -1271,7 +1265,7 @@ original = '''
 $\mathsf{QDist}[d](A, B) \le \varepsilon$: the declared distance-functor registry entry $d$ (v0: TV, $\mathbb{W}_1$, $\mathbb{W}_2$ product-space; each entry declares subject sort, symmetry flag, licensed judgement-level rules, and what the bound means for observables) between subjects $A, B$ is at most $\varepsilon \in \mathbb{Q}$. Subjects: declared manifests/snapshots AND definite descriptions ($\mathrm{fix}\,T$), the latter carrying a well-formedness obligation discharged by the concluding rule. Judgement-level admissibles (per-entry metric-axiom lemmas): triangle, weaken, symmetry-where-flagged.
 '''
 amended = ''
-note = 'The $=_\varepsilon$-shaped form won the shape adjudication (wball adjudication note, \S"The judgement form"): it composes at judgement level and every rule family can conclude it; the eRHL pre/post form is witness-interior to QCoupleDrift, its expectation-gap readouts entering as gap-pseudometric registry entries. Sound-only at birth (HM/eRHL completeness knowingly conceded). Schema: MISSING-ROW — ships as a later QtslCert revision under the \S3 incremental pattern; zero meta-schema motion (re-verified in the design note).'
+note = 'The $=_\varepsilon$-shaped form won the shape adjudication: it composes at judgement level and every rule family can conclude it; the eRHL pre/post form is witness-interior to QCoupleDrift, its expectation-gap readouts entering as gap-pseudometric registry entries. Sound-only at birth (HM/eRHL completeness knowingly conceded). Schema: MISSING-ROW — ships as a later QtslCert revision under the incremental staging pattern; zero meta-schema motion.'
 
 [[rule]]
 name = "QCoupleDrift"
@@ -1281,8 +1275,8 @@ aux_lemmas = [
   "Qtsl.QRelChain.sound_QRelTV",
   "Qtsl.QRelChain.sound_QRelExpGap",
 ]
-scope = "finite-chain tier built; mixture-polynomial tier designed (QREL-TIER-SKETCH wave 1)"
-witness = 'Finite tier PROVED (qtsl-aux \texttt{QRelChain.lean}, 0-sorry): \texttt{sound\_QRelTV} / \texttt{sound\_QRelExpGap} (+ \texttt{\_of\_reach} variants consuming the graph criterion via \texttt{tendsto\_absorbedMass\_one}). Pilot: 4 exact-$\Q$ certificates over the wave-1 battery family, independent checker, 6-mutant battery, TV bound 3.01x tighter than the best unary route on correlated faulting (upstream relational-pilot tree).'
+scope = "finite-chain tier built; mixture-polynomial tier designed"
+witness = 'Finite tier PROVED (qtsl-aux \texttt{QRelChain.lean}, 0-sorry): \texttt{sound\_QRelTV} / \texttt{sound\_QRelExpGap} (+ \texttt{\_of\_reach} variants consuming the graph criterion via \texttt{tendsto\_absorbedMass\_one}). Pilot: 4 exact-$\Q$ certificates over the pilot battery family, independent checker, 6-mutant battery, TV bound 3.01x tighter than the best unary route on correlated faulting.'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -1326,7 +1320,7 @@ aux_lemmas = [
   "Qtsl.QFixBall.anchored_le_radius",
 ]
 scope = "parametric complete metric space; affine/Euclidean instantiation mechanized"
-witness = 'PROVED (qtsl-aux \texttt{QFixBall.lean}, 0-sorry, axioms [propext, Classical.choice, Quot.sound]): \texttt{sound\_QFixBall} ($\exists!$ fixed point in the certified ball; existence manufactured by the contraction, no existence stratum consumed), \texttt{dist\_fixedPoint\_le} (anchored bound $\delta/(1-\rho)$), \texttt{anchored\_le\_radius}, \texttt{sound\_QFixBall\_affine} (EuclideanSpace: the caviwball-v0 pinned mean map). The $\mathbb{W}_2$-completeness gap rides as the [CompleteSpace] hypothesis — honest boundary, named successor leg, never an axiom. Checker: the upstream cavi-wball pilot (11 obligations; 11/11 mutants refuse at named obligations; ACCEPT with $\rho = 96/181$, ball $3.6\times 10^{-7}$, ground truth inside with slack x1.9).'
+witness = 'PROVED (qtsl-aux \texttt{QFixBall.lean}, 0-sorry, axioms [propext, Classical.choice, Quot.sound]): \texttt{sound\_QFixBall} ($\exists!$ fixed point in the certified ball; existence manufactured by the contraction, no existence stratum consumed), \texttt{dist\_fixedPoint\_le} (anchored bound $\delta/(1-\rho)$), \texttt{anchored\_le\_radius}, \texttt{sound\_QFixBall\_affine} (EuclideanSpace: the caviwball-v0 pinned mean map). The $\mathbb{W}_2$-completeness gap rides as the [CompleteSpace] hypothesis — honest boundary, named successor, never an axiom. Checker: the cavi-wball pilot (11 obligations; 11/11 mutants refuse at named obligations; ACCEPT with $\rho = 96/181$, ball $3.6\times 10^{-7}$, ground truth inside with slack x1.9).'
 original = '''
 \begin{mathpar}
 \inferrule*{
@@ -1337,7 +1331,7 @@ original = '''
   \mathsf{QDist}[d](\hat\mu, \mathrm{fix}\,T) \le r \ \text{+ the description license: } \mathrm{fix}\,T \ \text{well-defined (unique) in } \overline{B}(\hat\mu, r)
 }
 \end{mathpar}
-every hypothesis anchored at the known snapshot, never at the unknown fixed point (the anchoring inversion — cookbook ch.\ 08).
+every hypothesis anchored at the known snapshot, never at the unknown fixed point (the anchoring inversion).
 '''
 amended = '''
 \begin{mathpar}
@@ -1352,7 +1346,7 @@ amended = '''
 \end{mathpar}
 every hypothesis anchored at the known snapshot, never at the unknown fixed point; refusals: $\rho \ge 1$, and registry entries the subject sort does not carry.
 '''
-note = 'Sibling of QCoupleDrift under the QDist kind. Concludes onto a definite-description subject and therefore carries the description well-formedness discharge in the same rule (the grammar\textquotesingle s one new typing obligation — wball adjudication note, \S"The definite-description reframe"). Refusals: $\rho \ge 1$ (PERRON), VAR (v0 means-only). Producer strategy (Gaussian pinning reduction, iterate-averaged Perron proposer): the cookbook chapter on anchoring at the known point. Schema: MISSING-ROW.'
+note = 'Sibling of QCoupleDrift under the QDist kind. Concludes onto a definite-description subject and therefore carries the description well-formedness discharge in the same rule (the grammar\textquotesingle s one new typing obligation). Refusals: $\rho \ge 1$ (PERRON), VAR (v0 means-only). Producer strategy (Gaussian pinning reduction, iterate-averaged Perron proposer): anchor everything at the known point. Schema: MISSING-ROW.'
 
 [[rule]]
 name = "QDistTransport (matrix cells)"
@@ -1376,7 +1370,7 @@ original = '''
   \text{exact witness: judgement transports unchanged} \qquad \varepsilon\text{-witness: } \mathsf{QDist}[\mathrm{TV}](\text{fine pushed law}, \text{coarse law}) \le n\,\varepsilon \ \text{at declared horizon } n
 }
 \end{mathpar}
-transport is a MATRIX (judgement class $\times$ witness class), each cell = conclusion form + per-cell Lean lemma + refusal condition; full grid in the wball adjudication note, \S"The transport family".
+transport is a MATRIX (judgement class $\times$ witness class), each cell = conclusion form + per-cell Lean lemma + refusal condition; the built cells are displayed in the amended column.
 '''
 amended = '''
 \begin{mathpar}

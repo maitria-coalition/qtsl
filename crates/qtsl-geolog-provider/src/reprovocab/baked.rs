@@ -213,11 +213,51 @@ pub fn dc_e5p1_container_bytes() -> &'static [u8] {
     include_bytes!("../../fixtures/baked/dc-baked-e5p1.glc")
 }
 
+// ── event-8 mint (the absorption/contraction bake — generation
+// counter 10, house name revision event 8: the FIRST family-addition
+// event. The qc/dc pair's sources are byte-stable, so the pair's
+// revisions did not move and the primary aliases below are NOT
+// re-aimed at this event; two NEW closure families join the roster
+// instead: dac = qc sources + Dtmc + DtmcAbsorb (the absorption-
+// bracket species' home — its revision chid deliberately equals the
+// wave's staged-chain revision, because revision chids hash semantic
+// ops and the pre-mint fragment's only motion was comments; staged
+// and baked verdicts bind to one revision), and dcc = dac sources +
+// DtmcContraction (the generator-form contraction strengthening's
+// home; expected-value containers carry absorption rows AND
+// contraction rows, so their single prerequisite closure contains
+// both fragments) ────────────────────────────────────────────────────
+
+/// Event-8 revision chid of the baked **dac** closure
+/// (BernsteinLogic + Qtsl + Dtmc + DtmcAbsorb).
+pub const BAKED_DAC_E8_REV: [u8; 32] = [
+    0x6f, 0x1b, 0x2c, 0x7e, 0xf5, 0x62, 0xc4, 0x37, 0x17, 0x4d, 0xd3, 0xea, 0xbf, 0xcb, 0x9d, 0x7e,
+    0x48, 0x7d, 0xe3, 0xc8, 0x41, 0xd6, 0x3b, 0x85, 0xff, 0x42, 0x01, 0x7b, 0xe5, 0xff, 0x29, 0xd0,
+];
+/// Event-8 revision chid of the baked **dcc** closure
+/// (dac + DtmcContraction).
+pub const BAKED_DCC_E8_REV: [u8; 32] = [
+    0x70, 0xb3, 0x1e, 0x69, 0xb4, 0x89, 0x1c, 0x03, 0xd4, 0x65, 0x4f, 0xc5, 0x52, 0x02, 0x34, 0x68,
+    0x3e, 0x18, 0x29, 0xaf, 0x59, 0x59, 0x3c, 0xac, 0xb7, 0xcd, 0xc7, 0x23, 0xa8, 0x9d, 0x4d, 0x9d,
+];
+
+/// The event-8 dac chain container (the production store's extract).
+pub fn dac_e8_container_bytes() -> &'static [u8] {
+    include_bytes!("../../fixtures/baked/dac-baked-e8.glc")
+}
+
+/// The event-8 dcc chain container.
+pub fn dcc_e8_container_bytes() -> &'static [u8] {
+    include_bytes!("../../fixtures/baked/dcc-baked-e8.glc")
+}
+
 // ── the PRIMARY pair: tracks theories/pins/baked_v1_pins.txt ─────────
 // The mint-swap point: a new revision event re-aims exactly these four
 // aliases (+ BAKED_PRIMARY_EVENT + the legacy roster append below);
 // every caller of the V1 names follows automatically, and the
-// [`tests`] pins-file tie refuses a half-done swap.
+// [`tests`] pins-file tie refuses a half-done swap. (A FAMILY-ADDITION
+// event — new closures, pair revisions unmoved — re-aims nothing here;
+// the event-8 block above is the first instance.)
 
 /// The revision event the primary pair tracks (the pins file's
 /// header). Exemption rosters and swap integrity key off this.
@@ -297,6 +337,22 @@ pub const BAKED_ROSTER: &[BakedPin] = &[
         closure: "dc",
         rev: BAKED_DC_V1_REV,
         container: dc_v1_container_bytes,
+    },
+    // CURRENT non-pair families, minted at event 8 (generation 10 —
+    // the family-addition event; the pair above is untouched because
+    // its sources did not move). Not "legacy": these are the live
+    // homes of the absorption-bracket and contraction species.
+    BakedPin {
+        event: 10,
+        closure: "dac",
+        rev: BAKED_DAC_E8_REV,
+        container: dac_e8_container_bytes,
+    },
+    BakedPin {
+        event: 10,
+        closure: "dcc",
+        rev: BAKED_DCC_E8_REV,
+        container: dcc_e8_container_bytes,
     },
     // LEGACY: the event-6.1 pair, retained at the event-7 swap.
     // Reason: the event-7 mint landed mid-campaign (hours after the

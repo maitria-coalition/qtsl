@@ -183,7 +183,8 @@ use geolog_ground_api::Verdict;
 use qtsl_geolog_provider::container::{hex32, parse_container, verify_commits, Container};
 use qtsl_geolog_provider::reprovocab::baked::{
     derive_baked_vocab, resolve_baked_rev, staged_revision_of_chain, BakedVocab,
-    BAKED_COMPARISONS_CHID, BAKED_DC_V1_REV, BAKED_GENESIS_CHID, BAKED_QC_V1_REV,
+    BAKED_COMPARISONS_CHID, BAKED_DAC_E8_REV, BAKED_DCC_E8_REV, BAKED_DC_V1_REV,
+    BAKED_GENESIS_CHID, BAKED_QC_V1_REV,
 };
 use qtsl_geolog_provider::reprovocab::bl::{
     bl_v0_indexes, BL_CERT_V0_REV, BL_STACK_V0_REV, BL_V0_OBLIGATIONS,
@@ -1446,6 +1447,7 @@ fn resolved_families(v: &QtslVocab) -> Vec<&'static str> {
         ("gymrw", v.gymrw.is_some()),
         ("gymeproc", v.gymeproc.is_some()),
         ("dabs", v.dabs.is_some()),
+        ("dgc", v.dgc.is_some()),
     ] {
         if on {
             out.push(name);
@@ -1474,27 +1476,36 @@ fn check_baked_chain(c: &Container, expect: &Expect) -> Result<String, String> {
     // Self-contained: deps resolve against earlier commits only.
     let commits = verify_commits(c, &[])?;
     let total_ops: usize = commits.iter().map(|vc| vc.ops.len()).sum();
-    // PRIMARY-ONLY, deliberately: a chain container must carry the
+    // CURRENT-ONLY, deliberately: a chain container must carry a
     // CURRENT event's revision (greenfield — old-event chains re-emit
     // rather than resolve; the append-only store, not this checker,
-    // is where history lives).
-    let qc = commits.iter().any(|vc| vc.own == BAKED_QC_V1_REV);
-    let dc = commits.iter().any(|vc| vc.own == BAKED_DC_V1_REV);
-    let (closure, pin) = match (qc, dc) {
-        (true, false) => ("qc", BAKED_QC_V1_REV),
-        (false, true) => ("dc", BAKED_DC_V1_REV),
-        (true, true) => {
-            return Err(
-                "chain_ambiguous: both baked closure revisions in one container".to_string(),
-            )
+    // is where history lives). Current = the primary pair plus the
+    // event-8 family additions (dac/dcc), whose revisions are live
+    // alongside the pair rather than superseding it.
+    const CURRENT_CHAINS: &[(&str, [u8; 32])] = &[
+        ("qc", BAKED_QC_V1_REV),
+        ("dc", BAKED_DC_V1_REV),
+        ("dac", BAKED_DAC_E8_REV),
+        ("dcc", BAKED_DCC_E8_REV),
+    ];
+    let mut hit: Option<(&str, [u8; 32])> = None;
+    for (name, rev) in CURRENT_CHAINS {
+        if commits.iter().any(|vc| vc.own == *rev) {
+            if hit.is_some() {
+                return Err(
+                    "chain_ambiguous: multiple baked closure revisions in one container"
+                        .to_string(),
+                );
+            }
+            hit = Some((name, *rev));
         }
-        (false, false) => {
-            return Err(
-                "chain_unpinned: no pinned baked revision among the commits — not a \
-                 baked vocabulary chain this checker recognizes"
-                    .to_string(),
-            )
-        }
+    }
+    let Some((closure, pin)) = hit else {
+        return Err(
+            "chain_unpinned: no pinned baked revision among the commits — not a \
+             baked vocabulary chain this checker recognizes"
+                .to_string(),
+        );
     };
     let vocab = derive_baked_vocab(pin, &commits)?;
     let qv = QtslVocab::build(&[&vocab.index]);

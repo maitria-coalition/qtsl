@@ -3269,13 +3269,13 @@ theorem measurableSet_le_lex (d : ℕ) :
     MeasurableSet {q : (Fin d → ℝ) × (Fin d → ℝ) |
       toLex q.1 ≤ toLex q.2}
 \end{leansrc}
-\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinISPN.}\texttt{\bfseries not\_branchZenoFree\_of\_disabled}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriDemonic.lean}, line 105}\par\nopagebreak
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinCISPN.}\texttt{\bfseries not\_branchZenoFree\_of\_disabled}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriColouredDemonic.lean}, line 121}\par\nopagebreak
 \begin{leansrc}
-theorem not_branchZenoFree_of_disabled {i : N.Vanishing} {u : U}
-    (h : ¬ N.IEnabled u i.1) (r : N.Vanishing → ℕ) :
+theorem not_branchZenoFree_of_disabled {i : N.Vanishing} {a : N.IAct}
+    (h : ¬ N.IEnabled a i.1) (r : N.Vanishing → ℕ) :
     ¬ N.toFinMA.BranchZenoFree r
 \end{leansrc}
-\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinISPN.}\texttt{\bfseries RespScheduler}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriDemonic.lean}, line 121}\par\nopagebreak
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinCISPN.}\texttt{\bfseries RespScheduler}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriColouredDemonic.lean}, line 139}\par\nopagebreak
 \begin{leansrc}
 def RespScheduler : Type
 \end{leansrc}
@@ -3285,7 +3285,7 @@ theorem arena_plural :
     (net₁.uniformResp : net₁.RespScheduler).1.choice i10 1
       ≠ discardResp.1.choice i10 1
 \end{leansrc}
-\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinISPN.}\texttt{\bfseries RespectingRows}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriDemonic.lean}, line 193}\par\nopagebreak
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinCISPN.}\texttt{\bfseries RespectingRows}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriColouredDemonic.lean}, line 213}\par\nopagebreak
 \begin{leansrc}
 structure RespectingRows where …
 \end{leansrc}
@@ -3303,13 +3303,13 @@ theorem ispnDemonicC_iff {r : N.Vanishing → ℕ} (hr : N.CascadeRank r)
     (k : ℕ) (μ : SubPMF (Traj N.Tangible k)) :
     N.ispnDemonicC (absFuel r) k μ ↔ N.demonicTangibleLaws hr k μ
 \end{leansrc}
-\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinISPN.}\texttt{\bfseries demonicTangibleLaws\_rank\_irrel}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriDemonic.lean}, line 158}\par\nopagebreak
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinCISPN.}\texttt{\bfseries demonicTangibleLaws\_rank\_irrel}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriColouredDemonic.lean}, line 177}\par\nopagebreak
 \begin{leansrc}
 theorem demonicTangibleLaws_rank_irrel {r r' : N.Vanishing → ℕ}
     (hr : N.CascadeRank r) (hr' : N.CascadeRank r') (k : ℕ) :
     N.demonicTangibleLaws hr k = N.demonicTangibleLaws hr' k
 \end{leansrc}
-\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinISPN.}\texttt{\bfseries demonicTangibleCredal\_rank\_irrel}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriDemonic.lean}, line 172}\par\nopagebreak
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinCISPN.}\texttt{\bfseries demonicTangibleCredal\_rank\_irrel}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriColouredDemonic.lean}, line 191}\par\nopagebreak
 \begin{leansrc}
 theorem demonicTangibleCredal_rank_irrel {r r' : N.Vanishing → ℕ}
     (hr : N.CascadeRank r) (hr' : N.CascadeRank r') (k : ℕ) :
@@ -3380,9 +3380,9 @@ theorem r1r3_composite_adequacy {S : Multiset U} {m : BMarking P B}
     ∀ l : List U, (↑l : Multiset U) = S →
       N.ChainEnabled l m ∧ N.chainFire l m = N.compositeFire S m
 \end{leansrc}
-\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinISPN.}\texttt{\bfseries flatten\_triangle\_of\_agree}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriFlatten.lean}, line 324}\par\nopagebreak
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinCISPN.}\texttt{\bfseries flatten\_triangle\_of\_agree}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/StochasticPetriColouredComposed.lean}, line 343}\par\nopagebreak
 \begin{leansrc}
-theorem flatten_triangle_of_agree (σ : Policy N.Vanishing U)
+theorem flatten_triangle_of_agree (σ : Policy N.Vanishing N.IAct)
     (r : N.Vanishing → ℕ) (hr : ZenoFree (N.toFinMA.imStep σ) r)
     {Mode : Type} [Fintype Mode] (e : Mode ≃ N.Tangible)
     (flat : FinCTMC Mode)
@@ -3393,7 +3393,7 @@ theorem flatten_triangle_of_agree (σ : Policy N.Vanishing U)
     (k : ℕ) {a : Crd (Traj N.Tangible k)} :
     ∃ α : Cell
         (looseConj (atoms (jumpRows
-          (closeMaRows N.compileIspn (compilePolicy σ) (absFuel r))) k) :
+          (closeMaRows N.compileCispn (compilePolicy σ) (absFuel r))) k) :
           Loose a a)
         (looseConj (atoms (jumpRows (compileCtmc (flat.relabel e))) k))
         (𝟙 a) (𝟙 a),
@@ -3497,6 +3497,23 @@ theorem FinBN.jointLaw_mass (B : FinBN n Val) : (B.jointLaw).mass = 1
 \begin{leansrc}
 theorem FinBN.ancestralPMF_eq (σ : Asn Val) :
     (B.ancestralPMF) σ = q2e ((B.jointLaw).wt σ)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries noiseDenot\_progTraj}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/ProbProg.lean}, line 200}\par\nopagebreak
+\begin{leansrc}
+theorem noiseDenot_progTraj (P : ProbProgram S N₀ N) :
+    ∀ k, noiseDenot (progTraj P k) (measurable_progTraj P k) = pathDist P k
+  | 0 => by
+    calc noiseDenot (progTraj P 0) (measurable_progTraj P 0)
+        = noiseDenot (trajZero ∘ P.start)
+            (measurable_trajZero.comp P.measurable_start)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries su\_pprog\_adequacy}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/ProbProg.lean}, line 398}\par\nopagebreak
+\begin{leansrc}
+theorem su_pprog_adequacy {P : ProbProgram S N₀ N} {M : FinDTMC S}
+    (hPM : Presents P M) (k : ℕ) (μ : SubPMF (Traj S k)) :
+    idealPoint μ ∈ (pprogDnf (compile M) k).modelClass
+      ↔ μ.probFun = ((noiseDenot (progTraj P k) (measurable_progTraj P k) :
+          ProbState (Traj S k)) : Traj S k → ℝ)
 \end{leansrc}
 \par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.QNet.}\texttt{\bfseries quantum\_net\_adequacy}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/QuantumNet.lean}, line 426}\par\nopagebreak
 \begin{leansrc}
@@ -3870,7 +3887,7 @@ theorem uv_smallIR_containment :
 \begin{leansrc}
 structure QNetRows (κ : Type*) where …
 \end{leansrc}
-\par\medskip\noindent Modules cited: \texttt{SuFunctor.Adequacy.QuantumNet}, \texttt{SuFunctor.Adequacy.Ode}, \texttt{SuFunctor.Adequacy.Pde}, \texttt{SuFunctor.Adequacy.PdeRows}, \texttt{QtslAux.SdeGenerator}, \texttt{QtslAux.SdeGeneratorPoly}, \texttt{QtslAux.SdeMartingaleProblem}, \texttt{SuFunctor.Adequacy.Rode}, \texttt{QtslAux.JumpDiffusion}, \texttt{QtslAux.JumpDiffusionMartingaleProblem}, \texttt{SuFunctor.Adequacy.CtmcJumpChain}, \texttt{SuFunctor.Adequacy.MarkovAutomaton}, \texttt{SuFunctor.Adequacy.MaDemonic}, \texttt{SuFunctor.Adequacy.Bag}, \texttt{SuFunctor.TokenGame}, \texttt{SuFunctor.Adequacy.StochasticPetri}, \texttt{SuFunctor.Adequacy.StochasticPetriCascade}, \texttt{SuFunctor.Adequacy.StochasticPetriDemonic}, \texttt{SuFunctor.Adequacy.StochasticPetriSetFiring}, \texttt{SuFunctor.Adequacy.StochasticPetriFlatten}, \texttt{SuFunctor.Adequacy.StochasticPetriFlattenAgreement}, \texttt{SuFunctor.Adequacy.StochasticPetriComposed}, \texttt{QtslAux.KilledTimeIndexed}, \texttt{SuFunctor.Adequacy.StochasticPetriAngelic}, \texttt{SuFunctor.Adequacy.StochasticPetriColoured}, \texttt{SuFunctor.Adequacy.StochasticPetriColouredCascade}, \texttt{SuFunctor.Adequacy.PetriVanilla}, \texttt{Qtsl.ScmTwin}, \texttt{SuFunctor.Stochastic.NoiseKleisli}, \texttt{QtslAux.QuantumCoarseGraining}, \texttt{SuFunctor.Adequacy.QuantumContainment}.
+\par\medskip\noindent Modules cited: \texttt{SuFunctor.Adequacy.QuantumNet}, \texttt{SuFunctor.Adequacy.Ode}, \texttt{SuFunctor.Adequacy.Pde}, \texttt{SuFunctor.Adequacy.PdeRows}, \texttt{QtslAux.SdeGenerator}, \texttt{QtslAux.SdeGeneratorPoly}, \texttt{QtslAux.SdeMartingaleProblem}, \texttt{SuFunctor.Adequacy.Rode}, \texttt{QtslAux.JumpDiffusion}, \texttt{QtslAux.JumpDiffusionMartingaleProblem}, \texttt{SuFunctor.Adequacy.CtmcJumpChain}, \texttt{SuFunctor.Adequacy.MarkovAutomaton}, \texttt{SuFunctor.Adequacy.MaDemonic}, \texttt{SuFunctor.Adequacy.Bag}, \texttt{SuFunctor.TokenGame}, \texttt{SuFunctor.Adequacy.StochasticPetri}, \texttt{SuFunctor.Adequacy.StochasticPetriCascade}, \texttt{SuFunctor.Adequacy.StochasticPetriDemonic}, \texttt{SuFunctor.Adequacy.StochasticPetriSetFiring}, \texttt{SuFunctor.Adequacy.StochasticPetriFlatten}, \texttt{SuFunctor.Adequacy.StochasticPetriFlattenAgreement}, \texttt{SuFunctor.Adequacy.StochasticPetriComposed}, \texttt{QtslAux.KilledTimeIndexed}, \texttt{SuFunctor.Adequacy.StochasticPetriColouredComposed}, \texttt{SuFunctor.Adequacy.StochasticPetriAngelic}, \texttt{SuFunctor.Adequacy.StochasticPetriColoured}, \texttt{SuFunctor.Adequacy.StochasticPetriColouredCascade}, \texttt{SuFunctor.Adequacy.StochasticPetriColouredDemonic}, \texttt{SuFunctor.Adequacy.PetriVanilla}, \texttt{Qtsl.ScmTwin}, \texttt{SuFunctor.Stochastic.NoiseKleisli}, \texttt{SuFunctor.Adequacy.ProbProg}, \texttt{QtslAux.QuantumCoarseGraining}, \texttt{SuFunctor.Adequacy.QuantumContainment}.
 \par\medskip\noindent Also cited in this chapter, listed under an earlier one: \texttt{QtslAux.QuantumAssembly}, \texttt{QtslAux.QuantumRecords}, \texttt{SuFunctor.Adequacy.DelayLine}, \texttt{SuFunctor.Adequacy.Dtmc}, \texttt{SuFunctor.Adequacy.EnvelopeUnion}, \texttt{SuFunctor.Adequacy.HeatTorus}, \texttt{SuFunctor.Adequacy.HeatTorusInit}, \texttt{SuFunctor.Adequacy.Inclusions}, \texttt{SuFunctor.Adequacy.MarginalGlue}, \texttt{SuFunctor.Adequacy.Mdp}, \texttt{SuFunctor.Adequacy.MdpDemonic}, \texttt{SuFunctor.Adequacy.Pgm}, \texttt{SuFunctor.Adequacy.SolutionSetMesh}, \texttt{copy\_ne\_kleisli}, \texttt{maxSlice\_unionRays}, \texttt{maxSlice\_unionRays\_subset}, \texttt{noiseDenot\_seqComp}.
 
 \section{Systems: Composition Patterns}
@@ -9521,6 +9538,212 @@ theorem BelState.push_comp (f : V → U) (g : U → W) (x : BelState V) :
 \begin{leansrc}
 theorem eq_of_tvDist_le_zero {L : Type*} [Fintype L] {p q : L → ℝ}
     (h : tvDist p q ≤ 0) : p = q
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmcAbsorb\_mass\_le\_reach}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 484}\par\nopagebreak
+\begin{leansrc}
+theorem dtmcAbsorb_mass_le_reach (M : FinDTMC S) {C : Finset S}
+    {T t' : ℕ} (h : T ≤ t') :
+    massOn M t' C ≤ massOn M T C + massOn M T (M.reachSet C \ C)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmcAbsorbBracket\_reach\_sound}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 512}\par\nopagebreak
+\begin{leansrc}
+theorem dtmcAbsorbBracket_reach_sound (M : FinDTMC S)
+    {C Abs : Finset S} (hAbs : ∀ s ∈ Abs, M.Absorbing s)
+    (hCA : C ⊆ Abs) {T t' : ℕ} (h : T ≤ t') :
+    massOn M T C ≤ massOn M t' C ∧
+      massOn M t' C ≤ massOn M T C + massOn M T (M.reachSet C \ C)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmcAbsorb\_reach\_residual\_le}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 528}\par\nopagebreak
+\begin{leansrc}
+theorem dtmcAbsorb_reach_residual_le (M : FinDTMC S)
+    {C Abs : Finset S} (hAbs : ∀ s ∈ Abs, M.Absorbing s) (T : ℕ) :
+    massOn M T (M.reachSet C \ C) ≤ 1 - massOn M T Abs
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmcAbsorb\_eventual\_bracket\_reach}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 550}\par\nopagebreak
+\begin{leansrc}
+theorem dtmcAbsorb_eventual_bracket_reach (M : FinDTMC S)
+    {C Abs : Finset S} (hAbs : ∀ s ∈ Abs, M.Absorbing s)
+    (hCA : C ⊆ Abs) {T : ℕ} {lo hi : ℚ}
+    (hlo : lo ≤ massOn M T C)
+    (hhi : massOn M T C + massOn M T (M.reachSet C \ C) ≤ hi) :
+    ∀ t', T ≤ t' → lo ≤ massOn M t' C ∧ massOn M t' C ≤ hi
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.FinDTMC.}\texttt{\bfseries ForwardClosed}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 229}\par\nopagebreak
+\begin{leansrc}
+def FinDTMC.ForwardClosed (M : FinDTMC S) (D : Finset S) : Prop
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmc\_mass\_mono\_of\_forwardClosed}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 276}\par\nopagebreak
+\begin{leansrc}
+theorem dtmc_mass_mono_of_forwardClosed (M : FinDTMC S)
+    {D : Finset S} (hD : M.ForwardClosed D) {T t' : ℕ} (h : T ≤ t') :
+    massOn M T D ≤ massOn M t' D
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries idBool\_strict\_improvement}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 769}\par\nopagebreak
+\begin{leansrc}
+theorem idBool_strict_improvement {T t' : ℕ} (h : T ≤ t') :
+    massOn idBool t' {true} = 0
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmcPosteriorBracket\_sound}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAbsorb.lean}, line 574}\par\nopagebreak
+\begin{leansrc}
+theorem dtmcPosteriorBracket_sound {ι : Type} [Fintype ι]
+    (N Mv : ι → ℚ) (R : ℚ) (hR : 0 ≤ R)
+    (hN : ∀ c, 0 ≤ N c)
+    (hS : 0 < ∑ c', N c')
+    (hle : ∀ c, N c ≤ Mv c)
+    (hgap : (∑ c', (Mv c' - N c')) ≤ R) (c : ι) :
+    N c / ((∑ c', N c') + R) ≤ Mv c / (∑ c', Mv c') ∧
+      Mv c / (∑ c', Mv c') ≤ (N c + R) / ((∑ c', N c') + R)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries massAt\_expect\_le\_of\_contraction\_of\_weighted}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 164}\par\nopagebreak
+\begin{leansrc}
+theorem massAt_expect_le_of_contraction_of_weighted (M : FinDTMC S)
+    (V : S → ℚ) {c : ℚ} (hc : 0 ≤ c)
+    (hcontr : ∀ s, (∑ s', M.step s s' * V s') ≤ c * V s) (t : ℕ) :
+    (∑ s, massAt M t s * V s) ≤ c ^ t * ∑ s, massAt M 0 s * V s
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries qGenFormContraction\_subsumes\_genform}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 181}\par\nopagebreak
+\begin{leansrc}
+theorem qGenFormContraction_subsumes_genform [DecidableEq S]
+    (M : FinDTMC S) (V : S → ℚ)
+    (hg : ∀ s, genRow (compile M) V s ≤ 0) (t : ℕ) :
+    expectQ (M.pathLaw t) (atLast V) ≤
+      expectQ (M.pathLaw 0) (atLast V)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries wmassAt}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 63}\par\nopagebreak
+\begin{leansrc}
+def wmassAt (init : S → ℚ) (W : S → S → ℚ) : ℕ → S → ℚ
+  | 0 => init
+  | t + 1 => fun s' => ∑ s, wmassAt init W t s * W s s'
+
+@[simp] theorem wmassAt_zero (init : S → ℚ) (W : S → S → ℚ) :
+    wmassAt init W 0 = init
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries massAt\_eq\_wmassAt}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 85}\par\nopagebreak
+\begin{leansrc}
+theorem massAt_eq_wmassAt (M : FinDTMC S) (t : ℕ) :
+    massAt M t = wmassAt M.init M.step t
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries wmassAt\_expect\_le\_of\_contraction}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 116}\par\nopagebreak
+\begin{leansrc}
+theorem wmassAt_expect_le_of_contraction {init : S → ℚ} {W : S → S → ℚ}
+    (V : S → ℚ) (hinit : ∀ s, 0 ≤ init s) (hW : ∀ s s', 0 ≤ W s s')
+    {c : ℚ} (hc : 0 ≤ c)
+    (hcontr : ∀ s, (∑ s', W s s' * V s') ≤ c * V s) (t : ℕ) :
+    (∑ s, wmassAt init W t s * V s) ≤ c ^ t * ∑ s, init s * V s
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries massAt\_expect\_on\_le\_of\_regionContraction}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAliveTail.lean}, line 60}\par\nopagebreak
+\begin{leansrc}
+theorem massAt_expect_on_le_of_regionContraction (M : FinDTMC S)
+    (A : Finset S) (V : S → ℚ) {c : ℚ} (hc : 0 ≤ c)
+    (hclosed : ∀ x ∉ A, ∀ y ∈ A, M.step x y = 0)
+    (hcontr : ∀ x ∈ A, (∑ y ∈ A, M.step x y * V y) ≤ c * V x) (t : ℕ) :
+    (∑ x ∈ A, massAt M t x * V x) ≤ c ^ t * ∑ x ∈ A, M.init x * V x
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries dtmcAliveTail\_of\_regionContraction}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAliveTail.lean}, line 93}\par\nopagebreak
+\begin{leansrc}
+theorem dtmcAliveTail_of_regionContraction (M : FinDTMC S)
+    (A : Finset S) (V : S → ℚ) {c : ℚ} (hc : 0 ≤ c)
+    (hfloor : ∀ x ∈ A, 1 ≤ V x)
+    (hclosed : ∀ x ∉ A, ∀ y ∈ A, M.step x y = 0)
+    (hcontr : ∀ x ∈ A, (∑ y ∈ A, M.step x y * V y) ≤ c * V x) (t : ℕ) :
+    massOn M t A ≤ c ^ t * ∑ x ∈ A, M.init x * V x
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries aliveTail\_needs\_floor}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAliveTail.lean}, line 128}\par\nopagebreak
+\begin{leansrc}
+theorem aliveTail_needs_floor :
+    ¬ (massOn unitChain 1 Finset.univ ≤
+        (1 : ℚ) ^ 1 * ∑ x ∈ Finset.univ, unitChain.init x * ((1 : ℚ) / 2))
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries aliveTail\_needs\_no\_reentry}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcAliveTail.lean}, line 159}\par\nopagebreak
+\begin{leansrc}
+theorem aliveTail_needs_no_reentry :
+    ¬ (massOn reentryChain 1 {true} ≤
+        (1 : ℚ) ^ 1 * ∑ x ∈ ({true} : Finset Bool),
+          reentryChain.init x * (1 : ℚ))
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries genFormTemplate\_collapse}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcTemplate.lean}, line 35}\par\nopagebreak
+\begin{leansrc}
+theorem genFormTemplate_collapse {ι : Type} [Fintype ι]
+    (w : ι → ℚ) (d : ι → ℤ) {M γ c : ℚ} (hM : 0 ≤ M) (hγ : 0 < γ)
+    (h : (∑ i, w i * γ ^ d i) ≤ c) (n : ℤ) :
+    (∑ i, w i * (M * γ ^ (n + d i))) ≤ c * (M * γ ^ n)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries aliveStep\_factor}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcProductProfile.lean}, line 264}\par\nopagebreak
+\begin{leansrc}
+theorem aliveStep_factor {g : List ℚ} {ρ : ℚ} (hg : ∀ q ∈ g, 0 < q)
+    (hρ : 0 < ρ) (p : ℚ) {d : ℕ} (x : Fin d → ℕ)
+    (hx : ∀ i, downMove x i ≠ 0) :
+    aliveStep g ρ p x
+      = (∑ i, transferRatio g ρ p (x i)) / (d : ℚ)
+          * prodProfileV g ρ x
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries transferRatio\_of\_ge}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcProductProfile.lean}, line 180}\par\nopagebreak
+\begin{leansrc}
+theorem transferRatio_of_ge {g : List ℚ} {ρ : ℚ} (hg : ∀ q ∈ g, 0 < q)
+    (hρ : 0 < ρ) (p : ℚ) {v : ℕ} (hv : g.length + 1 ≤ v) :
+    transferRatio g ρ p v = rInf ρ p
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries productProfile\_collapse}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcProductProfile.lean}, line 297}\par\nopagebreak
+\begin{leansrc}
+theorem productProfile_collapse {g : List ℚ} {ρ : ℚ}
+    (hg : ∀ q ∈ g, 0 < q) (hρ : 0 < ρ) (p : ℚ) {d : ℕ} {c : ℚ}
+    (hclass : ∀ k ∈ Finset.Icc 1 d,
+      ((d : ℚ) - (k : ℚ)) * rMax g ρ p + (k : ℚ) * rInf ρ p
+        ≤ (d : ℚ) * c)
+    (x : Fin d → ℕ) (j : Fin d) (hgeo : g.length + 1 ≤ x j)
+    (h2 : 2 ≤ x j) :
+    aliveStep g ρ p x ≤ c * prodProfileV g ρ x
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries rampProfile\_needs\_window\_reach}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcProductProfile.lean}, line 370}\par\nopagebreak
+\begin{leansrc}
+theorem rampProfile_needs_window_reach :
+    (∀ k ∈ Finset.Icc (1 : ℕ) 3,
+      ((3 : ℚ) - (k : ℚ)) * rMax rampG (7/4) (1/4)
+        + (k : ℚ) * rInf (7/4) (1/4) ≤ (3 : ℚ) * (193/200)) ∧
+    (3 : ℚ) * (193/200)
+      < 2 * transferRatio rampG (7/4) (1/4) 1
+          + transferRatio rampG (7/4) (1/4) 5
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries sum\_range\_mul\_pow\_mul\_eq}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 279}\par\nopagebreak
+\begin{leansrc}
+theorem sum_range_mul_pow_mul_eq (c : ℚ) (n : ℕ) :
+    (∑ i ∈ Finset.range n, (i : ℚ) * c ^ i) * (1 - c) ^ 2 =
+      c - (n : ℚ) * c ^ n + ((n : ℚ) - 1) * c ^ (n + 1)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries sum\_Ico\_pow\_le}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 318}\par\nopagebreak
+\begin{leansrc}
+theorem sum_Ico_pow_le {c : ℚ} (hc : 0 ≤ c) (hc1 : c < 1) (T T' : ℕ) :
+    (∑ t ∈ Finset.Ico T T', c ^ t) ≤ c ^ T / (1 - c)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries sum\_Ico\_mul\_pow\_le}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 335}\par\nopagebreak
+\begin{leansrc}
+theorem sum_Ico_mul_pow_le {c : ℚ} (hc : 0 ≤ c) (hc1 : c < 1)
+    (T T' : ℕ) :
+    (∑ t ∈ Finset.Ico T T', (t : ℚ) * c ^ t) ≤
+      c ^ T * ((T : ℚ) * (1 - c) + c) / (1 - c) ^ 2
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries wmassAt\_exit\_tail\_le}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 374}\par\nopagebreak
+\begin{leansrc}
+theorem wmassAt_exit_tail_le {init : S → ℚ} {W : S → S → ℚ}
+    (V e : S → ℚ) (hinit : ∀ s, 0 ≤ init s) (hW : ∀ s s', 0 ≤ W s s')
+    {c : ℚ} (hc : 0 ≤ c) (hc1 : c < 1)
+    (hcontr : ∀ s, (∑ s', W s s' * V s') ≤ c * V s)
+    {κ : ℚ} (hκ : 0 ≤ κ) (hexit : ∀ s, e s ≤ κ * V s)
+    (hIV : 0 ≤ ∑ s, init s * V s) (T T' : ℕ) :
+    (∑ t ∈ Finset.Ico T T', ∑ s, wmassAt init W t s * e s) ≤
+      κ * c ^ T * (∑ s, init s * V s) / (1 - c)
+\end{leansrc}
+\par\medskip\noindent{\small \texttt{SuFunctor.Adequacy.}\texttt{\bfseries wmassAt\_exit\_moment\_tail\_le}}\hfill{\footnotesize \path{lean/su-functor/SuFunctor/Adequacy/DtmcContraction.lean}, line 403}\par\nopagebreak
+\begin{leansrc}
+theorem wmassAt_exit_moment_tail_le {init : S → ℚ} {W : S → S → ℚ}
+    (V e : S → ℚ) (hinit : ∀ s, 0 ≤ init s) (hW : ∀ s s', 0 ≤ W s s')
+    {c : ℚ} (hc : 0 ≤ c) (hc1 : c < 1)
+    (hcontr : ∀ s, (∑ s', W s s' * V s') ≤ c * V s)
+    {κ : ℚ} (hκ : 0 ≤ κ) (hexit : ∀ s, e s ≤ κ * V s)
+    (hIV : 0 ≤ ∑ s, init s * V s) (T T' : ℕ) :
+    (∑ t ∈ Finset.Ico T T', (t : ℚ) * ∑ s, wmassAt init W t s * e s) ≤
+      κ * (∑ s, init s * V s) * c ^ T * ((T : ℚ) * (1 - c) + c) /
+        (1 - c) ^ 2
 \end{leansrc}
 \par\medskip\noindent{\small \texttt{Qtsl.Acceptance.}\texttt{\bfseries towerCitation\_sound\_of\_wf}}\hfill{\footnotesize \path{lean/qtsl-aux/QtslAux/Acceptance.lean}, line 56}\par\nopagebreak
 \begin{leansrc}

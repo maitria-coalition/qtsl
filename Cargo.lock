@@ -516,7 +516,7 @@ dependencies = [
 [[package]]
 name = "geolog-core"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/geolog-alpha-dev.git?rev=83ebe88d5007b101112941f2b47ccb9cefd97fb9#83ebe88d5007b101112941f2b47ccb9cefd97fb9"
+source = "git+https://github.com/maitria-coalition/geolog-alpha.git?rev=dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519#dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519"
 dependencies = [
  "geolog-id",
  "serde",
@@ -525,7 +525,7 @@ dependencies = [
 [[package]]
 name = "geolog-envelope"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/geolog-alpha-dev.git?rev=83ebe88d5007b101112941f2b47ccb9cefd97fb9#83ebe88d5007b101112941f2b47ccb9cefd97fb9"
+source = "git+https://github.com/maitria-coalition/geolog-alpha.git?rev=dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519#dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -541,17 +541,17 @@ dependencies = [
 [[package]]
 name = "geolog-ground-api"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/geolog-alpha-dev.git?rev=83ebe88d5007b101112941f2b47ccb9cefd97fb9#83ebe88d5007b101112941f2b47ccb9cefd97fb9"
+source = "git+https://github.com/maitria-coalition/geolog-alpha.git?rev=dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519#dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519"
 
 [[package]]
 name = "geolog-id"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/geolog-alpha-dev.git?rev=83ebe88d5007b101112941f2b47ccb9cefd97fb9#83ebe88d5007b101112941f2b47ccb9cefd97fb9"
+source = "git+https://github.com/maitria-coalition/geolog-alpha.git?rev=dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519#dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519"
 
 [[package]]
 name = "geolog-id-keyhive"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/geolog-alpha-dev.git?rev=83ebe88d5007b101112941f2b47ccb9cefd97fb9#83ebe88d5007b101112941f2b47ccb9cefd97fb9"
+source = "git+https://github.com/maitria-coalition/geolog-alpha.git?rev=dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519#dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -564,7 +564,7 @@ dependencies = [
 [[package]]
 name = "geolog-meta-rows"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/geolog-alpha-dev.git?rev=83ebe88d5007b101112941f2b47ccb9cefd97fb9#83ebe88d5007b101112941f2b47ccb9cefd97fb9"
+source = "git+https://github.com/maitria-coalition/geolog-alpha.git?rev=dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519#dcafbd6e9fafe36bf4a133d5708b3ceaa6b35519"
 dependencies = [
  "blake3",
  "ed25519-dalek",
@@ -740,7 +740,7 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 [[package]]
 name = "maitria-hypernet"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/kernels-dev.git?rev=4176759c2fff7cc00b8ce15e9251fc77c2e5ed6d#4176759c2fff7cc00b8ce15e9251fc77c2e5ed6d"
+source = "git+https://github.com/maitria-coalition/kernels.git?rev=af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923#af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923"
 dependencies = [
  "ciborium",
  "num-bigint",
@@ -755,7 +755,7 @@ dependencies = [
 [[package]]
 name = "maitria-kernels"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/kernels-dev.git?rev=35f92d9fe4db51e80290c7b9bc71441ccd725c48#35f92d9fe4db51e80290c7b9bc71441ccd725c48"
+source = "git+https://github.com/maitria-coalition/kernels.git?rev=af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923#af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923"
 dependencies = [
  "rayon",
 ]
@@ -763,7 +763,7 @@ dependencies = [
 [[package]]
 name = "maitria-kernels-cuda"
 version = "0.1.0"
-source = "git+https://github.com/maitria-coalition/kernels-dev.git?rev=35f92d9fe4db51e80290c7b9bc71441ccd725c48#35f92d9fe4db51e80290c7b9bc71441ccd725c48"
+source = "git+https://github.com/maitria-coalition/kernels.git?rev=af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923#af46b3bfcae71a1fb4cbf7762ba9bb69eeb9f923"
 dependencies = [
  "cudarc",
  "maitria-kernels",

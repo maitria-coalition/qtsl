@@ -33,8 +33,23 @@
 //!   the unit self-loop. A labeled state that leaked mass would break
 //!   the monotonicity the bridge lemmas rest on — decided FALSE.
 //! - **`qtsl_dabs_absorb_bracket {q, class, lo, hi}`** — holds iff
-//!   `lo ≤ N_c` and `N_c + R ≤ hi`, both recomputed by the T-step
-//!   evaluation above.
+//!   `lo ≤ N_c` and `N_c + R_c ≤ hi`, both recomputed by the T-step
+//!   evaluation above, where `R_c` is the REACHABILITY-SHARPENED
+//!   per-class residual: the residual mass restricted to states from
+//!   which some class-`c` state is reachable through the stored rows'
+//!   positive-probability edges (backward walk from the class's
+//!   states; a rowless or unit-self-loop unclassified state reaches
+//!   nothing and contributes zero). `R_c ≤ R` always, so every
+//!   certificate admitted under the uniform-residual reading stays
+//!   admissible — claims may be looser than canonical, never tighter.
+//!   Soundness direction, stated carefully: the co-reachable set is
+//!   not forward-closed, but its COMPLEMENT is (no positive stored
+//!   inflow into the set exists from outside it), so the mass on it
+//!   never grows and later class gain is bounded by `R_c`. The walk
+//!   rides the same evaluation budget as the forward evolution —
+//!   their costs are SUMMED against one cap, charged up front from
+//!   lengths — and exhaustion refuses the whole claim, never a
+//!   fallback to the uniform residual, never a verdict.
 //! - **`qtsl_dabs_posterior_bracket {q, class, lo, hi}`** — holds iff
 //!   `lo ≤ N_c/(S+R)` and `(N_c+R)/(S+R) ≤ hi`; REFUSES at `S = 0`
 //!   (no positive evidence witness — the normalized measure's
@@ -376,10 +391,10 @@ pub fn check_dabs_wf(q: &DabsQuery) -> Result<(), DabsViolation> {
 }
 
 /// The T-step measure evolution: `m_0` = dinit, `m_{t+1} = m_t · K`
-/// with rowless sources completed by self-loops. Returns
-/// `(N_c, S, R)` for the claimed class `c` — exact ℚ throughout.
-/// Row lawfulness is the caller's (`check_rows`).
-fn evolve(q: &DabsQuery, class: u64) -> (QQ, QQ, QQ) {
+/// with rowless sources completed by self-loops. Returns the horizon
+/// measure — exact ℚ throughout. Row lawfulness is the caller's
+/// (`check_rows`).
+fn evolve_measure(q: &DabsQuery) -> Vec<QQ> {
     let has_rows: Vec<bool> = {
         let mut v = vec![false; q.ns];
         for (src, _, _) in &q.rows {
@@ -406,6 +421,12 @@ fn evolve(q: &DabsQuery, class: u64) -> (QQ, QQ, QQ) {
         }
         m = next;
     }
+    m
+}
+
+/// Aggregate the horizon measure into `(N_c, S, R)` for the claimed
+/// class `c`.
+fn aggregate(q: &DabsQuery, class: u64, m: &[QQ]) -> (QQ, QQ, QQ) {
     let mut n_c = QQ::zero();
     let mut s_all = QQ::zero();
     let mut rej = QQ::zero();
@@ -422,15 +443,108 @@ fn evolve(q: &DabsQuery, class: u64) -> (QQ, QQ, QQ) {
     (n_c, s_all, r)
 }
 
-/// The unnormalized bracket: `lo ≤ N_c ∧ N_c + R ≤ hi`.
-pub fn check_dabs_absorb(q: &DabsQuery, class: u64, lo: &QQ, hi: &QQ) -> Result<(), DabsViolation> {
+/// Compatibility wrapper: `(N_c, S, R)` with the UNIFORM residual —
+/// the posterior form's reading (its one shared budget across
+/// numerator and denominator is what makes the single normalizer
+/// sound, so it deliberately does NOT take the sharpened residual).
+fn evolve(q: &DabsQuery, class: u64) -> (QQ, QQ, QQ) {
+    let m = evolve_measure(q);
+    aggregate(q, class, &m)
+}
+
+/// The reachability-sharpened per-class residual `R_c`: the horizon
+/// residual mass restricted to states from which some class-`c`
+/// state is reachable through the stored rows' POSITIVE-probability
+/// edges (filtered here explicitly — the walk never assumes the
+/// range report ran). Backward walk, class states as seeds; a
+/// rowless state has no edges and a unit-self-loop unclassified
+/// state only its own, so neither reaches the class — each
+/// contributes zero exactly as the species theory states. The
+/// SHARED-budget charge (forward + walk, summed) lives at the
+/// bracket's entry; the walk-local cap here is defense in depth for
+/// direct callers — exhaustion refuses the WHOLE claim either way,
+/// never a fallback to the uniform residual, never a verdict.
+fn class_reach_residual(q: &DabsQuery, class: u64, m: &[QQ]) -> Result<QQ, String> {
     use std::cmp::Ordering::*;
-    check_rows(q)?;
-    let (n_c, _s, r) = evolve(q, class);
-    if lo.cmp_qq(&n_c) == Greater || n_c.add(&r).cmp_qq(hi) == Greater {
-        return Err(DabsViolation::Bracket);
+    if q.ns.saturating_add(q.rows.len()) > DABS_MAX_WORK {
+        return Err(
+            "states + stored rows beyond the work budget for the class-reachability \
+             walk — refusing the claim (never falling back to the uniform residual)"
+                .into(),
+        );
     }
-    Ok(())
+    let zero = QQ::zero();
+    let mut preds: Vec<Vec<usize>> = vec![Vec::new(); q.ns];
+    for (src, dst, p) in &q.rows {
+        if p.cmp_qq(&zero) == Greater {
+            preds[*dst].push(*src);
+        }
+    }
+    let mut in_reach = vec![false; q.ns];
+    let mut stack: Vec<usize> = Vec::new();
+    for (state, c) in &q.classed {
+        if *c == class && !in_reach[*state] {
+            in_reach[*state] = true;
+            stack.push(*state);
+        }
+    }
+    while let Some(y) = stack.pop() {
+        for &x in &preds[y] {
+            if !in_reach[x] {
+                in_reach[x] = true;
+                stack.push(x);
+            }
+        }
+    }
+    // Residual support: unclassified, unrejected — the classed and
+    // rejected buckets are already accounted outside R.
+    let rejected: HashSet<usize> = q.rejected.iter().copied().collect();
+    let mut r_c = QQ::zero();
+    for (x, reach) in in_reach.iter().enumerate() {
+        if *reach && !q.classed.contains_key(&x) && !rejected.contains(&x) && !m[x].is_zero() {
+            r_c = r_c.add(&m[x]);
+        }
+    }
+    Ok(r_c)
+}
+
+/// The unnormalized bracket: `lo ≤ N_c ∧ N_c + R_c ≤ hi`, with `R_c`
+/// the reachability-sharpened per-class residual. Three-valued like
+/// the posterior form: `Err` = refusal (the budget), decided
+/// violations inside.
+///
+/// ONE shared budget: the walk rides the SAME evaluation budget as
+/// the forward evolution — their costs are SUMMED (saturating) and
+/// charged up front from lengths alone, before any stage runs, so a
+/// claim whose stages each fit individually but whose total exceeds
+/// the cap refuses as a whole: no verdict, no uniform-residual
+/// fallback, no work done past the charge.
+pub fn check_dabs_absorb(
+    q: &DabsQuery,
+    class: u64,
+    lo: &QQ,
+    hi: &QQ,
+) -> Result<Result<(), DabsViolation>, String> {
+    use std::cmp::Ordering::*;
+    let per_pass = q.rows.len().saturating_add(q.ns);
+    let forward = q.horizon.saturating_mul(per_pass);
+    if forward.saturating_add(per_pass) > DABS_MAX_WORK {
+        return Err(
+            "forward evolution + reachability walk beyond the shared work budget — \
+             refusing the whole claim (never falling back to the uniform residual)"
+                .into(),
+        );
+    }
+    if let Err(v) = check_rows(q) {
+        return Ok(Err(v));
+    }
+    let m = evolve_measure(q);
+    let (n_c, _s, _r) = aggregate(q, class, &m);
+    let r_c = class_reach_residual(q, class, &m)?;
+    if lo.cmp_qq(&n_c) == Greater || n_c.add(&r_c).cmp_qq(hi) == Greater {
+        return Ok(Err(DabsViolation::Bracket));
+    }
+    Ok(Ok(()))
 }
 
 /// The normalized (posterior) bracket: `lo ≤ N_c/(S+R) ∧
@@ -795,7 +909,10 @@ pub(crate) fn eval_dabs(
             let lo = d.q_lit(args[2], "lo")?;
             let query = d.elem(args[3])?;
             let q = decode_query(&d, v, query)?;
-            Ok(check_dabs_absorb(&q, class, &lo, &hi).is_ok())
+            match check_dabs_absorb(&q, class, &lo, &hi) {
+                Ok(verdict) => Ok(verdict.is_ok()),
+                Err(refuse) => Err(ctx_err(name, refuse)),
+            }
         }
         DabsKind::Posterior => {
             let class = d.nat_lit(args[0], "class")?;
@@ -837,35 +954,189 @@ mod tests {
 
     /// Canonical values at T = 10: `N_0 = 14762/59049` (the partial
     /// geometric sum `(1/6)·(1−(1/3)^10)/(1−1/3)`), `R = (1/3)^10 =
-    /// 1/59049`, `N_0 + R = 4921/19683`. The tight bracket accepts
-    /// with equality on both ends; strictly tighter on either end
-    /// rejects — pinning both recomputed values exactly.
+    /// 1/59049` — and the alive state reaches the class, so the
+    /// sharpened `R_0` EQUALS the uniform residual here and
+    /// `N_0 + R_0 = 4921/19683`. The tight bracket accepts with
+    /// equality on both ends; strictly tighter on either end rejects —
+    /// pinning both recomputed values exactly.
     #[test]
     fn die_paradox_exact_bracket() {
         let dq = die(10);
         let n0 = q(14762, 59049);
         let n0r = q(4921, 19683);
-        assert!(check_dabs_absorb(&dq, 0, &n0, &n0r).is_ok());
+        assert!(check_dabs_absorb(&dq, 0, &n0, &n0r).unwrap().is_ok());
         // Strictly tighter low end: lo just above N_0.
         let lo_tight = q(14763, 59050);
         assert!(lo_tight.cmp_qq(&n0) == std::cmp::Ordering::Greater);
         assert_eq!(
-            check_dabs_absorb(&dq, 0, &lo_tight, &n0r),
+            check_dabs_absorb(&dq, 0, &lo_tight, &n0r).unwrap(),
             Err(DabsViolation::Bracket)
         );
-        // Strictly tighter high end: hi just below N_0 + R.
-        let hi_tight = q(14762, 59049);
+        // Strictly tighter high end: hi just below N_0 + R_0.
         assert_eq!(
-            check_dabs_absorb(&dq, 0, &n0, &hi_tight),
+            check_dabs_absorb(&dq, 0, &n0, &q(14762, 59049)).unwrap(),
             Err(DabsViolation::Bracket)
         );
-        // A claim on a class no state carries: N_1 = 0, and the whole
-        // residual still caps the high end.
-        assert!(check_dabs_absorb(&dq, 1, &q(0, 1), &q(1, 59049)).is_ok());
+        // A claim on a class no state carries: N_1 = 0 and — under
+        // the sharpened residual — R_1 = 0 (no seeds, nothing
+        // co-reachable): the canonical width is ZERO. The exact
+        // point bracket accepts (under the uniform residual this hi
+        // would have been rejected — the acceptance is the
+        // sharpening's own liveness witness: revert the sharpening
+        // and this line fails)…
+        assert!(check_dabs_absorb(&dq, 1, &q(0, 1), &q(0, 1))
+            .unwrap()
+            .is_ok());
+        // … looser claims stay admissible (the old uniform-width
+        // shapes included) …
+        assert!(check_dabs_absorb(&dq, 1, &q(0, 1), &q(1, 59049))
+            .unwrap()
+            .is_ok());
+        assert!(check_dabs_absorb(&dq, 1, &q(0, 1), &q(1, 59050))
+            .unwrap()
+            .is_ok());
+        // … and the low end still bites: lo > N_1 = 0 rejects.
         assert_eq!(
-            check_dabs_absorb(&dq, 1, &q(0, 1), &q(1, 59050)),
+            check_dabs_absorb(&dq, 1, &q(1, 59049), &q(1, 1)).unwrap(),
             Err(DabsViolation::Bracket)
         );
+    }
+
+    /// The beauquier shape (the brief's named regression): a chain
+    /// whose claimed class is UNREACHABLE from every alive state —
+    /// the class label sits on an orphan absorbing state no positive
+    /// row feeds. Canonical width for that class is 0 at any T ≥ 1,
+    /// and the OLD uniform-width claim still ACCEPTs
+    /// (claims-may-be-looser, exercised).
+    #[test]
+    fn unreachable_class_width_zero() {
+        // 0 = alive, 1 = acc (classed 0), 2 = orphan (classed 1,
+        // rowless, no inbound rows). Rows: alive → acc 1/2,
+        // alive → alive 1/2.
+        let dq = DabsQuery {
+            ns: 3,
+            horizon: 5,
+            rows: vec![(0, 1, q(1, 2)), (0, 0, q(1, 2))],
+            init: vec![(0, q(1, 1))],
+            classed: [(1usize, 0u64), (2usize, 1u64)].into_iter().collect(),
+            rejected: vec![],
+        };
+        // Class 1: N_1 = 0, R_1 = 0 — the point bracket [0, 0]
+        // accepts. Under the uniform residual (R = (1/2)^5 = 1/32)
+        // this hi would have rejected: this line is the sharpening's
+        // mutant-direction witness.
+        assert!(check_dabs_absorb(&dq, 1, &q(0, 1), &q(0, 1))
+            .unwrap()
+            .is_ok());
+        // The old uniform-width claim [0, 1/32] still accepts.
+        assert!(check_dabs_absorb(&dq, 1, &q(0, 1), &q(1, 32))
+            .unwrap()
+            .is_ok());
+        // Class 0 keeps the full residual: alive reaches acc, so
+        // R_0 = 1/32 and hi below N_0 + R_0 rejects.
+        let n0 = q(31, 32);
+        assert!(check_dabs_absorb(&dq, 0, &n0, &q(1, 1)).unwrap().is_ok());
+        assert_eq!(
+            check_dabs_absorb(&dq, 0, &n0, &n0).unwrap(),
+            Err(DabsViolation::Bracket)
+        );
+    }
+
+    /// Whole-budget refusal at the walk-heavy extreme: horizon zero
+    /// (no evolution steps) with a state count past the cap refuses
+    /// the whole claim up front — never a fallback to the uniform
+    /// residual, never a verdict. (This shape sits past
+    /// DABS_MAX_STATES too, so it is pure-core-only; the
+    /// production-reachable boundary is the split-budget test below.)
+    #[test]
+    fn reach_walk_budget_refuses_whole_claim() {
+        let ns = DABS_MAX_WORK + 2;
+        let dq = DabsQuery {
+            ns,
+            horizon: 0,
+            rows: vec![(0, 1, q(1, 1))],
+            init: vec![(0, q(1, 1))],
+            classed: [(1usize, 0u64)].into_iter().collect(),
+            rejected: vec![],
+        };
+        let err =
+            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)).expect_err("the shared budget refuses");
+        assert!(err.contains("budget"), "{err}");
+        assert!(err.contains("uniform residual"), "{err}");
+        // Same shape, small alphabet: verdicts normally.
+        let small = DabsQuery { ns: 3, ..dq };
+        assert!(check_dabs_absorb(&small, 0, &q(0, 1), &q(1, 1))
+            .unwrap()
+            .is_ok());
+        // The walk-local cap (defense in depth for direct callers)
+        // refuses on its own too; it fires before any indexing, so
+        // the deliberately short measure vector is never touched.
+        let big = DabsQuery {
+            ns: DABS_MAX_WORK + 2,
+            horizon: 0,
+            rows: vec![],
+            init: vec![(0, q(1, 1))],
+            classed: [(1usize, 0u64)].into_iter().collect(),
+            rejected: vec![],
+        };
+        let m = vec![QQ::zero(); 2];
+        assert!(class_reach_residual(&big, 0, &m).is_err());
+    }
+
+    /// The SPLIT-BUDGET boundary, production-reachable: each stage
+    /// individually under the cap — the forward evolution's charge
+    /// and the walk's charge each fit, and the shape passes the
+    /// decoder's own gates (`ns` far below DABS_MAX_STATES; the
+    /// stored rows one lawful source group) — but their SUM exceeds
+    /// the one budget the species contract names, so the whole claim
+    /// REFUSES. (Before the shared-budget repair, both independent
+    /// checks passed and the claim verdicted.)
+    #[test]
+    fn split_budget_sum_refuses_whole_claim() {
+        // n identical rows alive → acc at 1/n each: one lawful group
+        // (mass exactly one) the production decoder could carry.
+        let n = DABS_MAX_WORK / 2 + 1024;
+        let p = QQ::new(BigInt::from(1), BigUint::from(n));
+        let dq = DabsQuery {
+            ns: 3,
+            horizon: 1,
+            rows: vec![(0usize, 1usize, p); n],
+            init: vec![(0, q(1, 1))],
+            classed: [(1usize, 0u64)].into_iter().collect(),
+            rejected: vec![],
+        };
+        let per_pass = dq.rows.len() + dq.ns;
+        let forward = dq.horizon * per_pass;
+        assert!(forward <= DABS_MAX_WORK, "forward stage fits alone");
+        assert!(per_pass <= DABS_MAX_WORK, "walk stage fits alone");
+        assert!(forward + per_pass > DABS_MAX_WORK, "the sum crosses");
+        let err = check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1))
+            .expect_err("the summed budget refuses the whole claim");
+        assert!(err.contains("shared work budget"), "{err}");
+        assert!(err.contains("uniform residual"), "{err}");
+    }
+
+    /// The walk filters on p > 0 itself (never assuming the range
+    /// report ran): a zero-probability stored edge into the class
+    /// creates no co-reachability. Driven at the walk's own grain —
+    /// the lawfulness gate would refuse the row upstream in the
+    /// bracket path, which is exactly why the filter needs its own
+    /// witness.
+    #[test]
+    fn reach_walk_filters_zero_edges() {
+        let dq = DabsQuery {
+            ns: 3,
+            horizon: 1,
+            // alive → acc at probability ZERO (unlawful upstream;
+            // the walk must not read it as an edge), alive → alive 1.
+            rows: vec![(0, 1, q(0, 1)), (0, 0, q(1, 1))],
+            init: vec![(0, q(1, 1))],
+            classed: [(1usize, 0u64)].into_iter().collect(),
+            rejected: vec![],
+        };
+        let m = evolve_measure(&dq);
+        let r_c = class_reach_residual(&dq, 0, &m).expect("walk runs");
+        assert!(r_c.is_zero(), "a zero edge must not carry reachability");
     }
 
     /// The posterior bracket at T = 10: `[N_0/(S+R), (N_0+R)/(S+R)]
@@ -943,32 +1214,36 @@ mod tests {
         let mut dq = die(10);
         dq.rows[2] = (0, 2, q(1, 3)); // group now sums to 5/6
         assert_eq!(
-            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)),
+            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)).unwrap(),
             Err(DabsViolation::RowMass { src: 0 })
         );
         let mut dq = die(10);
         dq.rows.push((1, 1, q(0, 1))); // zero entry stored
         assert_eq!(
-            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)),
+            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)).unwrap(),
             Err(DabsViolation::ProbRange { src: 1 })
         );
         let mut dq = die(10);
         dq.init = vec![(0, q(1, 2))]; // not a distribution
         assert_eq!(
-            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)),
+            check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)).unwrap(),
             Err(DabsViolation::InitMass)
         );
     }
 
     /// Horizon zero is the identity evolution: `m_T = dinit`, so the
-    /// classed mass is zero and everything unrejected is residual.
+    /// classed mass is zero and everything unrejected is residual
+    /// (and the alive state reaches the class, so the sharpened
+    /// residual is the full one here).
     #[test]
     fn horizon_zero_is_dinit() {
         let dq = die(0);
-        // N_0 = 0, R = 1 − 0 − 0 = 1 (all mass alive).
-        assert!(check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1)).is_ok());
+        // N_0 = 0, R_0 = R = 1 (all mass alive, co-reachable).
+        assert!(check_dabs_absorb(&dq, 0, &q(0, 1), &q(1, 1))
+            .unwrap()
+            .is_ok());
         assert_eq!(
-            check_dabs_absorb(&dq, 0, &q(1, 59049), &q(1, 1)),
+            check_dabs_absorb(&dq, 0, &q(1, 59049), &q(1, 1)).unwrap(),
             Err(DabsViolation::Bracket)
         );
     }

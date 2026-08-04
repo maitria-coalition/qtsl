@@ -1,0 +1,239 @@
+import std.{Nat, Q, Str, q_le, q_lt};
+
+// Engine-decided judgements (oracle = the qtsl certification plugin at
+// the engine's ground seam): bounded computations discharged by
+// evaluation, never derivation-defined.
+import qtsl.{qtsl_dtmc_genform_contraction, qtsl_dgc_partial_lo,
+             qtsl_dgc_ev_bracket, qtsl_dgc_survival_tail,
+             qtsl_dgc_z_one};
+
+// DtmcContraction.geolog
+//
+// The score-carrying, regional, quantitative contraction strengthening
+// of the chain-content generator-form seam (C-SYS-GENFORM-CONTRACTION):
+// certificate species for weighted alive-mass decay and — at strict
+// contraction — geometric survival tails and expected-value brackets
+// over stored-row chains. The incumbent qtsl_dtmc_genform rows are
+// this species' degenerate face (score = 1, c = 1, region = all
+// states) and stay byte-identical; every certificate admitted under
+// the incumbent discharges under the strengthening with an unchanged
+// conclusion (mechanized: qGenFormContraction_subsumes_genform).
+//
+// THIS EVENT MINTS THE FINITE FACE ONLY: the witness's alive region is
+// a finite stored-row set, enumerated exhaustively by dweight rows.
+// Template-presented regions (geometric offset families) and
+// pattern-presented infinite chains are DELIBERATE DEFERRALS — see the
+// absences block at the end of the theory.
+//
+// Evaluation semantics (exact Q throughout; every quantity recomputed
+// from stored rows — derived quantities are never stored, so forging
+// an intermediate is unrepresentable):
+//
+// * The witness declares an anchor state (its chain is the anchor's
+//   chain), an ABSOLUTE horizon T, a contraction rate c, and the
+//   certificate component V given as stored dweight rows; the ALIVE
+//   REGION is exactly the set of states carrying a dweight row
+//   (membership is the stored row's presence; the region must be
+//   nonempty). Two separate recomputes discharge the contraction
+//   demand, per stored row:
+//   (1) REGIONAL CONTRACTION: for every region state x,
+//       sum_{y in region} K(x,y) V(y) <= c V(x);
+//   (2) NO RE-ENTRY: K(x, y) = 0 for every stored row from a
+//       non-region state x into a region state y — recomputed, never
+//       assumed.
+//   Exit weight is bounded by a SEPARATELY DERIVED domination: the
+//   evaluator computes min V over the region, demands it strictly
+//   positive, and derives the conversion constant 1 / min V — a
+//   claimed constant would be a stored derived quantity, so none is
+//   representable. (The mechanized floor lemma applies to the
+//   rescaled component V / min V; the rescaling is scale-invariance
+//   of the contraction inequality.)
+// * FACE GRAMMAR (shape demands, refused not defaulted): anchor,
+//   horizon, and c are MANDATORY; at least one dweight row is
+//   mandatory; offset is optional (ABSENT means zero); score is
+//   optional (ABSENT means one; a PRESENT score REFUSES this event —
+//   the deferred-safe-fail seam, refusal over guessing, never a
+//   verdict). Duplicate or foreign-chain rows refuse at the chase /
+//   functionality grain.
+// * CLAIMS (each a side-condition, recomputed per claim; claims may
+//   be looser than canonical, never tighter). Write T for the
+//   witness horizon, k for the offset, and survival S(n) for the
+//   region mass of the killed-on-exit evolution at step n, started
+//   from the full stored dinit measure:
+//   - qtsl_dgc_partial_lo: lo <= sum_{n=k}^{T-1} S(n) — the exact
+//     partial survival sum, indices absolute, prologue steps
+//     0..k-1 excluded.
+//   - qtsl_dgc_ev_bracket: [lo, hi] brackets the expected exit time
+//     counted from step k (the raw first moment of the return-value
+//     distribution when the prologue is deterministic): lo from the
+//     partial sum, hi = partial + the geometric tail assembly at
+//     rate c from T (demands c < 1 and the positive region minimum).
+//   - qtsl_dgc_survival_tail: S(n) <= coeff * rate^n for every
+//     n >= T (demands 0 <= rate < 1, 0 <= coeff, and the derived
+//     conversion via the positive region minimum).
+//   - qtsl_dgc_z_one: termination mass exactly 1. Recompute: every
+//     region state's stored outgoing row mass is exactly one
+//     (stochastic rows, not sub-probability), dinit is a
+//     probability measure, the regional contraction holds at
+//     0 <= c < 1, no re-entry holds, and min V over the region is
+//     strictly positive — weighted decay then converts to bare
+//     survival decay, which forces P[T = infinity] = 0. (A sign-free
+//     weighted contraction alone would NOT suffice: a negative-V
+//     self-loop satisfies the inequality while never terminating —
+//     the conversion through the positive minimum is load-bearing.)
+// * ANCHOR OFFSET (moment-assembly datum; the deterministic-prologue
+//   facility): a witness DECLARING a positive offset k asserts its
+//   prologue, and the R18 demand checks the assertion
+//   UNCONDITIONALLY (whether or not any claim spends it — declaring
+//   an unusable datum refuses rather than idling); the datum is
+//   SPENT by partial/EV conclusions (absent = 0). Recompute: evolve
+//   the killed-on-exit measure from the full stored dinit; k = 0
+//   holds vacuously; k > horizon refuses; for k > 0 the total
+//   surviving mass at step k-1 must equal one (every dinit atom
+//   survives the whole prologue) — REFUSED otherwise. A spread
+//   initializer is lawful exactly when all of its mass survives the
+//   prologue.
+// * PER-CLAIM ANCHORING: every claim speaks about ITS OWN witness's
+//   anchored chain, and nothing else. Where one container carries
+//   both absorption queries (DAbsQuery) and contraction witnesses,
+//   the evaluator additionally REFUSES anchor chains that differ —
+//   one container, one chain — so no consumer can read two claims
+//   about two chains as one program's certificate.
+// * LEGACY INPUT CANONICALIZATION (emitter contract, recorded here
+//   because the schema is the wire truth): certificate inputs of the
+//   pre-mint dev-oracle format that carry a template rate but no
+//   explicit contraction rate canonicalize c := that rate at
+//   emission; the schema demands /c present always.
+//
+// Soundness (mechanized on the finite grain; see the Group L
+// catalogue entry for the full roster and grades): the
+// weighted-transfer induction wmassAt_expect_le_of_contraction
+// (+ _scored, + regional packaging
+// wmassAt_expect_on_le_of_contraction_on), exit domination
+// wmassAt_exit_le_of_contraction, tail assemblies
+// wmassAt_exit_tail_le and wmassAt_exit_moment_tail_le, the
+// alive-mass face massAt_expect_on_le_of_regionContraction +
+// dtmcAliveTail_of_regionContraction (unit floor + closed
+// complement, each witnessed load-bearing by committed
+// kernel-checked countermodels; applied to V / min V), and the
+// subsumption pair massAt_expect_le_of_contraction_of_weighted +
+// qGenFormContraction_subsumes_genform. The binding of stored rows
+// to any external program is a translation obligation outside this
+// species' trust path.
+
+theory DtmcContraction extends Dtmc {
+
+  // One contraction witness on one chain. The chain binding rides an
+  // ANCHOR STATE (the DAbsQuery pattern): the witness's chain IS its
+  // anchor's chain (`w DGenContraction/anchor DState/dtmc`). The
+  // anchor binds the chain only — it is NOT the initial state; the
+  // initial measure is the chain's stored dinit.
+  DGenContraction : Set;
+  DGenContraction/anchor  : DGenContraction -> DState;
+  DGenContraction/horizon : DGenContraction -> Nat;
+
+  // Anchor-offset datum (deterministic-prologue length; absent = 0).
+  DGenContraction/offset  : DGenContraction -> Nat;
+
+  // The contraction rate.
+  DGenContraction/c       : DGenContraction -> Q;
+
+  // Soft-score face (absent = 1; present REFUSES this event — the
+  // deferred-safe-fail seam).
+  DGenContraction/score   : DGenContraction -> HypernetRef;
+
+  // Stored certificate component V: one row per region state; the
+  // alive region is exactly this relation's support, and it must be
+  // nonempty (the face-grammar demand).
+  dweight : {cw: DGenContraction, state: DState} -> Q;
+
+  // Weight rows bind states of the witness's own chain (term-form
+  // equality through the anchor, the DAbsQuery pattern).
+  chase ax/wf/dgc_weight_same_dtmc : forall w : DGenContraction,
+      s : DState, v : Q.
+    v = {cw: w, state: s} dweight
+    |- s DState/dtmc = w DGenContraction/anchor DState/dtmc;
+
+  // The strengthened demand (side-condition
+  // C-SYS-GENFORM-CONTRACTION, registry row R18), minted per witness:
+  // the face grammar, the regional contraction recompute, the
+  // no-re-entry recompute, the positive region minimum, the offset
+  // prologue determinism where a partial/EV claim spends it, and the
+  // one-container-one-chain cross-face refusal. Budget exhaustion at
+  // ANY stage — the evolution, the recomputes, or a claim's assembly
+  // — REFUSES the whole claim, never verdicts and never falls back
+  // to a weaker recompute.
+  qtsl_dtmc_genform_contraction : {cw: DGenContraction} -> Prop;
+      // side-condition
+
+  report ax/wf/dgc_demand : forall w : DGenContraction.
+    |- {cw: w} qtsl_dtmc_genform_contraction;
+
+  // Claim rows (each a side-condition; recomputed per claim —
+  // registry rows R19-R22).
+  qtsl_dgc_partial_lo : {cw: DGenContraction, lo: Q} -> Prop;
+      // side-condition (R19)
+  qtsl_dgc_ev_bracket : {cw: DGenContraction, lo: Q, hi: Q} -> Prop;
+      // side-condition (R20)
+  qtsl_dgc_survival_tail : {cw: DGenContraction, coeff: Q, rate: Q}
+    -> Prop;   // side-condition (R21)
+  qtsl_dgc_z_one : {cw: DGenContraction} -> Prop;
+      // side-condition (R22)
+
+  // Range and order reports: the rate sits in [0, 1] with strictness
+  // demanded exactly where a tail/EV conclusion spends it; claimed
+  // intervals are intervals; tail coefficients and rates are
+  // nonnegative (a negative-base power is not a geometric survival
+  // contract).
+  report ax/wf/dgc_c_range : forall w : DGenContraction, c : Q.
+    c = w DGenContraction/c
+    |- {l: 0, r: c} q_le, {l: c, r: 1} q_le;
+
+  report ax/wf/dgc_ev_order : forall w : DGenContraction, l : Q, h : Q.
+    {cw: w, lo: l, hi: h} qtsl_dgc_ev_bracket
+    |- {l: l, r: h} q_le;
+
+  report ax/wf/dgc_tail_range : forall w : DGenContraction, b : Q,
+      r : Q.
+    {cw: w, coeff: b, rate: r} qtsl_dgc_survival_tail
+    |- {l: 0, r: b} q_le, {l: 0, r: r} q_le, {l: r, r: 1} q_lt;
+
+  report ax/wf/dgc_ev_strict : forall w : DGenContraction, l : Q,
+      h : Q, c : Q.
+    {cw: w, lo: l, hi: h} qtsl_dgc_ev_bracket,
+    c = w DGenContraction/c
+    |- {l: c, r: 1} q_lt;
+
+  // ==========================================================
+  // Deliberately absent (the testable negatives)
+  // ==========================================================
+  //
+  // * TEMPLATE-PRESENTED REGIONS (geometric offset families,
+  //   V(n) = M * gamma^n over an unbounded counter): no admitted
+  //   certificate demands them at the stored-weights grain — the
+  //   finite face stores every weight. The collapse warrant
+  //   (genFormTemplate_collapse) is mechanized and BANKED; the
+  //   schema face boards the revision event that follows its own
+  //   design leg (state-to-counter binding is the open design
+  //   question).
+  // * PATTERN-PRESENTED INFINITE CHAINS (finitely-presented row
+  //   families, product-profile templates, window coverage): the
+  //   d-dimensional walk family's face. Deferred to its own design
+  //   leg — the open questions are the state-coordinate binding
+  //   (no canonical (state, axis) -> coordinate relation exists at
+  //   this grain), the kernel species (a pattern's generated rows
+  //   vs the stored completion's rowless-is-absorbing are two
+  //   different kernels and must not share one chain reading), and
+  //   the infinite-carrier theorem (the finite-state induction does
+  //   not by itself warrant infinite-sum exchange). Pre-mint
+  //   verdicts for that face stay on the dev-oracle lane, graded
+  //   honestly as such.
+  // * HIGHER MOMENTS (k >= 2): the same per-term reduction with
+  //   sum t^k c^t closed forms — FILED to the species leg that first
+  //   needs them, not smuggled.
+  // * STORED EXIT-DOMINATION OR CONVERSION CONSTANTS: derived
+  //   (1 / min V), never stored.
+  // * PRESENT-SCORE EVALUATION: the score face refuses this event
+  //   (the mechanized core is score-carrying; the evaluator seam
+  //   stays deferred-safe-fail until a case demands it).
+}

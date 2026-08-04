@@ -844,15 +844,32 @@ fn roster_leads_with_the_primary_pair() {
     // The containers are the primary containers, byte-identical.
     assert_eq!((q.container)(), qc_v1_container_bytes());
     assert_eq!((d.container)(), dc_v1_container_bytes());
-    // Every non-leading row is a LEGACY row: a strictly older event.
+    // Every non-leading row is either a LEGACY row (a strictly older
+    // event) or a CURRENT family-addition row: a NEW closure family
+    // minted at or after the primary event WITHOUT moving the pair
+    // (the event-8 dac/dcc rows are the first instance — the pair's
+    // sources were byte-stable, so the primary aliases did not
+    // re-aim). What stays refused: a tail row RE-LISTING a pair
+    // closure at or after the primary event, which is exactly the
+    // half-done-swap signature the old all-legacy invariant guarded.
     for p in &BAKED_ROSTER[2..] {
         assert!(
-            p.event < BAKED_PRIMARY_EVENT && !p.is_primary(),
-            "roster tail row (event {}, {}) is not legacy — the swap \
-             appended above the line, or forgot to bump BAKED_PRIMARY_EVENT",
+            !p.is_primary(),
+            "roster tail row (event {}, {}) claims primacy — the swap \
+             appended above the line",
             p.event,
             p.closure
         );
+        if p.event >= BAKED_PRIMARY_EVENT {
+            assert!(
+                p.closure != "qc" && p.closure != "dc",
+                "roster tail row (event {}, {}) re-lists a pair closure at or \
+                 after the primary event — the swap appended above the line, \
+                 or forgot to bump BAKED_PRIMARY_EVENT",
+                p.event,
+                p.closure
+            );
+        }
     }
 }
 

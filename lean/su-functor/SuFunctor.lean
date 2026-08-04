@@ -50,6 +50,8 @@ import SuFunctor.Universe.DemonicClock
 import SuFunctor.Universe.MeshCompositor
 import SuFunctor.Universe.SpacelikeSeam
 import SuFunctor.Universe.StochasticWitnesses
+import SuFunctor.Universe.ThinningAbsorption
+import SuFunctor.Universe.DemonicPortCitizenship
 import SuFunctor.Universe.HausdorffKL
 import SuFunctor.Universe.EpistemicStates
 import SuFunctor.Universe.Marginalization
@@ -123,18 +125,22 @@ import SuFunctor.Adequacy.StochasticPetri
 import SuFunctor.Adequacy.StochasticPetriCascade
 import SuFunctor.Adequacy.StochasticPetriColoured
 import SuFunctor.Adequacy.StochasticPetriColouredCascade
+import SuFunctor.Adequacy.StochasticPetriColouredDemonic
 import SuFunctor.Adequacy.StochasticPetriDemonic
 import SuFunctor.Adequacy.StochasticPetriSetFiring
 import SuFunctor.Adequacy.StochasticPetriFlatten
 import SuFunctor.Adequacy.StochasticPetriAngelic
 import SuFunctor.Adequacy.StochasticPetriComposed
 import SuFunctor.Adequacy.StochasticPetriFlattenAgreement
+import SuFunctor.Adequacy.StochasticPetriColouredComposed
+import SuFunctor.Adequacy.StochasticPetriColouredDirected
 import SuFunctor.Adequacy.StochasticPetriSupervise
 import SuFunctor.Adequacy.StochasticPetriSuperviseDemonic
 import SuFunctor.Adequacy.DelayLine
 import SuFunctor.Adequacy.Bag
 import SuFunctor.Adequacy.SemanticUniverseWiring
 import SuFunctor.Adequacy.BagWiring
+import SuFunctor.Adequacy.ProbProg
 import SuFunctor.Adequacy.Ode
 import SuFunctor.Adequacy.Rode
 import SuFunctor.Adequacy.MarginalGlue
@@ -154,6 +160,7 @@ import SuFunctor.Adequacy.DtmcAbsorb
 import SuFunctor.Adequacy.DtmcAliveTail
 import SuFunctor.Adequacy.DtmcContraction
 import SuFunctor.Adequacy.DtmcTemplate
+import SuFunctor.Adequacy.DtmcProductProfile
 import SuFunctor.Adequacy.SpecBehavioral
 import SuFunctor.Adequacy.SpecPathLens
 import SuFunctor.Adequacy.SpecStreettFormers
@@ -286,6 +293,20 @@ Module map:
 * `SuFunctor.Universe.ImageChar` — the image characterization: the
   compile is a bijection from citizens onto the nonempty closed
   radial sets, with the attained ray gauge as its inverse.
+* `SuFunctor.Universe.ThinningAbsorption` — rate imprecision as
+  stay-channel imprecision: the Poisson-thinning chart into the
+  extended outcome space is mass-one and generator-lossless, absorbed
+  families land (radially embedded) in the classical Cozman corner of
+  the credal poset, and the family is recovered as the full-mass
+  slice; with the endpoint probe and the coupling divergence witness
+  for joint-body conventions.
+* `SuFunctor.Universe.DemonicPortCitizenship` — the citizenship lemma
+  at the imprecise tier's composite shape: demonic-port images of
+  nonempty compact regions under maps continuous on them land, radially
+  embedded, in the credal-body class — no convexity claimed, and a
+  quadratic witness shows none is available; with the piecewise and
+  polynomial faces, the exact-slice/never-raw packaging honesty pair,
+  and convexity-free landings for absorbed thinning families.
 * `SuFunctor.Universe.IdealPoint` — systems are ideal points: the
   body of `σ` is pinned among radial sets by one miss-face and the
   escape demands of the citizens `σ` dips under, so the singleton
@@ -551,6 +572,15 @@ Module map:
   cascade ranks are colour censuses, and the square is `ma_adequacy`
   through the coloured dictionary triangle — the left square the
   coloured flattening triangle consumes, statement shape unchanged.
+* `SuFunctor.Adequacy.StochasticPetriColouredDemonic` — the coloured
+  demonic and angelic faces: the enabling-respecting arena over
+  (transition, colour-vector) pairs — the demon selects tokens, not
+  just transitions — with the set-valued square, the credal-slice
+  reconciliation, verdicts at both polarities, the membership lemma
+  feeding both directed transfers, and the double obstruction
+  control (disabled pairs by supply and by guard each refute the
+  branch-level certificate at a singleton transition roster; the
+  recolouring net refutes every cascade rank at once).
 * `SuFunctor.Adequacy.StochasticPetriSetFiring` — the set-firing
   face: simultaneous composite firings of non-conflicting immediates
   (the founding formalism's rules R1/R3), driven by one value
@@ -763,6 +793,20 @@ Module map:
   law is a reading (the canonical section lifts), and the
   finite-horizon closure stays where it is mechanized, at the measure
   stratum's `bag_transport`.
+* `SuFunctor.Adequacy.ProbProg` — the probabilistic-programs square
+  at the former's grain: a program is a start stage and a loop body,
+  each a noise-port hypernet stage, and the unrolled program text —
+  one deterministic map on one summed-roster cube — denotes the
+  kernel-local Kleisli iterate of the stage denotations
+  (`noiseDenot_progTraj`, the Kleisli functoriality law folded to the
+  former level, unconditional at the measure stratum); the profile
+  determines the path distribution (`pathDist_profile` — a model type
+  is a profile, not a tag); and for a program presenting a classical
+  chain through the exact-rational face of its stage kernels
+  (`Presents`, the stratum boundary stated rather than smoothed), the
+  judgment on the compiled outcome-row presentation pins exactly the
+  text's denotation (`su_pprog_adequacy`), with the fair-coin
+  specimen discharging every hypothesis concretely.
 * `SuFunctor.Adequacy.Ode` — the adequacy square for the autonomous
   initial-value problem, the drift-only frame every continuous plant
   specializes: compiled forward rows (initial row, record-class row,
@@ -872,6 +916,19 @@ Module map:
   family hold at every template instance as soon as one collapsed
   exact-rational inequality holds — unbounded-counter regions become
   finitely checkable.
+* `SuFunctor.Adequacy.DtmcProductProfile` — product-profile templates
+  collapse to finitely many inequalities: the d-dimensional face of
+  the template collapse, for the uniform-axis ±1 walk on `Fin d → ℕ`
+  with monus at zero and absorption at the origin.  Under the product
+  weight `V x = ∏ i, u (x i)` — per-coordinate ramp profile, then a
+  constant geometric ratio — the alive one-step transfer factorizes
+  through per-coordinate transfer ratios, the ratios stabilize past
+  the ramp, and the finitely many class inequalities
+  `(d−k)·rMax + k·rInf ≤ d·c` discharge the contraction at every
+  state owning a geometric-regime coordinate.  The window-vocabulary
+  corollary carries the load-bearing reach side condition
+  `profile length ≤ box + 1`, whose necessity is witnessed on a
+  concrete admissible ramp profile.
 * `SuFunctor.Adequacy.MarginalGlue` — the marginal-glue obstruction:
   Vorob'ev's pairwise-consistent-but-jointly-unrealizable family of
   pair laws over a cyclic three-site cover, mechanized over the

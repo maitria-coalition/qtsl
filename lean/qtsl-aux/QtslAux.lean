@@ -35,7 +35,9 @@ import QtslAux.QuantumStack
 import QtslAux.QuantumStackNecessity
 import QtslAux.QuantumStackSufficiency
 import QtslAux.QuantumStackVonNeumann
+import QtslAux.QuantumStackConnectivity
 import QtslAux.QuantumStackNormality
+import QtslAux.QuantumStackScalars
 import QtslAux.QuantumStackImplementer
 import QtslAux.QuantumStackHolonomy
 import QtslAux.LayerD
