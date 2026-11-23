@@ -1430,8 +1430,8 @@ idling pays, among the policies tested}: at the weekly count the
 best tested never-idle (work-conserving) policy needs $255N + 455$
 ticks, $80$ behind $\pi^{\ast}$, with its never-idle law verified at
 every pre-goal tick of the replay, and a measured greedy baseline
-runs $224$ ticks behind; it is not yet established that no untested
-work-conserving policy closes that gap. Gating the \emph{last} step moves arrivals
+runs $224$ ticks behind; it is not yet established whether an untested
+work-conserving policy can close the $80$-tick gap to $\pi^{\ast}$ at $N = 84$. Gating the \emph{last} step moves arrivals
 $0.0\%$, while holding the \emph{diffusion starts} recovers the full
 gap, and replaying $\pi^{\ast}$ with holds disallowed is
 \emph{refused} by the engine at its first delayed diffusion start:
@@ -1444,8 +1444,8 @@ minimization --- the reduction Lean-checked against the
 mechanized imprecise-decision-theory development, with a concrete
 refutation cell showing the collapse fails without determinism.
 ``The synthesized policy is decision-theoretically correct''
-therefore means optimal throughput --- which the receipts above
-establish for $N \le 7$ and have not yet established beyond, and the
+therefore means optimal throughput. The receipts above establish
+that for $N \le 7$; beyond $N = 7$ it is not yet established. The
 seat-regret
 face of the specification vocabulary
 (section~\ref{sec:spec-lang-regret}) is where the language states
@@ -1729,10 +1729,10 @@ station's two machines can work in the same tick on lots at
 different steps, never on two lots at the same step. Kempf's
 specification allows more than one lot at a process step to start,
 receive service, or finish in a tick; that parallelism \emph{adds}
-runs, so the a-fortiori argument below does not cover it: whether
-the optimality results of this section carry over to a net with
-Kempf's parallelism, or to his full specification, is not yet
-established (see the model note in section~\ref{sec:exp-semicon}).
+runs, so the a-fortiori argument below does not cover it. The model
+note in section~\ref{sec:exp-semicon} discusses whether these
+optimality results carry over to a net with Kempf's parallelism or
+to his full specification.
 The others: diffusion's batching-of-three and its mix rules,
 product types and test-lot dedication, the declared buffer
 capacities, the transporter, the operators and technician, the
