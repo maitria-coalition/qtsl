@@ -188,8 +188,11 @@ mkdir -p generated
 {
   echo "# qtsl-experiments provenance for the committed book artefacts."
   echo "# chapter-tree is git's content hash of chapter/ (survives history rewrites)."
+  echo "# repo is the public home of the commit; commit-date is its committer date (UTC)."
+  echo "repo=https://github.com/maitria-coalition/qtsl-experiments"
   echo "chapter-tree=$(git -C "$EXP" rev-parse HEAD:chapter)"
-  echo "commit=$(git -C "$EXP" log -1 --format='%h %cs')"
+  echo "commit=$(git -C "$EXP" rev-parse HEAD)"
+  echo "commit-date=$(TZ=UTC git -C "$EXP" log -1 --format=%cd --date=format-local:%Y-%m-%d)"
   if [[ -n "$(git -C "$EXP" status --porcelain -- chapter 2>/dev/null)" ]]; then
     echo "dirty=chapter/ had uncommitted changes at build time"
   fi

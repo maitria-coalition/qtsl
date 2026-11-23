@@ -1,4 +1,7 @@
 # qtsl-experiments provenance for the committed book artefacts.
 # chapter-tree is git's content hash of chapter/ (survives history rewrites).
-chapter-tree=ce6175dab258804c0eb3e17aca9e7760db8800a7
-commit=05f91e7 2026-08-04
+# repo is the public home of the commit; commit-date is its committer date (UTC).
+repo=https://github.com/maitria-coalition/qtsl-experiments
+chapter-tree=6ba0622658f5cb0116553d42b9a5670ca9c5ef72
+commit=70c4ec6e4b48bb3089ccdcc1d1fad86816127cc5
+commit-date=2026-11-23
