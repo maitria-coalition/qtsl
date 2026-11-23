@@ -10123,11 +10123,12 @@ lots (two-sided, with LRAT proofs accepted by a CakeML-verified
 checker, resting on two pen-and-paper lemmas), and attains the same
 expression in replay at $N=84$ and at $N=8,\dots,12$ (with the
 pending-lot count and unlock threshold substituted for the latter
-replays). Optimality at those counts is open: the Lean
-machine-contiguity floor is for an abstract schedule model. These
+replays). Optimality at those counts is not yet established: the
+Lean machine-contiguity floor is for an abstract schedule model. These
 results are about a simplified net in which at most one lot per
 process step may start, receive a unit of service, or finish per
-tick. An uncertified black-box dispatcher runs inside a
+tick; whether they carry over to Kempf's 1994 specification is
+discussed in section~\ref{sec:exp-semicon}. An uncertified black-box dispatcher runs inside a
 certified switching envelope whose sealed certificate re-verifies
 byte-identical after every run. One certificate covers lot counts
 from $7$ to $10^{7}$ --- its container grows six bytes across the
@@ -11676,7 +11677,7 @@ but for an abstract schedule model onto which the net does not
 project exactly: the net also allows a tick in a lot's own start
 round and a same-round handover of a diffusion machine. So for
 $N \ge 8$ the floor is not yet proved for the net, and optimality
-there is open, although $\pi^*$ is replayed at $255N + 375$. An
+there is not yet established, although $\pi^*$ is replayed at $255N + 375$. An
 earlier version of this paragraph claimed a Lean floor over all
 policies and a two-sided optimum at every $N$; both overclaimed. The
 evidence and its exact scope are in
@@ -11690,7 +11691,8 @@ that reference, and only the diffusion-station
 pull preference ever moves a number; at $N = 84$ the tested
 deliberately idling supervisor family improves on the best tested
 work-conserving policy ($255N + 455$ ticks) by $80$ ticks, though
-whether some untested work-conserving policy closes that gap is open;
+it is not yet established that no untested work-conserving policy
+closes that gap;
 and the wall-clock value
 concentrates in the dispatch seat: an adversarial pull order costs
 $+83.5\%$, while the synthesized gate --- whose value is the
@@ -11715,8 +11717,8 @@ the results on this track are about this net, including the policy
 comparisons above and the envelope below.
 Whether they carry over to a net with Kempf's per-machine parallelism,
 and more generally to Kempf's full specification (batching, setups,
-personnel, failures), is open. A re-model with per-machine
-parallelism is in progress.
+personnel, failures), is work in progress, reopened 2026-10-23,
+with a re-model that adds per-machine parallelism.
 
 The track's last exhibit prices the case nobody certifies: an
 \emph{uncertified} policy --- a lookahead heuristic standing in for
@@ -11788,10 +11790,11 @@ earlier preview of
 this section stated that no claim was made about optimality of the
 dispatch policies, only their certified stability region; that
 sentence is now true of the fluid track alone. On the discrete
-Mini-Fab net the optimality question is closed for $N \le 7$ and open
-beyond, where attainment at $255N + 375$ is replayed but the floor is
-proved only for the abstract model (erratum above). Whether any of it
-carries over to Kempf's specification is open (model note above). The
+Mini-Fab net the optimality question is closed for $N \le 7$ and not
+yet established beyond, where attainment at $255N + 375$ is replayed but the floor is
+proved only for the abstract model (erratum above). For whether any
+of it carries over to Kempf's specification, see the model note
+above. The
 correction is recorded here rather than silently edited away, so that
 readers of the earlier preview can see what changed. The ladder's remaining nine rungs
 --- MIMAC sets 1--6, the SMT2020 pair, and SMAT2022 --- are
@@ -81044,7 +81047,8 @@ T_{\mathrm{opt}}(N) \;=\; 255N + 371 + d(N),
 \]
 and is established from both sides. For $N \ge 8$ the same expression
 is only the conjectured optimum: $\pi^{\ast}$ attains it at the
-replayed counts below, but optimality on the net is open.
+replayed counts below, but optimality on the net is not yet
+established.
 \emph{Erratum (2026-10-19): optimality is established for $N \le 7$
 only.} For $N = 1, \dots, 7$ it is closed from both sides: no schedule
 meets $T_{\mathrm{opt}} - 1$ on a stated relaxation of the net that
@@ -81095,7 +81099,8 @@ refused by the kernel --- but it is proved for an \emph{abstract
 schedule model} onto which the net does not project exactly: the net
 also allows a tick in a lot's own start round and a same-round
 handover of a diffusion machine. So for $N \ge 8$ the floor is not
-yet proved for the net, and optimality there is open, although
+yet proved for the net, and optimality there is not yet established,
+although
 the replays at $N = 8, \dots, 12$ and $N = 84$ attain $255N + 375$.
 Those replays establish the upper side at those counts, not an
 all-policy lower bound. The Lean analysis accounts for the $+4$ in
@@ -81112,8 +81117,8 @@ idling pays, among the policies tested}: at the weekly count the
 best tested never-idle (work-conserving) policy needs $255N + 455$
 ticks, $80$ behind $\pi^{\ast}$, with its never-idle law verified at
 every pre-goal tick of the replay, and a measured greedy baseline
-runs $224$ ticks behind; whether some untested work-conserving policy
-closes that gap is open. Gating the \emph{last} step moves arrivals
+runs $224$ ticks behind; it is not yet established that no untested
+work-conserving policy closes that gap. Gating the \emph{last} step moves arrivals
 $0.0\%$, while holding the \emph{diffusion starts} recovers the full
 gap, and replaying $\pi^{\ast}$ with holds disallowed is
 \emph{refused} by the engine at its first delayed diffusion start:
@@ -81127,7 +81132,8 @@ mechanized imprecise-decision-theory development, with a concrete
 refutation cell showing the collapse fails without determinism.
 ``The synthesized policy is decision-theoretically correct''
 therefore means optimal throughput --- which the receipts above
-establish for $N \le 7$ and leave open beyond, and the seat-regret
+establish for $N \le 7$ and have not yet established beyond, and the
+seat-regret
 face of the specification vocabulary
 (section~\ref{sec:spec-lang-regret}) is where the language states
 exactly this shape: the regret of a filler against its own seat,
@@ -81360,10 +81366,11 @@ $N=84$ container plus a transcription of the rows it does not
 seal; the $N=1,\dots,12$ replays use that model with the
 pending-lot count and unlock threshold substituted. Optimality
 on the simplified net is established for $N=1,\dots,7$
-and is open beyond; the
+and not yet established beyond; the
 Lean machine-contiguity floor is for an abstract schedule model. The best tested never-idle policy needs
 $255N + 455$ at $N = 84$ --- these two gates are worth $80$ ticks over it
-(whether an untested work-conserving policy closes that gap is open), and replaying $\pi^{\ast}$ with
+(that no untested work-conserving policy closes that gap is not yet
+established), and replaying $\pi^{\ast}$ with
 holds disallowed is refused at its first delayed diffusion start.
 Under deterministic closed dynamics, imprecise-decision-theoretic
 selection provably collapses to makespan minimization (Lean-checked)
@@ -81641,8 +81648,9 @@ specification allows more than one lot at a process step to start,
 receive service, or finish in a tick; that parallelism \emph{adds}
 runs, so the a-fortiori argument below does not cover it: whether
 the optimality results of this section carry over to a net with
-Kempf's parallelism, or to his full specification, is open. The
-others: diffusion's batching-of-three and its mix rules,
+Kempf's parallelism, or to his full specification, is not yet
+established (see the model note in section~\ref{sec:exp-semicon}).
+The others: diffusion's batching-of-three and its mix rules,
 product types and test-lot dedication, the declared buffer
 capacities, the transporter, the operators and technician, the
 maintenance calendars and failures, and the timed weekly release
