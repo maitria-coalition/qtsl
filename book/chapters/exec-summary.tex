@@ -226,8 +226,8 @@ plainly: the circuit is examined, not learned --- system
 identification is a separate problem the toolkit does not yet
 address. (section~\ref{sec:exp-atari}.)
 
-\paragraph{Semiconductor process models: certified stable, and
-dispatched to certified optimality.} On the
+\paragraph{Semiconductor process models: certified stable, with
+wall-clock dispatch optimal for up to seven lots on a simplified net.} On the
 Intel Mini-Fab, the community's minimal re-entrant model, named
 dispatch policies
 carry exact drain certificates at up to $99.9\%$ of fluid capacity,
@@ -240,11 +240,17 @@ weak and shown anyway: the aggregation gap is a measured frontier,
 not fine print. On the Mini-Fab's discrete net, dispatch itself is
 now a certified quantity: joint policy+certificate synthesis returns
 a supervisor with a certified $1.9\%$ throughput-floor gain over the
-no-policy worst case; a wall-clock floor over \emph{all} dispatch
-policies --- proved in Lean, with adversarial mutants refused by the
-kernel --- is met exactly by an explicit shipped policy, so its
-certified-optimality column reads $100.00\%$, earned rather than
-rounded; and an uncertified black-box dispatcher runs inside a
+no-policy worst case; an explicit shipped policy attains the
+wall-clock optimum over \emph{all} dispatch policies for up to seven
+lots (two-sided, with LRAT proofs accepted by a CakeML-verified
+checker, resting on two pen-and-paper lemmas), and attains the same
+expression in replay at $N=84$ and at $N=8,\dots,12$ (with the
+pending-lot count and unlock threshold substituted for the latter
+replays). Optimality at those counts is open: the Lean
+machine-contiguity floor is for an abstract schedule model. These
+results are about a simplified net in which at most one lot per
+process step may start, receive a unit of service, or finish per
+tick. An uncertified black-box dispatcher runs inside a
 certified switching envelope whose sealed certificate re-verifies
 byte-identical after every run. One certificate covers lot counts
 from $7$ to $10^{7}$ --- its container grows six bytes across the

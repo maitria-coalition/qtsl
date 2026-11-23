@@ -610,12 +610,15 @@ the frontier itself is the seam between them.
 What has been certified about the discrete line, with no fluid
 scaling and no aggregate projection anywhere in the statement: the
 lot-flow core of the Mini-Fab --- the exact Kempf process times, the
-machines at their true capacities ($2$, $2$, $1$), the full
-re-entrant route --- as an SDCPN of the modelling catalogue's frame,
+station machine counts $(2, 2, 1)$, the full re-entrant route,
+simplified so that at most one lot per process step may start,
+receive a unit of service, or finish per tick (the model-boundary
+paragraph, page~\pageref{par:minifab-model-boundary}) --- as an SDCPN of the modelling catalogue's frame,
 a token-population System at its full
 combinatorial state space, carrying twelve plated certificates whose
-$150$ footprint sequents are discharged in exact rational
-arithmetic, one row set covering \emph{every} lot count,
+$150$ footprint sequents are discharged by the producer in exact
+rational arithmetic (section~\ref{sec:minifab-exact-status} says
+what checks them), one row set covering \emph{every} lot count,
 \emph{every} scheduler, \emph{every} run. The model is small enough
 to print whole, and this section does --- the net on its own page in
 Petri notation (Figure~\ref{fig:minifab-sdcpn-petri}), the
@@ -1128,14 +1131,33 @@ The trust story is staged, and each stage is named rather than
 blurred.
 
 \begin{itemize}
-\item \textbf{Discharged today, re-runnable from the public tree:}
-  all $150$ footprint sequents, coverage, floors, gap positivity,
-  and scale-parameter conformance, in the producer's exact tier
-  (Bernstein-coefficient nonnegativity over the declared colour
-  boxes, exact $\Q$). The campaign --- model, dictionaries, rows ---
-  is committed beside the toolkit's semiconductor strategy, and its
-  test battery replays the whole verification, so these numbers are
-  a \texttt{cargo test} away rather than a transcript's word.
+\item \textbf{Checked today by the producer (trusted Rust, not
+  formally verified):} the toolkit's producer-side verifier,
+  \texttt{verify\_campaign} in mtk, checks all $150$ footprint
+  sequents, coverage, the certificates' floor conditions (every cited
+  feature nonnegative over its plate's declared colour box --- a
+  side condition of each certificate, not a lower bound on the
+  optimum), gap positivity, and scale-parameter
+  conformance, in exact rational arithmetic (Bernstein-coefficient
+  nonnegativity, exact $\Q$). The campaign --- model, dictionaries,
+  rows --- and the tests that run this verification are public, beside
+  the toolkit's semiconductor strategy, at the mtk revision the
+  experiments repository pins (\texttt{8904467}). Two
+  separate facts limit what that buys a reader. First, the verifier
+  is ordinary Rust that we trust, not formally verified. Second, it cannot
+  be rebuilt from public sources today: the snapshot depends on
+  development revisions of sibling crates that are not published, so
+  a reader cannot reproduce the producer check from public sources
+  alone. The checker of the next item, which
+  reads the sealed container, independently re-evaluates only $36$ of the $150$ footprint rows,
+  those of the six tick transitions; the other $114$, including the
+  rows of the release, start, finish and ship transitions on which
+  the deadline depends, are checked by this producer alone. The
+  sealed bytes do not identify the net: a variant in which lots skip
+  step~2 seals to the same bytes. So the sealed checker's $36$-row
+  evaluation does not by itself authenticate the net printed in this
+  chapter, nor the $114$ producer-only rows; ``the net'' in every
+  claim here is the one defined by the pinned mtk source.
 \item \textbf{Discharged today, in the production loop:} emitted
   certificate containers are sealed deterministically (double
   emission is byte-identical), and the engine-side theory provider
@@ -1269,7 +1291,8 @@ nontrivial question. This subsection and the four that follow read
 the same declared clocks the other way --- \emph{metric time}, the
 tick meter --- and push the open-seat story to its natural end: what the
 wall clock rewards, exactly how much, a policy that attains the
-optimum, a machine-checked sense in which ``optimal'' is the
+optimum for $N \le 7$ and the conjectured value at the replayed
+larger counts $N = 8, \dots, 12$ and $N = 84$, a machine-checked sense in which ``optimal'' is the
 decision-theoretically right word, a deliberately untrusted policy
 run inside a certified envelope, and one certificate that spans lot
 counts from $7$ to $10^{7}$. The subject is unchanged --- the
@@ -1325,62 +1348,92 @@ Real-time value lives almost entirely in the dispatch seat ---
 which is why the optimum is a policy story, next, and why the seat
 then widens (section~\ref{sec:minifab-fulldispatch}).
 
-\subsection{Optimal throughput, exactly}
+\subsection{Optimal throughput: exact for up to seven lots}
 \label{sec:minifab-optimum}
 
-The exact optimum is known in closed form at small $N$ and attained
-at every tested $N$:
+For $N = 1, \dots, 7$, the optimum, measured as the tick of the
+$N$-th arrival into the finishing queue $q_6$ (not the tick at which
+all lots have shipped), is
 \[
 T_{\mathrm{opt}}(N) \;=\; 255N + 371 + d(N),
 \qquad d = 0\ (N \le 2),\quad 2\ (N = 3),\quad 4\ (N \ge 4),
 \]
-certified two-sided for $N \le 7$ by exhaustive Z3 search ---
-satisfiability with an independently re-validated witness schedule
-at $T_{\mathrm{opt}}$, unsatisfiability at $T_{\mathrm{opt}} - 1$
---- and the $+4$ plateau is attained by an explicit supervisor
-family $\pi^{\ast}$, drawn seated in its interface as
-Figure~\ref{fig:minifab-pistar} (hold the first few diffusion
-starts on one
-machine with two-tick handovers, then alternate pre-positioned; run
-the step-1 services back to back) at every tested lot count
-($N \le 8$, $12$, $30$, $84$): $21{,}795$ ticks at the weekly
-count, within $4$ ticks ($0.018\%$) of the machine-free floor
-above, and \emph{exactly}
-optimal in per-lot throughput at all $N$ --- $255$ ticks per lot,
-matched from both sides. The attainment side is \emph{container
-replay}, geolog-checked: $\pi^{\ast}$'s explicit firing table replays
-against the sealed exhibit bytes to arrival at exactly $21{,}795$,
-under the meter law, every hold accounted. The floor side now meets
-it exactly. The machine-free floor is \emph{not} attainable for
-$N \ge 3$ (Z3 refuses it outright), and the reason is mechanized ---
-Lean-checked: a five-case machine-contiguity analysis of the first
-four diffusion entrants, showing any schedule faster than
-$255N + 375$ leaves the third or fourth lot's service without a
-contiguous machine window --- and it \emph{collapsed} under
-mechanization: the tick-meter forces two pigeonhole machine
-handovers, three of the five cases dying inside the first forcing.
-That lifts the certified floor to $255N + 375$ for $N \ge 4$
-($255N + 373$ at $N \ge 3$; the mechanized anchors match the Z3
-optima exactly at $N \le 7$, and the $N = 3$ value $d = 2$ is
-Z3-certified two-sided), which the replayed attainment meets
-exactly --- the four-tick daylight between floor and attainment is
-closed, $N$-uniformly, and the mechanization explains why the
-plateau is $+4$: it is the double diffusion handover $\pi^{\ast}$
-saturates. In the same pass the counter/meter bookkeeping behind
+and is established from both sides. For $N \ge 8$ the same expression
+is only the conjectured optimum: $\pi^{\ast}$ attains it at the
+replayed counts below, but optimality on the net is open.
+\emph{Erratum (2026-10-19): optimality is established for $N \le 7$
+only.} For $N = 1, \dots, 7$ it is closed from both sides: no schedule
+meets $T_{\mathrm{opt}} - 1$ on a stated relaxation of the net that
+also imposes a queue-order reduction (unsatisfiable: LRAT proofs are
+checked by the CakeML-verified checker \texttt{cake\_lpr}, and an
+independent integer SMT encoding provides a separate check), and a schedule at
+$T_{\mathrm{opt}}$ exists and is re-validated. Two pen-and-paper
+arguments carry the lower side to every policy: that the relaxation
+contains every run of the net, and an exchange lemma justifying the
+queue-order reduction; for $N=1,\dots,5$ there are also UNSAT
+certificates for the encoding without the queue-order reduction. All
+of this is about the simplified net of this section, in which at
+most one lot per process step may start, receive a unit of service,
+or finish per tick, even at two-machine stations (model note at this
+section's end).
+
+On the upper side an explicit supervisor family $\pi^{\ast}$,
+drawn seated in its interface as Figure~\ref{fig:minifab-pistar}
+(hold the first few diffusion starts on one machine with two-tick
+handovers, then alternate pre-positioned; run the step-1 services
+back to back), attains the displayed expression in replay at
+$N = 1, \dots, 12$ and at $N = 84$; at each replayed $N \ge 4$ that
+value is $255N + 375$: $21{,}795$ ticks at the weekly count, within
+$4$ ticks ($0.018\%$) of the machine-free floor above; the displayed
+expression divided by $N$ tends to $255$ ticks per lot, which is an
+algebraic limit, not an all-$N$ replay result. The attainment is a \emph{replay}:
+$\pi^{\ast}$'s explicit firing table replays to arrival at exactly
+$21{,}795$ against the decoded container plus a named transcription
+of the net rows the container does not seal (the transcription is
+\texttt{semicon/minifab-floor/glc-replay/src/replay.rs} in the
+experiments repository; section~\ref{sec:minifab-exact-status}),
+under the meter law, every
+hold accounted. At $N = 1, \dots, 12$ the replay runs on the same
+decoded net with exactly two sealed facts changed, the pending-lot
+count and the unlock threshold, both sealed as $84$; it is not a
+replay of a sealed $N$-lot container. (The original archive also
+replayed $N = 30$, at $8{,}025$ ticks, against the producer's
+in-memory model rather than the decoded container; that receipt is
+kept but not re-run.) For $3 \le N \le 7$ the two-sided optimum also
+shows that the machine-free floor $255N + 371$ is not attained. A
+machine-contiguity floor of $255N + 375$ for $N \ge 4$ is proved in
+Lean~4 over mathlib --- a five-case analysis of the first four
+diffusion entrants, showing any schedule in that abstract model
+faster than $255N + 375$ leaves the third or fourth lot's service without a contiguous
+machine window, three of the five cases dying inside the first
+pigeonhole handover the tick-meter forces, with adversarial mutants
+refused by the kernel --- but it is proved for an \emph{abstract
+schedule model} onto which the net does not project exactly: the net
+also allows a tick in a lot's own start round and a same-round
+handover of a diffusion machine. So for $N \ge 8$ the floor is not
+yet proved for the net, and optimality there is open, although
+the replays at $N = 8, \dots, 12$ and $N = 84$ attain $255N + 375$.
+Those replays establish the upper side at those counts, not an
+all-policy lower bound. The Lean analysis accounts for the $+4$ in
+the abstract lower bound by diffusion-machine handovers; it does not
+transfer that bound to the net. An earlier edition of this
+subsection claimed a Lean-checked floor for the net and a two-sided
+optimum at every $N$; both overclaimed.
+Separately, the counter/meter bookkeeping behind
 the machine-free floor landed as geolog-checked rows --- this
 container family's first checker-side clock-law rows.
 
 Two consequences deserve their own sentences. \emph{Deliberate
-idling is necessary for optimality}: for $N \ge 3$ the best
-never-idle (work-conserving) policy needs $255N + 455$ ticks --- at
-the weekly count, $80$ ticks behind $\pi^{\ast}$, with its
-never-idle law verified at every pre-goal tick of the container
-replay --- and a measured greedy baseline runs $224$ ticks behind;
-gating the \emph{last} step moves arrivals $0.0\%$, while holding
-the \emph{diffusion starts} recovers the full gap. The necessity is
-also mechanical: replaying $\pi^{\ast}$ with holds disallowed is
-\emph{refused} by the engine at its first delayed diffusion start.
-Where the supervisor holds is what the last $80$ ticks are made of.
+idling pays, among the policies tested}: at the weekly count the
+best tested never-idle (work-conserving) policy needs $255N + 455$
+ticks, $80$ behind $\pi^{\ast}$, with its never-idle law verified at
+every pre-goal tick of the replay, and a measured greedy baseline
+runs $224$ ticks behind; whether some untested work-conserving policy
+closes that gap is open. Gating the \emph{last} step moves arrivals
+$0.0\%$, while holding the \emph{diffusion starts} recovers the full
+gap, and replaying $\pi^{\ast}$ with holds disallowed is
+\emph{refused} by the engine at its first delayed diffusion start:
+where the supervisor holds is what its last $80$ ticks are made of.
 And \emph{the decision-theoretic reading is discharged, not
 gestured at}: with deterministic closed dynamics the belief state
 is a point mass, and imprecise-decision-theoretic selection at the
@@ -1389,13 +1442,14 @@ minimization --- the reduction Lean-checked against the
 mechanized imprecise-decision-theory development, with a concrete
 refutation cell showing the collapse fails without determinism.
 ``The synthesized policy is decision-theoretically correct''
-therefore means optimal throughput --- the optimality receipts
-above discharge it, each at its stated grade, and the seat-regret
+therefore means optimal throughput --- which the receipts above
+establish for $N \le 7$ and leave open beyond, and the seat-regret
 face of the specification vocabulary
 (section~\ref{sec:spec-lang-regret}) is where the language states
 exactly this shape: the regret of a filler against its own seat,
-here $0$ at every tested lot count --- two-sided by Z3 at
-$N \le 7$, the Lean-checked floor met exactly beyond.
+here $0$ for $N \le 7$ (established two-sided as above) and
+unproved beyond, where the Lean floor covers only the abstract
+schedule model.
 
 Figure~\ref{fig:minifab-pistar} closes the subsection by drawing
 $\pi^{\ast}$ as what it is: a filler for the supervisor seat, the
@@ -1436,9 +1490,9 @@ diffusion-station pull preference binds the outcome --- the
 implantation and lithography columns of the table never move a
 number --- while token selection swings roughly $7{,}000$ ticks and
 \emph{crosses} with pull preference; the best cell lands on
-$255N + 455$ exactly at $N \in \{7, 84\}$ --- the work-conserving
-optimum of the previous subsection, consistent with the separation
-proved there, since grid policies never deliberately idle. Threshold-style gate supervisors provably
+$255N + 455$ exactly at $N \in \{7, 84\}$ --- the best tested
+work-conserving value of the previous subsection, consistent with it,
+since grid policies never deliberately idle. Threshold-style gate supervisors provably
 cannot express per-station pull preference --- argued: a gate place
 maintained by fixed-weight fused arcs is an affine functional of
 the marking, read through upward-closed thresholds, and a pull
@@ -1456,7 +1510,7 @@ operations.
 \toprule
 \multicolumn{4}{@{}c}{dispatch policy} &
 \multicolumn{4}{c}{ticks per arrival} &
-\multicolumn{2}{c@{}}{certified optimality (\%)} \\
+\multicolumn{2}{c@{}}{reference / listed value (\%)} \\
 \cmidrule(r){1-4}\cmidrule(lr){5-8}\cmidrule(l){9-10}
 $m_{\mathrm{diff}}$ pulls & $m_{\mathrm{impl}}$ pulls &
 $m_{\mathrm{lith}}$ pulls & selection &
@@ -1464,7 +1518,7 @@ $N{=}1$ & $N{=}7$ & $N{=}84$ & $N{=}10^{6}$ & $N{=}84$ & $N{=}10^{6}$ \\
 \midrule
 \multicolumn{4}{@{}l}{\textbf{ours: $\pi^{\ast}$} (synthesized holds --- not never-idle)} &
 626.0 & \bestcell{308.6} & \bestcell{259.5} & \bestcell{255.000375} &
-\bestcell{100.00} & \bestcell{100.00} \\
+\bestcell{100.00$^{\dagger}$} & \bestcell{100.00$^{\dagger}$} \\
 \midrule
 $q_5$ & $q_2$ & $q_3$ & most-advanced  & 626.0 & 320.0 & 260.4 & --- & 99.63 & --- \\
 $q_5$ & $q_2$ & $q_6$ & most-advanced  & 626.0 & 320.0 & 260.4 & --- & 99.63 & --- \\
@@ -1483,7 +1537,7 @@ $q_1$ & $q_2$ & $q_6$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & -
 $q_1$ & $q_4$ & $q_3$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & --- \\
 $q_1$ & $q_4$ & $q_6$ & most-advanced  & 626.0 & 448.6 & 477.4 & --- & 54.35 & --- \\
 \midrule
-\multicolumn{4}{@{}l}{\emph{certified floor, all policies ($255N{+}375$, $N \ge 4$, met by $\pi^{\ast}$)}} &
+\multicolumn{4}{@{}l}{\emph{reference ($255N{+}375$ for $N \ge 4$; proved optimal for $N \le 7$, not proved a floor for $N \ge 8$)}} &
 \emph{626.0} & \emph{308.6} & \emph{259.5} & \emph{255.000375} &
 \emph{100} & \emph{100} \\
 \bottomrule
@@ -1495,27 +1549,24 @@ cells (three binary pull preferences $\times$ token selection;
 deterministic replay, verified by residual-order permutations) and the
 synthesized $\pi^{\ast}$, which is not a row of the grid because it
 deliberately idles --- the one capability the never-idle class lacks,
-worth exactly the last $80$ ticks. Read the parameter columns: only
+worth $80$ ticks over the best tested never-idle cell. Read the parameter columns: only
 the diffusion column ever moves a number; the implantation and
 lithography preferences are provably irrelevant at this roster. Token
 selection crosses with pull preference (most-advanced wins under
 $q_5$, loses under $q_1$). Units: ticks per arrival ($T/N$, the
-throughput cost of one lot; the asymptotic ideal is $255$); at
-$N = 1$ every policy ties the floor at $626.0$ (the floor is
-$255N + 371$ there, and tight: no contention). ``Certified optimality'' is the certified floor
-divided by the policy's attained ticks: the fraction of
-certifiably-unbeatable performance the policy \emph{provably}
-delivers. $\pi^{\ast}$'s column reads $100.00$ at the weekly count ---
-earned, not rounded: the four-tick daylight between the machine-free
-floor and the attainment closed when the machine-contiguity tree was
-Lean-checked (section~\ref{sec:minifab-optimum}), and the certified
-floor now meets the replayed attainment at $255N + 375$ exactly. The
-closure is $N$-uniform, so the $N = 10^{6}$ column reads $100.00$ as
-well. The sixteen never-idle cells are deterministic replays and do
-not extend to $10^{6}$ (simulation is the bottleneck there by design,
-Table~\ref{tab:minifab-nscaling}); only rows whose attainment has a
-certified closed form carry those columns --- which is itself the
-point. The single-supervisor lanes of section~\ref{sec:minifab-carved}
+throughput cost of one lot; the asymptotic ideal is $255$); at $N = 1$ every tabulated policy attains the optimum of $626$
+ticks. At $N = 7$, $\pi^{\ast}$ attains the proved optimum of
+$2{,}160$ ticks ($308.6$ ticks per arrival, rounded). The
+percentage columns divide the reference time by the listed policy
+time at the same $N$, before rounding. $^{\dagger}$At $N = 84$
+the denominator for $\pi^{\ast}$ is its replayed time of
+$21{,}795$ ticks. At $N = 10^{6}$ the only policy entry is a
+formula evaluation: $(255N+375)/N = 255.000375$ ticks per
+arrival, not a replay. Its $100.00\%$ compares the formula with
+itself. Neither percentage column certifies optimality on the net;
+an earlier edition called these columns certified at every $N$.
+The sixteen never-idle cells are deterministic replays and have
+no million-lot entries (Table~\ref{tab:minifab-nscaling}). The single-supervisor lanes of section~\ref{sec:minifab-carved}
 show the same pull-order lever at the same magnitude ($40{,}406$ ticks
 under an adversarial greedy pull there).}
 \label{tab:minifab-dispatchgrid}
@@ -1527,11 +1578,16 @@ under an adversarial greedy pull there).}
 The envelope certificates --- safety, floors, the deadline ---
 never read the policy: they quantify over every filler of the seat,
 which is why the policy may be \emph{anything}, including a black
-box nobody should trust. (The per-policy rows of
-Table~\ref{tab:minifab-dispatchgrid} do read the policy --- but
-only as a replayed \emph{trace}, re-checked row by row against the
-sealed container, so even the performance claims ask for no trust
-in the box, only in the replay.) A third closure of the same seat
+box nobody should trust. (For replay-based performance claims the dispatcher need not be
+trusted: what is checked is its trace. For $\pi^{\ast}$ the replay
+model and its relation to the sealed instance are specified in
+section~\ref{sec:minifab-optimum}. The million-lot entry is a
+formula evaluation, not a checked trace. Of the never-idle rows of
+Table~\ref{tab:minifab-dispatchgrid}, only the best value at
+$N = 84$, $21{,}875$ ticks, is also reached by a work-conserving
+schedule replayed against the decoded container; the other cells
+are replays by the producer's strategy tier, which is trusted Rust
+and cannot be reproduced from public sources alone.) A third closure of the same seat
 demonstrates exactly that:
 the open comb filled by an uncertified lookahead heuristic (a
 stand-in for a learned or LLM dispatcher) composed with a certified
@@ -1607,7 +1663,8 @@ medians $1.9$\,ms).}
 \paragraph{What is $N$-parametric and what is not --- the honest
 split.} The \emph{certificate} and the \emph{checker} are
 $N$-parametric in the strong sense: the same $36$ footprint rows
-(this container's share of the exhibit family's $150$ footprint sequents),
+(of the $150$ footprint sequents the producer checks, the sealed
+checker evaluates only these $36$, the six tick transitions' rows),
 the same dictionaries, the same claim roster discharge at every $N$
 (identical tally vectors across the sweep), and at the landed weekly
 count the resealed container reproduces the landed exhibit exactly.
@@ -1646,21 +1703,33 @@ words; scheduling $\lfloor N/2\rfloor$ such pairs in blocks gives
 $\binom{259}{32}^{\lfloor N/2\rfloor}$ distinct maximal runs. Every
 one of them is covered by the same $\sim$3\,kB of certificate.
 
-\paragraph{Reproduction.} Every certificate in these subsections is
-available as a sealed container, together with a one-command
-reproduction kit that rebuilds the independent checker at a pinned
-revision, re-verifies each container from its bytes alone --- with
-per-relation claim counts as a load-bearing gate and committed
-integrity mutants that must refuse --- and re-runs the
-producer-tier mutant batteries. The dispatch grids, the Z3
-optima (each satisfiability/unsatisfiability pair re-derives in one
-command), and the $N$-scaling sweep ship the same way
-(section~\ref{sec:exp-repro}).
+\paragraph{Reproduction.} The reproduction kit rebuilds the independent checker at a pinned
+revision and re-checks the sealed containers, with per-relation
+claim counts and integrity mutants as gates. Of the Mini-Fab
+campaign's $150$ footprint rows, this check evaluates the $36$
+tick-transition rows; it neither checks the other $114$ nor
+identifies the net from the sealed bytes. The kit also includes
+the producer-tier mutant tests, but that leg needs unpublished
+dependency revisions and cannot be reproduced from public sources
+alone. For the dispatch grids, the small-$N$ optimality receipts
+(including the LRAT proofs and the independent SMT check), and
+the lot-count sweep, see section~\ref{sec:exp-repro}.
 
-\paragraph{The model boundary, honestly.} Everything in this
+\paragraph{The model boundary, honestly.}\label{par:minifab-model-boundary} Everything in this
 section --- counting time and carved clock alike --- certifies
-the lot-flow core, and each exclusion is a named refinement rather
-than fine print: diffusion's batching-of-three and its mix rules,
+the lot-flow core, as a simplified discrete net, and each exclusion
+is a named refinement rather than fine print. The first is
+parallelism: under the wall-clock semantics each transition fires at
+most once per tick, so at a given process step at most one lot can
+start, receive a unit of service, or finish in any one tick; a
+station's two machines can work in the same tick on lots at
+different steps, never on two lots at the same step. Kempf's
+specification allows more than one lot at a process step to start,
+receive service, or finish in a tick; that parallelism \emph{adds}
+runs, so the a-fortiori argument below does not cover it: whether
+the optimality results of this section carry over to a net with
+Kempf's parallelism, or to his full specification, is open. The
+others: diffusion's batching-of-three and its mix rules,
 product types and test-lot dedication, the declared buffer
 capacities, the transporter, the operators and technician, the
 maintenance calendars and failures, and the timed weekly release

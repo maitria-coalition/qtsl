@@ -182,7 +182,7 @@
 \end{tikzpicture}%
 \par\medskip
 \begin{minipage}{0.94\linewidth}
-\platecaption{The synthesized optimal policy $\pi^{\ast}$, drawn
+\platecaption{The synthesized policy $\pi^{\ast}$ (optimal for $N \le 7$), drawn
 as what it is: a filler for the supervisor seat. The dashed seat of
 Figure~\ref{fig:minifab-sdcpn-petri} is here nearly the whole page,
 and the plant survives only as the gated neighbourhood along the top
@@ -208,16 +208,22 @@ pre-positions each diffusion slot; holding $\mathrm{start}_1$ at the
 quota keeps a diffusion machine free for step~5 --- deliberate idling,
 the one capability the never-idle class lacks. What this filler
 attains, each claim at its tier (section~\ref{sec:minifab-optimum}):
-all arrivals in $255N + 371 + d(N)$ ticks, $d = 0, 0, 2$, then $4$ ---
-$21{,}795$ at the weekly $N = 84$, \emph{on} the certified all-policy
-floor exactly (attainment geolog-checked by container replay, every
-hold accounted; the floor itself Lean-checked); exactly optimal for $N \le 7$ by exhaustive Z3 search,
-two-sided. The best never-idle policy needs $255N + 455$ --- these two
-gates are worth the last $80$ ticks, and replaying $\pi^{\ast}$ with
+the $N$-th arrival into the last queue at $255N + 371 + d(N)$
+ticks ($d=0,0,2$, then $4$) for $N=1,\dots,12$ and $N=84$.
+The weekly replay reaches $21{,}795$ against the decoded
+$N=84$ container plus a transcription of the rows it does not
+seal; the $N=1,\dots,12$ replays use that model with the
+pending-lot count and unlock threshold substituted. Optimality
+on the simplified net is established for $N=1,\dots,7$
+and is open beyond; the
+Lean machine-contiguity floor is for an abstract schedule model. The best tested never-idle policy needs
+$255N + 455$ at $N = 84$ --- these two gates are worth $80$ ticks over it
+(whether an untested work-conserving policy closes that gap is open), and replaying $\pi^{\ast}$ with
 holds disallowed is refused at its first delayed diffusion start.
 Under deterministic closed dynamics, imprecise-decision-theoretic
 selection provably collapses to makespan minimization (Lean-checked)
---- so this page is also the decision-theoretic optimum. Initial
+--- so where $\pi^{\ast}$ is optimal ($N \le 7$), this page is also
+the decision-theoretic optimum. Initial
 marking drawn: $g_1$ open ($c_1 = 0 < \varphi$), $g_5$ shut
 ($\ell = 0$).}{fig:minifab-pistar}
 \end{minipage}

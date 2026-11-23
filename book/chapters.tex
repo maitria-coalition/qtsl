@@ -82,7 +82,53 @@
   {\footnotesize Figure~\thefigure: #1\label{#2}\par}}
 \input{chapters/qtsl-rule-catalogue-preamble}
 \input{maitria-style}
+% TeX Live 2025 compatibility shim for mathpartir's mathpar under this
+% book's \DocumentMetadata settings (testphase phase-II, above). In TL2025
+% those settings load latex-lab-math.ltx, which grabs each $$...$$ display
+% as one argument; mathpar opens $$ in \begin and closes it in \end, so the
+% grab never finds its closing $$ and the tagged pass dies with
+%   ! File ended while scanning use of \__math_grab_dollardollar:w.
+% The hook marks mathpar's display as already collected. \MathCollectFalse
+% (defined by latex-lab-math.ltx; it sets the private variable
+% \l__math_collected_bool) is local to the environment's group, so the
+% next ordinary display is grabbed and tagged as usual (checked: a TL2025
+% tagged test file with \[...\] and equation after a mathpar shows both as
+% Formula elements in the structure tree). Cost: mathpar's own formulas go
+% untagged, and at \end{document} tagpdf warns that the numbers of
+% automatic begin and end para hooks differ ("Package tagpdf Warning",
+% not an error; the run completes and the structure tree is written, but
+% paragraph tagging is unbalanced, so this tagged PDF makes no
+% accessibility claim). The \ifdefined guard makes it a no-op where the math module
+% is not loaded (untagged builds). Untested on other TeX Live releases;
+% re-check on every TeX Live upgrade, since both names are latex-lab
+% internals.
+\AddToHook{env/mathpar/begin}{\ifdefined\MathCollectFalse\MathCollectFalse\fi}
 \usepackage[colorlinks=true,linkcolor=accentdeep,urlcolor=accentdeep,citecolor=accentcite]{hyperref}
+% TeX Live 2025 compatibility shim for the table of contents' links. With
+% a 2025-11-01 or later format under \DocumentMetadata, hyperref defines
+% \hyper@nopatch@toc itself (hyperref.sty, "\IfFormatAtLeastT{2025-11-01}")
+% and leaves ToC links to latex-lab's toc code, which hangs them on
+% \l@part/\l@chapter/\l@section. titletoc's \titlecontents (maitria-style.tex)
+% replaces those, so every ToC link vanished again (the class described
+% above for the toc testphase module; toc-gate.py counted 82 links on the
+% first 15 pages against a floor of 250). Where hyperref has declined the
+% patch, this restores its own \contentsline link (the linktoc=section
+% case) at begin-document. A no-op on formats where hyperref patches
+% \contentsline itself. Re-check on every TeX Live upgrade.
+\makeatletter
+\ifdefined\hyper@nopatch@toc
+  \AtBeginDocument{%
+    \def\contentsline#1#2#3#4{%
+      \gdef\@contentsline@destination{#4}%
+      \begingroup\Hy@safe@activestrue
+      \edef\x{\endgroup\def\noexpand\Hy@tocdestname{#4}}\x
+      \ifx\Hy@tocdestname\@empty
+        \csname l@#1\endcsname{#2}{#3}%
+      \else
+        \csname l@#1\endcsname{\Hy@toclinkstart{#2}\Hy@toclinkend}{#3}%
+      \fi}}
+\fi
+\makeatother
 \usepackage{csquotes}
 \usepackage[backend=biber,style=numeric-comp,sortcites=true,natbib=true,
             maxnames=6,minnames=5,url=true,doi=true,eprint=true]{biblatex}
