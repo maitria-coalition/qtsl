@@ -246,11 +246,12 @@ lots (two-sided, with LRAT proofs accepted by a CakeML-verified
 checker, resting on two pen-and-paper lemmas), and attains the same
 expression in replay at $N=84$ and at $N=8,\dots,12$ (with the
 pending-lot count and unlock threshold substituted for the latter
-replays). Optimality at those counts is open: the Lean
-machine-contiguity floor is for an abstract schedule model. These
+replays). Optimality at those counts is not yet established: the
+Lean machine-contiguity floor is for an abstract schedule model. These
 results are about a simplified net in which at most one lot per
 process step may start, receive a unit of service, or finish per
-tick. An uncertified black-box dispatcher runs inside a
+tick; whether they carry over to Kempf's 1994 specification is
+discussed in section~\ref{sec:exp-semicon}. An uncertified black-box dispatcher runs inside a
 certified switching envelope whose sealed certificate re-verifies
 byte-identical after every run. One certificate covers lot counts
 from $7$ to $10^{7}$ --- its container grows six bytes across the

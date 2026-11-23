@@ -2,6 +2,6 @@
 # chapter-tree is git's content hash of chapter/ (survives history rewrites).
 # repo is the public home of the commit; commit-date is its committer date (UTC).
 repo=https://github.com/maitria-coalition/qtsl-experiments
-chapter-tree=6ba0622658f5cb0116553d42b9a5670ca9c5ef72
-commit=70c4ec6e4b48bb3089ccdcc1d1fad86816127cc5
+chapter-tree=4e6a7c59d653ccffeb7aefff968d115e63fc5cc9
+commit=89b6dcae58374e32c3f256a03a1c62624d964206
 commit-date=2026-11-23
