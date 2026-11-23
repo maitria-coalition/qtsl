@@ -11691,8 +11691,8 @@ that reference, and only the diffusion-station
 pull preference ever moves a number; at $N = 84$ the tested
 deliberately idling supervisor family improves on the best tested
 work-conserving policy ($255N + 455$ ticks) by $80$ ticks, though
-it is not yet established that no untested work-conserving policy
-closes that gap;
+it is not yet established whether an untested work-conserving policy
+can close that $80$-tick gap to $\pi^\ast$ at $N = 84$;
 and the wall-clock value
 concentrates in the dispatch seat: an adversarial pull order costs
 $+83.5\%$, while the synthesized gate --- whose value is the
@@ -11715,10 +11715,11 @@ lots at different steps, but never on two lots at the same step.
 Kempf's specification allows both. Within their stated scopes, all of
 the results on this track are about this net, including the policy
 comparisons above and the envelope below.
-Whether they carry over to a net with Kempf's per-machine parallelism,
-and more generally to Kempf's full specification (batching, setups,
-personnel, failures), is work in progress, reopened 2026-10-23,
-with a re-model that adds per-machine parallelism.
+We are developing a net with Kempf's per-machine parallelism. The
+investigation (work in progress, reopened 2026-10-23) asks whether
+these results carry over to that net and whether they carry over to
+Kempf's full specification, including batching, setups, personnel,
+and failures.
 
 The track's last exhibit prices the case nobody certifies: an
 \emph{uncertified} policy --- a lookahead heuristic standing in for
@@ -11790,11 +11791,12 @@ earlier preview of
 this section stated that no claim was made about optimality of the
 dispatch policies, only their certified stability region; that
 sentence is now true of the fluid track alone. On the discrete
-Mini-Fab net the optimality question is closed for $N \le 7$ and not
-yet established beyond, where attainment at $255N + 375$ is replayed but the floor is
-proved only for the abstract model (erratum above). For whether any
-of it carries over to Kempf's specification, see the model note
-above. The
+Mini-Fab net, optimality is established for $N \le 7$. For $N \ge 8$,
+optimality is not yet established: $\pi^\ast$ attains $255N + 375$ in
+replay at $N = 8, \ldots, 12$ and $N = 84$, but the lower bound is
+proved only for the abstract schedule model (see the erratum above).
+The model note above discusses whether these results carry over to
+Kempf's specification. The
 correction is recorded here rather than silently edited away, so that
 readers of the earlier preview can see what changed. The ladder's remaining nine rungs
 --- MIMAC sets 1--6, the SMT2020 pair, and SMAT2022 --- are
@@ -81117,8 +81119,8 @@ idling pays, among the policies tested}: at the weekly count the
 best tested never-idle (work-conserving) policy needs $255N + 455$
 ticks, $80$ behind $\pi^{\ast}$, with its never-idle law verified at
 every pre-goal tick of the replay, and a measured greedy baseline
-runs $224$ ticks behind; it is not yet established that no untested
-work-conserving policy closes that gap. Gating the \emph{last} step moves arrivals
+runs $224$ ticks behind; it is not yet established whether an untested
+work-conserving policy can close the $80$-tick gap to $\pi^{\ast}$ at $N = 84$. Gating the \emph{last} step moves arrivals
 $0.0\%$, while holding the \emph{diffusion starts} recovers the full
 gap, and replaying $\pi^{\ast}$ with holds disallowed is
 \emph{refused} by the engine at its first delayed diffusion start:
@@ -81131,8 +81133,8 @@ minimization --- the reduction Lean-checked against the
 mechanized imprecise-decision-theory development, with a concrete
 refutation cell showing the collapse fails without determinism.
 ``The synthesized policy is decision-theoretically correct''
-therefore means optimal throughput --- which the receipts above
-establish for $N \le 7$ and have not yet established beyond, and the
+therefore means optimal throughput. The receipts above establish
+that for $N \le 7$; beyond $N = 7$ it is not yet established. The
 seat-regret
 face of the specification vocabulary
 (section~\ref{sec:spec-lang-regret}) is where the language states
@@ -81369,8 +81371,8 @@ on the simplified net is established for $N=1,\dots,7$
 and not yet established beyond; the
 Lean machine-contiguity floor is for an abstract schedule model. The best tested never-idle policy needs
 $255N + 455$ at $N = 84$ --- these two gates are worth $80$ ticks over it
-(that no untested work-conserving policy closes that gap is not yet
-established), and replaying $\pi^{\ast}$ with
+(it is not yet established whether an untested work-conserving policy
+can close that $80$-tick gap to $\pi^{\ast}$ at $N=84$), and replaying $\pi^{\ast}$ with
 holds disallowed is refused at its first delayed diffusion start.
 Under deterministic closed dynamics, imprecise-decision-theoretic
 selection provably collapses to makespan minimization (Lean-checked)
@@ -81646,10 +81648,10 @@ station's two machines can work in the same tick on lots at
 different steps, never on two lots at the same step. Kempf's
 specification allows more than one lot at a process step to start,
 receive service, or finish in a tick; that parallelism \emph{adds}
-runs, so the a-fortiori argument below does not cover it: whether
-the optimality results of this section carry over to a net with
-Kempf's parallelism, or to his full specification, is not yet
-established (see the model note in section~\ref{sec:exp-semicon}).
+runs, so the a-fortiori argument below does not cover it. The model
+note in section~\ref{sec:exp-semicon} discusses whether these
+optimality results carry over to a net with Kempf's parallelism or
+to his full specification.
 The others: diffusion's batching-of-three and its mix rules,
 product types and test-lot dedication, the declared buffer
 capacities, the transporter, the operators and technician, the
