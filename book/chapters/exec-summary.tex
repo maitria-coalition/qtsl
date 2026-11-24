@@ -251,13 +251,14 @@ Lean machine-contiguity floor is for an abstract schedule model. These
 results are about a simplified net in which at most one lot per
 process step may start, receive a unit of service, or finish per
 tick; whether they carry over to Kempf's 1994 specification is
-discussed in section~\ref{sec:exp-semicon}. On a net that keeps Kempf's per-machine
-parallelism (without his batching, buffer limits, loading, operators,
-setups, maintenance or failures), one controller attains the earliest
-possible $N$-th completion at every $N$; on his full specification
-with buffer caps and without failures, checked one-week runs reach
-$87$ good lots, and $81$ at his product mix, against upper bounds
-(resting partly on prose) of about $89.5$ and $86.3$ (section~\ref{sec:minifab-kempf}). An uncertified black-box dispatcher runs inside a
+discussed in section~\ref{sec:exp-semicon}. On an unbatched parallel net, one controller reaches the step-5 target
+at the earliest possible round for every initial lot count $N$; on our
+capped, failure-free encoding, two calendar-checked weeks after warm-up
+produce $87$ good lots and $81$ good lots respectively, the latter at
+Kempf's mix; separate counting bounds under strict maintenance and
+whole-break assumptions give upper rates of about $89.5$ and $86.3$ good
+lots per week for free and Kempf mix, with run containment argued in
+prose (section~\ref{sec:minifab-kempf}). An uncertified black-box dispatcher runs inside a
 certified switching envelope whose sealed certificate re-verifies
 byte-identical after every run. One certificate covers lot counts
 from $7$ to $10^{7}$ --- its container grows six bytes across the
