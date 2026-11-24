@@ -10128,7 +10128,14 @@ Lean machine-contiguity floor is for an abstract schedule model. These
 results are about a simplified net in which at most one lot per
 process step may start, receive a unit of service, or finish per
 tick; whether they carry over to Kempf's 1994 specification is
-discussed in section~\ref{sec:exp-semicon}. An uncertified black-box dispatcher runs inside a
+discussed in section~\ref{sec:exp-semicon}. On an unbatched parallel net, one controller reaches the step-5 target
+at the earliest possible round for every initial lot count $N$; on our
+capped, failure-free encoding, two calendar-checked weeks after warm-up
+produce $87$ good lots and $81$ good lots respectively, the latter at
+Kempf's mix; separate counting bounds under strict maintenance and
+whole-break assumptions give upper rates of about $89.5$ and $86.3$ good
+lots per week for free and Kempf mix, with run containment argued in
+prose (section~\ref{sec:minifab-kempf}). An uncertified black-box dispatcher runs inside a
 certified switching envelope whose sealed certificate re-verifies
 byte-identical after every run. One certificate covers lot counts
 from $7$ to $10^{7}$ --- its container grows six bytes across the
@@ -81652,6 +81659,8 @@ runs, so the a-fortiori argument below does not cover it. The model
 note in section~\ref{sec:exp-semicon} discusses whether these
 optimality results carry over to a net with Kempf's parallelism or
 to his full specification.
+Section~\ref{sec:minifab-kempf} lists what is established so far
+on nets with Kempf's parallelism and on his fuller specification.
 The others: diffusion's batching-of-three and its mix rules,
 product types and test-lot dedication, the declared buffer
 capacities, the transporter, the operators and technician, the
@@ -81950,6 +81959,148 @@ those patterns carry certificates of their own. Nothing here claims either polic
 within a tenth of a lot per week of the model's capacity, by an
 artefact a reader can re-refuse and re-accept on their own machine in
 milliseconds.
+
+\section{Toward Kempf's specification: what is established}
+\label{sec:minifab-kempf}
+
+Section~\ref{sec:minifab-line} concerns the earlier simplified net.
+The models below restore features of Kempf's specification in stages.
+We report what was established by 2026-11-24. A \emph{good lot} is a
+finished lot of product Pa or Pb; test outputs are not counted. For an
+individual theorem, ``checked by two checkers'' means that the reference
+checker and an independently written checker accepted its proof with
+byte-identical output. For the every-$N$ result below, this applies to
+each link separately.
+
+\paragraph{1. The earliest possible step-5 target, for every $N$, on a
+parallel-tick net.}\label{par:minifab-kempf-everyN}
+This parallel-tick net allows machines at the same station to work in
+parallel. It is unbatched, has unbounded buffers, and does not model
+loading, unloading or operators. Start with $N$ lots waiting at the
+first step, where $N$ is any natural number, and let $L^\ast(N)$ be
+$0$ at $N = 0$; $615$, $670$ and $870$ at $N = 1, 2, 3$;
+$240N + 15$ for odd $N$ from $5$ to $19$; and $240N$ for every other
+$N$.
+
+For every initial lot count $N$, any run of the open net that reaches
+the step-5 target $f_4=N$ at a slot-0 boundary does so at round
+$L^\ast(N)$ or later. This includes policies that read $N$ or idle.
+One controller reaches that target at round $L^\ast(N)$ for every $N$.
+The target is already met at round zero when $N=0$. Thus one controller
+attains the earliest possible step-5 target at every $N$ at once.
+
+\emph{Assurance:} The argument composes 38 proof links. The reference
+checker and at least one independent checker accepted each link, and a
+separate check found that their shared definitions agree. The conclusion
+is assembled from the recorded acceptances; equivalence to one inlined
+proof was not checked. For the pointwise comparison of admissible
+policies by this step-5 objective, a policy is non-dominated exactly
+when it meets every $L^\ast(N)$. The order argument is in prose, not
+yet a single Semantic Universe judgment.
+
+\paragraph{2. Optimal times to the $N$-th step-5 completion with
+batching, then with loading and setups, for finitely many $N$.}
+Adding diffusion batches of exactly three lots at steps~1 and~5: for
+the 21 cases $N = 3m$ with $1 \le m \le 21$, the optimal time to the
+$N$-th step-5 completion is
+$\max(560 + 55N,\; 80N + 15\,(m \bmod 2))$. Adding as well the loading
+and unloading of each batch and the 10-minute setup whenever the
+lithography tool changes step: for the 12 cases $N = 3m$ with
+$1 \le m \le 12$, it is $\max(740 + 75N,\; 100N + 15\,(m \bmod 2))$.
+We take the lithography tool to start set up for step~3, a modelling
+choice.
+
+\emph{Assurance:} For the batch-only net, a CakeML-verified checker
+accepted the LRAT refutations of the encoded relaxed problems. For the
+model with loading and setups, the lower bounds use LRAT and z3 on a
+relaxation. The floor arguments rely on the encodings and on prose
+arguments that the relaxations contain every run. Trusted Rust replay
+checks a matching schedule for each listed $N$. These are separate
+results for the listed values, not every-$N$ theorems.
+
+\paragraph{3. A full week on the capped model, with the run's own
+calendar inside the theorem.}
+These two theorems concern our capped, failure-free encoding of the
+Mini-Fab. A run from the encoded initial state produces exactly $87$ Pa
+lots between minutes $20160$ and $30240$. Its non-sink coordinates agree
+at those two boundaries. A second run produces exactly $51$ Pa, $30$ Pb
+and $3$ test outputs between minutes $10080$ and $20160$: $84$ outputs,
+of which $81$ are good lots. Its non-sink coordinates likewise agree at
+the two week boundaries. Neither measured week begins at cold start; the
+first run is all-Pa, a choice allowed by the free-mix model.
+
+For each finite run the checked statement applies to that run's own
+decisions through the end of the measured week: it checks release
+windows, the encoded in-shift operator quotas, and at least one
+qualifying lithography maintenance in each required window, with the
+encoded spacing. The start-to-start maintenance spacing rule and the
+10-minute release window are encoding choices.
+
+\emph{Assurance:} Each finite run-and-calendar statement is a single
+theorem accepted by the reference checker and an independently written
+checker on the current draft of the geolog-lambda kernel.
+Correspondence between the encoding and Kempf's source table is
+encoder-derived. Neither theorem proves that the week can be iterated
+with the required calendar phase and cross-boundary history; neither
+proves a long-run rate.
+
+\paragraph{4. Upper bounds and their hypotheses.}
+For every run of the capped encoding used for this bound, under any
+policy, consider a counted initial or close boundary at time $r$ whose
+cumulative outputs satisfy the $51{:}30{:}3$ mix condition. If
+cumulative lithography busy time is at most $720\cdot\mathit{pm}+B$,
+where $\mathit{pm}$ counts maintenance starts, then
+\[
+  7840 \cdot \mathit{good} \;\le\; 69\,r + 3B + 3888 .
+\]
+Along qualifying boundaries with $r\to\infty$ and bounded $B$, division
+by $r$ gives a limsup of cumulative good output per minute of at most
+$69/7840$, equivalent to $621/7\approx 88.71$ good lots per week. The
+reported bound without the busy-time maintenance premise gives
+$648/7\approx 92.57$ per week under the counted-boundary mix condition.
+
+\emph{Assurance:} Two checkers accepted the finite-boundary result on
+the current draft of the geolog-lambda kernel. The rate interpretation
+is a mathematical consequence under the stated limiting conditions;
+the maintenance premise is not derived from the calendar.
+
+A separate counting argument applies to failure-free runs under strict
+lithography maintenance and three whole 60-minute off-blocks for the
+second operator per shift. Under those hypotheses its upper bounds are
+$105/11824$ good lots per minute for free mix and $405/47296$ at
+Kempf's mix, equivalent to about $89.51$ and $86.32$ good lots per
+week. A program checks the model-shape premises and exact counting-LP
+arithmetic; containment of all such runs and the interval/counting
+lemmas are prose arguments.
+
+\paragraph{Good lots produced in one checked finite week after warm-up.}
+\begin{itemize}
+\item $87$ good lots, all Pa, in the free-mix model.
+\item $81$ good lots at Kempf's mix (plus three test outputs).
+\end{itemize}
+
+\paragraph{Upper-rate consequences under additional hypotheses.}
+\begin{itemize}
+\item Under the strict maintenance and whole-off-block hypotheses:
+  $105/11824$ good lots per minute, about $89.51$ a week, for free
+  mix; $405/47296$ good lots per minute, about $86.32$ a week, at
+  Kempf's mix. Run containment and interval/counting lemmas are prose.
+\item Along qualifying cumulative-mix boundaries, with the busy-time
+  maintenance premise and bounded $B$: $69/7840$ good lots per minute,
+  or $621/7\approx 88.71$ a week. Without that premise, the reported
+  counted-boundary consequence is $648/7\approx 92.57$ a week.
+\end{itemize}
+
+The finite weeks and the upper bounds answer different questions. We
+have not established a long-run optimality interval at either mix.
+
+\paragraph{Not yet established.}
+Not yet established here are an optimal policy for Kempf's full
+specification including failures; an every-$N$ step-5 theorem for either
+batched net; indefinite calendar-valid repetition of the two measured
+weeks; a checked long-run-rate judgment; checked correspondence from
+Kempf's table to the encoding; and a single Semantic Universe judgment
+of non-domination for the item-1 controller.
 
 \section{The construction in TypeScript}
 \label{sec:minifab-ts}
